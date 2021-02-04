@@ -1,0 +1,228 @@
+/*  This script handles communications with Colortizer V4.2 and later.
+ *  Global variables to use in your application are:
+ *  tablePieceInput[][][0] (ID), tablePieceInput[][][1] (rotation), UMax, VMax, ID_Max
+ */
+
+/*
+ *  !! Don't change this tab unless you're sure you know what you're doing !!
+ */
+
+// Data Extents Parameters
+
+// Display Matrix Size (cells rendered to screen)
+int U_MAX = 18;
+int V_MAX = 22;
+int ID_MAX = 15;
+int numGrids = 9; // set this to number of grids if decoding multiple grids
+
+// Arrays that holds current ID information of rectilinear tile arrangement.
+int tablePieceInput[][][] = new int[U_MAX][V_MAX][2];
+
+void initInputData() {
+  // init for multiple grids
+  for (int u=0; u<U_MAX; u++) {
+    for (int v=0; v<V_MAX; v++) {
+      tablePieceInput[u][v][0] = -1; // ID
+      tablePieceInput[u][v][1] = 0; //Rotation
+    }
+  }
+}
+
+// Arraylist for storing table input values for each previous turns
+ArrayList<int[][][]> tableHistory = new ArrayList<int[][][]>();
+
+int portIN = 6152;
+import hypermedia.net.*; // can be found in library "UDP"
+UDP udp;  // define the UDP object
+
+boolean connection = false;
+boolean busyImporting = false;
+boolean changeDetected = false;
+
+void initUDP() {
+  udp = new UDP( this, portIN );
+  //udp.log( true );     // <-- printout the connection activity
+  udp.listen( true );
+
+  // Initialize tablePieceInput
+  initInputData();
+}
+
+void ImportData(String inputStr[]) {
+  if (inputStr[0].equals("COLORTIZER")) {
+    if (!connection) connection = true;
+    parseColortizerStrings(inputStr);
+  }
+  busyImporting = false;
+}
+
+void parseColortizerStrings(String data[]) {
+
+  // TODO: dynamically initialize amount of grids by firstTimeParsing and fill tilesList accordingly
+  // if (firstTimeParsing)
+  // {
+  //   String[] split = split(data[i], "\t");
+  //   if (split.length == 5)
+  //   {
+  //     if (split[0] > numGrids)
+  //     {
+  //       numGrids = split[0];
+  //     }
+  //   }
+  // }
+  for (int i=0; i<data.length; i++) {
+
+    String[] split = split(data[i], "\t");
+
+    // Checks maximum possible ID value
+    if (split.length == 2 && split[0].equals("IDMax")) {
+      println("split.length == 2, split = ");
+      printArray(split);
+      ID_MAX = int(split[1]);
+    }
+
+    // Checks if row format is compatible with piece recognition.  3 columns for ID, U, V; 4 columns for ID, U, V, rotation
+//    if (split.length == 3 || split.length == 4) {
+//      println("split.length == 3 || 4, split = ");
+//      printArray(split);
+//      //Finds UV values of Lego Grid:
+//      int u_temp = int(split[2]);
+//      int v_temp = tablePieceInput.length - int(split[2]) - 1;
+//
+//      if (split.length == 3 && !split[0].equals("gridExtents")) { // If 3 columns
+//        println("split.length == 3, split = ");
+//        printArray(split);
+//        // detects if different from previous value
+//        if ( v_temp < tablePieceInput.length && u_temp < tablePieceInput[1].length ) {
+//          if ( tablePieceInput[v_temp][u_temp][1] != int(split[0]) ) {
+//            // Sets ID
+//            tablePieceInput[v_temp][u_temp][1] = int(split[1]);
+//            changeDetected = true;
+//          }
+//        }
+//      } else if (split.length == 4) {   // If 4 columns
+//        println("split.length == 4, split = ");
+//        printArray(split);
+//        superColor = color(int(split[3]), 255-int(split[3]), int(split[3]) / 2, 75);
+//
+//        // detects if different from previous value
+//        if ( v_temp < tablePieceInput.length && u_temp < tablePieceInput[1].length ) {
+//          if ( tablePieceInput[v_temp][u_temp][1] != int(split[1]) || tablePieceInput[v_temp][u_temp][1] != int(split[3])/90 ) {
+//            // Sets ID
+//            tablePieceInput[v_temp][u_temp][0] = int(split[0]);
+//            //Identifies rotation vector of piece [WARNING: Colortizer supplies rotation in degrees (0, 90, 180, and 270)]
+//            tablePieceInput[v_temp][u_temp][1] = int(split[3])/90;
+//            changeDetected = true;
+//          }
+//        }
+//      }
+//    }
+
+
+    //
+    //  for (int i=0; i<data.length; i++) {
+    //
+    //    String[] split = split(data[i], "\t");
+    //
+    //    // Checks maximum possible ID value
+    //    if (split.length == 2 && split[0].equals("IDMax")) {
+    //      println("split.length == 2, split = ");
+    //      printArray(split);
+    //      ID_MAX = int(split[1]);
+    //    }
+    //
+    //    // Checks if row format is compatible with piece recognition.  3 columns for ID, U, V; 4 columns for ID, U, V, rotation
+    //    if (split.length == 3 || split.length == 4) {
+    //      println("split.length == 3 || 4, split = ");
+    //      printArray(split);
+    //      //Finds UV values of Lego Grid:
+    //      int u_temp = int(split[1]);
+    //      int v_temp = tablePieceInput.length - int(split[2]) - 1;
+    //
+    //      if (split.length == 3 && !split[0].equals("gridExtents")) { // If 3 columns
+    //        println("split.length == 3, split = ");
+    //        printArray(split);
+    //        // detects if different from previous value
+    //        if ( v_temp < tablePieceInput.length && u_temp < tablePieceInput[0].length ) {
+    //          if ( tablePieceInput[v_temp][u_temp][0] != int(split[0]) ) {
+    //            // Sets ID
+    //            tablePieceInput[v_temp][u_temp][0] = int(split[0]);
+    //            changeDetected = true;
+    //          }
+    //        }
+    //      } else if (split.length == 4) {   // If 4 columns
+    //        println("split.length == 4, split = ");
+    //        printArray(split);
+    //        superColor = color(int(split[3]), 255-int(split[3]), int(split[3]) / 2, 75);
+    //
+    //        // detects if different from previous value
+    //        if ( v_temp < tablePieceInput.length && u_temp < tablePieceInput[0].length ) {
+    //          if ( tablePieceInput[v_temp][u_temp][0] != int(split[0]) || tablePieceInput[v_temp][u_temp][1] != int(split[3])/90 ) {
+    //            // Sets ID
+    //            tablePieceInput[v_temp][u_temp][0] = int(split[0]);
+    //            //Identifies rotation vector of piece [WARNING: Colortizer supplies rotation in degrees (0, 90, 180, and 270)]
+    //            tablePieceInput[v_temp][u_temp][1] = int(split[3])/90;
+    //            changeDetected = true;
+    //          }
+    //        }
+    //      }
+    //    }
+    //  }
+
+    if (split.length == 5) // tab-separated columns make 5 chunks:
+    {
+      //u_temp and v_temp are not needed if using multiple grids..
+      int g_temp = int(split[0]);
+      int i_temp = int(split[1]);
+      int r_temp = int(split[4]);
+      if (!split[0].equals("grid#"))
+      {
+        tilesList.get(int(split[0]) -1).lego_id = i_temp; // allocate values to grid
+        tilesList.get(int(split[0]) -1).rotation = r_temp;
+      }
+      //Finds UV values of Lego Grid:
+      int u_temp = int(split[2]);
+      int v_temp = tablePieceInput.length - int(split[2]) - 1;
+      //println("split.length == 5, split = ");
+      //printArray(split);
+      // detects if different from previous value
+      if ( v_temp < tablePieceInput.length && u_temp < tablePieceInput[0].length ) {
+        if ( tablePieceInput[v_temp][u_temp][0] != int(split[0]) || tablePieceInput[v_temp][u_temp][1] != int(split[4])/90 ) {
+          // Sets ID
+          tablePieceInput[v_temp][u_temp][1] = int(split[1]);
+          //Identifies rotation vector of piece [WARNING: Colortizer supplies rotation in degrees (0, 90, 180, and 270)]
+          tablePieceInput[v_temp][u_temp][1] = int(split[4])/90;
+          changeDetected = true;
+        }
+      }
+    }
+  }
+}
+
+void receive( byte[] data, String ip, int port ) {  // <-- extended handler
+  // get the "real" message =
+  String message = new String( data );
+  // println("catch!");
+  println(message);
+
+  saveStrings("data.txt", split(message, "\n"));
+  String[] split = split(message, "\n");
+  // TODO: Console Output
+  // if (consoleText)
+  // {
+  //   textOutput = message.toCharArray();
+  // }
+  if (!busyImporting) {
+    busyImporting = true;
+    ImportData(split);
+  }
+
+  // Updates Screen whenever Webcam Update Received
+  if (changeDetected) loop();
+}
+
+void sendCommand(String command, int port) {
+  String dataToSend = "";
+  dataToSend += command;
+  udp.send( dataToSend, "localhost", port );
+}

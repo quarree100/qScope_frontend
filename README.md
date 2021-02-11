@@ -2,7 +2,9 @@
 Processing-Code für die Projektion und Bespielung des Monitors des CityScope-Setups in QUARREE100.
 
 ## Notes
-Die Processing-Sketche in [q100viz](q100viz/) lassen sich nur mit Processing 2 ausführen! Die verwendete Keystone-Library ist leider für Processing 3 nicht verfügbar..
+~~Die Processing-Sketche in [q100viz](q100viz/) lassen sich nur mit Processing 2 ausführen! Die verwendete Keystone-Library ist leider für Processing 3 nicht verfügbar..~~
+
+Die verwendeten libraries befinden sich in `libraries.zip` und müssen in den Processing-Sketch-Folder eingefügt werden, z.B. `/home/user/sketchbook/libraries`
 
 q100viz und statsViz müssen derzeit noch in bestimmer Reihenfolge ausgeführt werden, die mir gerade unklar ist..
 
@@ -15,5 +17,7 @@ project
 └───q100viz
 │       processing 2 sketch for the projection
 └───statsViz
-        processing sketch for the monitor stats
+│       processing sketch for the monitor stats
+└───libraries.zip
+	contains all relevant processing libraries
 ```

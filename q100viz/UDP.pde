@@ -50,50 +50,6 @@ void decodeIncomingMessage(String decode_message, Grid grid)
         print_lego_grid_full(grid);
 }
 
-//-------------------------------- OUTPUT DATA ---------------------------------
-void composeStatsToSend()
-{
-        if (selectedBuildingsList.size() > 0)
-        {
-                stats = "Typologiezone " + selectedID + " selected. \nnumber of houses = " + selectedBuildingsList.size() + "\n ID \t | \tCO2 \n\n";
-                float co2_sum = 0;
-                int heat_sum = 0;
-                int power_sum = 0;
-                int spec_heat_sum = 0;
-                int spec_power_we_sum = 0;
-                float spec_power_m2_sum = 0;
-                for (Building building : selectedBuildingsList) // TODO: new column if selectedBuildingsList > 20
-                {
-                        stats += nf(building.id, 3, 0);
-                        stats += " \t | \t";
-                        stats += nf(building.co2, 1, 3);
-                        co2_sum += building.co2;
-                        heat_sum += building.heat_consumption_2017;
-                        power_sum += building.e_power_consumption_2017;
-                        spec_heat_sum += building.specific_heat_consumption;
-                        spec_power_we_sum += building.specific_power_consumption_we;
-                        spec_power_m2_sum += building.specific_power_consumption_m2;
-                }
-                float co2_mean = co2_sum / selectedBuildingsList.size();
-                float heat_mean = heat_sum / selectedBuildingsList.size();
-                float power_mean = power_sum / selectedBuildingsList.size();
-                float spec_heat_mean = spec_heat_sum / selectedBuildingsList.size();
-                float spec_power_mean_we = spec_power_we_sum / selectedBuildingsList.size();
-                float spec_power_mean_m2 = spec_power_m2_sum / float(selectedBuildingsList.size());
-                stats += "\nCO2 sum \t" + nf(co2_sum, 1, 3) + "\n mean CO2-Emission \t" + nf(co2_mean, 1, 3);
-                stats += "\n heat_mean\t" + heat_mean + "\n power_mean \t" + power_mean + "\n spec_heat_mean \t" + spec_heat_mean + "\n spec_power_mean_we \t" + spec_power_mean_we;
-                stats += "\n spec_power_mean_m2 \t" + spec_power_mean_m2; //TODO do not display NaNs
-        }
-
-
-}
-
-void sendCommand(String command, int port) {
-        String dataToSend = "";
-        dataToSend += command;
-        udp.send( dataToSend, "localhost", port );
-}
-
 // void print_lego_grid_nicely()
 // {
 //   println("x\ty\tid\tr");

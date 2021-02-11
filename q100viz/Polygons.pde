@@ -159,29 +159,6 @@ double min_spec_heat = inf;
 double min_spec_power_we = inf;
 double min_spec_power_m2 = inf;
 
-void evaluateMaxValues()
-// sets values for statistical depiction in statsViz.pde
-{
-
-        for (Building building : buildingsList)
-        {
-                max_heat = (building.heat_consumption_2017 > max_heat) ? building.heat_consumption_2017 : max_heat;
-                max_power = (building.e_power_consumption_2017 > max_power) ? building.e_power_consumption_2017 : max_power;
-                max_spec_heat = (building.specific_heat_consumption > max_spec_heat) ? building.e_power_consumption_2017 : max_spec_heat;
-                max_spec_power_we = (building.specific_power_consumption_we > max_spec_power_we) ? building.specific_power_consumption_we : max_spec_power_we;
-                max_spec_power_m2 = (building.specific_power_consumption_m2 > max_spec_power_m2) ? building.specific_power_consumption_m2 : max_spec_power_m2;
-
-                min_heat = (building.heat_consumption_2017 < min_heat) ? building.heat_consumption_2017 : min_heat;
-                min_power = (building.e_power_consumption_2017 < min_power) ? building.e_power_consumption_2017 : min_power;
-                min_spec_heat = (building.specific_heat_consumption < min_spec_heat) ? building.specific_heat_consumption : min_spec_heat;
-                min_spec_power_we = (building.specific_power_consumption_we < min_spec_power_we) ? building.specific_power_consumption_we : min_spec_power_we;
-                min_spec_power_m2 = (building.specific_power_consumption_m2 < min_spec_power_m2) ? building.specific_power_consumption_m2 : min_spec_power_m2;
-
-        }
-        // println("max_heat, max_power, max_spec_heat, max_spec_power_we, max_spec_power_m2, min_heat, min_power, min_spec_heat, min_spec_power_we, min_spec_power_m2");
-        // println(max_heat, max_power, max_spec_heat, max_spec_power_we, max_spec_power_m2, min_heat, min_power, min_spec_heat, min_spec_power_we, min_spec_power_m2);
-}
-
 // --------------------------- Polygon interactions ----------------------------
 
 boolean polygon_contains_pixel(Polygon poly_in, PVector pos) { //TODO: void polygon_contains_polygon

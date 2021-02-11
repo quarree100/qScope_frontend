@@ -94,7 +94,7 @@ void runCO2series()
                         //add co2
                         co2Comm = co2Comm + "\n" + GIS_Data.typologiezonenList.get(i).id + "\n" + co2_sum_sector + "\n" + sector_connections;
                         println_log(co2Comm, 2);
-                        sendCommand(co2Comm, 6155);
+                        statsViz.sendCommand(co2Comm, 6155);
                 }
         }
 }

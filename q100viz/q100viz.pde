@@ -1,12 +1,10 @@
 /**
  * This sketch is written for the use with a CityScope table for the research in sociotechnical partizipation processes in the QUARREE100 project at the Department for Resilient Energy Systems, Bremen University.
  *
- * THIS SKETCH MUST BE RUN IN PROCESSING 2!
- *
  * by David Unland
  * unland@uni-bremen.de
  *
- * Jan-2021
+ * Feb-2021
  *
  * based on the RoadMapSandbox Code by Ira Winder, ira@mit.edu
  *
@@ -53,6 +51,7 @@ int latDiff = latMax - latMin;
 float resoX = float(lonDiff)/latDiff;
 
 GIS GIS_Data;
+StatsViz statsViz;
 
 // basemap
 PImage basemap;
@@ -71,10 +70,8 @@ String stats; // String to be sent to statsViz
 
 void setup() {
 
-        // instantiate grid:
-        grid = new Grid(22);
-
         // frameRate(5);
+        grid = new Grid(22);
 
         // size(1280, 1024, P3D);
         size(1920, 1080, P3D); // Use this size for your projector
@@ -138,11 +135,13 @@ void setup() {
 
         //  GIS objects and polygons meta data:
         selectBuildingsInTypo(selectedID);
-        evaluateMaxValues(); // has to be called after loading shapes to get max data for further processing
 
         // send initial communication string for statsViz
+        statsViz = new StatsViz();
+        statsViz.evaluateMaxValues(); // has to be called after loading shapes to get max data for further processing
+
         String initComm = ("init values" + "\n" + max_heat + "\n" + max_power + "\n" + max_spec_heat + "\n" + max_spec_power_we + "\n" + max_spec_power_m2 + "\n" + min_heat + "\n" + min_power + "\n" + min_spec_heat + "\n" + min_spec_power_we + "\n" + min_spec_power_m2);
-        sendCommand(initComm, 6155); // sends min and max values to statsViz.pde
+        statsViz.sendCommand(initComm, 6155); // sends min and max values to statsViz.pde
 
         // ----------------------------- TUI Grid ------------------------------
         grid.init(); // makes XY coordinates from TUI grid
@@ -312,11 +311,11 @@ void draw() {
         ////////////////////////////////////////////////////////////////////////
         /////////////////////////////// TIDYING UP /////////////////////////////
         // display statistics for selected typozone in statsViz.pde:
-        composeStatsToSend();
-        sendCommand(stats, 6155);
+        statsViz.composeStatsToSend();
+        statsViz.sendCommand(stats, 6155);
 
         String initComm = ("init" + "\n" + max_heat + "\n" + max_power + "\n" + max_spec_heat + "\n" + max_spec_power_we + "\n" + max_spec_power_m2 + "\n" + min_heat + "\n" + min_power + "\n" + min_spec_heat + "\n" + min_spec_power_we + "\n" + min_spec_power_m2);
-        sendCommand(initComm, 6155);
+        statsViz.sendCommand(initComm, 6155);
 
         // ---------------------- CO2-series animation -------------------------
         if (do_runCO2series)

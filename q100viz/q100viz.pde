@@ -52,6 +52,7 @@ float resoX = float(lonDiff)/latDiff;
 
 GIS GIS_Data;
 StatsViz statsViz;
+TimeSeries timeSeries;
 
 // basemap
 PImage basemap;
@@ -163,6 +164,9 @@ void setup() {
         {
                 building.col = lerpColor(green, red, building.co2);
         }
+
+        // Time Series:
+        timeSeries = new TimeSeries();
 
         // load FX:
         initialFXpathFinding();
@@ -318,8 +322,8 @@ void draw() {
         statsViz.sendCommand(initComm, 6155);
 
         // ---------------------- CO2-series animation -------------------------
-        if (do_runCO2series)
+        if (timeSeries.running)
         {
-                runCO2series();
+                timeSeries.run();
         }
 }

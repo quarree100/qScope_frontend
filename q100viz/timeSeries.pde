@@ -1,7 +1,10 @@
 /* ------------------------- TIME SERIES ------------------------------------ */
 // loads CO2-series and building-specific connection to power network from file
+class TimeSeries{
 
-boolean do_runCO2series = false;
+  TimeSeries(){}
+
+boolean running = false;
 boolean co2series_loaded = false; // makes sure that data is only loaded once
 int global_co2_array_pointer = 0; // points at co2 data to read
 int co2_series_step_timer = 0;
@@ -50,7 +53,7 @@ void loadCO2series(String co2_series_file)
         }
 }
 
-void runCO2series()
+void run()
 {
         if (hour() + minute() + second() > co2_series_step_timer)
         {
@@ -62,9 +65,9 @@ void runCO2series()
                 if (global_co2_array_pointer == num_of_years_in_series)
                 {
                         println_log("end of CO2 series reached!", 2);
-                        do_runCO2series = false;
+                        timeSeries.running = false;
                 }
-                if (do_runCO2series)
+                if (timeSeries.running)
                 {
                         for (Building building : buildingsList)
                         {
@@ -97,4 +100,5 @@ void runCO2series()
                         statsViz.sendCommand(co2Comm, 6155);
                 }
         }
+}
 }

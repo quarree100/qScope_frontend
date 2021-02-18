@@ -39,18 +39,7 @@ boolean displayHeatFlowFX = false;
 boolean displayPolygons = true; // displays shapefiles (or not)
 int rotationDegrees = 90; // variable to rotate projection by -- change with arrow keys
 
-// -------------- coordinate reference system information ----------------------
-int crs = 3857; // define coordinate reference systeme. Will be used to load table and draw shapes. so far: crs=3857
-// get these coordinates from GIS map:
-int lonMin = 1013102; // 1013137; //9.0975364; // y = 0
-int lonMax = 1013936; // 1013901; //9.1143553; // height
-int latMin = 7206177; // 7206217; //54.1876916; // x = 0
-int latMax = 7207365; // 7207334; //54.1988598; // width
-int lonDiff = lonMax - lonMin;
-int latDiff = latMax - latMin;
-float resoX = float(lonDiff)/latDiff;
-
-GIS GIS_Data;
+GIS gis;
 StatsViz statsViz;
 TimeSeries timeSeries;
 
@@ -73,6 +62,7 @@ void setup() {
 
         // frameRate(5);
         grid = new Grid(22);
+        gis = new GIS(1013102, 1013936, 7206177, 7207365);
 
         // size(1280, 1024, P3D);
         size(1920, 1080, P3D); // Use this size for your projector
@@ -98,13 +88,13 @@ void setup() {
 
         if (rotationDegrees == 0)
         {
-                int keystone_width = int(width * resoX);
+                int keystone_width = int(width * gis.area.resoX);
                 surface = ks.createCornerPinSurface(keystone_width, height, 20);
                 offscreen = createGraphics(keystone_width, height, P2D);
         }
         else if (rotationDegrees == 90)
         {
-                int keystone_height = int(width * resoX);
+                int keystone_height = int(width * gis.area.resoX);
                 surface = ks.createCornerPinSurface(width, keystone_height, 20); // width, height, resolution
                 offscreen = createGraphics(width, keystone_height, P2D);
         }
@@ -125,14 +115,13 @@ void setup() {
 
         // -------------------------- GIS SETUP --------------------------------
 
-        GIS_Data = new GIS();
         // load GIS shapefiles and create polygon objects:
-        GIS_Data.load_buildings();
-        GIS_Data.load_typologiezonen();
-        GIS_Data.load_nahwaermenetz();
-        GIS_Data.load_waermezentrale();
+        gis.load_buildings();
+        gis.load_typologiezonen();
+        gis.load_nahwaermenetz();
+        gis.load_waermezentrale();
 
-        GIS_Data.load_basemap("180111-QUARREE100-RK_modifiziert_flippedY_smaller.tga"); // loads data into "basemap" image
+        gis.load_basemap("180111-QUARREE100-RK_modifiziert_flippedY_smaller.tga"); // loads data into "basemap" image
 
         //  GIS objects and polygons meta data:
         selectBuildingsInTypo(selectedID);
@@ -154,7 +143,7 @@ void setup() {
                 building.co2 = random(1);
         }
 
-        println_log("reso = " + resoX, 1);
+        println_log("reso = " + gis.area.resoX, 1);
 
         // initial building coloring:
         color green = color(96, 205, 21);
@@ -186,7 +175,7 @@ void draw() {
         for (int i = 0; i<tilesList.size(); i++)
         // associates color of typologiezone with rotation of grid 1:1
         {
-                GIS_Data.typologiezonenList.get(i).col = color(int(tilesList.get(i).rotation), 255-int(tilesList.get(i).rotation), int(tilesList.get(i).rotation) / 2, 75);
+                gis.typologiezonenList.get(i).col = color(int(tilesList.get(i).rotation), 255-int(tilesList.get(i).rotation), int(tilesList.get(i).rotation) / 2, 75);
         }
         ////////////////////////////////////////////////////////////////////////
         //////////////////////////// OFFSCREEN DRAWING /////////////////////////
@@ -234,7 +223,7 @@ void draw() {
         // nahwaermentz mesh
         if (globalVerboseLevel >= 2)
         {
-                for (Node node : GIS_Data.nahwaermeMesh)
+                for (Node node : gis.nahwaermeMesh)
                 {
                         node.render(offscreen);
                 }
@@ -292,12 +281,12 @@ void draw() {
         if (helpText) {
                 textAlign(RIGHT, BOTTOM);
                 text("Press 'h' to hide/show this text.\n" +
-                     "Projection Map Key Commands:\n\n" +
+                     "PROJECTION MAP KEY COMMANDS:\n\n" +
                      "'c' \t ‒ \t turn on calibration mode.\n" +
                      "'s' \t ‒ \t save calibration.\n" +
                      "'l' \t ‒ \t load calibration.\n\n" +
                      "  Use mouse to adjust.\n\n\n" +
-                     "Application Key Commands:\n\n"
+                     "APPLICATION KEY COMMANDS:\n\n"
                      + "'m' \t ‒ \t toggle basemap\n"
                      + "'t' \t ‒ \t toggle Typologiezonen\n"
                      + "'g' \t ‒ \t toggle TUI grid\n"

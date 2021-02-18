@@ -78,7 +78,7 @@ void run()
                 }
 
                 co2_series_step_timer = hour() + minute() + second() + 1; // 1 second step
-                for (int i = 0; i<GIS_Data.typologiezonenList.size(); i++)
+                for (int i = 0; i<gis.typologiezonenList.size(); i++)
                 {
                         String co2Comm = ("co2comm");
                         float co2_sum_sector = 0;
@@ -88,14 +88,14 @@ void run()
                         for (Building building : buildingsList)
                         {
                                 PVector firstVertex = new PVector(building.polygon.longitudes[0], building.polygon.latitudes[0]);
-                                if (polygon_contains_pixel(GIS_Data.typologiezonenList.get(i), firstVertex))
+                                if (polygon_contains_pixel(gis.typologiezonenList.get(i), firstVertex))
                                 {
                                         co2_sum_sector += building.co2;
                                         if (building.connected) sector_connections++;
                                 }
                         }
                         //add co2
-                        co2Comm = co2Comm + "\n" + GIS_Data.typologiezonenList.get(i).id + "\n" + co2_sum_sector + "\n" + sector_connections;
+                        co2Comm = co2Comm + "\n" + gis.typologiezonenList.get(i).id + "\n" + co2_sum_sector + "\n" + sector_connections;
                         println_log(co2Comm, 2);
                         statsViz.sendCommand(co2Comm, 6155);
                 }

@@ -78,7 +78,7 @@ void setMeshNeighbours(String newNeighbourstring_in)
         {
                 splitString = subSplit.split(" ");
 
-                for (Node node : GIS_Data.nahwaermeMesh)
+                for (Node node : gis.nahwaermeMesh)
                 {
                         boolean foundAny = false;
                         ArrayList<Node> newNeighbours = new ArrayList<Node>();
@@ -86,7 +86,7 @@ void setMeshNeighbours(String newNeighbourstring_in)
                         {
                                 for (int i = 1; i<splitString.length; i++)
                                 {
-                                        for (Node otherNode : GIS_Data.nahwaermeMesh)
+                                        for (Node otherNode : gis.nahwaermeMesh)
                                         {
                                                 if (otherNode.str_id.equals(splitString[i])) newNeighbours.add(otherNode);
                                                 foundAny = true;
@@ -148,7 +148,7 @@ ArrayList<Node> findPath(Node startNode, Node globalGoal)
                         println_log("\n", 3);
 
                         // reset vals for next pathFinding
-                        for (Node temp_node: GIS_Data.nahwaermeMesh)
+                        for (Node temp_node: gis.nahwaermeMesh)
                         {
                                 temp_node.resetVals();
                         }
@@ -256,7 +256,7 @@ ArrayList<PVector> generatePath()
         Node firstNode = null;
 
         // ----------------------------------------------------for each polygon
-        for (Node waypoint : GIS_Data.nahwaermeMesh)
+        for (Node waypoint : gis.nahwaermeMesh)
         {
                 print_log("starting " + waypoint.str_id, 3);
                 // ----------------------------- get each pair of line vertices
@@ -276,7 +276,7 @@ ArrayList<PVector> generatePath()
                                         // ------------------ evaluate distance
                                         shortestDist = currentPos.dist(tempProj);
                                         firstNode = new Node(tempProj.x, tempProj.y, waypoint.str_id + neighbour.str_id); // first node has id of p1+p2
-                                        GIS_Data.nahwaermeMesh.add(firstNode);
+                                        gis.nahwaermeMesh.add(firstNode);
                                         println_log("found possible projection. new node with id " + firstNode.str_id + " created.", 3);
                                         setMeshNeighbours(firstNode.str_id + " " + waypoint.str_id + " " + neighbour.str_id + " end");
                                         nextStep = tempProj;

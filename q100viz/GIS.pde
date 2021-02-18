@@ -1,11 +1,44 @@
+// subclass of GIS for the region to be displayed
+class Area{
+  // get these coordinates from GIS map:
+  int lonMin; // 1013137; //9.0975364; // y = 0
+  int lonMax; // 1013901; //9.1143553; // height
+  int latMin; // 7206217; //54.1876916; // x = 0
+  int latMax; // 7207334; //54.1988598; // width
+  int lonDiff;
+  int latDiff;
+  float resoX;
+
+  Area(){}
+}
+
 
 class GIS
 {
 ArrayList<Polygon> typologiezonenList = new ArrayList<Polygon>();   // stores list of Typologiezonen
 ArrayList<Polygon> nahwaermeList = new ArrayList<Polygon>();   // list of all sections in Nahwärmenetz
 ArrayList<Node> nahwaermeMesh = new ArrayList<Node>();   // global invisibile Nahwärmenetz for movement of FX
-GIS(){
+
+// -------------- coordinate reference system information ----------------------
+int crs = 3857; // define coordinate reference systeme. Will be used to load table and draw shapes. so far: crs=3857
+
+Area area = new Area();
+
+GIS(int lon_min, int lon_max, int lat_min, int lat_max){
+  area.lonMin = lon_min;
+  area.lonMax = lon_max;
+  area.latMin = lat_min;
+  area.latMax = lat_max;
+
+  area.lonDiff = area.lonMax - area.lonMin;
+  area.latDiff = area.latMax - area.latMin;
+  area.resoX = float(area.lonDiff)/area.latDiff;
+
 }
+
+
+
+
 
 ///////////////////////// LOAD EXTERNAL DATA FROM CSVs /////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -15,6 +48,11 @@ float[] convertToXY_epsg3857(String tempLon, String tempLat, PGraphics p)
 {
         int lon = int(tempLon);
         int lat = int(tempLat);
+        int latMin = area.latMin;
+        int latMax = area.latMax;
+        int lonMin = area.lonMin;
+        int lonMax = area.lonMax;
+        float resoX = area.resoX;
 
         //relative x,y
         float tempY = p.height - (float(lat - latMin) / float(latMax - latMin) * p.height); // TODO: leichter mit map()?
@@ -321,20 +359,20 @@ void load_basemap(String map)
         {
                 // img_delta_X = int(imgLonDiff * offscreen.width / float(lonDiff));
                 // img_delta_Y = int(img_delta_X * basemap.height / float(basemap.width));
-                img_delta_Y = int(imgLatDiff * offscreen.height) / latDiff;
-                img_delta_X = int(imgLonDiff * offscreen.width) / latDiff;
-                imgOffsetY = int((latMax - imgLatMax) / (float(latDiff) / offscreen.height));
-                imgOffsetX = ((imgLonMin - lonMin) * offscreen.width) / latDiff;
+                img_delta_Y = int(imgLatDiff * offscreen.height) / area.latDiff;
+                img_delta_X = int(imgLonDiff * offscreen.width) / area.latDiff;
+                imgOffsetY = int((area.latMax - imgLatMax) / (float(area.latDiff) / offscreen.height));
+                imgOffsetX = ((imgLonMin - area.lonMin) * offscreen.width) / area.latDiff;
         }
 
         else if (rotationDegrees == 90)
         {
-                img_delta_Y = int(imgLatDiff * (resoX * offscreen.width/float(lonDiff))); // Δy soll (verhältnismäßig) mit Canvas-BREITE gleichgesetzt werden
+                img_delta_Y = int(imgLatDiff * (area.resoX * offscreen.width/float(area.lonDiff))); // Δy soll (verhältnismäßig) mit Canvas-BREITE gleichgesetzt werden
                 img_delta_X = int(img_delta_Y * (basemap.width/float(basemap.height)));
 
                 println("img_delta_X = " + img_delta_X + ", img_delta_Y = " + img_delta_Y);
-                imgOffsetY = int((latMax - imgLatMax) * (offscreen.width/float(latDiff)));
-                imgOffsetX = int((imgLonMin - lonMin) * (offscreen.height/float(lonDiff)));
+                imgOffsetY = int((area.latMax - imgLatMax) * (offscreen.width/float(area.latDiff)));
+                imgOffsetX = int((imgLonMin - area.lonMin) * (offscreen.height/float(area.lonDiff)));
 
                 println("imgOffsetX = " + imgOffsetX + ", imgOffsetY = " + imgOffsetY);
         }

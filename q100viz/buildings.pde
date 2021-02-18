@@ -79,7 +79,7 @@ void selectBuildingsInTypo(int selBuildingsIDin)
 // highlights buildings according to selected street
 {
         selectedBuildingsList.clear();
-        for (Polygon typologiezone : GIS_Data.typologiezonenList) //iterate typologiezonen
+        for (Polygon typologiezone : gis.typologiezonenList) //iterate typologiezonen
         {
                 if (typologiezone.id == selBuildingsIDin)
                 {

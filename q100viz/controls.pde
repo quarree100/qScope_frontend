@@ -86,7 +86,7 @@ void keyPressed() {
                 break;
 
         case 't':
-                for (Polygon zone : GIS_Data.typologiezonenList)
+                for (Polygon zone : gis.typologiezonenList)
                 {
                         zone.visible = !zone.visible;
                 }

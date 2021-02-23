@@ -82,7 +82,7 @@ float[] convertToXY_epsg3857(String tempLon, String tempLat, PGraphics p)
 // ------------------------------ Typologiezonen -------------------------------
 void load_typologiezonen()
 {
-        Table typologiezonen = loadTable("typoTable.csv", "header");
+        Table typologiezonen = loadTable("data/typoTable.csv", "header");
         for (TableRow row: typologiezonen.rows())
         {
                 polygonsList.add(new Polygon());
@@ -127,7 +127,7 @@ void load_buildings() // loads GIS shapefiles and creates polygon objects
         switch (crs)
         {
         case 3857:
-                Table buildingsTable = loadTable("buildings.csv", "header");
+                Table buildingsTable = loadTable("data/buildings.csv", "header");
                 for (TableRow row: buildingsTable.rows())
                 {
                         polygonsList.add(new Polygon());
@@ -181,7 +181,7 @@ void load_buildings() // loads GIS shapefiles and creates polygon objects
 // -------------------------------- Waermezentrale -----------------------------
 void load_waermezentrale()
 {
-        Table waermezentrale = loadTable("waerme_zentrale.csv", "header");
+        Table waermezentrale = loadTable("data/waerme_zentrale.csv", "header");
         for (TableRow row : waermezentrale.rows())
         {
                 polygonsList.add(new Polygon());
@@ -223,7 +223,7 @@ void load_waermezentrale()
 // -------------------------------- Nahwaermenetz ------------------------------
 void load_nahwaermenetz()
 {
-        Table nahwaermenetz = loadTable("nahwaermenetz.csv", "header");
+        Table nahwaermenetz = loadTable("data/nahwaermenetz.csv", "header");
         for (TableRow row: nahwaermenetz.rows())
         {
                 polygonsList.add(new Polygon());

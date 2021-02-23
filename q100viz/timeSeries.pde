@@ -2,22 +2,36 @@
 // loads CO2-series and building-specific connection to power network from file
 class TimeSeries{
 
-  TimeSeries(){}
 
 boolean running = false;
-boolean co2series_loaded = false; // makes sure that data is only loaded once
+boolean series_loaded = false; // makes sure that data is only loaded once
 int global_co2_array_pointer = 0; // points at co2 data to read
 int co2_series_step_timer = 0;
 int num_of_years_in_series;
+String execution_mode; // generic or GAMA
+
+int interval = 3; // (in seconds). There will be one step per interval
+long last_interval = 0; // stores time of execution of last simulation step
+
+TimeSeries(){}
+TimeSeries(String input_mode, int step_interval){
+  interval = step_interval;
+  execution_mode = input_mode;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// GENERIC DATA /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void loadCO2series(String co2_series_file)
 {
-        if (!co2series_loaded)
+        if (!series_loaded)
         {
                 try {
                         Table co2_series_table = loadTable(co2_series_file, "header");
                         println_log("CO2-series loaded from file " + co2_series_file, 2);
-                        co2series_loaded = true;
+                        series_loaded = true;
 
                         // apply data to buildings:
                         int num_of_ids = 173;
@@ -100,5 +114,74 @@ void run()
                         statsViz.sendCommand(co2Comm, 6155);
                 }
         }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// GAMA API ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void load_from_GAMA(String gama_series)
+{
+        if (!series_loaded)
+        {
+                try {
+                        // load table:
+                        Table co2_series_table = loadTable(gama_series, "header");
+                        println_log("CO2-series loaded from file " + gama_series, 2);
+                        series_loaded = true;
+
+                        // apply data to buildings:
+                        int num_of_ids = 173;
+                        num_of_years_in_series = co2_series_table.getRowCount() / num_of_ids;
+                        println("table data: num of rows = " + co2_series_table.getRowCount() + " num_of_years_in_series = " + num_of_years_in_series);
+                        for (Building building : buildingsList)
+                        {
+                                building.co2_series = new float[num_of_years_in_series];
+                                building.connected_series = new int[num_of_years_in_series];
+                        }
+                        // for i in id_from_table:
+                        // for (int i = 0; i < num_of_ids; i++) { // get only first year --> 173 ids
+                        int co2_array_pointer = 0; // always increases at highest id
+                        for (TableRow row : co2_series_table.rows())
+                        {
+                                // TableRow row = co2_series_table.getRow(i);
+                                buildingsList.get(row.getInt("id")).co2_series[co2_array_pointer] = row.getFloat("CO2");
+                                buildingsList.get(row.getInt("id")).connected_series[co2_array_pointer] = row.getInt("Anschluss");
+                                println("added " + row.getFloat("CO2") + " to bulding " + row.getInt("id"));
+                                if (row.getInt("id") == num_of_ids - 1) co2_array_pointer++; // increases when last id is found
+                        }
+
+                        for (Building building : buildingsList)
+                        {
+                                printArray_log(building.co2_series, 3);
+                        }
+                        // get id_from_buildings
+                        // --> adopt co2, adopt connection_state
+
+                } catch(Exception e) {
+                        println("error loading co2-series. " + e);
+                }
+        }
+}
+
+void run_from_gama()
+{
+  // first run: assign connection_moments to buildings
+  if (){}
+
+  // standard run:
+  if (millis() > last_interval + interval * 1000)
+  {
+    // 1. increase cycle
+
+    // 2. iterate buildings: cycle = connectionMoment ?
+
+    // 2a: yes: set building = connected
+
+    // 3. update other metadata
+
+    last_interval = millis();
+  }
 }
 }

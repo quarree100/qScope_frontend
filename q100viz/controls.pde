@@ -195,7 +195,7 @@ void mouseDragged() {
 void controlEvent(ControlEvent theEvent) {
         if (theEvent.isFrom(checkbox)) {
                 timeSeries.running = !timeSeries.running;
-                timeSeries.loadCO2series("fiktive_CO2_daten.csv");
+                timeSeries.loadCO2series("data/fiktive_CO2_daten.csv");
                 // myColorBackground = 0;
                 // print("got an event from "+checkbox.getName()+"\t\n");
                 // checkbox uses arrayValue to store the state of

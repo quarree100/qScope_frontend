@@ -155,7 +155,7 @@ void setup() {
         }
 
         // Time Series:
-        timeSeries = new TimeSeries();
+        timeSeries = new TimeSeries("GAMA", 0.02);
 
         // load FX:
         initialFXpathFinding();
@@ -300,6 +300,9 @@ void draw() {
                      + "global verbose level: " + globalVerboseLevel + " \t(press v/V to change)\n"
                      ,width, height-200);
         }
+        textAlign(LEFT,BOTTOM);
+        strokeWeight(2);
+        text("cycle " + timeSeries.cycle, 1300, 150);
 
         ////////////////////////////////////////////////////////////////////////
         /////////////////////////////// TIDYING UP /////////////////////////////
@@ -313,6 +316,6 @@ void draw() {
         // ---------------------- CO2-series animation -------------------------
         if (timeSeries.running)
         {
-                timeSeries.run();
+                timeSeries.run("GAMA");
         }
 }

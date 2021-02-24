@@ -43,9 +43,9 @@ void render(PGraphics p)
                         p.beginShape();
                         p.stroke(0);
                         p.strokeWeight(1);
+                        p.fill(col);
                         for (int i=0; i<latitudes.length; i++)
                         {
-                                p.fill(col);
                                 p.vertex(longitudes[i], latitudes[i]);
                         }
                         p.endShape();
@@ -55,9 +55,9 @@ void render(PGraphics p)
                         p.beginShape();
                         p.stroke(0);
                         p.strokeWeight(1);
+                        p.fill(col);
                         for (int i=0; i<latitudes.length; i++)
                         {
-                                p.fill(col);
                                 p.vertex(longitudes[i], latitudes[i]);
                         }
                         p.endShape();
@@ -115,6 +115,7 @@ void render(PGraphics p)
                                 }
                         }
                 } // nahwaermenetz end
+                p.noFill();
                 p.popStyle();
         } // end if visible
 }

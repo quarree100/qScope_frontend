@@ -136,6 +136,7 @@ void load_buildings() // loads GIS shapefiles and creates polygon objects
                         Building lastBuilding = buildingsList.get(buildingsList.size()-1);
                         lastPolygon.id = row.getInt("id");//pass id
                         lastBuilding.id = row.getInt("id");
+                        lastBuilding.osm_id = row.getInt("osm_id");
                         // lastPolygon.type = "strasse";
                         lastPolygon.strasse = row.getString("Straße");
                         try {

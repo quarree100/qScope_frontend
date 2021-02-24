@@ -47,11 +47,7 @@ void load(String mode_in)
 {
   if (mode_in == "GAMA")
   {
-<<<<<<< HEAD
     load_from_GAMA("data/gama_data_comma.csv"); // TODO: semicolon-based parsing of data (Original ist Semikolon-separiert.)
-=======
-    load_from_GAMA("data/gama_data_comma.csv");
->>>>>>> 74db8d95fc43d1bc198675e1124782381e611dd2
   }
   else if (mode_in == "generic")
   {

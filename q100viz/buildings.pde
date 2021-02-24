@@ -4,6 +4,7 @@ ArrayList<Building> selectedBuildingsList = new ArrayList<Building>(); // tempor
 
 class Building {
 int id;
+int osm_id;
 float co2;
 float[] co2_series;
 color col;
@@ -18,6 +19,9 @@ int specific_power_consumption_we;
 float specific_power_consumption_m2;
 boolean connected = false; // ans Netz angeschlossen
 int[] connected_series; //
+
+// simulation data:
+int connectionCycle; // stores moment of household connection for gama-related simulations
 
 int[] contained_in_gridField; // = new int[squareFields*squareFields]; // stores which grid fields overlap with building
 
@@ -51,13 +55,14 @@ void render(PGraphics p)
         }
 
         // ------------------------- fill and draw vertices
+        p.fill(col);
         for (int i=0; i<polygon.latitudes.length; i++)
         {
-                p.fill(col);
                 p.vertex(polygon.longitudes[i], polygon.latitudes[i]);
         }
         p.endShape();
         p.noStroke();
+        p.noFill();
 }
 
 void assignColor() // to be run when clicked/selected via LEGO

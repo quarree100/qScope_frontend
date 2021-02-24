@@ -10,11 +10,17 @@ int co2_series_step_timer = 0;
 int num_of_years_in_series;
 String execution_mode; // generic or GAMA
 
-int interval = 3; // (in seconds). There will be one step per interval
+float interval = 1; // (in seconds). There will be one step per interval
 long last_interval = 0; // stores time of execution of last simulation step
+int cycle = 0;
+int maxCycle;
+
 
 TimeSeries(){}
-TimeSeries(String input_mode, int step_interval){
+TimeSeries(int step_interval){
+  interval = step_interval;
+}
+TimeSeries(String input_mode, float step_interval){
   interval = step_interval;
   execution_mode = input_mode;
 }
@@ -24,7 +30,41 @@ TimeSeries(String input_mode, int step_interval){
 ///////////////////////////// GENERIC DATA /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-void loadCO2series(String co2_series_file)
+void run(String mode_in)
+{
+  if (mode_in == "GAMA" || mode_in == "gama")
+  {
+    run_from_gama();
+  }
+  else
+  {
+    run_generic();
+  }
+}
+
+// general handler for initialization of timeSeries. if String is a path to a file, try to load it.
+void load(String mode_in)
+{
+  if (mode_in == "GAMA")
+  {
+    load_from_GAMA("data/gama_data_comma.csv");
+  }
+  else if (mode_in == "generic")
+  {
+    load_generic_CO2_series("data/fiktive_CO2_daten.csv");
+  }
+  else
+  {
+    try{
+      load_generic_CO2_series(mode_in);
+    } catch(Exception e)
+    {
+      print_log(e + "; could not load input file with generic data", 2);
+    }
+  }
+}
+
+void load_generic_CO2_series(String co2_series_file)
 {
         if (!series_loaded)
         {
@@ -67,7 +107,7 @@ void loadCO2series(String co2_series_file)
         }
 }
 
-void run()
+void run_generic()
 {
         if (hour() + minute() + second() > co2_series_step_timer)
         {
@@ -121,66 +161,59 @@ void run()
 /////////////////////////////// GAMA API ///////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////// GAMA LOAD ////////////////////////////////////
 void load_from_GAMA(String gama_series)
 {
-        if (!series_loaded)
+    // load csv
+    Table gama_data = loadTable(gama_series, "header");
+
+    // get last cycle. (could be any row in column "cycle", but let's pick the last..)
+    maxCycle = gama_data.getRow(gama_data.getRowCount() - 1).getInt("cycle");
+
+    // cycle rows; cycle buildings; abort when building found
+    for (TableRow row : gama_data.rows())
+    {
+      for (Building building : buildingsList)
+      {
+        if (building.osm_id == row.getInt("id"))
         {
-                try {
-                        // load table:
-                        Table co2_series_table = loadTable(gama_series, "header");
-                        println_log("CO2-series loaded from file " + gama_series, 2);
-                        series_loaded = true;
-
-                        // apply data to buildings:
-                        int num_of_ids = 173;
-                        num_of_years_in_series = co2_series_table.getRowCount() / num_of_ids;
-                        println("table data: num of rows = " + co2_series_table.getRowCount() + " num_of_years_in_series = " + num_of_years_in_series);
-                        for (Building building : buildingsList)
-                        {
-                                building.co2_series = new float[num_of_years_in_series];
-                                building.connected_series = new int[num_of_years_in_series];
-                        }
-                        // for i in id_from_table:
-                        // for (int i = 0; i < num_of_ids; i++) { // get only first year --> 173 ids
-                        int co2_array_pointer = 0; // always increases at highest id
-                        for (TableRow row : co2_series_table.rows())
-                        {
-                                // TableRow row = co2_series_table.getRow(i);
-                                buildingsList.get(row.getInt("id")).co2_series[co2_array_pointer] = row.getFloat("CO2");
-                                buildingsList.get(row.getInt("id")).connected_series[co2_array_pointer] = row.getInt("Anschluss");
-                                println("added " + row.getFloat("CO2") + " to bulding " + row.getInt("id"));
-                                if (row.getInt("id") == num_of_ids - 1) co2_array_pointer++; // increases when last id is found
-                        }
-
-                        for (Building building : buildingsList)
-                        {
-                                printArray_log(building.co2_series, 3);
-                        }
-                        // get id_from_buildings
-                        // --> adopt co2, adopt connection_state
-
-                } catch(Exception e) {
-                        println("error loading co2-series. " + e);
-                }
+           building.connectionCycle = row.getInt("momentToConnect");
+           println_log("building " + building.osm_id + "connects at cycle " + building.connectionCycle, 2);
+           break;
         }
+      }
+    }
+    println_log("Loading GAMA input file finished.", 2);
 }
 
+
+
+///////////////////////////////// GAMA RUN /////////////////////////////////////
 void run_from_gama()
 {
-  // first run: assign connection_moments to buildings
-  if (){}
-
-  // standard run:
   if (millis() > last_interval + interval * 1000)
   {
     // 1. increase cycle
+    cycle++;
+    println_log("cycle " + cycle, 1);
 
     // 2. iterate buildings: cycle = connectionMoment ?
+    for (Building building : buildingsList)
+    {
+      if (cycle == building.connectionCycle)
+      {
+        building.connected = true;
+        building.assignColor();
+        building.col = color(95, 246, 151);
+      }
+    }
 
     // 2a: yes: set building = connected
 
     // 3. update other metadata
 
+    // 4. tidy up
+    if (cycle > maxCycle) running = false;
     last_interval = millis();
   }
 }

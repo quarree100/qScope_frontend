@@ -212,4 +212,69 @@ void select_polygons_via_TUI() // TODO: remake this and only check for each buil
   }
 }
 
+// create a JSON file of grid to be used by GAMA:
+void composeJSON()
+{
+  JSONObject export = new JSONObject();
+
+  // create metadata fields
+  JSONObject metadata = new JSONObject();
+  metadata.setString("id", "someID");
+  metadata.setInt("timestamp", int(str(year()) + str(month()) + str(day()) + str(hour()) + str(minute()) + str(second())));
+  metadata.setString("apiv", "2.1.0");
+
+  export.setJSONObject("meta", metadata);
+
+  // crete header fields:
+  JSONObject header = new JSONObject();
+
+  JSONObject spatial = new JSONObject();
+  spatial.setInt("nrows", squareFields/2);
+  spatial.setInt("ncols", squareFields/2);
+  spatial.setInt("physical_longitude", 0);
+  spatial.setInt("physical_latitude", 0);
+  spatial.setInt("longitude", gis.area.lonMin);
+  spatial.setInt("latitude", gis.area.latMin);
+  spatial.setInt("cellSize", 0);
+  spatial.setInt("rotation", 0);
+
+  header.setJSONObject("spatial", spatial);
+
+  JSONObject owner = new JSONObject();
+  owner.setString("name", NAME);
+  owner.setString("title", TITLE);
+  owner.setString("institute", INSTITUTE);
+
+  header.setJSONObject("owner", owner);
+
+  header.setBoolean("block", false);
+  header.setBoolean("mapping", false);
+
+  export.setJSONObject("header", header);
+
+  // create grid array:
+  JSONArray grid = new JSONArray();
+  for (int x = 0; x < squareFields; x++)
+  {
+          for (int y = 0; y < squareFields; y++)
+          {
+            JSONObject field = new JSONObject();
+
+            field.setInt("x", x);
+            field.setInt("y", y);
+
+            // ID:
+            field.setInt("type", lego_grid[x][y][0]);
+
+            // rotation:
+            field.setInt("rot", lego_grid[x][y][1]);
+
+            grid.setJSONObject(x+y, field);
+          }
+  }
+  export.setJSONArray("grid", grid);
+  saveJSONObject(export, "data/export.json");
+
+}
+
 }

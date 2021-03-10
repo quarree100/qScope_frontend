@@ -26,10 +26,6 @@ TimeSeries(String input_mode, float step_interval){
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-///////////////////////////// GENERIC DATA /////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
 void run(String mode_in)
 {
   if (mode_in == "GAMA" || mode_in == "gama")
@@ -64,8 +60,78 @@ void load(String mode_in)
   }
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////// GAMA API ///////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////// GAMA LOAD ////////////////////////////////////
+void load_from_GAMA(String gama_series)
+{
+    // load csv
+    Table gama_data = loadTable(gama_series, "header");
+
+    // get last cycle. (could be any row in column "cycle", but let's pick the last..)
+    maxCycle = gama_data.getRow(gama_data.getRowCount() - 1).getInt("cycle");
+
+    // cycle rows; cycle buildings; abort when building found
+    for (TableRow row : gama_data.rows())
+    {
+      for (Building building : buildingsList)
+      {
+        if (building.osm_id == row.getInt("id"))
+        {
+           building.connectionCycle = row.getInt("momentToConnect");
+           println_log("building " + building.osm_id + "connects at cycle " + building.connectionCycle, 2);
+           break;
+        }
+      }
+    }
+    println_log("Loading GAMA input file finished.", 2);
+}
+
+
+
+///////////////////////////////// GAMA RUN /////////////////////////////////////
+void run_from_gama()
+{
+  if (millis() > last_interval + interval * 1000)
+  {
+    // 1. increase cycle
+    cycle++;
+    println_log("cycle " + cycle, 1);
+
+    // 2. iterate buildings: cycle = connectionMoment ?
+    for (Building building : buildingsList)
+    {
+      if (cycle == building.connectionCycle)
+      {
+        // 2a: yes: set building = connected
+        building.connected = true;
+        building.assignColor();
+        building.col = color(95, 246, 151);
+      }
+    }
+
+    // 3. update other metadata
+
+    // 4. tidy up
+    if (cycle > maxCycle) running = false;
+    last_interval = millis();
+  }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+///////////////////////////// GENERIC DATA /////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+
 void load_generic_CO2_series(String co2_series_file)
 {
+
+  boolean series_loaded = true;
         if (!series_loaded)
         {
                 try {
@@ -154,67 +220,5 @@ void run_generic()
                         statsViz.sendCommand(co2Comm, 6155);
                 }
         }
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////// GAMA API ///////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////// GAMA LOAD ////////////////////////////////////
-void load_from_GAMA(String gama_series)
-{
-    // load csv
-    Table gama_data = loadTable(gama_series, "header");
-
-    // get last cycle. (could be any row in column "cycle", but let's pick the last..)
-    maxCycle = gama_data.getRow(gama_data.getRowCount() - 1).getInt("cycle");
-
-    // cycle rows; cycle buildings; abort when building found
-    for (TableRow row : gama_data.rows())
-    {
-      for (Building building : buildingsList)
-      {
-        if (building.osm_id == row.getInt("id"))
-        {
-           building.connectionCycle = row.getInt("momentToConnect");
-           println_log("building " + building.osm_id + "connects at cycle " + building.connectionCycle, 2);
-           break;
-        }
-      }
-    }
-    println_log("Loading GAMA input file finished.", 2);
-}
-
-
-
-///////////////////////////////// GAMA RUN /////////////////////////////////////
-void run_from_gama()
-{
-  if (millis() > last_interval + interval * 1000)
-  {
-    // 1. increase cycle
-    cycle++;
-    println_log("cycle " + cycle, 1);
-
-    // 2. iterate buildings: cycle = connectionMoment ?
-    for (Building building : buildingsList)
-    {
-      if (cycle == building.connectionCycle)
-      {
-        building.connected = true;
-        building.assignColor();
-        building.col = color(95, 246, 151);
-      }
-    }
-
-    // 2a: yes: set building = connected
-
-    // 3. update other metadata
-
-    // 4. tidy up
-    if (cycle > maxCycle) running = false;
-    last_interval = millis();
-  }
 }
 }

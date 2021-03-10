@@ -9,6 +9,9 @@
  * based on the RoadMapSandbox Code by Ira Winder, ira@mit.edu
  *
  */
+ String NAME = "dunland";
+ String TITLE = "CityScope_QUARREE100";
+ String INSTITUTE = "Bremen University";
 
 // GUI
 import controlP5.*;
@@ -170,6 +173,7 @@ void draw() {
         background(120,200,150);
 
         grid.check_incoming_message();
+        grid.composeJSON();
 
         // color according to rotation
         for (int i = 0; i<tilesList.size(); i++)

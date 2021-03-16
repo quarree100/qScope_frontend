@@ -4,7 +4,7 @@
  * by David Unland
  * unland@uni-bremen.de
  *
- * Feb-2021
+ * March-2021
  *
  * based on the RoadMapSandbox Code by Ira Winder, ira@mit.edu
  *
@@ -64,7 +64,7 @@ String stats; // String to be sent to statsViz
 void setup() {
 
         // frameRate(5);
-        grid = new Grid(22);
+        grid = new Grid(11);
         gis = new GIS(1013102, 1013936, 7206177, 7207365);
 
         // size(1280, 1024, P3D);
@@ -168,11 +168,14 @@ void setup() {
 /////////////////////////////////// MAIN LOOP //////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+long last_JSON_sent = 0;
 void draw() {
 
         background(120,200,150);
 
         grid.check_incoming_message();
+
+        if (millis() > last_JSON_sent + 500)
         grid.composeJSON();
 
         // color according to rotation

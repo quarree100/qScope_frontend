@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "apiv": "2.1.0",
+    "id": "someID",
+    "timestamp": 0
+  },
+  "grid": [
+    {
+      "rot": 0,
+      "x": 0,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 1,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 2,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 3,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 4,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 5,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 6,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 7,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 8,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 9,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 0,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 1,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 2,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 3,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 4,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 5,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 6,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 7,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 8,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 9,
+      "type": 1
+    },
+    {
+      "rot": 0,
+      "x": 10,
+      "y": 10,
+      "type": 1
+    }
+  ],
+  "header": {
+    "owner": {
+      "name": "dunland",
+      "institute": "Bremen University",
+      "title": "CityScope_QUARREE100"
+    },
+    "mapping": false,
+    "block": false,
+    "spatial": {
+      "physical_longitude": 0,
+      "nrows": 11,
+      "latitude": 7206177,
+      "rotation": 0,
+      "physical_latitude": 0,
+      "ncols": 11,
+      "cellSize": 0,
+      "longitude": 1013102
+    }
+  }
+}

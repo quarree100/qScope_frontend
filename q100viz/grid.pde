@@ -2,7 +2,7 @@ class Grid
 {
 
 //----------------------------- LEGO decoding ----------------------------------
-int squareFields = 22;   // number of fields on both horizontal and vertical axis on physical table
+int squareFields = 11;   // number of fields on both horizontal and vertical axis on physical table
 int[][][] lego_grid;   // [x][y][ID/rotation]
 
 // ------------------------------ GIS data -------------------------------------
@@ -229,8 +229,8 @@ void composeJSON()
   JSONObject header = new JSONObject();
 
   JSONObject spatial = new JSONObject();
-  spatial.setInt("nrows", squareFields/2);
-  spatial.setInt("ncols", squareFields/2);
+  spatial.setInt("nrows", squareFields);
+  spatial.setInt("ncols", squareFields);
   spatial.setInt("physical_longitude", 0);
   spatial.setInt("physical_latitude", 0);
   spatial.setInt("longitude", gis.area.lonMin);

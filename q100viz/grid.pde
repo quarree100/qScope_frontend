@@ -254,6 +254,7 @@ void composeJSON()
 
   // create grid array:
   JSONArray grid = new JSONArray();
+  int count = 0;
   for (int x = 0; x < squareFields; x++)
   {
           for (int y = 0; y < squareFields; y++)
@@ -269,7 +270,8 @@ void composeJSON()
             // rotation:
             field.setInt("rot", lego_grid[x][y][1]);
 
-            grid.setJSONObject(x+y, field);
+            grid.setJSONObject(count, field);
+            count++;
           }
   }
   export.setJSONArray("grid", grid);

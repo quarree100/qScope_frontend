@@ -42,7 +42,7 @@ ArrayList<CO2_plot> plotsList = new ArrayList<CO2_plot>();
 
 public void setup()
 {
-        size(1024, 800);
+        
         textAlign(LEFT,TOP);
 
         udp = new UDP(this, local_UDPin);
@@ -159,7 +159,7 @@ public void receive( byte[] data, String ip, int port ) {  // <-- extended handl
                  * split[0] == "co2Comm"-identifier
                  * split[1] == id of sector
                  * split[2] == co2_sum_sector
-                 * split[3] == sector_connections (Anzahl Anschl\u00fcsse)
+                 * split[3] == sector_connections (Anzahl Anschlüsse)
                  * execute: add co2_sum_sector to graph of sector-specific graph
                  */
                 println("co2Comm data received");
@@ -653,6 +653,7 @@ public void drawSpiderWebDiagram(int x, int y)
         text("co2_mean", x+cos(radians(360))*radius/2, y+sin(radians(360))*radius/2);
       }
 }
+  public void settings() {  size(1024, 800); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "statsViz" };
     if (passedArgs != null) {

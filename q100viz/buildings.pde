@@ -81,7 +81,7 @@ void assignColor() // to be run when clicked/selected via LEGO
 
 /* ------------------ GENERAL FUNCTIONS CONCERNING BUILDINGS -----------------*/
 void selectBuildingsInTypo(int selBuildingsIDin)
-// highlights buildings according to selected street
+// highlights buildings according to selected typologiezone
 {
         selectedBuildingsList.clear();
         for (Polygon typologiezone : gis.typologiezonenList) //iterate typologiezonen

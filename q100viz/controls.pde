@@ -108,58 +108,58 @@ void keyPressed() {
         case '0':
                 selectedID = 0;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '1':
                 selectedID = 1;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '2':
                 selectedID = 2;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '3':
                 selectedID = 3;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '4':
                 selectedID = 4;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '5':
                 selectedID = 5;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '6':
                 selectedID = 6;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '7':
                 selectedID = 7;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '8':
                 selectedID = 8;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '9':
                 selectedID = 9;
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         case '+':
                 selectedID = (selectedID + 1) % 12;
                 println_log("selected ID = " + selectedID, 1);
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
 
         case '-':
@@ -167,7 +167,7 @@ void keyPressed() {
                 selectedID = (selectedID < 0) ? 11 : selectedID;
                 println_log("selected ID = " + selectedID, 1);
                 selectBuildingsInTypo(selectedID);
-                statsViz.sendCommand(stats, 6155);
+                statsViz.send_stats();
                 break;
         }
 }

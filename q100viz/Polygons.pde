@@ -14,7 +14,7 @@ Tile(int gridNum)
 
 int selectedID = int(random(9));
 
-/* ####################### POLYGONS FROM GIS IMPORT ######################### */
+////////////////////////// POLYGONS FROM GIS IMPORT ////////////////////////////
 ArrayList<Polygon> polygonsList = new ArrayList<Polygon>(); // stores all created polygons
 
 class Polygon
@@ -146,19 +146,6 @@ color defineStreetColor(String tempStrasse)
                 tempCol = color(102, 15, 133);
         return tempCol;
 }
-
-double inf = Double.POSITIVE_INFINITY;
-int max_heat = 0;
-int max_power = 0;
-int max_spec_heat = 0;
-int max_spec_power_we = 0;
-float max_spec_power_m2 = 0;
-
-double min_heat = inf;
-double min_power = inf;
-double min_spec_heat = inf;
-double min_spec_power_we = inf;
-double min_spec_power_m2 = inf;
 
 // --------------------------- Polygon interactions ----------------------------
 

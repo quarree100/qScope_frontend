@@ -49,7 +49,7 @@ void receive( byte[] data, String ip, int port ) {  // <-- extended handler
 
         } else {
                 stats = message;
-                // println("message = \n" + message);
+                println("message = \n" + message);
                 try
                 {
                         if (int(split(split[0], " ")[1]) != selectedID)

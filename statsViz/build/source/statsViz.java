@@ -177,7 +177,7 @@ public void receive( byte[] data, String ip, int port ) {  // <-- extended handl
 
         } else {
                 stats = message;
-                // println("message = \n" + message);
+                println("message = \n" + message);
                 try
                 {
                         if (PApplet.parseInt(split(split[0], " ")[1]) != selectedID)

@@ -1,17 +1,9 @@
-// subclass of GIS for the region to be displayed
-class Area{
-  // get these coordinates from GIS map:
-  int lonMin; // 1013137; //9.0975364; // y = 0
-  int lonMax; // 1013901; //9.1143553; // height
-  int latMin; // 7206217; //54.1876916; // x = 0
-  int latMax; // 7207334; //54.1988598; // width
-  int lonDiff;
-  int latDiff;
-  float resoX;
-
-  Area(){}
-}
-
+// basemap
+PImage basemap;
+int img_delta_Y; // to be declared at loadGISbasemap
+int img_delta_X;
+int imgOffsetY; // to be declared at loadGISbasemap
+int imgOffsetX;
 
 class GIS
 {
@@ -80,9 +72,9 @@ float[] convertToXY_epsg3857(String tempLon, String tempLat, PGraphics p)
 ///////////////////////////////// load datasets ////////////////////////////////
 
 // ------------------------------ Typologiezonen -------------------------------
-void load_typologiezonen()
+void load_typologiezonen(String typologiezonen_table)
 {
-        Table typologiezonen = loadTable("data/typoTable.csv", "header");
+        Table typologiezonen = loadTable(typologiezonen_table, "header");
         for (TableRow row: typologiezonen.rows())
         {
                 polygonsList.add(new Polygon());
@@ -121,13 +113,13 @@ void load_typologiezonen()
 }
 
 // --------------------------------- buildings ---------------------------------
-void load_buildings() // loads GIS shapefiles and creates polygon objects
+void load_buildings(String buildings_table) // loads GIS shapefiles and creates polygon objects
 {
   boolean load_buildingSpecific_data = true;
         switch (crs)
         {
         case 3857:
-                Table buildingsTable = loadTable("data/buildings.csv", "header");
+                Table buildingsTable = loadTable(buildings_table, "header");
                 for (TableRow row: buildingsTable.rows())
                 {
                         polygonsList.add(new Polygon());
@@ -148,6 +140,12 @@ void load_buildings() // loads GIS shapefiles and creates polygon objects
                                 //println("lastPolygon.strasse = " + lastPolygon.strasse);
                         } catch(Exception e) {
                           load_buildingSpecific_data = false;
+                          lastBuilding.co2 = random(0,1);
+                          lastBuilding.heat_consumption_2017 = int(random(0,1));
+                          lastBuilding.e_power_consumption_2017 = int(random(0,10000));
+                          lastBuilding.specific_heat_consumption = int(random(0,10000));
+                          lastBuilding.specific_power_consumption_we = int(random(0,10000));
+                          lastBuilding.specific_power_consumption_m2 = random(0,1);
                         }                        lastBuilding.col = defineStreetColor(lastPolygon.strasse); // allocates color according to street
 
                         String[] lats = split(row.getString("lats"), ' '); // making list out of POLYGON geometry
@@ -176,13 +174,15 @@ void load_buildings() // loads GIS shapefiles and creates polygon objects
                 break;
         }
         println_log(buildingsList.size() + " polygons for buildings added.", 1);
-        if (!load_buildingSpecific_data) println_log("building-specific data could not be loaded." ,1);
+        if (!load_buildingSpecific_data)
+          println_log("building-specific data could not be loaded. Random data was generated." ,1);
+
 }
 
 // -------------------------------- Waermezentrale -----------------------------
-void load_waermezentrale()
+void load_waermezentrale(String waermezentrale_table)
 {
-        Table waermezentrale = loadTable("data/waerme_zentrale.csv", "header");
+        Table waermezentrale = loadTable(waermezentrale_table, "header");
         for (TableRow row : waermezentrale.rows())
         {
                 polygonsList.add(new Polygon());
@@ -222,9 +222,9 @@ void load_waermezentrale()
 
 
 // -------------------------------- Nahwaermenetz ------------------------------
-void load_nahwaermenetz()
+void load_nahwaermenetz(String nahwaermentz_file)
 {
-        Table nahwaermenetz = loadTable("data/nahwaermenetz.csv", "header");
+        Table nahwaermenetz = loadTable(nahwaermentz_file, "header");
         for (TableRow row: nahwaermenetz.rows())
         {
                 polygonsList.add(new Polygon());
@@ -342,17 +342,14 @@ void load_nahwaermenetz()
 
 
 // ----------------------------------- basemap ---------------------------------
-void load_basemap(String map)
+void load_basemap(String map, int imgLonMax, int imgLatMax, int imgLonMin, int imgLatMin)
 {
         basemap = loadImage(map);
         /* extent:
            lower left: 1012695.0710094821406528,7205976.7903914991766214
            upper right:1014205.5283626030432060,7207571.7344451360404491
          */
-        int imgLonMax = 1014205;
-        int imgLatMax = 7207571;
-        int imgLonMin = 1012695;
-        int imgLatMin = 7205976;
+
         int imgLonDiff = imgLonMax - imgLonMin;
         int imgLatDiff = imgLatMax - imgLatMin;
 
@@ -378,4 +375,18 @@ void load_basemap(String map)
                 println("imgOffsetX = " + imgOffsetX + ", imgOffsetY = " + imgOffsetY);
         }
 }
+}
+
+// subclass of GIS for the region to be displayed
+class Area{
+  // get these coordinates from GIS map:
+  int lonMin; // 1013137; //9.0975364; // y = 0
+  int lonMax; // 1013901; //9.1143553; // height
+  int latMin; // 7206217; //54.1876916; // x = 0
+  int latMax; // 7207334; //54.1988598; // width
+  int lonDiff;
+  int latDiff;
+  float resoX;
+
+  Area(){}
 }

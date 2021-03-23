@@ -8,7 +8,7 @@ boolean series_loaded = false; // makes sure that data is only loaded once
 int global_co2_array_pointer = 0; // points at co2 data to read
 int co2_series_step_timer = 0;
 int num_of_years_in_series;
-String execution_mode; // generic or GAMA
+String execution_mode; // "generic" or "GAMA" or "load_from_file"
 
 float interval = 1; // (in seconds). There will be one step per interval
 long last_interval = 0; // stores time of execution of last simulation step
@@ -32,7 +32,10 @@ void run(String mode_in)
   {
     run_from_gama();
   }
-  else
+  else if (mode_in == "generic")
+  {
+  }
+  else if (mode_in == "load_from_file")
   {
     run_generic();
   }
@@ -47,12 +50,16 @@ void load(String mode_in)
   }
   else if (mode_in == "generic")
   {
-    load_generic_CO2_series("data/fiktive_CO2_daten.csv");
+    create_generic_CO2_series();
+  }
+  else if (mode_in == "load_from_file")
+  {
+    load_from_file("data/fiktive_CO2_daten.csv");
   }
   else
   {
     try{
-      load_generic_CO2_series(mode_in);
+      load_from_file(mode_in);
     } catch(Exception e)
     {
       print_log(e + "; could not load input file with generic data", 2);
@@ -127,8 +134,25 @@ void run_from_gama()
 ///////////////////////////// GENERIC DATA /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+void create_generic_CO2_series()
+{
+  println("generating random data for buildings");
+  for (Building building : buildingsList)
+  {
+    building.co2 = random(0,1);
+    building.heat_consumption_2017 = int(random(0,1));
+    building.e_power_consumption_2017 = int(random(0,1));
+    building.specific_heat_consumption = int(random(0,1));
+    building.specific_power_consumption_we = int(random(0,1));
+    building.specific_power_consumption_m2 = random(0,1);
+}
+}
 
-void load_generic_CO2_series(String co2_series_file)
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////// GENERIC DATA FROM FILE //////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+void load_from_file(String co2_series_file)
 {
 
   boolean series_loaded = true;
@@ -169,9 +193,9 @@ void load_generic_CO2_series(String co2_series_file)
 
                 } catch(Exception e) {
                         println("error loading co2-series. " + e);
+                        }
                 }
         }
-}
 
 void run_generic()
 {

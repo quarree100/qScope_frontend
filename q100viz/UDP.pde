@@ -7,8 +7,10 @@ int local_UDPin = 5000;
 String incoming_message = "";
 String lastMessage = "";
 
-void initUDP()
+void initUDP(int local_UDPin_, String local_UDPAddress_)
 {
+        local_UDPin = local_UDPin_;
+        local_UDPAddress = local_UDPAddress_;
         udp = new UDP(this, local_UDPin);
         // udp.log(true);
         udp.listen(true);

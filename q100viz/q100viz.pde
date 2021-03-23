@@ -13,49 +13,41 @@
  String TITLE = "CityScope_QUARREE100";
  String INSTITUTE = "Bremen University";
 
-// GUI
-import controlP5.*;
+ //------------------------------- input data ----------------------------------
+ String BUILDINGS_FILE = "data/buildings.csv";
+ String WAERMEZENTRALE_FILE = "data/waerme_zentrale.csv";
+ String TYPOLOGIEZONEN_FILE = "data/typoTable.csv";
+ String NAHWAERMENETZ_FILE = "data/nahwaermenetz.csv";
+ String BASEMAP_FILE = "180111-QUARREE100-RK_modifiziert_flippedY_smaller.tga";
 
-ControlP5 cp5;
-CheckBox checkbox;
-
-// These are libraries and objects needed for projection mapping (i.e. Keystone Library Objects)
-// ATTENTION: MUST BE RUN IN PROCESSING 2; library not available for p3
+//-------------------------------- keystone ------------------------------------
 import deadpixel.keystone.*;
 Keystone ks;
 CornerPinSurface surface;
 PGraphics offscreen;
 PVector surfaceMouse;
 
-// import gifAnimation.*;
-// GifMaker gifExport;
-// boolean exportGif = false;
-// int k = 0; // used for steps (frames) for gif export
-
 // declare grid:
 Grid grid;
 
 //----------------------------- GUI controls -----------------------------------
+import controlP5.*;
+ControlP5 cp5;
+CheckBox checkbox;
+
+// global controls:
 boolean showBaseMap = true; // shows basemap from the beginning (or not). can be toggled with key 'm'
 boolean showSurfaceMouse = true;
 boolean displayHeatFlowFX = false;
 boolean displayPolygons = true; // displays shapefiles (or not)
 int rotationDegrees = 90; // variable to rotate projection by -- change with arrow keys
 
+boolean helpText = true;
+boolean gridLines = true;
+
 GIS gis;
 StatsViz statsViz;
 TimeSeries timeSeries;
-
-// basemap
-PImage basemap;
-int img_delta_Y; // to be declared at loadGISbasemap
-int img_delta_X;
-int imgOffsetY; // to be declared at loadGISbasemap
-int imgOffsetX;
-
-boolean helpText = true;
-boolean gridLines = true;
-String stats; // String to be sent to statsViz
 
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////// SETUP ////////////////////////////////////
@@ -65,7 +57,7 @@ void setup() {
 
         // frameRate(5);
         grid = new Grid(11);
-        gis = new GIS(1013102, 1013936, 7206177, 7207365);
+        gis = new GIS(1013102, 1013936, 7206177, 7207365); // new GIS layer with geographic area boundaries
 
         // size(1280, 1024, P3D);
         size(1920, 1080, P3D); // Use this size for your projector
@@ -86,8 +78,6 @@ void setup() {
         /* Keystone will only work with P3D or OPENGL renderers, since it relies on texture mapping to deform. We need an offscreen buffer to draw the surface we want projected. Note that we're matching the resolution of the CornerPinSurface. (The offscreen buffer can be P2D or P3D)
          */
         ks = new Keystone(this);
-
-        // float keystone_height = width / float(width * ()(lonMax-lonMin)/float(latMax-latMin)));
 
         if (rotationDegrees == 0)
         {
@@ -114,17 +104,17 @@ void setup() {
         }
 
         // ----------------------------- UDP -----------------------------------
-        initUDP();
+        initUDP(5000, "127.0.0.1"); // create new UDP and start listening
 
         // -------------------------- GIS SETUP --------------------------------
 
         // load GIS shapefiles and create polygon objects:
-        gis.load_buildings();
-        gis.load_typologiezonen();
-        gis.load_nahwaermenetz();
-        gis.load_waermezentrale();
+        gis.load_buildings(BUILDINGS_FILE);
+        gis.load_typologiezonen(TYPOLOGIEZONEN_FILE);
+        gis.load_nahwaermenetz(NAHWAERMENETZ_FILE);
+        gis.load_waermezentrale(WAERMEZENTRALE_FILE);
 
-        gis.load_basemap("180111-QUARREE100-RK_modifiziert_flippedY_smaller.tga"); // loads data into "basemap" image
+        gis.load_basemap(BASEMAP_FILE, 1014205, 7207571, 1012695, 7205976); // loads data into "basemap" image
 
         //  GIS objects and polygons meta data:
         selectBuildingsInTypo(selectedID);
@@ -132,9 +122,6 @@ void setup() {
         // send initial communication string for statsViz
         statsViz = new StatsViz();
         statsViz.evaluateMaxValues(); // has to be called after loading shapes to get max data for further processing
-
-        String initComm = ("init values" + "\n" + max_heat + "\n" + max_power + "\n" + max_spec_heat + "\n" + max_spec_power_we + "\n" + max_spec_power_m2 + "\n" + min_heat + "\n" + min_power + "\n" + min_spec_heat + "\n" + min_spec_power_we + "\n" + min_spec_power_m2);
-        statsViz.sendCommand(initComm, 6155); // sends min and max values to statsViz.pde
 
         // ----------------------------- TUI Grid ------------------------------
         grid.init(); // makes XY coordinates from TUI grid
@@ -158,7 +145,7 @@ void setup() {
         }
 
         // Time Series:
-        timeSeries = new TimeSeries("GAMA", 0.02);
+        timeSeries = new TimeSeries("generic", 0.02);
 
         // load FX:
         initialFXpathFinding();
@@ -237,17 +224,8 @@ void draw() {
         }
 
         // TUI physical table grid:
-        // int gridScale_ = offscreen.height/squareFields;
-        // int shorterDimension = (offscreen.height < offscreen.width) ? offscreen.height : offscreen.width;         // makes this rotation-dependent
         if (grid.display)
         {
-                // for (int i = 0; i<shorterDimension; i+=gridScale_)
-                // {
-                //         offscreen.strokeWeight(1);
-                //         offscreen.stroke(120);
-                //         offscreen.line(i, 0, i, shorterDimension - 0.5*gridScale_);
-                //         offscreen.line(0, i, shorterDimension - gridScale_*0.5, i);
-                // }
                 // TUI physical LEGO positions:
                 grid.draw_TUI_grid(offscreen);
                 grid.drawFieldEntries(offscreen);
@@ -314,11 +292,9 @@ void draw() {
         ////////////////////////////////////////////////////////////////////////
         /////////////////////////////// TIDYING UP /////////////////////////////
         // display statistics for selected typozone in statsViz.pde:
-        statsViz.composeStatsToSend();
-        statsViz.sendCommand(stats, 6155);
-
-        String initComm = ("init" + "\n" + max_heat + "\n" + max_power + "\n" + max_spec_heat + "\n" + max_spec_power_we + "\n" + max_spec_power_m2 + "\n" + min_heat + "\n" + min_power + "\n" + min_spec_heat + "\n" + min_spec_power_we + "\n" + min_spec_power_m2);
-        statsViz.sendCommand(initComm, 6155);
+        // TODO: only do this if statsViz is running!
+        statsViz.send_stats();
+        statsViz.sendInitialString();
 
         // ---------------------- CO2-series animation -------------------------
         if (timeSeries.running)

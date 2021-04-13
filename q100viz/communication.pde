@@ -91,7 +91,9 @@ void send_stats()
                 stats += "\n heat_mean\t" + heat_mean + "\n power_mean \t" + power_mean + "\n spec_heat_mean \t" + spec_heat_mean + "\n spec_power_mean_we \t" + spec_power_mean_we;
                 stats += "\n spec_power_mean_m2 \t" + spec_power_mean_m2; //TODO do not display NaNs
         }
-        println(stats); // TODO: q100_viz sends "null" before first typologiezone was selected via keyboard...
+        if (stats != null)
+          println_log(stats, 3); // TODO: q100_viz sends "null" before first typologiezone was selected via keyboard...
+        else println_log("no Typologiezone selected. Press 1-8 to select one and print stats.", 3);
         sendCommand(stats, 6155);
 
 

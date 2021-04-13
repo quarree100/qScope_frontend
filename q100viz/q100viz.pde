@@ -158,7 +158,8 @@ void setup() {
 long last_JSON_sent = 0;
 void draw() {
 
-        background(120,200,150);
+        // background(120,200,150);
+        background(0);
 
         grid.check_incoming_message();
 
@@ -282,12 +283,12 @@ void draw() {
                      + "selected ID: " + selectedID + "\t (press +/-) to change\n"
                      + "'v' \t ‒ \t higher verbose detail\n"
                      + "'V' \t ‒ \t less verbose output\n"
-                     + "global verbose level: " + globalVerboseLevel + " \t(press v/V to change)\n"
+                     + "global verbose level: " + globalVerboseLevel + " \t(press v/V to change)\n" +
+                     "\ncycle " + timeSeries.cycle
                      ,width, height-200);
         }
         textAlign(LEFT,BOTTOM);
         strokeWeight(2);
-        text("cycle " + timeSeries.cycle, 1300, 150);
 
         ////////////////////////////////////////////////////////////////////////
         /////////////////////////////// TIDYING UP /////////////////////////////

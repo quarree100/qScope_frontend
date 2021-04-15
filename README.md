@@ -21,3 +21,19 @@ project
 └───libraries.zip
 	contains all relevant processing libraries
 ```
+
+## q100viz_p5
+
+*q100viz_p5* is a Python port of the *q100viz* Processing sketch. 
+
+Before you can run the sketch, you need to install required packages:
+```
+pip install -r requirements.txt
+```
+
+Geodata sources are expected to be found in the `data` directory. Create it (if it does not exist) and make the basemap image and shapefiles available.
+
+Change to the `q100vix_p5` directory and run the sketch:
+```
+python q100viz.py
+```

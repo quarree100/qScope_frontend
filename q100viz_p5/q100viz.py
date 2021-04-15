@@ -1,5 +1,6 @@
 import pathlib
 import p5
+import random
 
 import gis
 import keystone
@@ -33,7 +34,7 @@ viewport_extent = (1013102, 7206177, 1013936, 7207365)
 # bounding box (EPSG:3857) of the aerial photo
 basemap_extent = (1012695, 7205976, 1014205, 7207571)
 
-# GIS layers
+# GIS layers (as GeoDataFrame)
 typologiezonen = None
 buildings = None
 waermezentrale = None
@@ -59,17 +60,18 @@ def setup():
     # load basemap
     _gis.load_basemap(BASEMAP_FILE, basemap_extent)
 
-    # load shapefiles
+    # load shapefiles into data frames
     buildings = gis.read_shapefile(BUILDINGS_FILE)
-    print(buildings.head())
-    
     typologiezonen = gis.read_shapefile(TYPOLOGIEZONEN_FILE)
-    print(typologiezonen.head())
-
     nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
-    print(nahwaermenetz.head())
-
     waermezentrale = gis.read_shapefile(WAERMESPEICHER_FILE, 'Wärmespeicher').append(gis.read_shapefile(HEIZZENTRALE_FILE))
+
+    # insert some random values
+    buildings['co2'] = [random.random() for row in buildings.values]
+
+    print(buildings.head())
+    print(typologiezonen.head())
+    print(nahwaermenetz.head())
     print(waermezentrale.head())
 
 

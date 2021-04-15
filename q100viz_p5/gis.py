@@ -47,13 +47,15 @@ class GIS:
 
         p5.pop_style()
 
-    def draw_polygon_layer(self, df, stroke, stroke_weight, fill):
+    def draw_polygon_layer(self, df, stroke, stroke_weight, fill, lerp_target=None, lerp_attr=None):
         p5.push_style()
         p5.stroke(stroke)
         p5.stroke_weight(stroke_weight)
-        p5.fill(fill)
 
         for polygon in df.to_dict('records'):
+            fill_color = fill.lerp(lerp_target, polygon[lerp_attr]) if lerp_target else fill
+            p5.fill(fill_color)
+
             p5.begin_shape()
             for coord in polygon['geometry'].exterior.coords:
                 p5.vertex(*self.convert_to_xy(*coord))

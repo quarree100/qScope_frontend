@@ -87,7 +87,7 @@ def draw():
         _gis.draw_basemap()
 
     if show_shapes:
-        _gis.draw_polygon_layer(buildings, 0, 1, p5.Color(96, 205, 21))
+        _gis.draw_polygon_layer(buildings, 0, 1, p5.Color(96, 205, 21), p5.Color(213, 50, 21), 'co2')
         _gis.draw_polygon_layer(typologiezonen, 0, 1, p5.Color(123, 201, 230, 50))
         _gis.draw_linestring_layer(nahwaermenetz, p5.Color(217, 9, 9), 3)
         _gis.draw_polygon_layer(waermezentrale, 0, 1, p5.Color(252, 137, 0))

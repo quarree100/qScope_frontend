@@ -3,7 +3,7 @@ import p5
 import random
 
 import gis
-import keystone
+import grid
 
 path = pathlib.Path()
 
@@ -17,8 +17,6 @@ TYPOLOGIEZONEN_FILE = path.joinpath("../data/Shapefiles/Typologiezonen.shp")
 
 # size (should match the resolution of the projector)
 canvas_size = (1920, 1080)
-
-surface = None
 
 # mapping from screen coordinates to corner points of the area of interest
 topleft = [1920, 60]
@@ -40,6 +38,8 @@ buildings = None
 waermezentrale = None
 nahwaermenetz = None
 
+_grid = None
+
 # other configuration values
 show_basemap = True
 show_shapes = True
@@ -47,15 +47,14 @@ show_shapes = True
 
 def setup():
     global _gis
-    global surface
+    global _grid
     global typologiezonen, buildings, waermezentrale, nahwaermenetz
 
-    _gis = gis.GIS(viewport_extent)
-
+    # initialize canvas before everything else, to make sure the actual width and height values are used
     p5.size(*canvas_size)
 
-    # create the corner pin surface for projection
-    surface = keystone.CornerPinSurface([topleft, topright, bottomright, bottomleft])
+    # ======= GIS setup =======
+    _gis = gis.GIS(viewport_extent, [topleft, topright, bottomright, bottomleft])
 
     # load basemap
     _gis.load_basemap(BASEMAP_FILE, basemap_extent)
@@ -74,29 +73,47 @@ def setup():
     print(nahwaermenetz.head())
     print(waermezentrale.head())
 
+    # ======= Grid setup =======
+    _grid = grid.Grid((11, 11), [[80, 60], [1080, 60], [1080, 1060], [80, 1060]])
+
 
 def draw():
     p5.background(0)
 
-    # apply the transformation matrix
-    mat = surface.get_transform_mat()
-    p5.apply_matrix(mat)
+    with p5.push_matrix():
+        # apply the transformation matrix
+        mat = _gis.surface.get_transform_mat()
+        p5.apply_matrix(mat)
 
-    # GIS shapes and objects
-    if show_basemap:
-        _gis.draw_basemap()
+        # GIS shapes and objects
+        if show_basemap:
+            _gis.draw_basemap()
 
-    if show_shapes:
-        _gis.draw_polygon_layer(buildings, 0, 1, p5.Color(96, 205, 21), p5.Color(213, 50, 21), 'co2')
-        _gis.draw_polygon_layer(typologiezonen, 0, 1, p5.Color(123, 201, 230, 50))
-        _gis.draw_linestring_layer(nahwaermenetz, p5.Color(217, 9, 9), 3)
-        _gis.draw_polygon_layer(waermezentrale, 0, 1, p5.Color(252, 137, 0))
+        if show_shapes:
+            _gis.draw_polygon_layer(buildings, 0, 1, p5.Color(96, 205, 21), p5.Color(213, 50, 21), 'co2')
+            _gis.draw_polygon_layer(typologiezonen, 0, 1, p5.Color(123, 201, 230, 50))
+            _gis.draw_linestring_layer(nahwaermenetz, p5.Color(217, 9, 9), 3)
+            _gis.draw_polygon_layer(waermezentrale, 0, 1, p5.Color(252, 137, 0))
 
-    # reference frame
-    p5.stroke(255, 255, 255)
-    p5.stroke_weight(2)
-    p5.no_fill()
-    p5.rect(0, 0, 1920, 1080)
+        # reference frame
+        p5.stroke(255, 255, 0)
+        p5.stroke_weight(2)
+        p5.no_fill()
+        p5.rect(0, 0, width, height)
+
+    with p5.push_matrix():
+        # apply the transformation matrix
+        mat = _grid.surface.get_transform_mat()
+        p5.apply_matrix(mat)
+
+        # grid
+        _grid.draw(p5.Color(255, 255, 255), 1, p5.Color(0, 0, 0, 0))
+
+        # reference frame
+        p5.stroke(0, 0, 255)
+        p5.stroke_weight(2)
+        p5.no_fill()
+        p5.rect(0, 0, width, height)
 
 
 if __name__ == '__main__':

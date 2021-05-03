@@ -3,21 +3,20 @@ import p5
 
 
 class GIS:
-    def __init__(self, canvas_size, viewport_extent):
-        width, height = canvas_size
+    def __init__(self, viewport_extent):
         self.xmin, self.ymin, self.xmax, self.ymax = viewport_extent
 
         self.width = abs(self.xmax - self.xmin)
         self.height = abs(self.ymax - self.ymin)
-
-        self.x_scale = width / self.width
-        self.y_scale = height / self.height
 
     def load_basemap(self, file, extent):
         self.basemap = p5.load_image(file)
         self.basemap_extent = extent
         
     def convert_to_xy(self, x, y):
+        self.x_scale = width / self.width
+        self.y_scale = height / self.height
+
         new_x = (int(x) - self.xmin) * self.x_scale
         new_y = height - (int(y) - self.ymin) * self.y_scale
 
@@ -25,6 +24,9 @@ class GIS:
 
     def draw_basemap(self):
         xmin, ymin, xmax, ymax = self.basemap_extent
+
+        self.x_scale = width / self.width
+        self.y_scale = height / self.height
 
         img_x = int((xmin - self.xmin) * self.x_scale)
         img_y = int((self.ymax - ymax) * self.y_scale)

@@ -50,7 +50,7 @@ def setup():
     global surface
     global typologiezonen, buildings, waermezentrale, nahwaermenetz
 
-    _gis = gis.GIS(canvas_size, viewport_extent)
+    _gis = gis.GIS(viewport_extent)
 
     p5.size(*canvas_size)
 

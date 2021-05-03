@@ -1,9 +1,11 @@
+import multiprocessing
 import pathlib
 import p5
 import random
 
 import gis
 import grid
+import udp
 
 path = pathlib.Path()
 
@@ -117,4 +119,12 @@ def draw():
 
 
 if __name__ == '__main__':
-    p5.run(frame_rate=1)
+    try:
+        _udp = udp.UDPServer("127.0.0.1", 5000, 1024)
+
+        udp_p = multiprocessing.Process(target=_udp.listen, daemon=True)
+        udp_p.start()
+
+        p5.run(frame_rate=1)
+    except KeyboardInterrupt:
+        exit()

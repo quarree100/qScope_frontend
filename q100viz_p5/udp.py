@@ -7,7 +7,7 @@ class UDPServer:
         self.port = port
         self.buffer_size = buffer_size
 
-    def listen(self):
+    def listen(self, grid):
         try:
             # Create a datagram socket
             udp_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
@@ -19,9 +19,9 @@ class UDPServer:
 
             # Listen for incoming datagrams
             while True:
-                message, address = udp_socket.recvfrom(self.buffer_size)
+                message, _ = udp_socket.recvfrom(self.buffer_size)
 
-                print("Message from Client: {}".format(message))
-                print("Client IP Address: {}".format(address))
+                grid.read_message(message.decode())
+
         except KeyboardInterrupt:
             exit()

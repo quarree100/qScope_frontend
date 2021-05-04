@@ -114,7 +114,7 @@ def draw():
         p5.apply_matrix(mat)
 
         # grid
-        _grid.draw(p5.Color(255, 255, 255), 1, p5.Color(0, 0, 0, 0))
+        _grid.draw(p5.Color(255, 255, 255), 1)
 
         # reference frame
         p5.stroke(0, 0, 255)

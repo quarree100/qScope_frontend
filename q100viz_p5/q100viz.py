@@ -1,7 +1,7 @@
-import multiprocessing
 import pathlib
 import p5
 import random
+import threading
 
 import gis
 import grid
@@ -78,6 +78,11 @@ def setup():
     # ======= Grid setup =======
     _grid = grid.Grid((11, 11), [[80, 60], [1080, 60], [1080, 1060], [80, 1060]])
 
+    _udp = udp.UDPServer("127.0.0.1", 5000, 1024)
+
+    udp_p = threading.Thread(target=_udp.listen, args=(_grid,), daemon=True)
+    udp_p.start()
+
 
 def draw():
     p5.background(0)
@@ -120,11 +125,6 @@ def draw():
 
 if __name__ == '__main__':
     try:
-        _udp = udp.UDPServer("127.0.0.1", 5000, 1024)
-
-        udp_p = multiprocessing.Process(target=_udp.listen, daemon=True)
-        udp_p.start()
-
         p5.run(frame_rate=1)
     except KeyboardInterrupt:
         exit()

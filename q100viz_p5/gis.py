@@ -19,24 +19,18 @@ class GIS:
         self.basemap_extent = extent
 
     def convert_to_xy(self, x, y):
-        self.x_scale = width / self.width
-        self.y_scale = height / self.height
-
-        new_x = (int(x) - self.xmin) * self.x_scale
-        new_y = height - (int(y) - self.ymin) * self.y_scale
+        new_x = (int(x) - self.xmin) * width / self.width
+        new_y = height - (int(y) - self.ymin) * height / self.height
 
         return (new_x, new_y)
 
     def draw_basemap(self):
         xmin, ymin, xmax, ymax = self.basemap_extent
 
-        self.x_scale = width / self.width
-        self.y_scale = height / self.height
-
-        img_x = int((xmin - self.xmin) * self.x_scale)
-        img_y = int((self.ymax - ymax) * self.y_scale)
-        img_w = int(abs(xmax - xmin) * self.x_scale)
-        img_h = int(abs(ymax - ymin) * self.y_scale)
+        img_x = int((xmin - self.xmin) * width / self.width)
+        img_y = int((self.ymax - ymax) * height / self.height)
+        img_w = int(abs(xmax - xmin) * width / self.width)
+        img_h = int(abs(ymax - ymin) * height / self.height)
 
         p5.image(self.basemap, img_x, img_y, img_w, img_h)
 

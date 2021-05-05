@@ -30,15 +30,10 @@ class Grid:
                 for y, row in enumerate(self.grid):
                     for x, cell in enumerate(row):
                         p5.stroke(stroke)
-                        p5.stroke_weight(stroke_weight)
+                        p5.stroke_weight(stroke_weight * (4 if cell.selected else 1))
                         p5.fill(p5.Color(*colors[cell.id]) if cell.id > -1 else p5.Color(0, 0, 0, 0))
-                        p5.begin_shape()
-                        for _x, _y in [[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]:
-                            p5.vertex(
-                                _x * width / self.x_size,
-                                _y * height / self.y_size
-                            )
-                        p5.end_shape()
+                        p5.rect(x * width / self.x_size, y * height / self.y_size,
+                                1 * width / self.x_size, 1 * height / self.y_size)
             except TypeError:
                 pass
 
@@ -69,6 +64,17 @@ class Grid:
                 print()
             print()
         except TypeError:
+            pass
+
+    def mouse_clicked(self, event):
+        # reproject coordinates onto unit square ([0, 0] ... [1, 1])
+        point = self.surface.inverse_transform_unit([[event.x, event.y]])[0]
+
+        # update cell at cursor position
+        try:
+            cell = self.grid[int(point[1] * self.y_size)][int(point[0] * self.x_size)]
+            cell.selected = not cell.selected
+        except IndexError:
             pass
 
 

@@ -76,7 +76,7 @@ def setup():
     print(waermezentrale.head())
 
     # ======= Grid setup =======
-    _grid = grid.Grid((11, 11), [[80, 60], [1080, 60], [1080, 1060], [80, 1060]])
+    _grid = grid.Grid((11, 11), [[80, 80], [1080, 80], [1080, 1080], [80, 1080]])
 
     _udp = udp.UDPServer("127.0.0.1", 5000, 1024)
 
@@ -121,6 +121,10 @@ def draw():
         p5.stroke_weight(2)
         p5.no_fill()
         p5.rect(0, 0, width, height)
+
+
+def mouse_clicked(event):
+    _grid.mouse_clicked(event)
 
 
 if __name__ == '__main__':

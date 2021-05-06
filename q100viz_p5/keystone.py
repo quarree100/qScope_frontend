@@ -3,10 +3,10 @@ import numpy
 
 
 class CornerPinSurface:
-    def __init__(self, points):
-        """Load control points and calculate the transformation matrix."""
-        src = numpy.float32([[0, 0], [width, 0], [width, height], [0, height]])
-        dst = numpy.float32(points)
+    def __init__(self, src_points, dst_points):
+        """Calculate the transformation matrixes from source and destination points."""
+        src = numpy.float32(src_points)
+        dst = numpy.float32(dst_points)
 
         self.transform_mat = cv2.getPerspectiveTransform(src, dst)
         self.inverse_transform_mat = numpy.linalg.inv(self.transform_mat)
@@ -21,12 +21,12 @@ class CornerPinSurface:
 
     def transform(self, points):
         """Transform a list of surface points onto the canvas."""
-        return cv2.perspectiveTransform(numpy.float32([points]), self.transform_mat)[0]
+        src = numpy.float32([points])
+        dst = cv2.perspectiveTransform(src, self.transform_mat)
+        return dst[0].tolist()
 
     def inverse_transform(self, points):
         """Transform a list of canvas points onto the surface."""
-        return cv2.perspectiveTransform(numpy.float32([points]), self.inverse_transform_mat)[0]
-
-    def inverse_transform_unit(self, points):
-        """Transform a list of canvas points onto the normalized surface."""
-        return [[x / width, y / height] for x, y in self.inverse_transform(points)]
+        src = numpy.float32([points])
+        dst = cv2.perspectiveTransform(src, self.inverse_transform_mat)
+        return dst[0].tolist()

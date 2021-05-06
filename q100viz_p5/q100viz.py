@@ -103,6 +103,19 @@ def draw():
             _gis.draw_linestring_layer(nahwaermenetz, p5.Color(217, 9, 9), 3)
             _gis.draw_polygon_layer(waermezentrale, 0, 1, p5.Color(252, 137, 0))
 
+            # draw buildings intersecting with selected grid cells
+            for y, row in enumerate(_grid.grid):
+                for x, cell in enumerate(row):
+                    if cell.selected:
+                        # get viewport coordinates of the cell rectangle
+                        cell_vertices = _grid.surface.transform(
+                            [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
+                        )
+
+                        # draw overlapping buildings
+                        selection = _gis.get_intersecting_features(buildings, cell_vertices)
+                        _gis.draw_polygon_layer(selection, p5.Color(255, 0, 127), 2, None)
+
         # grid
         _grid.draw(p5.Color(255, 255, 255), 1)
 

@@ -24,11 +24,11 @@ class GIS:
         self.basemap_w = xmax - xmin
         self.basemap_h = ymax - ymin
 
-    def get_intersecting_features(self, df, v_polygon):
+    def get_intersection_indexer(self, df, v_polygon):
         polygon = self.surface.inverse_transform(v_polygon)
         shape = shapely.geometry.Polygon(polygon)
 
-        return df[df.intersects(shape)]
+        return df.intersects(shape)
 
     def draw_basemap(self):
         with p5.push_matrix():

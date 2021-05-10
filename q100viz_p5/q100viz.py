@@ -6,6 +6,7 @@ import threading
 import gis
 import grid
 import keystone
+import stats
 import udp
 
 path = pathlib.Path()
@@ -38,6 +39,12 @@ buildings = None
 waermezentrale = None
 nahwaermenetz = None
 
+# UDP config
+grid_udp = ('localhost', 5000)
+stats_udp = ('localhost', 6155)
+
+stats_viz = None
+
 # other configuration values
 show_basemap = True
 show_shapes = True
@@ -48,6 +55,7 @@ def setup():
     global _gis
     global _grid
     global typologiezonen, buildings, waermezentrale, nahwaermenetz
+    global stats_viz
 
     # initialize canvas before everything else, to make sure the width and height values are available
     p5.size(*canvas_size)
@@ -70,21 +78,47 @@ def setup():
     nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
     waermezentrale = gis.read_shapefile(WAERMESPEICHER_FILE, 'Wärmespeicher').append(gis.read_shapefile(HEIZZENTRALE_FILE))
 
+    # ======= Grid setup =======
+    _grid = grid.Grid(150, 50, 1800, 750, 11, 11)
+
+    # ======= UDP server =======
+    udp_server = udp.UDPServer(*grid_udp, 1024)
+    udp_thread = threading.Thread(target=udp_server.listen, args=(_grid,), daemon=True)
+    udp_thread.start()
+
+    # ======= stats viz communication =======
+    stats_viz = stats.Stats(*stats_udp)
+
     # insert some random values
     buildings['co2'] = [random.random() for row in buildings.values]
+    buildings['heat_consumption_2017'] = [100 * random.random() for row in buildings.values]
+    buildings['e_power_consumption_2017'] = [100 * random.random() for row in buildings.values]
+    buildings['specific_heat_consumption'] = [100 * random.random() for row in buildings.values]
+    buildings['specific_power_consumption_we'] = [100 * random.random() for row in buildings.values]
+    buildings['specific_power_consumption_m2'] = [100 * random.random() for row in buildings.values]
 
     print(buildings.head())
     print(typologiezonen.head())
     print(nahwaermenetz.head())
     print(waermezentrale.head())
 
-    # ======= Grid setup =======
-    _grid = grid.Grid(150, 50, 1800, 750, 11, 11)
+    # send min/max values to stats viz
+    bmax = buildings.max()
+    bmin = buildings.min()
 
-    _udp = udp.UDPServer("127.0.0.1", 5000, 1024)
-
-    udp_p = threading.Thread(target=_udp.listen, args=(_grid,), daemon=True)
-    udp_p.start()
+    stats_viz.send_max_values([
+        bmax['heat_consumption_2017'],
+        bmax['e_power_consumption_2017'],
+        bmax['specific_heat_consumption'],
+        bmax['specific_power_consumption_we'],
+        bmax['specific_power_consumption_m2']
+    ], [
+        bmin['heat_consumption_2017'],
+        bmin['e_power_consumption_2017'],
+        bmin['specific_heat_consumption'],
+        bmin['specific_power_consumption_we'],
+        bmin['specific_power_consumption_m2']
+    ])
 
 
 def draw():

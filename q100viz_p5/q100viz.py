@@ -153,11 +153,14 @@ def draw():
         # grid
         _grid.draw(p5.Color(255, 255, 255), 1)
 
-        # reference frame
-        p5.stroke(255, 255, 0)
-        p5.stroke_weight(2)
-        p5.no_fill()
-        p5.rect(0, 0, width, height)
+        # mask
+        border = 1000
+        with p5.push_style():
+            p5.fill(p5.Color(0, 0, 0))
+            p5.rect(-border, -border, width + 2 * border, border)
+            p5.rect(-border, height, width + 2 * border, height + border)
+            p5.rect(-border, -border, border, height + 2 * border)
+            p5.rect(width, -border, width + border, height + 2 * border)
 
 
 def mouse_pressed(event):

@@ -1,5 +1,5 @@
-import pathlib
 import p5
+import pathlib
 import random
 import threading
 
@@ -18,6 +18,8 @@ WAERMESPEICHER_FILE = path.joinpath("../data/Shapefiles/Wärmespeicher.shp")
 HEIZZENTRALE_FILE = path.joinpath("../data/Shapefiles/Heizzentrale.shp")
 NAHWAERMENETZ_FILE = path.joinpath("../data/Shapefiles/Nahwärmenetz.shp")
 TYPOLOGIEZONEN_FILE = path.joinpath("../data/Shapefiles/Typologiezonen.shp")
+
+SAVED_KEYSTONE_FILE = 'keystone.save'
 
 # canvas
 canvas_size = (1920, 1080) # should match the resolution of the projector
@@ -63,11 +65,20 @@ def setup():
     p5.size(*canvas_size)
 
     # calculate the display projection matrix (viewport -> canvas)
-    # note: rotation may be applied
-    canvas_surface = keystone.CornerPinSurface(
-        [[0, 0], [0, height], [width, height], [width, 0]],
-        [[150, 1050], [1750, 1050], [1850, 50], [50, 50]]
-    )
+    # if a previous surface has been saved, restore it; otherwise use fallback values
+    try:
+        canvas_surface = keystone.CornerPinSurface(
+            [[0, 0], [0, height], [width, height], [width, 0]],
+            None
+        )
+        canvas_surface.load(SAVED_KEYSTONE_FILE)
+    except Exception:
+        print("Failed to open keystone file")
+
+        canvas_surface = keystone.CornerPinSurface(
+            [[0, 0], [0, height], [width, height], [width, 0]],
+            [[150, 1050], [1750, 1050], [1850, 50], [50, 50]]
+        )
 
     # ======= GIS setup =======
     _gis = gis.GIS(**viewport_extent)
@@ -202,6 +213,8 @@ def key_typed(event):
         show_basemap = not show_basemap
     elif event.key.name == 'G':
         show_grid = not show_grid
+    elif event.key.name == 'S':
+        canvas_surface.save(SAVED_KEYSTONE_FILE)
 
 
 if __name__ == '__main__':

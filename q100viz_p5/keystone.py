@@ -1,5 +1,6 @@
 import cv2
 import numpy
+import pickle
 
 
 class CornerPinSurface:
@@ -7,7 +8,8 @@ class CornerPinSurface:
         self.src_points = src_points
         self.dst_points = dst_points
 
-        self.calculate()
+        if self.src_points and self.dst_points:
+            self.calculate()
 
     def calculate(self):
         """Calculate the transformation matrixes from source and destination points."""
@@ -55,3 +57,13 @@ class CornerPinSurface:
         self.active_corner[0] = mouse_x
         self.active_corner[1] = mouse_y
         self.calculate()
+
+    def load(self, filepath):
+        with open(filepath, 'rb') as reader:
+            self.dst_points = pickle.load(reader)
+
+        self.calculate()
+
+    def save(self, filepath):
+        with open(filepath, 'wb') as writer:
+            pickle.dump(self.dst_points, writer)

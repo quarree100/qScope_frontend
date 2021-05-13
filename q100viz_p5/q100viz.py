@@ -22,6 +22,7 @@ TYPOLOGIEZONEN_FILE = path.joinpath("../data/Shapefiles/Typologiezonen.shp")
 # canvas
 canvas_size = (1920, 1080) # should match the resolution of the projector
 canvas_surface = None
+corner_handle = None
 
 # projected surfaces
 _gis = None
@@ -123,6 +124,8 @@ def setup():
 
 
 def draw():
+    global corner_handle
+
     p5.background(0)
 
     with p5.push_matrix():
@@ -167,18 +170,31 @@ def draw():
             p5.rect(-border, -border, border, height + 2 * border)
             p5.rect(width, -border, width + border, height + 2 * border)
 
+    # get the drag handle (if the mouse hovers over it)
+    corner_handle = canvas_surface.get_corner_handle(20)
+
+    if corner_handle:
+        with p5.push_style():
+            p5.no_stroke()
+            p5.fill(p5.Color(255, 255, 255, 200))
+            p5.circle(list(corner_handle)[0], list(corner_handle)[1], 20)
+
 
 # Mouse event handlers
-
 def mouse_pressed(event):
     # get viewport coordinate
-    v_coord = canvas_surface.inverse_transform([[event.x, event.y]])[0]
+    mouse_position = canvas_surface.inverse_transform([[event.x, event.y]])[0]
 
-    _grid.mouse_pressed(v_coord)
+    _grid.mouse_pressed(mouse_position)
+
+
+def mouse_dragged(event):
+    # update corner pin surface while dragging
+    if corner_handle:
+        canvas_surface.update()
 
 
 # Keyboard event handlers
-
 def key_typed(event):
     global show_basemap, show_grid
 
@@ -190,6 +206,6 @@ def key_typed(event):
 
 if __name__ == '__main__':
     try:
-        p5.run(frame_rate=1)
+        p5.run(frame_rate=10)
     except KeyboardInterrupt:
         exit()

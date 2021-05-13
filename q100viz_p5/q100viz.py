@@ -48,6 +48,7 @@ stats_viz = None
 # other configuration values
 show_basemap = True
 show_shapes = True
+show_grid = True
 
 
 def setup():
@@ -154,7 +155,8 @@ def draw():
             _gis.draw_polygon_layer(buildings[buildings.selected], p5.Color(255, 0, 127), 2, None)
 
         # grid
-        _grid.draw(p5.Color(255, 255, 255), 1)
+        if show_grid:
+            _grid.draw(p5.Color(255, 255, 255), 1)
 
         # mask
         border = 1000
@@ -166,11 +168,24 @@ def draw():
             p5.rect(width, -border, width + border, height + 2 * border)
 
 
+# Mouse event handlers
+
 def mouse_pressed(event):
     # get viewport coordinate
     v_coord = canvas_surface.inverse_transform([[event.x, event.y]])[0]
 
     _grid.mouse_pressed(v_coord)
+
+
+# Keyboard event handlers
+
+def key_typed(event):
+    global show_basemap, show_grid
+
+    if event.key.name == 'M':
+        show_basemap = not show_basemap
+    elif event.key.name == 'G':
+        show_grid = not show_grid
 
 
 if __name__ == '__main__':

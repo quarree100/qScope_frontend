@@ -77,7 +77,7 @@ def setup():
 
         canvas_surface = keystone.CornerPinSurface(
             [[0, 0], [0, height], [width, height], [width, 0]],
-            [[150, 1050], [1750, 1050], [1850, 50], [50, 50]]
+            [[80, 1035], [1840, 1035], [1840, 45], [80, 45]]
         )
 
     # ======= GIS setup =======

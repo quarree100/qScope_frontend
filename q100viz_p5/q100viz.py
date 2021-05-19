@@ -87,7 +87,7 @@ def setup():
     _gis.load_basemap(BASEMAP_FILE, **basemap_extent)
 
     # load shapefiles into data frames
-    buildings = gis.read_shapefile(BUILDINGS_FILE, columns={'osm_id': 'int64'})
+    buildings = gis.read_shapefile(BUILDINGS_FILE, columns={'osm_id': 'int64'}).set_index('osm_id')
     typologiezonen = gis.read_shapefile(TYPOLOGIEZONEN_FILE)
     nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
     waermezentrale = gis.read_shapefile(WAERMESPEICHER_FILE, 'Wärmespeicher').append(gis.read_shapefile(HEIZZENTRALE_FILE))
@@ -103,20 +103,23 @@ def setup():
     # ======= stats viz communication =======
     _stats = stats.Stats(*stats_udp)
 
-    _stats.read_csv(BUILDINGS_STATS_FILE, buildings, {
-        'Straße': str,
-        'Hausnr.': str,
-        'Art': str,
-        'Baujahr': 'int16'
+    buildings = _stats.append_csv(BUILDINGS_STATS_FILE, buildings, {
+        'Straße': 'object',
+        'Hausnr.': 'object',
+        'Art': 'object',
+        'Baujahr': 'Int16', # nullable int
+        'Typologie IWU': 'object',
+        'WE': 'Int16', # nullable int
+        'Gfl. [m²]': 'float64',
+        'Sanierung SIZ [u/t/s]': 'object',
+        'Energieträger': 'object',
+        'Wärmeverbrauch 2017 [kWh]': 'float64',
+        'Stromverbrauch 2017 [kWh]': 'float64',
+        'Anschluss': 'bool'
     })
 
     # insert some random values
     buildings['co2'] = [random.random() for row in buildings.values]
-    buildings['heat_consumption_2017'] = [100 * random.random() for row in buildings.values]
-    buildings['e_power_consumption_2017'] = [100 * random.random() for row in buildings.values]
-    buildings['specific_heat_consumption'] = [100 * random.random() for row in buildings.values]
-    buildings['specific_power_consumption_we'] = [100 * random.random() for row in buildings.values]
-    buildings['specific_power_consumption_m2'] = [100 * random.random() for row in buildings.values]
 
     print(buildings.head())
     print(typologiezonen.head())
@@ -128,17 +131,9 @@ def setup():
     bmin = buildings.min()
 
     _stats.send_max_values([
-        bmax['heat_consumption_2017'],
-        bmax['e_power_consumption_2017'],
-        bmax['specific_heat_consumption'],
-        bmax['specific_power_consumption_we'],
-        bmax['specific_power_consumption_m2']
+        bmax['co2']
     ], [
-        bmin['heat_consumption_2017'],
-        bmin['e_power_consumption_2017'],
-        bmin['specific_heat_consumption'],
-        bmin['specific_power_consumption_we'],
-        bmin['specific_power_consumption_m2']
+        bmin['co2']
     ])
 
 

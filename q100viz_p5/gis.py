@@ -73,5 +73,9 @@ class GIS:
                         p5.vertex(*coord)
                     p5.end_shape()
 
-def read_shapefile(file, layer=None):
-    return geopandas.read_file(file, layer=layer).to_crs(crs=crs)
+def read_shapefile(file, layer=None, columns=None):
+    df = geopandas.read_file(file, layer=layer).to_crs(crs=crs)
+    if columns:
+        df = df.astype(columns)
+        return df.loc[:, ['geometry', *columns.keys()]]
+    return df

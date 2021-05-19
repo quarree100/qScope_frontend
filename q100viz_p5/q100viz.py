@@ -14,6 +14,7 @@ path = pathlib.Path()
 # geodata sources
 BASEMAP_FILE = path.joinpath("../data/Layer/180111-QUARREE100-RK_modifiziert_flippedY_smaller.tga")
 BUILDINGS_FILE = path.joinpath("../data/Shapefiles/osm_heide_buildings.shp")
+BUILDINGS_STATS_FILE = "../data/Gebaeudeliste_import_truncated.csv"
 WAERMESPEICHER_FILE = path.joinpath("../data/Shapefiles/Wärmespeicher.shp")
 HEIZZENTRALE_FILE = path.joinpath("../data/Shapefiles/Heizzentrale.shp")
 NAHWAERMENETZ_FILE = path.joinpath("../data/Shapefiles/Nahwärmenetz.shp")
@@ -46,7 +47,7 @@ nahwaermenetz = None
 grid_udp = ('localhost', 5000)
 stats_udp = ('localhost', 6155)
 
-stats_viz = None
+_stats = None
 
 # other configuration values
 show_basemap = True
@@ -59,7 +60,7 @@ def setup():
     global _gis
     global _grid
     global typologiezonen, buildings, waermezentrale, nahwaermenetz
-    global stats_viz
+    global _stats
 
     # initialize canvas before everything else, to make sure the width and height values are available
     p5.size(*canvas_size)
@@ -86,7 +87,7 @@ def setup():
     _gis.load_basemap(BASEMAP_FILE, **basemap_extent)
 
     # load shapefiles into data frames
-    buildings = gis.read_shapefile(BUILDINGS_FILE)
+    buildings = gis.read_shapefile(BUILDINGS_FILE, columns={'osm_id': 'int64'})
     typologiezonen = gis.read_shapefile(TYPOLOGIEZONEN_FILE)
     nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
     waermezentrale = gis.read_shapefile(WAERMESPEICHER_FILE, 'Wärmespeicher').append(gis.read_shapefile(HEIZZENTRALE_FILE))
@@ -100,7 +101,14 @@ def setup():
     udp_thread.start()
 
     # ======= stats viz communication =======
-    stats_viz = stats.Stats(*stats_udp)
+    _stats = stats.Stats(*stats_udp)
+
+    _stats.read_csv(BUILDINGS_STATS_FILE, buildings, {
+        'Straße': str,
+        'Hausnr.': str,
+        'Art': str,
+        'Baujahr': 'int16'
+    })
 
     # insert some random values
     buildings['co2'] = [random.random() for row in buildings.values]
@@ -119,7 +127,7 @@ def setup():
     bmax = buildings.max()
     bmin = buildings.min()
 
-    stats_viz.send_max_values([
+    _stats.send_max_values([
         bmax['heat_consumption_2017'],
         bmax['e_power_consumption_2017'],
         bmax['specific_heat_consumption'],

@@ -1,5 +1,6 @@
 import numpy
 import geopandas
+import shapely
 import pygame
 
 import keystone
@@ -15,6 +16,12 @@ class GIS:
         self.surface.src_points = src_points
         self.surface.dst_points = dst_points
         self.surface.calculate()
+
+    def get_intersection_indexer(self, df, v_polygon):
+        polygon = self.surface.inverse_transform(v_polygon)
+        shape = shapely.geometry.Polygon(polygon)
+
+        return df.intersects(shape)
 
     def draw_linestring_layer(self, surface, df, color, stroke):
         for linestring in df.to_dict('records'):

@@ -63,7 +63,9 @@ _grid = grid.Grid(canvas_size, 50, 50, 1000, 1000, 11, 11)
 # Begin Game Loop
 while True:
     for event in pygame.event.get():
-        if event.type == QUIT:
+        if event.type == MOUSEBUTTONDOWN:
+            _grid.mouse_pressed()
+        elif event.type == QUIT:
             pygame.quit()
             sys.exit()
 
@@ -71,6 +73,22 @@ while True:
     _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
     _gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
     _gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'co2')
+
+    # find buildings intersecting with selected grid cells
+    buildings['selected'] = False
+
+    for y, row in enumerate(_grid.grid):
+        for x, cell in enumerate(row):
+            if cell.selected:
+                # get viewport coordinates of the cell rectangle
+                cell_vertices = _grid.surface.transform(
+                    [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
+                )
+                ii = _gis.get_intersection_indexer(buildings, cell_vertices)
+                buildings.loc[ii, 'selected'] = True
+
+    # highlight selected buildings
+    _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
 
     _grid.draw(canvas)
 

@@ -10,12 +10,18 @@ class Surface(pygame.Surface):
         dst = numpy.float32(self.dst_points)
 
         self.transform_mat = cv2.getPerspectiveTransform(src, dst)
-        # self.inverse_transform_mat = numpy.linalg.inv(self.transform_mat)
+        self.inverse_transform_mat = numpy.linalg.inv(self.transform_mat)
 
     def transform(self, points):
         """Transform a list of surface points onto the canvas."""
         src = numpy.float32([points])
         dst = cv2.perspectiveTransform(src, self.transform_mat)
+        return dst[0].tolist()
+
+    def inverse_transform(self, points):
+        """Transform a list of canvas points onto the surface."""
+        src = numpy.float32([points])
+        dst = cv2.perspectiveTransform(src, self.inverse_transform_mat)
         return dst[0].tolist()
 
     def warp_image(self, file, dsize):

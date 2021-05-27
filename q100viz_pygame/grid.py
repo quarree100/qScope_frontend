@@ -29,6 +29,8 @@ class Grid:
             (100, 255, 100)
         ]
 
+        self.surface.fill(0)
+
         for y, row in enumerate(self.grid):
             for x, cell in enumerate(row):
                 stroke = 4 if cell.selected else 1
@@ -37,6 +39,19 @@ class Grid:
                 p0, p1 = (x, y), (x + 1, y + 1)
                 p0_t, p1_t = self.surface.transform([p0, p1])
                 pygame.draw.rect(self.surface, fill, (*p0_t, p1_t[0] - p0_t[0], p1_t[1] - p0_t[1]), stroke)
+
+    def mouse_pressed(self):
+        pos = pygame.mouse.get_pos()
+
+        # get grid coordinate
+        coord = self.surface.inverse_transform([pos])[0]
+
+        # update cell at cursor position
+        try:
+            cell = self.grid[int(coord[1])][int(coord[0])]
+            cell.selected = not cell.selected
+        except IndexError:
+            pass
 
 
 class GridCell:

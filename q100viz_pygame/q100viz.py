@@ -15,7 +15,7 @@ NAHWAERMENETZ_FILE = "../data/Shapefiles/Nahwärmenetz.shp"
 TYPOLOGIEZONEN_FILE = "../data/Shapefiles/Typologiezonen.shp"
 
 # Set FPS
-FPS = 10
+FPS = 12
 
 # Set up colors
 BLUE = (0, 0, 255)
@@ -60,11 +60,19 @@ waermezentrale = gis.read_shapefile(WAERMESPEICHER_FILE, 'Wärmespeicher').appen
 # Initialize grid
 _grid = grid.Grid(canvas_size, 50, 50, 1000, 1000, 11, 11)
 
+show_basemap = True
+show_grid = True
+
 # Begin Game Loop
 while True:
     for event in pygame.event.get():
         if event.type == MOUSEBUTTONDOWN:
             _grid.mouse_pressed()
+        elif event.type == KEYDOWN:
+            if event.key == K_m:
+                show_basemap = event.key == K_m and not show_basemap
+            elif event.key == K_g:
+                show_grid = not show_grid
         elif event.type == QUIT:
             pygame.quit()
             sys.exit()
@@ -92,9 +100,13 @@ while True:
 
     _grid.draw(canvas)
 
-    canvas.blit(basemap.surface, (0, 0))
+    canvas.fill(0)
+
+    if show_basemap:
+        canvas.blit(basemap.surface, (0, 0))
     canvas.blit(_gis.surface, (0, 0))
-    canvas.blit(_grid.surface, (0, 0))
+    if show_grid:
+        canvas.blit(_grid.surface, (0, 0))
 
     pygame.display.update()
 

@@ -1,3 +1,4 @@
+import pickle
 import cv2
 import numpy
 import pygame
@@ -31,3 +32,11 @@ class Surface(pygame.Surface):
     def warp_image(self, file, dsize):
         img = cv2.imread(file)
         return cv2.warpPerspective(img, self.transform_mat, dsize)
+
+    def load(self, filepath):
+        with open(filepath, 'rb') as reader:
+            self.src_points, self.dst_points = pickle.load(reader)
+
+    def save(self, filepath):
+        with open(filepath, 'wb') as writer:
+            pickle.dump((self.src_points, self.dst_points), writer)

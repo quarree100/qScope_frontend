@@ -15,6 +15,8 @@ HEIZZENTRALE_FILE = "../data/Shapefiles/Heizzentrale.shp"
 NAHWAERMENETZ_FILE = "../data/Shapefiles/Nahwärmenetz.shp"
 TYPOLOGIEZONEN_FILE = "../data/Shapefiles/Typologiezonen.shp"
 
+SAVED_KEYSTONE_FILE = 'keystone.save'
+
 # Set FPS
 FPS = 12
 
@@ -38,8 +40,12 @@ pygame.display.set_caption("q100viz")
 # create the main surface, projected to corner points
 # the viewport's coordinates are between 0 and 100 on each axis
 viewport = keystone.Surface(canvas_size, pygame.SRCALPHA)
-viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
-viewport.dst_points = [[80, 45], [0, 1015], [1920, 1035], [1840, 45]]
+try:
+    viewport.load(SAVED_KEYSTONE_FILE)
+except Exception:
+    print("Failed to open keystone file")
+    viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
+    viewport.dst_points = [[80, 45], [80, 1035], [1840, 1035], [1840, 45]]
 viewport.calculate()
 
 # Initialize geographic viewport and basemap
@@ -52,6 +58,7 @@ basemap = gis.Basemap(canvas_size, BASEMAP_FILE,
                       # northwest          southwest           southeast           northeast
                       [[1012695, 7207571], [1012695, 7205976], [1014205, 7205976], [1014205, 7207571]],
                       _gis)
+basemap.warp(canvas_size)
 
 # Initialize grid, projected onto the viewport
 _grid = grid.Grid(canvas_size, 17, 11,
@@ -71,10 +78,14 @@ waermezentrale = gis.read_shapefile(WAERMESPEICHER_FILE, 'Wärmespeicher').appen
 
 # mask
 mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50], [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
-pygame.draw.polygon(viewport, BLACK, viewport.transform(mask_points))
+
+# calibration
+calibration_mode = False
+active_anchor = 0
 
 # Begin Game Loop
 while True:
+    # process mouse/keyboard events
     for event in pygame.event.get():
         if event.type == MOUSEBUTTONDOWN:
             _grid.mouse_pressed()
@@ -83,9 +94,32 @@ while True:
                 show_basemap = event.key == K_m and not show_basemap
             elif event.key == K_g:
                 show_grid = not show_grid
+            elif event.key == K_c:
+                calibration_mode = not calibration_mode
+            if calibration_mode:
+                if event.key == K_TAB:
+                    active_anchor = 0 if active_anchor == 3 else active_anchor + 1
+                elif event.key in [K_UP, K_DOWN, K_RIGHT, K_LEFT]:
+                    viewport.src_points[active_anchor][0] += 0.1 * (event.key == K_LEFT) - 0.1 * (event.key == K_RIGHT)
+                    viewport.src_points[active_anchor][1] += 0.1 * (event.key == K_UP) - 0.1 * (event.key == K_DOWN)
+
+                    # recalculate all surface projections
+                    viewport.calculate()
+                    _gis.surface.calculate(viewport.transform_mat)
+                    _grid.surface.calculate(viewport.transform_mat)
+                    basemap.surface.calculate(_gis.surface.transform_mat)
+                    basemap.warp(canvas_size)
+                elif event.key == K_s:
+                    viewport.save(SAVED_KEYSTONE_FILE)
+
         elif event.type == QUIT:
             pygame.quit()
             sys.exit()
+
+    # clear surfaces
+    canvas.fill(0)
+    viewport.fill(0)
+    _gis.surface.fill(0)
 
     _gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
@@ -108,13 +142,24 @@ while True:
     # highlight selected buildings
     _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
 
+    # draw grid
     _grid.draw(canvas)
 
-    canvas.fill(0)
+    # draw mask
+    pygame.draw.polygon(viewport, BLACK, viewport.transform(mask_points))
+
+    if calibration_mode:
+        # draw calibration anchors
+        for i, anchor in enumerate(viewport.transform([[0, 0], [0, 100], [100, 100], [100, 0]])):
+            pygame.draw.rect(viewport, WHITE,
+                            [anchor[0] - 10, anchor[1] - 10, 20, 20],
+                            i != active_anchor)
 
     if show_basemap:
-        canvas.blit(basemap.surface, (0, 0))
+        canvas.blit(basemap.image, (0, 0))
+
     canvas.blit(_gis.surface, (0, 0))
+
     if show_grid:
         canvas.blit(_grid.surface, (0, 0))
 

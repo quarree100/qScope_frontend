@@ -43,6 +43,7 @@ class GIS:
 
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):
+        self.file = file
         self.surface = keystone.Surface(canvas_size)
 
         img_h, img_w, _ = cv2.imread(file).shape
@@ -52,9 +53,10 @@ class Basemap:
         self.surface.dst_points = dst_points
         self.surface.calculate(gis.surface.transform_mat)
 
+    def warp(self, canvas_size):
         # warp image and update the surface
-        image = self.surface.warp_image(file, canvas_size)
-        self.surface = pygame.image.frombuffer(image, image.shape[1::-1], 'BGR')
+        image = self.surface.warp_image(self.file, canvas_size)
+        self.image = pygame.image.frombuffer(image, image.shape[1::-1], 'BGR')
 
 
 def read_shapefile(file, layer=None, columns=None):

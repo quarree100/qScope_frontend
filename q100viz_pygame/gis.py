@@ -1,4 +1,4 @@
-import numpy
+import cv2
 import geopandas
 import shapely
 import pygame
@@ -9,13 +9,13 @@ crs="EPSG:3857"
 
 
 class GIS:
-    def __init__(self, canvas_size, src_points, dst_points):
+    def __init__(self, canvas_size, src_points, viewport):
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
 
-        # calculate the projection matrix (EPSG:3857 -> viewport coordinates)
+        # calculate the projection matrix: EPSG:3857 -> viewport coordinates
         self.surface.src_points = src_points
-        self.surface.dst_points = dst_points
-        self.surface.calculate()
+        self.surface.dst_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
+        self.surface.calculate(viewport.transform_mat)
 
     def get_intersection_indexer(self, df, v_polygon):
         polygon = self.surface.inverse_transform(v_polygon)
@@ -42,15 +42,15 @@ class GIS:
 
 
 class Basemap:
-    def __init__(self, canvas_size, file, gis, src_points, dst_points):
-        self.gis = gis
+    def __init__(self, canvas_size, file, dst_points, gis):
         self.surface = keystone.Surface(canvas_size)
 
-        # calculate the projection matrix (image pixels -> EPSG:3857 -> viewport extent)
-        self.surface.src_points = src_points
+        img_h, img_w, _ = cv2.imread(file).shape
+
+        # calculate the projection matrix (image pixels -> EPSG:3857)
+        self.surface.src_points = [[0, 0], [0, img_h], [img_w, img_h], [img_w, 0]],
         self.surface.dst_points = dst_points
-        self.surface.calculate()
-        self.surface.transform_mat = numpy.dot(self.gis.surface.transform_mat, self.surface.transform_mat)
+        self.surface.calculate(gis.surface.transform_mat)
 
         # warp image and update the surface
         image = self.surface.warp_image(file, canvas_size)

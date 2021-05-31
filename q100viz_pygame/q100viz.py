@@ -3,6 +3,7 @@ import random
 import pygame
 from pygame.locals import *
 
+import keystone
 import gis
 import grid
 
@@ -34,20 +35,31 @@ canvas_size = width, height = 1920, 1080
 canvas = pygame.display.set_mode(canvas_size)
 pygame.display.set_caption("q100viz")
 
+# create the main surface, projected to corner points
+# the viewport's coordinates are between 0 and 100 on each axis
+viewport = keystone.Surface(canvas_size, pygame.SRCALPHA)
+viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
+viewport.dst_points = [[80, 45], [0, 1015], [1920, 1035], [1840, 45]]
+viewport.calculate()
+
 # Initialize geographic viewport and basemap
 _gis = gis.GIS(canvas_size,
-               [[1013102, 7206177], [1013102, 7207365], [1013936, 7206177], [1013936, 7207365]],
-               # southwest          northwest           southeast           northeast
-               #                            EPSG:3857 -> surface
-               # bottom right       bottom left         top right           top left
-               [[width, height],    [0, height],        [width, 0],         [0, 0]])
+               # northeast          northwest           southwest           southeast
+               [[1013936, 7207365], [1013102, 7207365], [1013102, 7206177], [1013936, 7206177]],
+               viewport)
 
-basemap = gis.Basemap(canvas_size, BASEMAP_FILE, _gis,
-                      [[0, 1161],          [0, 0],             [1100, 1161],       [1100, 0]],
-                      # bottom left        top left            bottom right        top right
-                      #                         image pixels -> EPSG:3857
-                      # southwest          northwest           southeast           northeast
-                      [[1012695, 7205976], [1012695, 7207571], [1014205, 7205976], [1014205, 7207571]])
+basemap = gis.Basemap(canvas_size, BASEMAP_FILE,
+                      # northwest          southwest           southeast           northeast
+                      [[1012695, 7207571], [1012695, 7205976], [1014205, 7205976], [1014205, 7207571]],
+                      _gis)
+
+# Initialize grid, projected onto the viewport
+_grid = grid.Grid(canvas_size, 17, 11,
+                  [[0, 0], [0, 100], [100, 100], [100, 0]],
+                  viewport)
+
+show_basemap = True
+show_grid = True
 
 # Load data
 buildings = gis.read_shapefile(BUILDINGS_FILE, columns={'osm_id': 'int64'}).set_index('osm_id')
@@ -57,11 +69,9 @@ typologiezonen = gis.read_shapefile(TYPOLOGIEZONEN_FILE)
 nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
 waermezentrale = gis.read_shapefile(WAERMESPEICHER_FILE, 'Wärmespeicher').append(gis.read_shapefile(HEIZZENTRALE_FILE))
 
-# Initialize grid
-_grid = grid.Grid(canvas_size, 50, 50, 1000, 1000, 11, 11)
-
-show_basemap = True
-show_grid = True
+# mask
+mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50], [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
+pygame.draw.polygon(viewport, BLACK, viewport.transform(mask_points))
 
 # Begin Game Loop
 while True:
@@ -107,6 +117,8 @@ while True:
     canvas.blit(_gis.surface, (0, 0))
     if show_grid:
         canvas.blit(_grid.surface, (0, 0))
+
+    canvas.blit(viewport, (0, 0))
 
     pygame.display.update()
 

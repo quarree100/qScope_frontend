@@ -4,12 +4,16 @@ import pygame
 
 
 class Surface(pygame.Surface):
-    def calculate(self):
+    def calculate(self, other_mat=None):
         """Calculate the transformation matrixes from source and destination points."""
         src = numpy.float32(self.src_points)
         dst = numpy.float32(self.dst_points)
 
         self.transform_mat = cv2.getPerspectiveTransform(src, dst)
+
+        if (other_mat is not None):
+            self.transform_mat = numpy.dot(other_mat, self.transform_mat)
+
         self.inverse_transform_mat = numpy.linalg.inv(self.transform_mat)
 
     def transform(self, points):

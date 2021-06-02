@@ -1,11 +1,13 @@
 import sys
 import random
+import threading
 import pygame
 from pygame.locals import *
 
 import keystone
 import gis
 import grid
+import udp
 
 # geodata sources
 BASEMAP_FILE = "../data/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"
@@ -31,6 +33,9 @@ WHITE = (255, 255, 255)
 pygame.init()
 
 clock = pygame.time.Clock()
+
+# UDP config
+grid_udp = ('localhost', 5000)
 
 # Set up display
 canvas_size = width, height = 1920, 1080
@@ -61,9 +66,7 @@ basemap = gis.Basemap(canvas_size, BASEMAP_FILE,
 basemap.warp(canvas_size)
 
 # Initialize grid, projected onto the viewport
-_grid = grid.Grid(canvas_size, 17, 11,
-                  [[0, 0], [0, 100], [100, 100], [100, 0]],
-                  viewport)
+_grid = grid.Grid(canvas_size, 11, 11, [[0, 0], [0, 100], [80, 100], [80, 0]], viewport)
 
 show_basemap = True
 show_grid = True
@@ -82,6 +85,12 @@ mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50], [-50, -50], [-5
 # calibration
 calibration_mode = False
 active_anchor = 0
+
+# UDP server for incoming cspy messages
+udp_server = udp.UDPServer(*grid_udp, 1024)
+udp_thread = threading.Thread(target=udp_server.listen, args=(_grid,), daemon=True)
+udp_thread.start()
+
 
 # Begin Game Loop
 while True:
@@ -160,10 +169,10 @@ while True:
 
     canvas.blit(_gis.surface, (0, 0))
 
+    canvas.blit(viewport, (0, 0))
+
     if show_grid:
         canvas.blit(_grid.surface, (0, 0))
-
-    canvas.blit(viewport, (0, 0))
 
     pygame.display.update()
 

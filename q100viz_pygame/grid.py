@@ -1,3 +1,4 @@
+import json
 import pygame
 
 import keystone
@@ -33,7 +34,7 @@ class Grid:
 
         for y, row in enumerate(self.grid):
             for x, cell in enumerate(row):
-                stroke = 4 if cell.selected else 1
+                stroke = 4 if cell.selected else 1 if cell.id < 0 else 0
                 fill = pygame.Color(*colors[cell.id]) if cell.id > -1 else pygame.Color(255, 255, 255)
 
                 rect_points = self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]])
@@ -50,6 +51,33 @@ class Grid:
             cell = self.grid[int(coord[1])][int(coord[0])]
             cell.selected = not cell.selected
         except IndexError:
+            pass
+
+    def read_message(self, message):
+        try:
+            array = json.loads(message)
+        except json.decoder.JSONDecodeError:
+            print("Invalid JSON")
+            return
+
+        # update grid cells
+        try:
+            for y, row in enumerate(self.grid):
+                for x, cell in enumerate(row):
+                    cell.id, cell.rot = array[y * self.y_size + x]
+        except TypeError:
+            pass
+        except IndexError:
+            print("Warning: incoming grid has unexpected size")
+
+    def print(self):
+        try:
+            for row in self.grid:
+                for cell in row:
+                    print(f"{cell.id}/{cell.rot}", end="\t")
+                print()
+            print()
+        except TypeError:
             pass
 
 

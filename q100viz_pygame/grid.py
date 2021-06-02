@@ -21,7 +21,7 @@ class Grid:
 
     def draw(self, surface):
         colors = [
-            (180, 180, 180),
+            (0, 0, 0, 0),
             (255, 255, 255),
             (50, 50, 125),
             (255, 255, 0),
@@ -30,15 +30,18 @@ class Grid:
             (100, 255, 100)
         ]
 
-        self.surface.fill(0)
+        rects_transformed = [(cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
+            for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
-        for y, row in enumerate(self.grid):
-            for x, cell in enumerate(row):
-                stroke = 4 if cell.selected else 1 if cell.id < 0 else 0
-                fill = pygame.Color(*colors[cell.id]) if cell.id > -1 else pygame.Color(255, 255, 255)
+        # draw filled rectangles to visualize grid data
+        for cell, rect_points in rects_transformed:
+            if cell.id > -1:
+                pygame.draw.polygon(self.surface, pygame.Color(*colors[cell.id]), rect_points, 0)
 
-                rect_points = self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]])
-                pygame.draw.polygon(self.surface, fill, rect_points, stroke)
+        # draw rectangle outlines
+        for cell, rect_points in rects_transformed:
+            stroke = 4 if cell.selected else 1
+            pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), rect_points, stroke)
 
     def mouse_pressed(self):
         pos = pygame.mouse.get_pos()
@@ -53,7 +56,7 @@ class Grid:
         except IndexError:
             pass
 
-    def read_message(self, message):
+    def read_scanner_data(self, message):
         try:
             array = json.loads(message)
         except json.decoder.JSONDecodeError:
@@ -65,6 +68,11 @@ class Grid:
             for y, row in enumerate(self.grid):
                 for x, cell in enumerate(row):
                     cell.id, cell.rot = array[y * self.y_size + x]
+                    cell.selected = False
+
+                    # object with ID 1 selects cells
+                    if cell.id == 1:
+                        cell.selected = True
         except TypeError:
             pass
         except IndexError:
@@ -86,4 +94,3 @@ class GridCell:
         self.id = id
         self.rot = rot
         self.selected = False
-

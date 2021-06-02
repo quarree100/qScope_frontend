@@ -90,7 +90,7 @@ active_anchor = 0
 
 # UDP server for incoming cspy messages
 udp_server = udp.UDPServer(*grid_udp, 1024)
-udp_thread = threading.Thread(target=udp_server.listen, args=(_grid,), daemon=True)
+udp_thread = threading.Thread(target=udp_server.listen, args=(_grid.read_scanner_data,), daemon=True)
 udp_thread.start()
 
 # stats viz communication
@@ -152,8 +152,11 @@ while True:
                 ii = _gis.get_intersection_indexer(buildings, cell_vertices)
                 buildings.loc[ii, 'selected'] = True
 
-    # highlight selected buildings
-    _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
+    if len(buildings[buildings.selected]):
+        # highlight selected buildings
+        _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
+
+        _stats.send_dataframe_as_json(buildings[buildings.selected])
 
     # draw grid
     _grid.draw(canvas)
@@ -165,8 +168,8 @@ while True:
         # draw calibration anchors
         for i, anchor in enumerate(viewport.transform([[0, 0], [0, 100], [100, 100], [100, 0]])):
             pygame.draw.rect(viewport, WHITE,
-                            [anchor[0] - 10, anchor[1] - 10, 20, 20],
-                            i != active_anchor)
+                             [anchor[0] - 10, anchor[1] - 10, 20, 20],
+                             i != active_anchor)
 
     if show_basemap:
         canvas.blit(basemap.image, (0, 0))

@@ -17,3 +17,18 @@ Change to the `q100viz_p5` directory and run the sketch:
 ```
 python q100viz.py
 ```
+
+## q100viz_pygame
+
+Another port of the *q100viz* Processing sketch, based on [pygame](https://www.pygame.org/). It clearly outperforms p5.
+
+### Interactions
+
+- **M** key: toggle basemap
+- **G** key: toggle grid
+- **C** key: toggle calibration mode
+
+- In calibration mode:
+  - **TAB** key: select active corner
+  - **UP/DOWN/LEFT/RIGHT** keys: move active corner
+  - **S** key: save configuration

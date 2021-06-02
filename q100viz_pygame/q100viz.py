@@ -8,6 +8,7 @@ import keystone
 import gis
 import grid
 import udp
+import stats
 
 # geodata sources
 BASEMAP_FILE = "../data/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"
@@ -36,6 +37,7 @@ clock = pygame.time.Clock()
 
 # UDP config
 grid_udp = ('localhost', 5000)
+stats_udp = ('localhost', 6155)
 
 # Set up display
 canvas_size = width, height = 1920, 1080
@@ -91,6 +93,8 @@ udp_server = udp.UDPServer(*grid_udp, 1024)
 udp_thread = threading.Thread(target=udp_server.listen, args=(_grid,), daemon=True)
 udp_thread.start()
 
+# stats viz communication
+_stats = stats.Stats(*stats_udp)
 
 # Begin Game Loop
 while True:

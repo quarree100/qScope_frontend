@@ -133,6 +133,7 @@ while True:
     canvas.fill(0)
     viewport.fill(0)
     _gis.surface.fill(0)
+    _grid.surface.fill(0)
 
     _gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))

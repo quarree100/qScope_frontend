@@ -41,7 +41,7 @@ stats_udp = ('localhost', 6155)
 
 # Set up display
 canvas_size = width, height = 1920, 1080
-canvas = pygame.display.set_mode(canvas_size)
+canvas = pygame.display.set_mode(canvas_size, NOFRAME)
 pygame.display.set_caption("q100viz")
 
 # create the main surface, projected to corner points
@@ -103,18 +103,21 @@ while True:
         if event.type == MOUSEBUTTONDOWN:
             _grid.mouse_pressed()
         elif event.type == KEYDOWN:
+            # toggle basemap:
             if event.key == K_m:
                 show_basemap = event.key == K_m and not show_basemap
+            # toggle grid:
             elif event.key == K_g:
                 show_grid = not show_grid
+            # toggle calibration:
             elif event.key == K_c:
                 calibration_mode = not calibration_mode
             if calibration_mode:
                 if event.key == K_TAB:
                     active_anchor = 0 if active_anchor == 3 else active_anchor + 1
                 elif event.key in [K_UP, K_DOWN, K_RIGHT, K_LEFT]:
-                    viewport.src_points[active_anchor][0] += 0.1 * (event.key == K_LEFT) - 0.1 * (event.key == K_RIGHT)
-                    viewport.src_points[active_anchor][1] += 0.1 * (event.key == K_UP) - 0.1 * (event.key == K_DOWN)
+                    viewport.src_points[active_anchor][0] += 1 * (event.key == K_LEFT) - 1 * (event.key == K_RIGHT)
+                    viewport.src_points[active_anchor][1] += 1 * (event.key == K_UP) - 1 * (event.key == K_DOWN)
 
                     # recalculate all surface projections
                     viewport.calculate()
@@ -185,3 +188,4 @@ while True:
     pygame.display.update()
 
     clock.tick(FPS)
+    

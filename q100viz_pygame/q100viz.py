@@ -1,5 +1,4 @@
 import sys
-import random
 import threading
 import pygame
 from pygame.locals import *
@@ -12,7 +11,8 @@ import stats
 
 # geodata sources
 BASEMAP_FILE = "../data/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"
-BUILDINGS_FILE = "../data/Shapefiles/osm_heide_buildings.shp"
+BUILDINGS_OSM_FILE = "../data/Shapefiles/osm_heide_buildings.shp"
+BUILDINGS_DATA_FILE = "../data/Layer/Gebaeudeliste_import_truncated.csv"
 WAERMESPEICHER_FILE = "../data/Shapefiles/Wärmespeicher.shp"
 HEIZZENTRALE_FILE = "../data/Shapefiles/Heizzentrale.shp"
 NAHWAERMENETZ_FILE = "../data/Shapefiles/Nahwärmenetz.shp"
@@ -74,8 +74,16 @@ show_basemap = True
 show_grid = True
 
 # Load data
-buildings = gis.read_shapefile(BUILDINGS_FILE, columns={'osm_id': 'int64'}).set_index('osm_id')
-buildings['co2'] = [random.random() for row in buildings.values]
+buildings = gis.read_shapefile(BUILDINGS_OSM_FILE, columns={'osm_id': 'int64'}).set_index('osm_id')
+
+buildings = stats.append_csv(BUILDINGS_DATA_FILE, buildings, {
+    'Wärmeverbrauch 2017 [kWh]': 'float32',
+    'Stromverbrauch 2017 [kWh]': 'float32',
+})
+
+# data normalized by max values
+buildings['Wärme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / buildings.max()['Wärmeverbrauch 2017 [kWh]']
+buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / buildings.max()['Stromverbrauch 2017 [kWh]']
 
 typologiezonen = gis.read_shapefile(TYPOLOGIEZONEN_FILE)
 nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
@@ -141,7 +149,7 @@ while True:
     _gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
     _gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
-    _gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'co2')
+    _gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')
 
     # find buildings intersecting with selected grid cells
     buildings['selected'] = False
@@ -160,7 +168,7 @@ while True:
         # highlight selected buildings
         _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
 
-        _stats.send_dataframe_as_json(buildings[buildings.selected])
+        _stats.send_dataframe_as_json(buildings[buildings.selected].drop('geometry', 1))
 
     # draw grid
     _grid.draw(canvas)

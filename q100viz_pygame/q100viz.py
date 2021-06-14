@@ -85,6 +85,9 @@ buildings = stats.append_csv(BUILDINGS_DATA_FILE, buildings, {
 buildings['Wärme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / buildings.max()['Wärmeverbrauch 2017 [kWh]']
 buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / buildings.max()['Stromverbrauch 2017 [kWh]']
 
+# add cell column
+buildings['cell'] = ""
+
 typologiezonen = gis.read_shapefile(TYPOLOGIEZONEN_FILE)
 nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
 waermezentrale = gis.read_shapefile(WAERMESPEICHER_FILE, 'Wärmespeicher').append(gis.read_shapefile(HEIZZENTRALE_FILE))
@@ -163,12 +166,15 @@ while True:
                 )
                 ii = _gis.get_intersection_indexer(buildings, cell_vertices)
                 buildings.loc[ii, 'selected'] = True
+                buildings.loc[ii, 'cell'] = f"{x},{y}"
 
     if len(buildings[buildings.selected]):
         # highlight selected buildings
         _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
 
-        _stats.send_dataframe_as_json(buildings[buildings.selected].drop('geometry', 1))
+    # build clusters of selected buildings and send JSON message
+    cluster_dfs = [cluster.drop('geometry', 1) for _, cluster in stats.make_clusters(buildings[buildings.selected])]
+    _stats.send_dataframes_as_json(cluster_dfs)
 
     # draw grid
     _grid.draw(canvas)
@@ -196,4 +202,3 @@ while True:
     pygame.display.update()
 
     clock.tick(FPS)
-    

@@ -55,7 +55,7 @@ project qScope
 where:
 - cspy: https://github.com/dunland/cspy
 - data: has to be linked from server
-- GAMA: https://github.com/Lwinkeler/Q100-AB2-qScope
+- GAMA: https://github.com/quarree100/q100abm
 - q100_info: t.b.a
 - q100_viz: https://github.com/dunland/q100_viz
 - settings: t.b.a (currently from cspy/settings)

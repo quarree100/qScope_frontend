@@ -2,9 +2,9 @@
 
 Code für die Projektion und Bespielung des Monitors des CityScope-Setups in QUARREE100.
 
-## q100viz_p5
+## q100viz_pygame
 
-*q100viz_p5* is a Python port of the *q100viz* Processing sketch. It relies heavily on the "p5" library (read the documentation [here](https://p5.readthedocs.io/)).
+*q100viz_pygame* is a Python port of the *q100viz* Processing sketch, based on [pygame](https://www.pygame.org/).
 
 Before you can run the sketch, you need to install required packages:
 ```
@@ -13,12 +13,23 @@ pip install -r requirements.txt
 
 Geodata sources are expected to be found in the `data` directory. Create it (if it does not exist) and make the basemap image and shapefiles available.
 
-Change to the `q100viz_p5` directory and run the sketch:
+Change to the `q100viz_pygame` directory and run the sketch:
 ```
 python q100viz.py
 ```
 
-## recommended folder structure:
+### Interactions
+
+- **M** key: toggle basemap
+- **G** key: toggle grid
+- **C** key: toggle calibration mode
+
+- In calibration mode:
+  - **TAB** key: select active corner
+  - **UP/DOWN/LEFT/RIGHT** keys: move active corner
+  - **S** key: save configuration
+
+## Recommended folder structure
 
 ```
 project qScope
@@ -34,9 +45,9 @@ project qScope
 │   └───Project_RuesdorferKamp_Restoration
 │    	└───Restoration_Model_01.gaml
 └───q100_info
-│       infoscreen script (javaScript)
+│       infoscreen (JavaScript)
 └───q100_viz
-│       projection script (P5)
+│       projection (Python)
 └───settings
         initial setup data to initialize ALL SOFTWARE COMPONENTS centrally
 

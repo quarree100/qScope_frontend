@@ -173,8 +173,8 @@ while True:
         _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
 
     # build clusters of selected buildings and send JSON message
-    cluster_dfs = [cluster.drop('geometry', 1) for _, cluster in stats.make_clusters(buildings[buildings.selected])]
-    _stats.send_dataframes_as_json(cluster_dfs)
+    clusters = stats.make_clusters(buildings[buildings.selected])
+    _stats.send_dataframe_as_json(clusters.sum())
 
     # draw grid
     _grid.draw(canvas)

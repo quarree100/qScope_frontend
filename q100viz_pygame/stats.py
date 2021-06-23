@@ -1,24 +1,35 @@
 import json
 import pandas
-
-import udp
+import threading
+import socketio
 
 
 class Stats:
-    def __init__(self, udp_address, udp_port):
-        # set up UDP client to talk to stats viz
-        self.udp_client = udp.UDPClient(udp_address, udp_port)
+    def __init__(self, socket_addr):
+        # set up Socket.IO client to talk to stats viz
+        self.io = socketio.Client()
+
+        def run():
+            self.io.connect(socket_addr)
+            self.io.wait()
+
+        thread = threading.Thread(target=run, daemon=True)
+        thread.start()
+
+    def send_message(self, msg):
+        try:
+            self.io.emit('message', msg)
+        except:
+            print("Could not connect to Socket.IO server.")
 
     def send_max_values(self, max_values, min_values):
-        init = "init\n" + "\n".join(map(str, max_values + min_values))
-        self.udp_client.send_message(init)
+        self.send_message("init\n" + "\n".join(map(str, max_values + min_values)))
 
     def send_dataframe_as_json(self, df):
-        self.udp_client.send_message(export_json(df, None))
+        self.send_message(export_json(df, None))
 
     def send_dataframes_as_json(self, dfs):
-        msg = json.dumps([json.loads(export_json(df, None)) for df in dfs])
-        self.udp_client.send_message(msg)
+        self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))
 
 
 def append_csv(file, df, cols):

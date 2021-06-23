@@ -35,9 +35,10 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-# UDP config
+# UDP
 grid_udp = ('localhost', 5000)
-stats_udp = ('localhost', 6155)
+# Socket.io
+stats_io = 'http://localhost:8081'
 
 # Set up display
 canvas_size = width, height = 1920, 1080
@@ -105,7 +106,7 @@ udp_thread = threading.Thread(target=udp_server.listen, args=(_grid.read_scanner
 udp_thread.start()
 
 # stats viz communication
-_stats = stats.Stats(*stats_udp)
+_stats = stats.Stats(stats_io)
 
 # Begin Game Loop
 while True:

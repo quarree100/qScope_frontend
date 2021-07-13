@@ -49,6 +49,9 @@ class Grid:
         # get grid coordinate
         coord = self.surface.inverse_transform([pos])[0]
 
+        if coord[0] < 0 or coord[1] < 0:
+            return
+
         # update cell at cursor position
         try:
             cell = self.grid[int(coord[1])][int(coord[0])]

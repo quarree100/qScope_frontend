@@ -36,7 +36,9 @@ pygame.init()
 clock = pygame.time.Clock()
 
 # UDP
-grid_udp = ('localhost', 5000)
+grid_udp_1 = ('localhost', 5000)
+grid_udp_2 = ('localhost', 5001)
+
 # Socket.io
 stats_io = 'http://localhost:8081'
 
@@ -69,7 +71,8 @@ basemap = gis.Basemap(canvas_size, BASEMAP_FILE,
 basemap.warp(canvas_size)
 
 # Initialize grid, projected onto the viewport
-_grid = grid.Grid(canvas_size, 11, 11, [[0, 0], [0, 100], [80, 100], [80, 0]], viewport)
+grid_1 = grid.Grid(canvas_size, 11, 11, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
+grid_2 = grid.Grid(canvas_size, 11, 11, [[50, 0], [50, 100], [100, 100], [100, 0]], viewport)
 
 show_basemap = True
 show_grid = True
@@ -101,9 +104,10 @@ calibration_mode = False
 active_anchor = 0
 
 # UDP server for incoming cspy messages
-udp_server = udp.UDPServer(*grid_udp, 1024)
-udp_thread = threading.Thread(target=udp_server.listen, args=(_grid.read_scanner_data,), daemon=True)
-udp_thread.start()
+for grid, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
+    udp_server = udp.UDPServer(*grid_udp, 1024)
+    udp_thread = threading.Thread(target=udp_server.listen, args=(grid.read_scanner_data,), daemon=True)
+    udp_thread.start()
 
 # stats viz communication
 _stats = stats.Stats(stats_io)
@@ -113,7 +117,8 @@ while True:
     # process mouse/keyboard events
     for event in pygame.event.get():
         if event.type == MOUSEBUTTONDOWN:
-            _grid.mouse_pressed()
+            grid_1.mouse_pressed()
+            grid_2.mouse_pressed()
         elif event.type == KEYDOWN:
             # toggle basemap:
             if event.key == K_m:
@@ -134,7 +139,8 @@ while True:
                     # recalculate all surface projections
                     viewport.calculate()
                     _gis.surface.calculate(viewport.transform_mat)
-                    _grid.surface.calculate(viewport.transform_mat)
+                    grid_1.surface.calculate(viewport.transform_mat)
+                    grid_2.surface.calculate(viewport.transform_mat)
                     basemap.surface.calculate(_gis.surface.transform_mat)
                     basemap.warp(canvas_size)
                 elif event.key == K_s:
@@ -148,7 +154,8 @@ while True:
     canvas.fill(0)
     viewport.fill(0)
     _gis.surface.fill(0)
-    _grid.surface.fill(0)
+    grid_1.surface.fill(0)
+    grid_2.surface.fill(0)
 
     _gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
@@ -158,16 +165,17 @@ while True:
     # find buildings intersecting with selected grid cells
     buildings['selected'] = False
 
-    for y, row in enumerate(_grid.grid):
-        for x, cell in enumerate(row):
-            if cell.selected:
-                # get viewport coordinates of the cell rectangle
-                cell_vertices = _grid.surface.transform(
-                    [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
-                )
-                ii = _gis.get_intersection_indexer(buildings, cell_vertices)
-                buildings.loc[ii, 'selected'] = True
-                buildings.loc[ii, 'cell'] = f"{x},{y}"
+    for grid in [grid_1, grid_2]:
+        for y, row in enumerate(grid.grid):
+            for x, cell in enumerate(row):
+                if cell.selected:
+                    # get viewport coordinates of the cell rectangle
+                    cell_vertices = grid.surface.transform(
+                        [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
+                    )
+                    ii = _gis.get_intersection_indexer(buildings, cell_vertices)
+                    buildings.loc[ii, 'selected'] = True
+                    buildings.loc[ii, 'cell'] = f"{x},{y}"
 
     if len(buildings[buildings.selected]):
         # highlight selected buildings
@@ -178,7 +186,8 @@ while True:
     _stats.send_dataframe_as_json(clusters.sum())
 
     # draw grid
-    _grid.draw(canvas)
+    grid_1.draw(canvas)
+    grid_2.draw(canvas)
 
     # draw mask
     pygame.draw.polygon(viewport, BLACK, viewport.transform(mask_points))
@@ -198,7 +207,8 @@ while True:
     canvas.blit(viewport, (0, 0))
 
     if show_grid:
-        canvas.blit(_grid.surface, (0, 0))
+        canvas.blit(grid_1.surface, (0, 0))
+        canvas.blit(grid_2.surface, (0, 0))
 
     pygame.display.update()
 

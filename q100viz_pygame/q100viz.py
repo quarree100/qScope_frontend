@@ -61,7 +61,7 @@ viewport.calculate()
 # Initialize geographic viewport and basemap
 _gis = gis.GIS(canvas_size,
                # northeast          northwest           southwest           southeast
-               [[1013936, 7207365], [1013102, 7207365], [1013102, 7206177], [1013936, 7206177]],
+               [[1013640, 7207470], [1013000, 7207270], [1013400, 7206120], [1014040, 7206320]],
                viewport)
 
 basemap = gis.Basemap(canvas_size, BASEMAP_FILE,

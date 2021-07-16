@@ -1,5 +1,6 @@
 import sys
 import threading
+import json
 import pygame
 from pygame.locals import *
 
@@ -10,13 +11,14 @@ import udp
 import stats
 
 # geodata sources
-BASEMAP_FILE = "../data/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"
-BUILDINGS_OSM_FILE = "../data/Shapefiles/osm_heide_buildings.shp"
-BUILDINGS_DATA_FILE = "../data/Layer/Gebaeudeliste_import_truncated.csv"
-WAERMESPEICHER_FILE = "../data/Shapefiles/Wärmespeicher.shp"
-HEIZZENTRALE_FILE = "../data/Shapefiles/Heizzentrale.shp"
-NAHWAERMENETZ_FILE = "../data/Shapefiles/Nahwärmenetz.shp"
-TYPOLOGIEZONEN_FILE = "../data/Shapefiles/Typologiezonen.shp"
+BASEMAP_FILE = "../../data/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"
+BUILDINGS_OSM_FILE = "../../data/Shapefiles/osm_heide_buildings.shp"
+BUILDINGS_DATA_FILE = "../../data/Layer/Gebaeudeliste_import_truncated.csv"
+WAERMESPEICHER_FILE = "../../data/Shapefiles/Wärmespeicher.shp"
+HEIZZENTRALE_FILE = "../../data/Shapefiles/Heizzentrale.shp"
+NAHWAERMENETZ_FILE = "../../data/Shapefiles/Nahwärmenetz.shp"
+TYPOLOGIEZONEN_FILE = "../../data/Shapefiles/Typologiezonen.shp"
+CSPY_SETTINGS_FILE = '../../settings/cityscopy.json'
 
 SAVED_KEYSTONE_FILE = 'keystone.save'
 
@@ -71,8 +73,11 @@ basemap = gis.Basemap(canvas_size, BASEMAP_FILE,
 basemap.warp(canvas_size)
 
 # Initialize grid, projected onto the viewport
-grid_1 = grid.Grid(canvas_size, 11, 11, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
-grid_2 = grid.Grid(canvas_size, 11, 11, [[50, 0], [50, 100], [100, 100], [100, 0]], viewport)
+grid_settings = json.load(open(CSPY_SETTINGS_FILE))['cityscopy']
+nrows = grid_settings['nrows']
+ncols = grid_settings['ncols']
+grid_1 = grid.Grid(canvas_size, nrows, ncols, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
+grid_2 = grid.Grid(canvas_size, nrows, ncols, [[50, 0], [50, 100], [100, 100], [100, 0]], viewport)
 
 show_basemap = True
 show_grid = True
@@ -91,6 +96,9 @@ buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / buildings
 
 # add cell column
 buildings['cell'] = ""
+buildings['rotation'] = 0
+previous_rotation = buildings['rotation']
+buildings['cell_id'] = -1
 
 typologiezonen = gis.read_shapefile(TYPOLOGIEZONEN_FILE)
 nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
@@ -111,6 +119,8 @@ for grid, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
 
 # stats viz communication
 _stats = stats.Stats(stats_io)
+
+print(buildings)
 
 # Begin Game Loop
 while True:
@@ -165,9 +175,12 @@ while True:
     # find buildings intersecting with selected grid cells
     buildings['selected'] = False
 
+    new_rotation = False
+
     for grid in [grid_1, grid_2]:
         for y, row in enumerate(grid.grid):
             for x, cell in enumerate(row):
+                # buildings.iloc[x, 6] = cell.rot
                 if cell.selected:
                     # get viewport coordinates of the cell rectangle
                     cell_vertices = grid.surface.transform(
@@ -176,6 +189,23 @@ while True:
                     ii = _gis.get_intersection_indexer(buildings, cell_vertices)
                     buildings.loc[ii, 'selected'] = True
                     buildings.loc[ii, 'cell'] = f"{x},{y}"
+                    buildings.loc[ii, 'rotation'] = cell.rot
+                    buildings.loc[ii, 'cell_id'] = cell.id
+                    new_rotation = True
+
+    # print(buildings.iloc[i,5])
+    # print(buildings['cell'])
+    # print(buildings[buildings['selected'] == True]['cell'].to_markdown())
+
+    # if (previous_rotation != buildings['rotation']):
+    #     print("rotation has changed!")
+    print(buildings[['cell_id', 'rotation']].to_markdown())
+    # print(previous_rotation.compare(buildings['rotation'], keep_equal=True).to_markdown())
+
+    if new_rotation == True:
+        previous_rotation = buildings['rotation']
+
+    grid_1.print()
 
     if len(buildings[buildings.selected]):
         # highlight selected buildings

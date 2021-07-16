@@ -74,7 +74,7 @@ class Grid:
                     cell.selected = False
 
                     # object with ID 1 selects cells
-                    if cell.id == 1:
+                    if cell.id >= 1:
                         cell.selected = True
         except TypeError:
             pass

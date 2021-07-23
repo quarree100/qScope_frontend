@@ -21,11 +21,11 @@ class Grid:
 
     def draw(self, surface):
         colors = [
-            (0, 0, 0, 0),
             (255, 255, 255),
-            (50, 50, 125),
-            (255, 255, 0),
+            (0, 0, 0, 0),
+            (255, 0, 0),
             (0, 255, 255),
+            (255, 255, 0),
             (0, 100, 255),
             (100, 255, 100)
         ]
@@ -73,9 +73,13 @@ class Grid:
                     cell.id, cell.rot = array[y * self.y_size + x]
                     cell.selected = False
 
-                    # object with ID 1 selects cells
-                    if cell.id >= 1:
+                    # object with ID 3 selects cells
+                    if cell.id == 3:
                         cell.selected = True
+                    
+                    # remember last rotational position to compare changes later
+                    cell.prev_rot = cell.rot
+
         except TypeError:
             pass
         except IndexError:
@@ -97,3 +101,4 @@ class GridCell:
         self.id = id
         self.rot = rot
         self.selected = False
+        self.prev_rot = -1

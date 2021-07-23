@@ -76,8 +76,8 @@ basemap.warp(canvas_size)
 grid_settings = json.load(open(CSPY_SETTINGS_FILE))['cityscopy']
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
-grid_1 = grid.Grid(canvas_size, nrows, ncols, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
-grid_2 = grid.Grid(canvas_size, nrows, ncols, [[50, 0], [50, 100], [100, 100], [100, 0]], viewport)
+grid_1 = grid.Grid(canvas_size, nrows, ncols, [[50, 50], [50, 100], [75, 100], [75, 50]], viewport)
+grid_2 = grid.Grid(canvas_size, nrows, ncols, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
 
 show_basemap = True
 show_grid = True
@@ -96,9 +96,6 @@ buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / buildings
 
 # add cell column
 buildings['cell'] = ""
-buildings['rotation'] = 0
-previous_rotation = buildings['rotation']
-buildings['cell_id'] = -1
 
 typologiezonen = gis.read_shapefile(TYPOLOGIEZONEN_FILE)
 nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
@@ -175,8 +172,6 @@ while True:
     # find buildings intersecting with selected grid cells
     buildings['selected'] = False
 
-    new_rotation = False
-
     for grid in [grid_1, grid_2]:
         for y, row in enumerate(grid.grid):
             for x, cell in enumerate(row):
@@ -189,23 +184,10 @@ while True:
                     ii = _gis.get_intersection_indexer(buildings, cell_vertices)
                     buildings.loc[ii, 'selected'] = True
                     buildings.loc[ii, 'cell'] = f"{x},{y}"
-                    buildings.loc[ii, 'rotation'] = cell.rot
-                    buildings.loc[ii, 'cell_id'] = cell.id
-                    new_rotation = True
 
-    # print(buildings.iloc[i,5])
-    # print(buildings['cell'])
-    # print(buildings[buildings['selected'] == True]['cell'].to_markdown())
-
-    # if (previous_rotation != buildings['rotation']):
-    #     print("rotation has changed!")
-    print(buildings[['cell_id', 'rotation']].to_markdown())
-    # print(previous_rotation.compare(buildings['rotation'], keep_equal=True).to_markdown())
-
-    if new_rotation == True:
-        previous_rotation = buildings['rotation']
-
-    grid_1.print()
+                # check whether any rotation has changed:
+                if cell.rot != cell.prev_rot:
+                    print("cell", f"{x, y}", "rotated.")
 
     if len(buildings[buildings.selected]):
         # highlight selected buildings

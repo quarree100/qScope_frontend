@@ -126,6 +126,7 @@ while True:
         if event.type == MOUSEBUTTONDOWN:
             grid_1.mouse_pressed()
             grid_2.mouse_pressed()
+            _gis.mouse_pressed(buildings)
         elif event.type == KEYDOWN:
             # toggle basemap:
             if event.key == K_m:

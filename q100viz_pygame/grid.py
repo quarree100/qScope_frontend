@@ -71,14 +71,15 @@ class Grid:
             for y, row in enumerate(self.grid):
                 for x, cell in enumerate(row):
                     cell.id, cell.rot = array[y * self.y_size + x]
-                    cell.selected = False
 
                     # object with ID 3 selects cells
-                    if cell.id == 3:
-                        cell.selected = True
-                    
-                    # remember last rotational position to compare changes later
-                    cell.prev_rot = cell.rot
+                    cell.selected = cell.id == 3
+
+                    # calculate relative rotation
+                    # an inactive cell has a rotation value of -1
+                    if cell.prev_rot != cell.rot:
+                        cell.rel_rot = cell.rot - (cell.prev_rot if cell.prev_rot > -1 else 0)
+                        cell.prev_rot = cell.rot
 
         except TypeError:
             pass
@@ -100,5 +101,6 @@ class GridCell:
     def __init__(self, id=-1, rot=-1):
         self.id = id
         self.rot = rot
-        self.selected = False
         self.prev_rot = -1
+        self.rel_rot = 0
+        self.selected = False

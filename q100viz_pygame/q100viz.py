@@ -3,6 +3,7 @@ import threading
 import json
 import pygame
 from pygame.locals import *
+import shapely
 
 import keystone
 import gis
@@ -21,6 +22,7 @@ TYPOLOGIEZONEN_FILE = "../../data/Shapefiles/Typologiezonen.shp"
 CSPY_SETTINGS_FILE = '../../settings/cityscopy.json'
 
 SAVED_KEYSTONE_FILE = 'keystone.save'
+SAVED_BUILDINGS_FILE = 'export/buildings_export.shp'
 
 # Set FPS
 FPS = 12
@@ -76,8 +78,9 @@ basemap.warp(canvas_size)
 grid_settings = json.load(open(CSPY_SETTINGS_FILE))['cityscopy']
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
-grid_1 = grid.Grid(canvas_size, nrows, ncols, [[50, 50], [50, 100], [75, 100], [75, 50]], viewport)
-grid_2 = grid.Grid(canvas_size, nrows, ncols, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
+# grid_1 = grid.Grid(canvas_size, nrows, ncols, [[50, 50], [50, 100], [75, 100], [75, 50]], viewport)
+grid_2 = grid.Grid(canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
+grid_1 = grid.Grid(canvas_size, 22, 22, [[50, 0], [50, 100], [100, 100], [100, 0]], viewport)
 
 show_basemap = True
 show_grid = True
@@ -96,6 +99,7 @@ buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / buildings
 
 # add cell column
 buildings['cell'] = ""
+buildings['selected'] = False
 
 typologiezonen = gis.read_shapefile(TYPOLOGIEZONEN_FILE)
 nahwaermenetz = gis.read_shapefile(NAHWAERMENETZ_FILE)
@@ -107,6 +111,8 @@ mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50], [-50, -50], [-5
 # calibration
 calibration_mode = False
 active_anchor = 0
+edit_mode = False
+polygon_selector = 0
 
 # UDP server for incoming cspy messages
 for grid, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
@@ -121,12 +127,11 @@ print(buildings)
 
 # Begin Game Loop
 while True:
-    # process mouse/keyboard events
+    ################## process mouse/keyboard events ##################
     for event in pygame.event.get():
         if event.type == MOUSEBUTTONDOWN:
             grid_1.mouse_pressed()
             grid_2.mouse_pressed()
-            _gis.mouse_pressed(buildings)
         elif event.type == KEYDOWN:
             # toggle basemap:
             if event.key == K_m:
@@ -137,6 +142,40 @@ while True:
             # toggle calibration:
             elif event.key == K_c:
                 calibration_mode = not calibration_mode
+            # toggle edit-mode to move polygons:
+            elif event.key == K_e:
+                edit_mode = not edit_mode
+
+            ####################### edit mode: ########################
+            if edit_mode:
+                buildings.iloc[polygon_selector, 6] = True  # mark building as selected
+                if event.key == K_TAB:
+                    polygon_selector = (polygon_selector + 1) % buildings.size
+                    buildings.iloc[polygon_selector, 6] = True  # mark building as selected
+                    buildings.iloc[polygon_selector-1, 6] = False  # unselect previous
+
+                elif event.key in [K_UP, K_DOWN, K_LEFT, K_RIGHT]:
+                    polygon = buildings.iloc[polygon_selector, 0].exterior.coords
+                    points = []
+                    for pt in list(polygon):
+                        # move all points in geometry towards desired direction:
+                        point = shapely.geometry.Point(pt)
+                        if event.key == K_UP:
+                            points.append((shapely.geometry.Point(pt).x, shapely.geometry.Point(pt).y+2))
+                        elif event.key == K_DOWN:
+                            points.append((shapely.geometry.Point(pt).x, shapely.geometry.Point(pt).y-2))
+                        elif event.key == K_LEFT:
+                            points.append((shapely.geometry.Point(pt).x-2, shapely.geometry.Point(pt).y))
+                        elif event.key == K_RIGHT:
+                            points.append((shapely.geometry.Point(pt).x+2, shapely.geometry.Point(pt).y))
+
+                    buildings.iloc[polygon_selector, 0] = shapely.geometry.Polygon(points)
+
+                elif event.key == K_s:
+                    buildings['geometry'].to_file(SAVED_BUILDINGS_FILE)
+                    print('saved buildings.shp to', SAVED_BUILDINGS_FILE)
+
+            #################### calibration mode: ####################
             if calibration_mode:
                 if event.key == K_TAB:
                     active_anchor = 0 if active_anchor == 3 else active_anchor + 1
@@ -169,30 +208,39 @@ while True:
     _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
     _gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
     _gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')
+    _gis.draw_polygon_layer(canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel') # stroke simple black
 
     # find buildings intersecting with selected grid cells
-    buildings['selected'] = False
 
-    for grid in [grid_1, grid_2]:
-        for y, row in enumerate(grid.grid):
-            for x, cell in enumerate(row):
-                # buildings.iloc[x, 6] = cell.rot
-                if cell.selected:
-                    # get viewport coordinates of the cell rectangle
-                    cell_vertices = grid.surface.transform(
-                        [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
-                    )
-                    ii = _gis.get_intersection_indexer(buildings, cell_vertices)
-                    buildings.loc[ii, 'selected'] = True
-                    buildings.loc[ii, 'cell'] = f"{x},{y}"
+    if not edit_mode:
+        buildings['selected'] = False
+        for grid in [grid_1, grid_2]:
+            for y, row in enumerate(grid.grid):
+                for x, cell in enumerate(row):
+                    # buildings.iloc[x, 6] = cell.rot
+                    if cell.selected:
+                        # get viewport coordinates of the cell rectangle
+                        cell_vertices = grid.surface.transform(
+                            [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
+                        )
+                        ii = _gis.get_intersection_indexer(buildings, cell_vertices)
+                        buildings.loc[ii, 'selected'] = True
+                        buildings.loc[ii, 'cell'] = f"{x},{y}"
 
-                # check whether any rotation has changed:
-                if cell.rot != cell.prev_rot:
-                    print("cell", f"{x, y}", "rotated.")
+                    # check whether any rotation has changed:
+                    if cell.rot != cell.prev_rot:
+                        print("cell", f"{x, y}", "rotated.")
 
-    if len(buildings[buildings.selected]):
-        # highlight selected buildings
-        _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
+        if len(buildings[buildings.selected]):
+            # highlight selected buildings
+            _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
+
+    # highlight selected building in edit mode:
+    else:
+        if len(buildings[buildings.selected]):
+            # highlight selected buildings
+            _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 3, (255, 255, 255))
+
 
     # build clusters of selected buildings and send JSON message
     clusters = stats.make_clusters(buildings[buildings.selected])

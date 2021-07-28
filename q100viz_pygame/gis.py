@@ -40,23 +40,6 @@ class GIS:
             points = self.surface.transform(polygon['geometry'].exterior.coords)
             pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
-    def mouse_pressed(self, df):
-        pos_x = 1013400 + pygame.mouse.get_pos()[0]
-        pos_y = 7207470 - pygame.mouse.get_pos()[1]
-
-        # get grid coordinate
-        # coord = self.surface.inverse_transform([pos])[0]
-
-        # if coord[0] < 0 or coord[1] < 0:
-        #     return
-
-        # if pos within buildings:
-        point = shapely.geometry.Point(pos_x, pos_y)
-        print(df['geometry'])
-        print(point)
-
-        return(df.contains(point))
-
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):
         self.file = file

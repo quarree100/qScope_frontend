@@ -20,7 +20,7 @@ class Stats:
         try:
             self.io.emit('message', msg)
         except:
-            print("Could not connect to Socket.IO server.")
+            pass
 
     def send_max_values(self, max_values, min_values):
         self.send_message("init\n" + "\n".join(map(str, max_values + min_values)))

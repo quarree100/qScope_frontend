@@ -14,6 +14,7 @@ import stats
 # geodata sources
 BASEMAP_FILE = "../../data/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"
 BUILDINGS_OSM_FILE = "../../data/Shapefiles/osm_heide_buildings.shp"
+BUILDINGS_OSM_FILE = "../../data/Shapefiles/bestandsgebaeude_qScope-verzerrt.shp"
 BUILDINGS_DATA_FILE = "../../data/Layer/Gebaeudeliste_import_truncated.csv"
 WAERMESPEICHER_FILE = "../../data/Shapefiles/Wärmespeicher.shp"
 HEIZZENTRALE_FILE = "../../data/Shapefiles/Heizzentrale.shp"
@@ -84,6 +85,8 @@ grid_1 = grid.Grid(canvas_size, 22, 22, [[50, 0], [50, 100], [100, 100], [100, 0
 
 show_basemap = True
 show_grid = True
+show_typologiezonen = False
+show_nahwaermenetz = True
 
 # Load data
 buildings = gis.read_shapefile(BUILDINGS_OSM_FILE, columns={'osm_id': 'int64'}).set_index('osm_id')
@@ -139,6 +142,12 @@ while True:
             # toggle grid:
             elif event.key == K_g:
                 show_grid = not show_grid
+            # toggle typologiezonen:
+            if event.key == K_t:
+                show_typologiezonen = not show_typologiezonen
+            # toggle nahwaermenetz:
+            if event.key == K_n:
+                show_nahwaermenetz = not show_nahwaermenetz                
             # toggle calibration:
             elif event.key == K_c:
                 calibration_mode = not calibration_mode
@@ -204,8 +213,10 @@ while True:
     grid_1.surface.fill(0)
     grid_2.surface.fill(0)
 
-    _gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
-    _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
+    if show_nahwaermenetz:
+        _gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
+    if show_typologiezonen:
+        _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50)) 
     _gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
     _gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')  # fill
     _gis.draw_polygon_layer(canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel')  # stroke simple black

@@ -3,8 +3,12 @@ import threading
 import json
 import pygame
 from pygame.locals import *
-import shapely
 
+from config import *
+from calibration_mode import CalibrationMode
+from edit_mode import EditMode
+from tui_mode import TuiMode
+import session
 import keystone
 import gis
 import grid
@@ -48,40 +52,38 @@ grid_udp_2 = ('localhost', 5001)
 stats_io = 'http://localhost:8081'
 
 # Set up display
-canvas_size = width, height = 1920, 1080
 canvas = pygame.display.set_mode(canvas_size, NOFRAME)
 pygame.display.set_caption("q100viz")
 
 # create the main surface, projected to corner points
 # the viewport's coordinates are between 0 and 100 on each axis
-viewport = keystone.Surface(canvas_size, pygame.SRCALPHA)
+session.viewport = keystone.Surface(canvas_size, pygame.SRCALPHA)
 try:
-    viewport.load(SAVED_KEYSTONE_FILE)
+    session.viewport.load(SAVED_KEYSTONE_FILE)
 except Exception:
     print("Failed to open keystone file")
-    viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
-    viewport.dst_points = [[80, 45], [80, 1035], [1840, 1035], [1840, 45]]
-viewport.calculate()
+    session.viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
+    session.viewport.dst_points = [[80, 45], [80, 1035], [1840, 1035], [1840, 45]]
+session.viewport.calculate()
 
 # Initialize geographic viewport and basemap
-_gis = gis.GIS(canvas_size,
+session.gis = gis.GIS(canvas_size,
                # northeast          northwest           southwest           southeast
                [[1013640, 7207470], [1013000, 7207270], [1013400, 7206120], [1014040, 7206320]],
-               viewport)
+               session.viewport)
 
-basemap = gis.Basemap(canvas_size, BASEMAP_FILE,
+session.basemap = gis.Basemap(canvas_size, BASEMAP_FILE,
                       # northwest          southwest           southeast           northeast
                       [[1012695, 7207571], [1012695, 7205976], [1014205, 7205976], [1014205, 7207571]],
-                      _gis)
-basemap.warp(canvas_size)
+                      session.gis)
+session.basemap.warp(canvas_size)
 
 # Initialize grid, projected onto the viewport
 grid_settings = json.load(open(CSPY_SETTINGS_FILE))['cityscopy']
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
-# grid_1 = grid.Grid(canvas_size, nrows, ncols, [[50, 50], [50, 100], [75, 100], [75, 50]], viewport)
-grid_2 = grid.Grid(canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
-grid_1 = grid.Grid(canvas_size, 22, 22, [[50, 0], [50, 100], [100, 100], [100, 0]], viewport)
+session.grid_2 = grid.Grid(canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], session.viewport)
+session.grid_1 = grid.Grid(canvas_size, 22, 22, [[50, 0], [50, 100], [100, 100], [100, 0]], session.viewport)
 
 show_basemap = True
 show_grid = True
@@ -91,7 +93,7 @@ show_nahwaermenetz = True
 # Load data
 buildings = gis.read_shapefile(BUILDINGS_OSM_FILE, columns={'osm_id': 'int64'}).set_index('osm_id')
 
-buildings = stats.append_csv(BUILDINGS_DATA_FILE, buildings, {
+buildings = session.buildings = stats.append_csv(BUILDINGS_DATA_FILE, buildings, {
     'Wärmeverbrauch 2017 [kWh]': 'float32',
     'Stromverbrauch 2017 [kWh]': 'float32',
 })
@@ -111,14 +113,8 @@ waermezentrale = gis.read_shapefile(WAERMESPEICHER_FILE, 'Wärmespeicher').appen
 # mask
 mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50], [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
-# calibration
-calibration_mode = False
-active_anchor = 0
-edit_mode = False
-polygon_selector = 0
-
 # UDP server for incoming cspy messages
-for grid, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
+for grid, grid_udp in [[session.grid_1, grid_udp_1], [session.grid_2, grid_udp_2]]:
     udp_server = udp.UDPServer(*grid_udp, 1024)
     udp_thread = threading.Thread(target=udp_server.listen, args=(grid.read_scanner_data,), daemon=True)
     udp_thread.start()
@@ -128,13 +124,23 @@ _stats = stats.Stats(stats_io)
 
 print(buildings)
 
+handlers = {
+    'calibrate': CalibrationMode(),
+    'edit': EditMode(),
+    'tui': TuiMode()
+}
+active_handler = handlers['tui']
+
 # Begin Game Loop
 while True:
     ################## process mouse/keyboard events ##################
     for event in pygame.event.get():
+        if active_handler:
+            active_handler.process_event(event)
+
         if event.type == MOUSEBUTTONDOWN:
-            grid_1.mouse_pressed()
-            grid_2.mouse_pressed()
+            session.grid_1.mouse_pressed()
+            session.grid_2.mouse_pressed()
         elif event.type == KEYDOWN:
             # toggle basemap:
             if event.key == K_m:
@@ -150,57 +156,10 @@ while True:
                 show_nahwaermenetz = not show_nahwaermenetz                
             # toggle calibration:
             elif event.key == K_c:
-                calibration_mode = not calibration_mode
+                active_handler = handlers['calibrate' if active_handler != handlers['calibrate'] else 'tui']
             # toggle edit-mode to move polygons:
             elif event.key == K_e:
-                edit_mode = not edit_mode
-
-            ####################### edit mode: ########################
-            if edit_mode:
-                buildings.iloc[polygon_selector, 6] = True  # mark building as selected
-                if event.key == K_TAB:
-                    polygon_selector = (polygon_selector + 1) % buildings.size
-                    buildings.iloc[polygon_selector, 6] = True  # mark building as selected
-                    buildings.iloc[polygon_selector-1, 6] = False  # unselect previous
-
-                elif event.key in [K_UP, K_DOWN, K_LEFT, K_RIGHT]:
-                    polygon = buildings.iloc[polygon_selector, 0].exterior.coords
-                    points = []
-                    for pt in list(polygon):
-                        # move all points in geometry towards desired direction:
-                        point = shapely.geometry.Point(pt)
-                        if event.key == K_UP:
-                            points.append((shapely.geometry.Point(pt).x, shapely.geometry.Point(pt).y+2))
-                        elif event.key == K_DOWN:
-                            points.append((shapely.geometry.Point(pt).x, shapely.geometry.Point(pt).y-2))
-                        elif event.key == K_LEFT:
-                            points.append((shapely.geometry.Point(pt).x-2, shapely.geometry.Point(pt).y))
-                        elif event.key == K_RIGHT:
-                            points.append((shapely.geometry.Point(pt).x+2, shapely.geometry.Point(pt).y))
-
-                    buildings.iloc[polygon_selector, 0] = shapely.geometry.Polygon(points)
-
-                elif event.key == K_s:
-                    buildings['geometry'].to_file(SAVED_BUILDINGS_FILE)
-                    print('saved buildings.shp to', SAVED_BUILDINGS_FILE)
-
-            #################### calibration mode: ####################
-            if calibration_mode:
-                if event.key == K_TAB:
-                    active_anchor = 0 if active_anchor == 3 else active_anchor + 1
-                elif event.key in [K_UP, K_DOWN, K_RIGHT, K_LEFT]:
-                    viewport.src_points[active_anchor][0] += 1 * (event.key == K_LEFT) - 1 * (event.key == K_RIGHT)
-                    viewport.src_points[active_anchor][1] += 1 * (event.key == K_UP) - 1 * (event.key == K_DOWN)
-
-                    # recalculate all surface projections
-                    viewport.calculate()
-                    _gis.surface.calculate(viewport.transform_mat)
-                    grid_1.surface.calculate(viewport.transform_mat)
-                    grid_2.surface.calculate(viewport.transform_mat)
-                    basemap.surface.calculate(_gis.surface.transform_mat)
-                    basemap.warp(canvas_size)
-                elif event.key == K_s:
-                    viewport.save(SAVED_KEYSTONE_FILE)
+                active_handler = handlers['edit' if active_handler != handlers['edit'] else 'tui']
 
         elif event.type == QUIT:
             pygame.quit()
@@ -208,79 +167,41 @@ while True:
 
     # clear surfaces
     canvas.fill(0)
-    viewport.fill(0)
-    _gis.surface.fill(0)
-    grid_1.surface.fill(0)
-    grid_2.surface.fill(0)
+    session.viewport.fill(0)
+    session.gis.surface.fill(0)
+    session.grid_1.surface.fill(0)
+    session.grid_2.surface.fill(0)
 
-    if show_nahwaermenetz:
-        _gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
-    if show_typologiezonen:
-        _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50)) 
-    _gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
-    _gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')  # fill
-    _gis.draw_polygon_layer(canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel')  # stroke simple black
-
-    # find buildings intersecting with selected grid cells
-
-    if not edit_mode:
-        buildings['selected'] = False
-        for grid in [grid_1, grid_2]:
-            for y, row in enumerate(grid.grid):
-                for x, cell in enumerate(row):
-                    # buildings.iloc[x, 6] = cell.rot
-                    if cell.selected:
-                        # get viewport coordinates of the cell rectangle
-                        cell_vertices = grid.surface.transform(
-                            [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
-                        )
-                        ii = _gis.get_intersection_indexer(buildings, cell_vertices)
-                        buildings.loc[ii, 'selected'] = True
-                        buildings.loc[ii, 'cell'] = f"{x},{y}"
-
-                    # check whether any rotation has changed:
-                    if cell.rot != cell.prev_rot:
-                        print("cell", f"{x, y}", "rotated.")
-
-        if len(buildings[buildings.selected]):
-            # highlight selected buildings
-            _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 2, (255, 0, 127))
-
-    # highlight selected building in edit mode:
-    else:
-        if len(buildings[buildings.selected]):
-            # highlight selected buildings
-            _gis.draw_polygon_layer(canvas, buildings[buildings.selected], 3, (255, 255, 255))
-
+    session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
+    session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
+    session.gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
+    session.gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')  # fill
+    session.gis.draw_polygon_layer(canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel')  # stroke simple black
 
     # build clusters of selected buildings and send JSON message
     clusters = stats.make_clusters(buildings[buildings.selected])
     _stats.send_dataframe_as_json(clusters.sum())
 
     # draw grid
-    grid_1.draw(canvas)
-    grid_2.draw(canvas)
+    session.grid_1.draw(canvas)
+    session.grid_2.draw(canvas)
 
     # draw mask
-    pygame.draw.polygon(viewport, BLACK, viewport.transform(mask_points))
+    pygame.draw.polygon(session.viewport, BLACK, session.viewport.transform(mask_points))
 
-    if calibration_mode:
-        # draw calibration anchors
-        for i, anchor in enumerate(viewport.transform([[0, 0], [0, 100], [100, 100], [100, 0]])):
-            pygame.draw.rect(viewport, WHITE,
-                             [anchor[0] - 10, anchor[1] - 10, 20, 20],
-                             i != active_anchor)
+    if active_handler:
+        active_handler.draw(canvas)
 
     if show_basemap:
-        canvas.blit(basemap.image, (0, 0))
+        canvas.blit(session.basemap.image, (0, 0))
 
-    canvas.blit(_gis.surface, (0, 0))
+    canvas.blit(session.gis.surface, (0, 0))
 
-    canvas.blit(viewport, (0, 0))
+    canvas.blit(session.viewport, (0, 0))
 
     if show_grid:
-        canvas.blit(grid_1.surface, (0, 0))
-        canvas.blit(grid_2.surface, (0, 0))
+        canvas.blit(session.grid_1.surface, (0, 0))
+        canvas.blit(session.grid_2.surface, (0, 0))
 
     pygame.display.update()
 

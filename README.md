@@ -11,11 +11,11 @@ Before you can run the sketch, you need to install required packages:
 pip install -r requirements.txt
 ```
 
-Geodata sources are expected to be found in the `data` directory. Create it (if it does not exist) and make the basemap image and shapefiles available.
+Geodata sources are expected to be found in the `data` directory. Create it (if it does not exist) and make the basemap image and shapefiles available. Check the file paths in `config.py`.
 
-Change to the `q100viz_pygame` directory and run the sketch:
+Run the sketch:
 ```
-python q100viz.py
+python run_q100viz.py
 ```
 
 ### Interactions

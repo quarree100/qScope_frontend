@@ -1,8 +1,8 @@
-import session
+import q100viz.session as session
 
 
 class TuiMode:
-    def process_event(self, event):
+    def process_event(self, event, config):
         pass
 
     def draw(self, canvas):

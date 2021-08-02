@@ -1,15 +1,16 @@
-from pygame.locals import *
+from pygame.locals import KEYDOWN, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_s
 import shapely
 
-from config import *
-import session
+import q100viz.session as session
 
 
 class EditMode:
     def __init__(self):
         self.polygon_selector = 0
 
-    def process_event(self, event):
+    def process_event(self, event, config):
+        buildings_file = config['SAVED_BUILDINGS_FILE']
+
         session.buildings.iloc[self.polygon_selector, 6] = True  # mark building as selected
 
         if event.type == KEYDOWN:
@@ -36,8 +37,8 @@ class EditMode:
                 session.buildings.iloc[self.polygon_selector, 0] = shapely.geometry.Polygon(points)
 
             elif event.key == K_s:
-                session.buildings['geometry'].to_file(SAVED_BUILDINGS_FILE)
-                print('saved buildings.shp to', SAVED_BUILDINGS_FILE)
+                session.buildings['geometry'].to_file(buildings_file)
+                print('saved buildings.shp to', buildings_file)
 
     def draw(self, canvas):
         if len(session.buildings[session.buildings.selected]):

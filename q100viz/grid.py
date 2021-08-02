@@ -1,7 +1,7 @@
 import json
 import pygame
 
-import keystone
+import q100viz.keystone as keystone
 
 class Grid:
     def __init__(self, canvas_size, x_size, y_size, dst_points, viewport):

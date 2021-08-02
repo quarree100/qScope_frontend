@@ -3,7 +3,7 @@ import geopandas
 import shapely
 import pygame
 
-import keystone
+import q100viz.keystone as keystone
 
 crs="EPSG:3857"
 
@@ -42,6 +42,7 @@ class GIS:
 
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):
+        self.canvas_size = canvas_size
         self.file = file
         self.surface = keystone.Surface(canvas_size)
 
@@ -52,9 +53,9 @@ class Basemap:
         self.surface.dst_points = dst_points
         self.surface.calculate(gis.surface.transform_mat)
 
-    def warp(self, canvas_size):
+    def warp(self):
         # warp image and update the surface
-        image = self.surface.warp_image(self.file, canvas_size)
+        image = self.surface.warp_image(self.file, self.canvas_size)
         self.image = pygame.image.frombuffer(image, image.shape[1::-1], 'BGR')
 
 

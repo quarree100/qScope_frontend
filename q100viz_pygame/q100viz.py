@@ -1,4 +1,5 @@
 import sys
+import random
 import threading
 import json
 import pygame
@@ -85,6 +86,9 @@ buildings = session.buildings = stats.append_csv(BUILDINGS_DATA_FILE, buildings,
 # data normalized by max values
 buildings['Wärme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / buildings.max()['Wärmeverbrauch 2017 [kWh]']
 buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / buildings.max()['Stromverbrauch 2017 [kWh]']
+
+# mock data
+buildings['CO2'] = [0.5 * random.random() for row in buildings.values]
 
 # add cell column
 buildings['cell'] = ""

@@ -21,20 +21,11 @@ class UDPServer:
             # Listen for incoming datagrams
             while True:
                 message, _ = udp_socket.recvfrom(self.buffer_size)
+
+                if len(message) == self.buffer_size:
+                    print("Warning: the UDP message may have been truncated")
+
                 callback(message.decode())
 
         except KeyboardInterrupt:
             exit()
-
-
-class UDPClient:
-    """UDP client sending messages to the stats visualization"""
-    def __init__(self, remote_address, remote_port):
-        self.address = remote_address
-        self.port = remote_port
-
-        # Create a datagram socket
-        self.udp_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-
-    def send_message(self, message):
-        self.udp_socket.sendto(str.encode(message), (self.address, self.port))

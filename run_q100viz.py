@@ -99,7 +99,7 @@ mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50], [-50, -50], [-5
 
 # UDP server for incoming cspy messages
 for grid, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
-    udp_server = udp.UDPServer(*grid_udp, 1024)
+    udp_server = udp.UDPServer(*grid_udp, 4096)
     udp_thread = threading.Thread(target=udp_server.listen, args=(grid.read_scanner_data,), daemon=True)
     udp_thread.start()
 

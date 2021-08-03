@@ -3,7 +3,7 @@ import random
 import threading
 import json
 import pygame
-from pygame.locals import NOFRAME, MOUSEBUTTONDOWN, KEYDOWN, K_c, K_e, K_g, K_m, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, QUIT
 
 from config import config
 import q100viz.keystone as keystone
@@ -122,10 +122,7 @@ while True:
         if active_handler:
             active_handler.process_event(event, config)
 
-        if event.type == MOUSEBUTTONDOWN:
-            grid_1.mouse_pressed()
-            grid_2.mouse_pressed()
-        elif event.type == KEYDOWN:
+        if event.type == KEYDOWN:
             # toggle basemap:
             if event.key == K_m:
                 show_basemap = event.key == K_m and not show_basemap
@@ -150,15 +147,12 @@ while True:
     grid_1.surface.fill(0)
     grid_2.surface.fill(0)
 
+    # draw static GIS objects
     _gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
     _gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
     _gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')  # fill
     _gis.draw_polygon_layer(canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel')  # stroke simple black
-
-    # build clusters of selected buildings and send JSON message
-    clusters = stats.make_clusters(buildings[buildings.selected])
-    _stats.send_dataframe_as_json(clusters.sum())
 
     # draw grid
     grid_1.draw(canvas)
@@ -167,9 +161,15 @@ while True:
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
 
+    # draw extras
     if active_handler:
         active_handler.draw(canvas)
 
+    # build clusters of selected buildings and send JSON message
+    clusters = stats.make_clusters(buildings[buildings.selected])
+    _stats.send_dataframe_as_json(clusters.sum())
+
+    # render surfaces
     if show_basemap:
         canvas.blit(basemap.image, (0, 0))
 

@@ -2,3 +2,4 @@ geopandas
 opencv-python
 pygame
 python-socketio
+websocket-client

@@ -16,22 +16,6 @@ from q100viz.interaction.edit_mode import EditMode
 from q100viz.interaction.tui_mode import TuiMode
 import q100viz.session as session
 
-# geodata sources
-BASEMAP_FILE = "../../data/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"
-BUILDINGS_OSM_FILE = "../../data/Shapefiles/osm_heide_buildings.shp"
-# BUILDINGS_OSM_FILE = "../../data/Shapefiles/qScope_verzerrt/bestandsgebaeude_verzerrt.shp"
-# BUILDINGS_OSM_FILE = "export/buildings_export.shp"
-BUILDINGS_DATA_FILE = "../../data/Layer/Gebaeudeliste_import_truncated.csv"
-WAERMESPEICHER_FILE = "../../data/Shapefiles/Wärmespeicher.shp"
-HEIZZENTRALE_FILE = "../../data/Shapefiles/Heizzentrale.shp"
-NAHWAERMENETZ_FILE = "../../data/Shapefiles/Nahwärmenetz.shp"
-# NAHWAERMENETZ_FILE = "../../data/Shapefiles/qScope_verzerrt/Nahwärmenetz_verzerrt.shp"
-TYPOLOGIEZONEN_FILE = "../../data/Shapefiles/Typologiezonen.shp"
-CSPY_SETTINGS_FILE = '../../settings/cityscopy.json'
-
-SAVED_KEYSTONE_FILE = 'keystone.save'
-SAVED_BUILDINGS_FILE = 'export/buildings_export.shp'
-
 # Set FPS
 FPS = 12
 
@@ -159,7 +143,7 @@ while True:
                 show_typologiezonen = not show_typologiezonen
             # toggle nahwaermenetz:
             if event.key == K_n:
-                show_nahwaermenetz = not show_nahwaermenetz                
+                show_nahwaermenetz = not show_nahwaermenetz
             # toggle calibration:
             elif event.key == K_c:
                 active_handler = handlers['calibrate' if active_handler != handlers['calibrate'] else 'tui']

@@ -18,14 +18,14 @@ import q100viz.session as session
 
 # geodata sources
 BASEMAP_FILE = "../../data/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"
-# BUILDINGS_OSM_FILE = "../../data/Shapefiles/osm_heide_buildings.shp"
+BUILDINGS_OSM_FILE = "../../data/Shapefiles/osm_heide_buildings.shp"
 # BUILDINGS_OSM_FILE = "../../data/Shapefiles/qScope_verzerrt/bestandsgebaeude_verzerrt.shp"
-BUILDINGS_OSM_FILE = "export/buildings_export.shp"
+# BUILDINGS_OSM_FILE = "export/buildings_export.shp"
 BUILDINGS_DATA_FILE = "../../data/Layer/Gebaeudeliste_import_truncated.csv"
 WAERMESPEICHER_FILE = "../../data/Shapefiles/Wärmespeicher.shp"
 HEIZZENTRALE_FILE = "../../data/Shapefiles/Heizzentrale.shp"
-# NAHWAERMENETZ_FILE = "../../data/Shapefiles/Nahwärmenetz.shp"
-NAHWAERMENETZ_FILE = "../../data/Shapefiles/qScope_verzerrt/Nahwärmenetz_verzerrt.shp"
+NAHWAERMENETZ_FILE = "../../data/Shapefiles/Nahwärmenetz.shp"
+# NAHWAERMENETZ_FILE = "../../data/Shapefiles/qScope_verzerrt/Nahwärmenetz_verzerrt.shp"
 TYPOLOGIEZONEN_FILE = "../../data/Shapefiles/Typologiezonen.shp"
 CSPY_SETTINGS_FILE = '../../settings/cityscopy.json'
 
@@ -64,10 +64,17 @@ except Exception:
 viewport.calculate()
 
 # Initialize geographic viewport and basemap
+
+# ROI for distorted polygons:
+# _gis = session.gis = gis.GIS(canvas_size,
+#                # northeast          northwest           southwest           southeast
+#                [[1013622, 7207331], [1013083, 7207150], [1013414, 7206159], [1013990, 7206366]],
+#                session.viewport)
+
 _gis = session.gis = gis.GIS(canvas_size,
                # northeast          northwest           southwest           southeast
-               [[1013622, 7207331], [1013083, 7207150], [1013414, 7206159], [1013990, 7206366]],
-               session.viewport)
+               [[1013640, 7207470], [1013000, 7207270], [1013400, 7206120], [1014040, 7206320]],
+               viewport)
 
 basemap = session.basemap = gis.Basemap(canvas_size, config['BASEMAP_FILE'],
                        # northwest          southwest           southeast           northeast

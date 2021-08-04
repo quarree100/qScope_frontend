@@ -3,7 +3,7 @@ import random
 import threading
 import json
 import pygame
-from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, K_t, K_n, QUIT
 
 from config import config
 import q100viz.keystone as keystone

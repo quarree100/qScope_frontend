@@ -16,6 +16,22 @@ from q100viz.interaction.edit_mode import EditMode
 from q100viz.interaction.tui_mode import TuiMode
 import q100viz.session as session
 
+# geodata sources
+BASEMAP_FILE = "../../data/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"
+# BUILDINGS_OSM_FILE = "../../data/Shapefiles/osm_heide_buildings.shp"
+# BUILDINGS_OSM_FILE = "../../data/Shapefiles/qScope_verzerrt/bestandsgebaeude_verzerrt.shp"
+BUILDINGS_OSM_FILE = "export/buildings_export.shp"
+BUILDINGS_DATA_FILE = "../../data/Layer/Gebaeudeliste_import_truncated.csv"
+WAERMESPEICHER_FILE = "../../data/Shapefiles/Wärmespeicher.shp"
+HEIZZENTRALE_FILE = "../../data/Shapefiles/Heizzentrale.shp"
+# NAHWAERMENETZ_FILE = "../../data/Shapefiles/Nahwärmenetz.shp"
+NAHWAERMENETZ_FILE = "../../data/Shapefiles/qScope_verzerrt/Nahwärmenetz_verzerrt.shp"
+TYPOLOGIEZONEN_FILE = "../../data/Shapefiles/Typologiezonen.shp"
+CSPY_SETTINGS_FILE = '../../settings/cityscopy.json'
+
+SAVED_KEYSTONE_FILE = 'keystone.save'
+SAVED_BUILDINGS_FILE = 'export/buildings_export.shp'
+
 # Set FPS
 FPS = 12
 
@@ -50,8 +66,8 @@ viewport.calculate()
 # Initialize geographic viewport and basemap
 _gis = session.gis = gis.GIS(canvas_size,
                # northeast          northwest           southwest           southeast
-               [[1013640, 7207470], [1013000, 7207270], [1013400, 7206120], [1014040, 7206320]],
-               viewport)
+               [[1013622, 7207331], [1013083, 7207150], [1013414, 7206159], [1013990, 7206366]],
+               session.viewport)
 
 basemap = session.basemap = gis.Basemap(canvas_size, config['BASEMAP_FILE'],
                        # northwest          southwest           southeast           northeast
@@ -66,8 +82,10 @@ ncols = grid_settings['ncols']
 grid_1 = session.grid_1 = grid.Grid(canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
 grid_2 = session.grid_2 = grid.Grid(canvas_size, 22, 22, [[50, 0], [50, 100], [100, 100], [100, 0]], viewport)
 
-show_basemap = True
-show_grid = True
+show_basemap = False
+show_grid = False
+show_typologiezonen = False
+show_nahwaermenetz = True
 
 # Load data
 buildings = gis.read_shapefile(config['BUILDINGS_OSM_FILE'], columns={'osm_id': 'int64'}).set_index('osm_id')
@@ -129,6 +147,12 @@ while True:
             # toggle grid:
             elif event.key == K_g:
                 show_grid = not show_grid
+            # toggle typologiezonen:
+            if event.key == K_t:
+                show_typologiezonen = not show_typologiezonen
+            # toggle nahwaermenetz:
+            if event.key == K_n:
+                show_nahwaermenetz = not show_nahwaermenetz                
             # toggle calibration:
             elif event.key == K_c:
                 active_handler = handlers['calibrate' if active_handler != handlers['calibrate'] else 'tui']
@@ -147,12 +171,13 @@ while True:
     grid_1.surface.fill(0)
     grid_2.surface.fill(0)
 
-    # draw static GIS objects
-    _gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
-    _gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
-    _gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
-    _gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')  # fill
-    _gis.draw_polygon_layer(canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel')  # stroke simple black
+    session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
+    if show_typologiezonen:
+        session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
+    session.gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
+    session.gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')  # fill and lerp
+    # session.gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'Wärme_2017_rel')  # fill all equally
+    session.gis.draw_polygon_layer(canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel')  # stroke simple black
 
     # draw grid
     grid_1.draw(canvas)

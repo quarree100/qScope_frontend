@@ -1,5 +1,5 @@
 import pygame
-from pygame.locals import KEYDOWN, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_s
+from pygame.locals import KEYDOWN, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_s
 
 import q100viz.session as session
 
@@ -7,6 +7,7 @@ import q100viz.session as session
 class CalibrationMode:
     def __init__(self):
         self.active_anchor = 0
+        self.magnitude = 1
 
     def process_event(self, event, config):
         keystone_file = config['SAVED_KEYSTONE_FILE']
@@ -14,12 +15,15 @@ class CalibrationMode:
         if event.type == KEYDOWN:
             if event.key == K_TAB:
                 self.active_anchor = 0 if self.active_anchor == 3 else self.active_anchor + 1
+            elif event.key == K_SPACE:
+                self.magnitude = 0.1 if (self.magnitude == 1) else 1
+                print("magnitude = ", self.magnitude)
             elif event.key in [K_UP, K_DOWN, K_RIGHT, K_LEFT]:
                 session.viewport.src_points[self.active_anchor][0] += (
-                    1 * (event.key == K_LEFT) - 1 * (event.key == K_RIGHT)
+                    self.magnitude * (event.key == K_LEFT) - self.magnitude * (event.key == K_RIGHT)
                 )
                 session.viewport.src_points[self.active_anchor][1] += (
-                    1 * (event.key == K_UP) - 1 * (event.key == K_DOWN)
+                    self.magnitude * (event.key == K_UP) - self.magnitude * (event.key == K_DOWN)
                 )
 
                 # recalculate all surface projections

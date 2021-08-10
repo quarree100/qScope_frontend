@@ -20,23 +20,25 @@ class Grid:
         self.grid = [[GridCell() for x in range(x_size)] for y in range(y_size)]
 
     def draw(self, surface):
-        colors = [
-            (255, 255, 255),
-            (0, 0, 0, 0),
-            (255, 0, 0),
-            (0, 255, 255),
-            (255, 255, 0),
-            (0, 100, 255),
-            (100, 255, 100)
-        ]
-
         rects_transformed = [(cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
             for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
-        # draw filled rectangles to visualize grid data
+        font = pygame.font.SysFont('Arial', 20)
+
+        # draw grid data
         for cell, rect_points in rects_transformed:
-            if cell.id > -1:
-                pygame.draw.polygon(self.surface, pygame.Color(*colors[cell.id]), rect_points, 0)
+            self.surface.blit(
+                font.render(str(cell.id), True, (255, 255, 255)),
+                rect_points[0]
+            )
+            self.surface.blit(
+                font.render(str(cell.rot), True, (255, 255, 0)),
+                [rect_points[0][0] + 20, rect_points[0][1]]
+            )
+            self.surface.blit(
+                font.render(str(cell.rel_rot), True, (255, 127, 0)),
+                [rect_points[0][0] + 20, rect_points[0][1] + 20]
+            )
 
         # draw rectangle outlines
         for cell, rect_points in rects_transformed:

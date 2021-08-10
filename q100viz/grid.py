@@ -79,9 +79,11 @@ class Grid:
 
                     # calculate relative rotation
                     # an inactive cell has a rotation value of -1
-                    if cell.prev_rot != cell.rot:
-                        cell.rel_rot = cell.rot - (cell.prev_rot if cell.prev_rot > -1 else 0)
-                        cell.prev_rot = cell.rot
+                    if cell.rot == -1:
+                        cell.rel_rot = 0
+                    elif cell.prev_rot != cell.rot:
+                        cell.rel_rot = cell.rot - cell.prev_rot if cell.prev_rot > -1 else 0
+                    cell.prev_rot = cell.rot
 
         except TypeError:
             pass

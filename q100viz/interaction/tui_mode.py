@@ -18,8 +18,10 @@ class TuiMode:
                 for x, cell in enumerate(row):
                     if cell.selected:
                         i = get_intersection(session.buildings, grid, x, y)  # high performance impact, use sparingly
-                        session.buildings.loc[i, 'selected'] = True
-                        session.buildings.loc[i, 'cell'] = f"{x},{y}"
+
+                        # use rotation value to cycle through buildings located in cell
+                        selection = session.buildings[i].iloc[cell.rot % len(session.buildings[i])]
+                        session.buildings.loc[selection.name, 'selected'] = True
 
                     if cell.id > 0 and cell.rel_rot == 1:
                         i = get_intersection(session.buildings, grid, x, y)

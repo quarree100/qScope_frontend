@@ -74,8 +74,8 @@ class Grid:
                 for x, cell in enumerate(row):
                     cell.id, cell.rot = array[y * self.y_size + x]
 
-                    # object with ID 3 selects cells
-                    cell.selected = cell.id == 3
+                    # any non-white object selects cells
+                    cell.selected = cell.id != 0
 
                     # calculate relative rotation
                     # an inactive cell has a rotation value of -1

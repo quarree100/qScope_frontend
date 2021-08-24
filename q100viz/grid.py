@@ -17,7 +17,7 @@ class Grid:
         self.surface.calculate(viewport.transform_mat)
 
         # initialize two-dimensional array of grid cells
-        self.grid = [[GridCell() for x in range(x_size)] for y in range(y_size)]
+        self.grid = [[GridCell() for y in range(y_size)] for x in range(x_size)]
 
     def draw(self, surface):
         rects_transformed = [(cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
@@ -25,7 +25,7 @@ class Grid:
 
         font = pygame.font.SysFont('Arial', 20)
 
-        # draw grid data
+        # draw grid data    
         for cell, rect_points in rects_transformed:
             self.surface.blit(
                 font.render(str(cell.id), True, (255, 255, 255)),
@@ -39,7 +39,7 @@ class Grid:
                 font.render(str(cell.rel_rot), True, (255, 127, 0)),
                 [rect_points[0][0] + 20, rect_points[0][1] + 20]
             )
-
+            
         # draw rectangle outlines
         for cell, rect_points in rects_transformed:
             stroke = 4 if cell.selected else 1

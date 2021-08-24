@@ -19,7 +19,7 @@ class Stats:
     def send_message(self, msg):
         try:
             self.io.emit('message', msg)
-        except:
+        except Exception:
             pass
 
     def send_max_values(self, max_values, min_values):
@@ -34,7 +34,8 @@ class Stats:
 
 def append_csv(file, df, cols):
     """Open data from CSV and join them with a GeoDataFrame based on osm_id."""
-    values = pandas.read_csv(file, usecols=['osm_id', *cols.keys()], dtype=cols).set_index('osm_id')
+    values = pandas.read_csv(
+        file, usecols=['osm_id', *cols.keys()], dtype=cols).set_index('osm_id')
     return df.join(values, on='osm_id')
 
 
@@ -45,4 +46,5 @@ def make_clusters(buildings):
 
 def export_json(df, outfile):
     """Export a dataframe to JSON file."""
-    return pandas.DataFrame(df).to_json(outfile, orient='records', force_ascii=False, default_handler=str)
+    return pandas.DataFrame(df).to_json(
+        outfile, orient='records', force_ascii=False, default_handler=str)

@@ -5,7 +5,7 @@ import pygame
 
 import q100viz.keystone as keystone
 
-crs="EPSG:3857"
+crs = "EPSG:3857"
 
 
 class GIS:
@@ -39,6 +39,7 @@ class GIS:
 
             points = self.surface.transform(polygon['geometry'].exterior.coords)
             pygame.draw.polygon(self.surface, fill_color, points, stroke)
+
 
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):

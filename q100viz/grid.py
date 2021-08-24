@@ -21,7 +21,8 @@ class Grid:
         self.grid = [[GridCell() for x in range(x_size)] for y in range(y_size)]
 
     def draw(self, surface):
-        rects_transformed = [(cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
+        rects_transformed = [
+            (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
             for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
         font = pygame.font.SysFont('Arial', 20)

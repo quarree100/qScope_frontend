@@ -55,23 +55,27 @@ viewport.calculate()
 #                [[1013622, 7207331], [1013083, 7207150], [1013414, 7206159], [1013990, 7206366]],
 #                session.viewport)
 
-_gis = session.gis = gis.GIS(canvas_size,
-               # northeast          northwest           southwest           southeast
-               [[1013640, 7207470], [1013000, 7207270], [1013400, 7206120], [1014040, 7206320]],
-               viewport)
+_gis = session.gis = gis.GIS(
+    canvas_size,
+    # northeast          northwest           southwest           southeast
+    [[1013640, 7207470], [1013000, 7207270], [1013400, 7206120], [1014040, 7206320]],
+    viewport)
 
-basemap = session.basemap = gis.Basemap(canvas_size, config['BASEMAP_FILE'],
-                       # northwest          southwest           southeast           northeast
-                       [[1012695, 7207571], [1012695, 7205976], [1014205, 7205976], [1014205, 7207571]],
-                       _gis)
+basemap = session.basemap = gis.Basemap(
+    canvas_size, config['BASEMAP_FILE'],
+    # northwest          southwest           southeast           northeast
+    [[1012695, 7207571], [1012695, 7205976], [1014205, 7205976], [1014205, 7207571]],
+    _gis)
 basemap.warp()
 
 # Initialize grid, projected onto the viewport
 grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))['cityscopy']
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
-grid_1 = session.grid_1 = grid.Grid(canvas_size, ncols, nrows, [[50, 0], [50, 81], [100, 81], [100, 0]], viewport)
-grid_2 = session.grid_2 = grid.Grid(canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
+grid_1 = session.grid_1 = grid.Grid(
+    canvas_size, ncols, nrows, [[50, 0], [50, 81], [100, 81], [100, 0]], viewport)
+grid_2 = session.grid_2 = grid.Grid(
+    canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
 
 show_basemap = False
 show_grid = False
@@ -79,7 +83,8 @@ show_typologiezonen = False
 show_nahwaermenetz = True
 
 # Load data
-buildings = gis.read_shapefile(config['BUILDINGS_OSM_FILE'], columns={'osm_id': 'int64'}).set_index('osm_id')
+buildings = gis.read_shapefile(
+    config['BUILDINGS_OSM_FILE'], columns={'osm_id': 'int64'}).set_index('osm_id')
 
 buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], buildings, {
     'Wärmeverbrauch 2017 [kWh]': 'float32',
@@ -87,8 +92,10 @@ buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], 
 })
 
 # data normalized by max values
-buildings['Wärme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / buildings.max()['Wärmeverbrauch 2017 [kWh]']
-buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / buildings.max()['Stromverbrauch 2017 [kWh]']
+buildings['Wärme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / \
+    buildings.max()['Wärmeverbrauch 2017 [kWh]']
+buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / \
+    buildings.max()['Stromverbrauch 2017 [kWh]']
 
 # mock data
 buildings['CO2'] = [0.5 * random.random() for row in buildings.values]
@@ -100,16 +107,18 @@ buildings['selected'] = False
 typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])
 nahwaermenetz = gis.read_shapefile(config['NAHWAERMENETZ_FILE'])
 waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Wärmespeicher').append(
-    gis.read_shapefile(config['HEIZZENTRALE_FILE'])
-)
+    gis.read_shapefile(config['HEIZZENTRALE_FILE']))
 
 # mask
-mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50], [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
+mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50],
+               [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
 # UDP server for incoming cspy messages
-for grid, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
+for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
     udp_server = udp.UDPServer(*grid_udp, 4096)
-    udp_thread = threading.Thread(target=udp_server.listen, args=(grid.read_scanner_data,), daemon=True)
+    udp_thread = threading.Thread(target=udp_server.listen,
+                                  args=(grid_.read_scanner_data,),
+                                  daemon=True)
     udp_thread.start()
 
 # stats viz communication
@@ -146,7 +155,8 @@ while True:
                 show_nahwaermenetz = not show_nahwaermenetz
             # toggle calibration:
             elif event.key == K_c:
-                active_handler = handlers['calibrate' if active_handler != handlers['calibrate'] else 'tui']
+                active_handler = handlers[
+                    'calibrate' if active_handler != handlers['calibrate'] else 'tui']
             # toggle edit-mode to move polygons:
             elif event.key == K_e:
                 active_handler = handlers['edit' if active_handler != handlers['edit'] else 'tui']
@@ -166,9 +176,12 @@ while True:
     if show_typologiezonen:
         session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
     session.gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
-    session.gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')  # fill and lerp
-    # session.gis.draw_polygon_layer(canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'Wärme_2017_rel')  # fill all equally
-    session.gis.draw_polygon_layer(canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel')  # stroke simple black
+    session.gis.draw_polygon_layer(
+        canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')  # fill and lerp
+    # session.gis.draw_polygon_layer(
+    #     canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'Wärme_2017_rel')  # fill all equally
+    session.gis.draw_polygon_layer(
+        canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel')  # stroke simple black
 
     # draw grid
     grid_1.draw(canvas)

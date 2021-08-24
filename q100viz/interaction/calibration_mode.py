@@ -20,7 +20,8 @@ class CalibrationMode:
                 print("magnitude = ", self.magnitude)
             elif event.key in [K_UP, K_DOWN, K_RIGHT, K_LEFT]:
                 session.viewport.src_points[self.active_anchor][0] += (
-                    self.magnitude * (event.key == K_LEFT) - self.magnitude * (event.key == K_RIGHT)
+                    self.magnitude * (event.key == K_LEFT) - self.magnitude * (
+                        event.key == K_RIGHT)
                 )
                 session.viewport.src_points[self.active_anchor][1] += (
                     self.magnitude * (event.key == K_UP) - self.magnitude * (event.key == K_DOWN)
@@ -38,7 +39,8 @@ class CalibrationMode:
 
     def draw(self, canvas):
         # draw calibration anchors
-        for i, anchor in enumerate(session.viewport.transform([[0, 0], [0, 100], [100, 100], [100, 0]])):
+        for i, anchor in enumerate(
+                session.viewport.transform([[0, 0], [0, 100], [100, 100], [100, 0]])):
             pygame.draw.rect(session.viewport,
                              (255, 255, 255),
                              [anchor[0] - 10, anchor[1] - 10, 20, 20],

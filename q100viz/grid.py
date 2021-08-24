@@ -3,6 +3,7 @@ import pygame
 
 import q100viz.keystone as keystone
 
+
 class Grid:
     def __init__(self, canvas_size, x_size, y_size, dst_points, viewport):
         self.x_size = x_size
@@ -72,10 +73,10 @@ class Grid:
         try:
             for y, row in enumerate(self.grid):
                 for x, cell in enumerate(row):
-                    cell.id, cell.rot = array[y * self.y_size + x]
+                    cell.id, cell.rot = array[y * self.x_size + x]
 
-                    # object with ID 3 selects cells
-                    cell.selected = cell.id == 3
+                    # any non-white object selects cells
+                    cell.selected = cell.id != 0
 
                     # calculate relative rotation
                     # an inactive cell has a rotation value of -1

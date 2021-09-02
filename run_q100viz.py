@@ -3,7 +3,7 @@ import random
 import threading
 import json
 import pygame
-from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, K_t, K_n, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, K_n, K_p, K_t, QUIT
 
 from config import config
 import q100viz.keystone as keystone
@@ -71,6 +71,7 @@ grid_1 = session.grid_1 = grid.Grid(
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
 
+show_polygons = True
 show_basemap = False
 show_grid = False
 show_typologiezonen = False
@@ -135,6 +136,9 @@ while True:
             active_handler.process_event(event, config)
 
         if event.type == KEYDOWN:
+            # toggle polygons:
+            if event.key == K_p:
+                show_polygons = event.key == K_p and not show_polygons
             # toggle basemap:
             if event.key == K_m:
                 show_basemap = event.key == K_m and not show_basemap
@@ -196,7 +200,8 @@ while True:
     if show_basemap:
         canvas.blit(basemap.image, (0, 0))
 
-    canvas.blit(_gis.surface, (0, 0))
+    if show_polygons:
+        canvas.blit(_gis.surface, (0, 0))
 
     canvas.blit(viewport, (0, 0))
 

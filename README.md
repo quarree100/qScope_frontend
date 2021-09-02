@@ -20,6 +20,7 @@ python run_q100viz.py
 
 ### Interactions
 
+- **P** key: toggle polygons
 - **M** key: toggle basemap
 - **G** key: toggle grid
 - **C** key: toggle calibration mode

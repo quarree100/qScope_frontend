@@ -47,7 +47,7 @@ class Grid:
             stroke = 4 if cell.selected else 1
             pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), rect_points, stroke)
 
-    def mouse_pressed(self):
+    def mouse_pressed(self, button):
         pos = pygame.mouse.get_pos()
 
         # get grid coordinate
@@ -59,7 +59,11 @@ class Grid:
         # update cell at cursor position
         try:
             cell = self.grid[int(coord[1])][int(coord[0])]
-            cell.selected = not cell.selected
+            if button == 1:  # left click
+                cell.selected = not cell.selected
+            elif button == 3:  # right click
+                cell.prev_rot = cell.rot
+                cell.rot  = (cell.rot + 1) % 4
         except IndexError:
             pass
 

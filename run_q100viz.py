@@ -49,16 +49,10 @@ viewport.calculate()
 
 # Initialize geographic viewport and basemap
 
-# ROI for distorted polygons:
-# _gis = session.gis = gis.GIS(canvas_size,
-#                # northeast          northwest           southwest           southeast
-#                [[1013622, 7207331], [1013083, 7207150], [1013414, 7206159], [1013990, 7206366]],
-#                session.viewport)
-
 _gis = session.gis = gis.GIS(
     canvas_size,
     # northeast          northwest           southwest           southeast
-    [[1013640, 7207470], [1013000, 7207270], [1013400, 7206120], [1014040, 7206320]],
+    [[1013631, 7207409], [1012961, 7207198], [1013359, 7205932], [1014029, 7206143]],
     viewport)
 
 basemap = session.basemap = gis.Basemap(
@@ -69,7 +63,7 @@ basemap = session.basemap = gis.Basemap(
 basemap.warp()
 
 # Initialize grid, projected onto the viewport
-grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))['cityscopy']
+grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = session.grid_1 = grid.Grid(

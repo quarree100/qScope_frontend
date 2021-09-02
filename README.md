@@ -23,10 +23,12 @@ python run_q100viz.py
 - **M** key: toggle basemap
 - **G** key: toggle grid
 - **C** key: toggle calibration mode
+- **E** key: toggle edit mode (for displacement of polygons)
 
 - In calibration mode:
   - **TAB** key: select active corner
   - **UP/DOWN/LEFT/RIGHT** keys: move active corner
+  - **SPACE**: toggle magnitude
   - **S** key: save configuration
 
 ## Recommended folder structure

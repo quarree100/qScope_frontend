@@ -6,8 +6,8 @@ import q100viz.session as session
 class TuiMode:
     def process_event(self, event, config):
         if event.type == MOUSEBUTTONDOWN:
-            session.grid_1.mouse_pressed()
-            session.grid_2.mouse_pressed()
+            session.grid_1.mouse_pressed(event.button)
+            session.grid_2.mouse_pressed(event.button)
 
     def draw(self, canvas):
         session.buildings['selected'] = False

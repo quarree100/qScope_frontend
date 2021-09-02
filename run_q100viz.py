@@ -104,7 +104,7 @@ nahwaermenetz = gis.read_shapefile(config['NAHWAERMENETZ_FILE'])
 waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Wärmespeicher').append(
     gis.read_shapefile(config['HEIZZENTRALE_FILE']))
 
-# mask
+# mask viewport with black surface
 mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50],
                [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
@@ -198,7 +198,9 @@ while True:
 
     # render surfaces
     if show_basemap:
-        canvas.blit(basemap.image, (0, 0))
+        crop_width = 4644
+        crop_height = 620
+        canvas.blit(basemap.image, (0, 0), (0, 0, crop_width, crop_height))
 
     if show_polygons:
         canvas.blit(_gis.surface, (0, 0))

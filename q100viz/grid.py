@@ -69,7 +69,7 @@ class Grid:
 
     def read_scanner_data(self, message):
         try:
-            array = json.loads(message)
+            array = json.loads(message)['grid']
         except json.decoder.JSONDecodeError:
             print("Invalid JSON")
             return

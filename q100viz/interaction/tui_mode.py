@@ -28,7 +28,7 @@ class TuiMode:
 
                     if cell.id > 0 and cell.rel_rot == 1:
                         i = get_intersection(session.buildings, grid, x, y)
-                        session.buildings.loc[i, 'CO2'] *= 2
+                        session.buildings.loc[i, 'CO2'] += 20
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings
@@ -37,6 +37,9 @@ class TuiMode:
                 session.buildings[session.buildings.selected], 2, (255, 0, 127)
             )
 
+    def update_slider(self):
+        session.environment_variables['year'] = 2020 + int(session.slider * 30)  # ranges from 2020 to 2050
+        # print("year", session.environment_variables['year'])
 
 def get_intersection(df, grid, x, y):
     # get viewport coordinates of the cell rectangle

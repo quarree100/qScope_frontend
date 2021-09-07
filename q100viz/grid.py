@@ -1,5 +1,6 @@
 import json
 import pygame
+import q100viz.session as session
 
 import q100viz.keystone as keystone
 
@@ -70,6 +71,7 @@ class Grid:
     def read_scanner_data(self, message):
         try:
             array = json.loads(message)['grid']
+            session.slider = json.loads(message)['slider']
         except json.decoder.JSONDecodeError:
             print("Invalid JSON")
             return

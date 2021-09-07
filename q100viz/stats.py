@@ -31,6 +31,10 @@ class Stats:
     def send_dataframes_as_json(self, dfs):
         self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))
 
+    def send_environment_variables(self, df):
+        json_ = json.dumps(df)
+        print(json_)
+        self.send_message(json_)
 
 def append_csv(file, df, cols):
     """Open data from CSV and join them with a GeoDataFrame based on osm_id."""

@@ -86,6 +86,11 @@ buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], 
     'Stromverbrauch 2017 [kWh]': 'float32',
 })
 
+session.environment_variables = {
+    "year" : 2021,
+    "CO2_Preis" : 1
+}
+
 # data normalized by max values
 buildings['Wärme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / \
     buildings.max()['Wärmeverbrauch 2017 [kWh]']
@@ -163,6 +168,8 @@ while True:
             pygame.quit()
             sys.exit()
 
+    active_handler.update_slider()
+
     # clear surfaces
     canvas.fill(0)
     viewport.fill(0)
@@ -195,6 +202,7 @@ while True:
     # build clusters of selected buildings and send JSON message
     clusters = stats.make_clusters(buildings[buildings.selected])
     _stats.send_dataframe_as_json(clusters.sum())
+    _stats.send_environment_variables(session.environment_variables)
 
     # render surfaces
     if show_basemap:
@@ -210,6 +218,9 @@ while True:
     if show_grid:
         canvas.blit(grid_1.surface, (0, 0))
         canvas.blit(grid_2.surface, (0, 0))
+
+    font = pygame.font.SysFont('Arial', 20)
+    canvas.blit(font.render(str(session.slider), True, (255, 255, 255)), (50, 700))
 
     pygame.display.update()
 

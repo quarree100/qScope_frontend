@@ -201,8 +201,9 @@ while True:
 
     # build clusters of selected buildings and send JSON message
     clusters = stats.make_clusters(buildings[buildings.selected])
-    _stats.send_dataframe_as_json(clusters.sum())
-    _stats.send_environment_variables(session.environment_variables)
+    #_stats.send_dataframe_as_json(clusters.sum())
+    #_stats.send_environment_variables(session.environment_variables)
+    _stats.send_dataframe_with_environment_variables(clusters.sum(), session.environment_variables)
 
     # render surfaces
     if show_basemap:

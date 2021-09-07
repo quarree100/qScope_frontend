@@ -28,12 +28,20 @@ class Stats:
     def send_dataframe_as_json(self, df):
         self.send_message(export_json(df, None))
 
+    def send_dataframe_with_environment_variables(self, df, env):
+        data = json.loads(export_json(df, None))
+        result = {}
+        if (len(data) > 0):
+            result = data[0]
+        for key in env.keys():
+            result[key] = env[key]
+        self.send_message([json.dumps(result)])
+
     def send_dataframes_as_json(self, dfs):
         self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))
 
     def send_environment_variables(self, df):
         json_ = json.dumps(df)
-        print(json_)
         self.send_message(json_)
 
 def append_csv(file, df, cols):

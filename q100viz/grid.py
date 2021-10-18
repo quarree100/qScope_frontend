@@ -5,7 +5,7 @@ import q100viz.keystone as keystone
 
 
 class Grid:
-    def __init__(self, canvas_size, x_size, y_size, dst_points, viewport):
+    def __init__(self, canvas_size, x_size, y_size, dst_points, viewport, slider_ids=[]):
         self.x_size = x_size
         self.y_size = y_size
 
@@ -19,6 +19,9 @@ class Grid:
 
         # initialize two-dimensional array of grid cells
         self.grid = [[GridCell() for x in range(x_size)] for y in range(y_size)]
+
+        # set up sliders
+        self.sliders = {slider_id: None for slider_id in slider_ids}
 
     def draw(self, surface):
         rects_transformed = [
@@ -69,16 +72,16 @@ class Grid:
 
     def read_scanner_data(self, message):
         try:
-            array = json.loads(message)['grid']
+            msg = json.loads(message)
         except json.decoder.JSONDecodeError:
             print("Invalid JSON")
             return
 
-        # update grid cells
         try:
+            # update grid cells
             for y, row in enumerate(self.grid):
                 for x, cell in enumerate(row):
-                    cell.id, cell.rot = array[y * self.x_size + x]
+                    cell.id, cell.rot = msg['grid'][y * self.x_size + x]
 
                     # any non-white object selects cells
                     cell.selected = cell.id != 0
@@ -91,10 +94,14 @@ class Grid:
                         cell.rel_rot = cell.rot - cell.prev_rot if cell.prev_rot > -1 else 0
                     cell.prev_rot = cell.rot
 
+            # update slider values
+            for slider_id in self.sliders.keys():
+                self.sliders[slider_id] = msg['sliders'][slider_id]
+
         except TypeError:
             pass
         except IndexError:
-            print("Warning: incoming grid has unexpected size")
+            print("Warning: incoming grid data is incomplete")
 
     def print(self):
         try:

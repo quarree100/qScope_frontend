@@ -28,6 +28,13 @@ class Stats:
     def send_dataframe_as_json(self, df):
         self.send_message(export_json(df, None))
 
+    def send_dataframe_with_environment_variables(self, df, env):
+        data = json.loads(export_json(df, None))
+        result = data[0] if len(data) > 0 else {}
+        for key, value in env.items():
+            result[key] = value
+        self.send_message([json.dumps(result)])
+
     def send_dataframes_as_json(self, dfs):
         self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))
 

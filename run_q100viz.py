@@ -164,6 +164,8 @@ while True:
             pygame.quit()
             sys.exit()
 
+    active_handler.update_slider()
+
     # clear surfaces
     canvas.fill(0)
     viewport.fill(0)
@@ -195,7 +197,7 @@ while True:
 
     # build clusters of selected buildings and send JSON message
     clusters = stats.make_clusters(buildings[buildings.selected])
-    _stats.send_dataframe_as_json(clusters.sum())
+    _stats.send_dataframe_with_environment_variables(clusters.sum(), session.environment)
 
     # render surfaces
     if show_basemap:
@@ -211,6 +213,9 @@ while True:
     if show_grid:
         canvas.blit(grid_1.surface, (0, 0))
         canvas.blit(grid_2.surface, (0, 0))
+
+    font = pygame.font.SysFont('Arial', 20)
+    canvas.blit(font.render(str(session.grid_1.sliders['slider0']), True, (255, 255, 255)), (50, 700))
 
     pygame.display.update()
 

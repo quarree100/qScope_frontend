@@ -1,4 +1,5 @@
 import sys
+import os
 import random
 import threading
 import json
@@ -18,6 +19,9 @@ import q100viz.session as session
 
 # Set FPS
 FPS = 12
+
+# set window position
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
 
 # Initialize program
 pygame.init()
@@ -67,7 +71,7 @@ grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = session.grid_1 = grid.Grid(
-    canvas_size, ncols, nrows, [[50, 0], [50, 81], [100, 81], [100, 0]], viewport,
+    canvas_size, ncols, nrows, [[50, 0], [50, 90], [100, 90], [100, 0]], viewport,
     ['slider0'])
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
@@ -164,7 +168,8 @@ while True:
             pygame.quit()
             sys.exit()
 
-    active_handler.update_slider()
+    if active_handler != handlers['calibrate']:
+        active_handler.update_slider()
 
     # clear surfaces
     canvas.fill(0)

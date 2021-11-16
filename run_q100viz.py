@@ -71,7 +71,8 @@ grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = session.grid_1 = grid.Grid(
-    canvas_size, ncols, nrows, [[50, 0], [50, 81], [100, 81], [100, 0]], viewport)
+    canvas_size, ncols, nrows, [[50, 0], [50, 90], [100, 90], [100, 0]], viewport,
+    ['slider0'])
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
 
@@ -167,6 +168,9 @@ while True:
             pygame.quit()
             sys.exit()
 
+    if active_handler != handlers['calibrate']:
+        active_handler.update_slider()
+
     # clear surfaces
     canvas.fill(0)
     viewport.fill(0)
@@ -198,7 +202,7 @@ while True:
 
     # build clusters of selected buildings and send JSON message
     clusters = stats.make_clusters(buildings[buildings.selected])
-    _stats.send_dataframe_as_json(clusters.sum())
+    _stats.send_dataframe_with_environment_variables(clusters.sum(), session.environment)
 
     # render surfaces
     if show_basemap:
@@ -214,6 +218,9 @@ while True:
     if show_grid:
         canvas.blit(grid_1.surface, (0, 0))
         canvas.blit(grid_2.surface, (0, 0))
+
+    font = pygame.font.SysFont('Arial', 20)
+    canvas.blit(font.render(str(session.grid_1.sliders['slider0']), True, (255, 255, 255)), (50, 700))
 
     pygame.display.update()
 

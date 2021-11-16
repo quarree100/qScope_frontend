@@ -1,4 +1,5 @@
 import sys
+import os
 import random
 import threading
 import json
@@ -18,6 +19,9 @@ import q100viz.session as session
 
 # Set FPS
 FPS = 12
+
+# set window position
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
 
 # Initialize program
 pygame.init()

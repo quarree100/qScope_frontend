@@ -6,12 +6,12 @@ import q100viz.session as session
 class TuiMode:
     def __init__(self):
         self.slider_handles = ['year', 'year', 'year',
-                        'support', 'support', 'support',
+                        'foerderung', 'foerderung', 'foerderung',
                         'CO2-Preis', 'CO2-Preis', 'CO2-Preis', ' CO2-Preis',
                         'CO2-emissions', 'CO2-emissions', 'CO2-emissions',
-                        'technologie', 'technologie', 'technologie',
+                        'Technologie', 'Technologie', 'Technologie',
                         'investment', 'investment', 'investment',
-                        'anschluss', 'anschluss', 'anschluss']
+                        'Anschluss', 'Anschluss', 'Anschluss']
 
         self.slider_handle = self.slider_handles[0]
 
@@ -57,12 +57,24 @@ class TuiMode:
         if session.grid_1.sliders['slider0'] is not None:
             if self.slider_handle == 'year':
                 session.environment['year'] = 2020 + int(session.grid_1.sliders['slider0'] * 30)  # ranges from 2020 to 2050
-            elif self.slider_handle == 'CO2':
+            elif self.slider_handle == 'foerderung':
                 print("changing %s with slider0" % self.slider_handle)
-                # session.environment['year'] = 2020 + int(session.grid_1.sliders['slider0'] * 30)  # ranges from 2020 to 2050
-            elif self.slider_handle == 'fun':
+                # TODO: make something happen here
+            elif self.slider_handle == 'CO2-Preis':
                 print("changing %s with slider0" % self.slider_handle)
-                # session.environment['year'] = 2020 + int(session.grid_1.sliders['slider0'] * 30)  # ranges from 2020 to 2050
+                # TODO: make something happen here
+            elif self.slider_handle == 'CO2-emissions':
+                print("changing %s with slider0" % self.slider_handle)
+                # TODO: make something happen here
+            elif self.slider_handle == 'Technologie':
+                print("changing %s with slider0" % self.slider_handle)
+                # TODO: make something happen here
+            elif self.slider_handle == 'investment':
+                print("changing %s with slider0" % self.slider_handle)
+                # TODO: make something happen here
+            elif self.slider_handle == 'Anschluss':
+                print("changing %s with slider0" % self.slider_handle)
+                # TODO: make something happen here
 
 
 def get_intersection(df, grid, x, y):

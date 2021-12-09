@@ -58,23 +58,24 @@ class TuiMode:
             if self.slider_handle == 'year':
                 session.environment['year'] = 2020 + int(session.grid_1.sliders['slider0'] * 30)  # ranges from 2020 to 2050
             elif self.slider_handle == 'foerderung':
-                print("changing %s with slider0" % self.slider_handle)
-                # TODO: make something happen here
+                session.environment['foerderung'] = int(session.grid_1.sliders['slider0'] * 10000)  # ranges from 0 to 10,000€
             elif self.slider_handle == 'CO2-Preis':
-                print("changing %s with slider0" % self.slider_handle)
-                # TODO: make something happen here
+                session.environment['CO2-Preis'] = 55 + int(session.grid_1.sliders['slider0'] * 195)  # ranges from 55 to 240€/t
             elif self.slider_handle == 'CO2-emissions':
-                print("changing %s with slider0" % self.slider_handle)
-                # TODO: make something happen here
+                session.environment['CO2'] = int(session.grid_1.sliders['slider0'] * 500)  # ranges from 0 to 500  # TODO: only for selected buildings
             elif self.slider_handle == 'Technologie':
-                print("changing %s with slider0" % self.slider_handle)
-                # TODO: make something happen here
+                if int(session.grid_1.sliders['slider0'] / 4) >= 0 & int(session.grid_1.sliders['slider0'] / 4) < 0.25:
+                    session.environment['Technologie'] = 'PV'  # ranges from 0 to 500
+                elif int(session.grid_1.sliders['slider0'] / 4) >= 0.25 & int(session.grid_1.sliders['slider0'] / 4) < 0.5:
+                    session.environment['Technologie'] = 'Geothermie'  # ranges from 0 to 500
+                if int(session.grid_1.sliders['slider0'] / 4) >= 0.5 & int(session.grid_1.sliders['slider0'] / 4) < 0.75:
+                    session.environment['Technologie'] = 'Solarthermie'  # ranges from 0 to 500
+                if int(session.grid_1.sliders['slider0'] / 4) >= 0.75 & int(session.grid_1.sliders['slider0'] / 4) < 1:
+                    session.environment['Technologie'] = 'Fernwärme'  # ranges from 0 to 500
             elif self.slider_handle == 'investment':
-                print("changing %s with slider0" % self.slider_handle)
-                # TODO: make something happen here
+                session.environment['investment'] = int(session.grid_1.sliders['slider0'] * 10000)  # ranges from 0 to 10,000€
             elif self.slider_handle == 'Anschluss':
-                print("changing %s with slider0" % self.slider_handle)
-                # TODO: make something happen here
+                session.environment['Anschluss'] = int(session.grid_1.sliders['slider0'] > 0.5)  # Gebäudeanschluss toggle bei 0.5  # TODO: für alle ausgewählten Gebäude
 
 
 def get_intersection(df, grid, x, y):

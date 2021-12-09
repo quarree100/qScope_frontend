@@ -4,6 +4,17 @@ import q100viz.session as session
 
 
 class TuiMode:
+    def __init__(self):
+        self.slider_handles = ['year', 'year', 'year',
+                        'support', 'support', 'support',
+                        'CO2-Preis', 'CO2-Preis', 'CO2-Preis', ' CO2-Preis',
+                        'CO2-emissions', 'CO2-emissions', 'CO2-emissions',
+                        'technologie', 'technologie', 'technologie',
+                        'investment', 'investment', 'investment',
+                        'anschluss', 'anschluss', 'anschluss']
+
+        self.slider_handle = self.slider_handles[0]
+
     def process_event(self, event, config):
         if event.type == MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
@@ -26,9 +37,14 @@ class TuiMode:
                             selection = session.buildings[i].iloc[cell.rot % n]
                             session.buildings.loc[selection.name, 'selected'] = True
 
+                        # consider last row as slider control
+                        if y == len(grid.grid)-1:
+                            self.slider_handle = self.slider_handles[x]
+                            print("slider_handle: ", self.slider_handle)
+
                     if cell.id > 0 and cell.rel_rot == 1:
                         i = get_intersection(session.buildings, grid, x, y)
-                        session.buildings.loc[i, 'CO2'] += 20
+                        session.buildings.loc[i, 'CO2'] += 20  # arbitrarily increase a value associated with that building. TODO: give this some meaning.
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings
@@ -39,7 +55,14 @@ class TuiMode:
 
     def update_slider(self):
         if session.grid_1.sliders['slider0'] is not None:
-            session.environment['year'] = 2020 + int(session.grid_1.sliders['slider0'] * 30)  # ranges from 2020 to 2050
+            if self.slider_handle == 'year':
+                session.environment['year'] = 2020 + int(session.grid_1.sliders['slider0'] * 30)  # ranges from 2020 to 2050
+            elif self.slider_handle == 'CO2':
+                print("changing %s with slider0" % self.slider_handle)
+                # session.environment['year'] = 2020 + int(session.grid_1.sliders['slider0'] * 30)  # ranges from 2020 to 2050
+            elif self.slider_handle == 'fun':
+                print("changing %s with slider0" % self.slider_handle)
+                # session.environment['year'] = 2020 + int(session.grid_1.sliders['slider0'] * 30)  # ranges from 2020 to 2050
 
 
 def get_intersection(df, grid, x, y):

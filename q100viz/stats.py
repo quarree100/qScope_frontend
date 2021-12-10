@@ -2,7 +2,7 @@ import json
 import pandas
 import threading
 import socketio
-
+import q100viz.session as session
 
 class Stats:
     def __init__(self, socket_addr):
@@ -34,6 +34,7 @@ class Stats:
         for key, value in env.items():
             result[key] = value
         self.send_message([json.dumps(result)])
+        session.print_verbose(json.dumps(result))
 
     def send_dataframes_as_json(self, dfs):
         self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))

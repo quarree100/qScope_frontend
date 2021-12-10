@@ -4,7 +4,7 @@ import random
 import threading
 import json
 import pygame
-from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, K_n, K_p, K_t, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, K_n, K_p, K_t, K_v, K_PLUS, K_MINUS, QUIT
 
 from config import config
 import q100viz.keystone as keystone
@@ -163,6 +163,20 @@ while True:
             # toggle edit-mode to move polygons:
             elif event.key == K_e:
                 active_handler = handlers['edit' if active_handler != handlers['edit'] else 'tui']
+            elif event.key == K_PLUS:
+                if session.grid_1.sliders['slider0'] is not None:
+                    session.grid_1.sliders['slider0'] += 0.1
+                    session.print_verbose(("slider0 =", session.grid_1.sliders['slider0']))
+                else:
+                    session.grid_1.sliders['slider0'] = 0.1
+            elif event.key == K_MINUS:
+                if session.grid_1.sliders['slider0'] is not None:
+                    session.grid_1.sliders['slider0'] -= 0.1
+                    session.print_verbose(("slider0 =", session.grid_1.sliders['slider0']))
+                else:
+                    session.grid_1.sliders['slider0'] = 0.1
+            elif event.key == K_v:
+                session.verbose = not session.verbose
 
         elif event.type == QUIT:
             pygame.quit()

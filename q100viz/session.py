@@ -7,3 +7,8 @@ grid_1 = None
 grid_2 = None
 buildings = None
 environment = {}
+verbose = False
+
+def print_verbose(message):
+    if verbose:
+        print(message)

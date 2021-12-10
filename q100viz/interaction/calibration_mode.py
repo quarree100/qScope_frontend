@@ -48,7 +48,8 @@ class CalibrationMode:
 
         # connect anchor points with lines
         p1, p2, p3, p4 = session.viewport.transform([[0, 0], [0, 100], [100, 100], [100, 0]])
-        pygame.draw.line(session.viewport, (255,255,255), [p1[0], p1[1]], [p4[0], p4[1]], 2)
-        pygame.draw.line(session.viewport, (255,255,255), [p1[0], p1[1]], [p2[0], p2[1]], 2)
-        pygame.draw.line(session.viewport, (255,255,255), [p3[0], p3[1]], [p2[0], p2[1]], 2)
-        pygame.draw.line(session.viewport, (255,255,255), [p3[0], p3[1]], [p4[0], p4[1]], 2)
+        fill_color = (255,0,0) if self.magnitude == 1 else (0,0,255)
+        pygame.draw.line(session.viewport, fill_color, [p1[0], p1[1]], [p4[0], p4[1]], 2)
+        pygame.draw.line(session.viewport, fill_color, [p1[0], p1[1]], [p2[0], p2[1]], 2)
+        pygame.draw.line(session.viewport, fill_color, [p3[0], p3[1]], [p2[0], p2[1]], 2)
+        pygame.draw.line(session.viewport, fill_color, [p3[0], p3[1]], [p4[0], p4[1]], 2)

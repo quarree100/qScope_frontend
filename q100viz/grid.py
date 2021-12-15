@@ -2,6 +2,7 @@ import json
 import pygame
 
 import q100viz.keystone as keystone
+import q100viz.session as session
 
 
 class Grid:
@@ -18,20 +19,22 @@ class Grid:
         self.surface.calculate(viewport.transform_mat)
 
         # initialize two-dimensional array of grid cells
-        self.grid = [[GridCell() for x in range(x_size)] for y in range(y_size)]
+        self.grid = [[GridCell(x, y) for x in range(x_size)] for y in range(y_size)]
+
+        # create a list of transformed rectangles
+        self.rects_transformed = [
+            (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
+            for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
         # set up sliders
         self.sliders = {slider_id: None for slider_id in slider_ids}
 
     def draw(self, surface):
-        rects_transformed = [
-            (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
-            for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
         font = pygame.font.SysFont('Arial', 20)
 
         # draw grid data
-        for cell, rect_points in rects_transformed:
+        for cell, rect_points in self.rects_transformed:
             self.surface.blit(
                 font.render(str(cell.id), True, (255, 255, 255)),
                 rect_points[0]
@@ -46,9 +49,11 @@ class Grid:
             )
 
         # draw rectangle outlines
-        for cell, rect_points in rects_transformed:
-            stroke = 4 if cell.selected else 1
-            pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), rect_points, stroke)
+        for cell, rect_points in self.rects_transformed:
+            # do not apply to last row:
+            if cell.y is not len(self.grid) - 1:
+                stroke = 4 if cell.selected else 1
+                pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), rect_points, stroke)
 
     def mouse_pressed(self, button):
         pos = pygame.mouse.get_pos()
@@ -112,9 +117,15 @@ class Grid:
         except TypeError:
             pass
 
+    def transform(self):
+        self.rects_transformed = [
+            (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
+            for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
 class GridCell:
-    def __init__(self, id=-1, rot=-1):
+    def __init__(self, x, y, id=-1, rot=-1):
+        self.x = x
+        self.y = y
         self.id = id
         self.rot = rot
         self.prev_rot = -1

@@ -207,6 +207,13 @@ while True:
     grid_1.draw(canvas)
     grid_2.draw(canvas)
 
+    # highlight lowest row as slider control
+    for cell, rect_points in grid_1.rects_transformed:
+        if cell.y is len(grid_1.grid) - 1:
+            stroke = 4
+            color = pygame.Color(120,240,189)
+            pygame.draw.polygon(canvas, color, rect_points, stroke)
+
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
 
@@ -224,11 +231,13 @@ while True:
         crop_height = 620
         canvas.blit(basemap.image, (0, 0), (0, 0, crop_width, crop_height))
 
+    # GIS layer
     if show_polygons:
         canvas.blit(_gis.surface, (0, 0))
 
     canvas.blit(viewport, (0, 0))
 
+    # draw grid
     if show_grid:
         canvas.blit(grid_1.surface, (0, 0))
         canvas.blit(grid_2.surface, (0, 0))

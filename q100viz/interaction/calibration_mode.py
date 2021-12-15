@@ -31,7 +31,9 @@ class CalibrationMode:
                 session.viewport.calculate()
                 session.gis.surface.calculate(session.viewport.transform_mat)
                 session.grid_1.surface.calculate(session.viewport.transform_mat)
+                session.grid_1.transform()
                 session.grid_2.surface.calculate(session.viewport.transform_mat)
+                session.grid_2.transform()
                 session.basemap.surface.calculate(session.gis.surface.transform_mat)
                 session.basemap.warp()
             elif event.key == K_s:

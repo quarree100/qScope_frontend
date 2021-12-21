@@ -20,6 +20,7 @@ class Grid:
 
         # initialize two-dimensional array of grid cells
         self.grid = [[GridCell(x, y) for x in range(x_size)] for y in range(y_size)]
+        print((self.grid))
 
         # create a list of transformed rectangles
         self.rects_transformed = [
@@ -28,6 +29,19 @@ class Grid:
 
         # set up sliders
         self.sliders = {slider_id: None for slider_id in slider_ids}
+
+        # last row: slider controls
+        self.slider_controls = []
+        for y, row in enumerate(self.grid):
+            for x, cell in enumerate(row):
+                if y == len(self.grid) - 1:
+                    self.slider_controls.append(cell)
+        print(self.slider_controls)
+
+        # list of transformed slider controls rectangles
+        # self.slider_controls_transformed = [
+        #     (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
+        #     for y, row in enumerate(self.slider_controls) for x, cell in enumerate(row)]
 
     def draw(self, surface):
 

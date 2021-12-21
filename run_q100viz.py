@@ -21,7 +21,7 @@ import q100viz.session as session
 FPS = 12
 
 # set window position
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
+# os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
 
 # Initialize program
 pygame.init()
@@ -71,7 +71,7 @@ grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = session.grid_1 = grid.Grid(
-    canvas_size, ncols, nrows, [[50, 0], [50, 91], [100, 91], [100, 0]], viewport,
+    canvas_size, ncols, nrows, [[50, 0], [50, 81.818], [100, 81.818], [100, 0]], viewport,
     ['slider0'])
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, ncols, nrows, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
@@ -182,7 +182,7 @@ while True:
             pygame.quit()
             sys.exit()
 
-    if active_handler != handlers['calibrate']:
+    if active_handler != handlers['calibrate'] and active_handler != handlers['edit']:
         active_handler.update_slider()
 
     # clear surfaces
@@ -210,9 +210,19 @@ while True:
     # highlight lowest row as slider control
     for cell, rect_points in grid_1.rects_transformed:
         if cell.y is len(grid_1.grid) - 1:
-            stroke = 4
+            stroke = 4 if cell.selected else 1
             color = pygame.Color(120,240,189)
             pygame.draw.polygon(canvas, color, rect_points, stroke)
+
+    # highlight lowest row as slider control
+    # for cell, rect_points in grid_1.slider_controls_transformed:
+    #     if cell.y is len(grid_1.grid) - 1:
+    #         stroke = 4 if cell.selected else 1
+    #         color = pygame.Color(120,240,189)
+    #         pygame.draw.polygon(canvas, color, rect_points, stroke)
+
+    print(pygame.mouse.get_pos())
+
 
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))

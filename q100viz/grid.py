@@ -64,7 +64,7 @@ class Grid:
 
         # draw rectangle outlines
         for cell, rect_points in self.rects_transformed:
-            # do not apply to last row:
+            # do not apply to last row; it will be treated seperatedly as slider controls:
             if cell.y is not len(self.grid) - 1:
                 stroke = 4 if cell.selected else 1
                 pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), rect_points, stroke)

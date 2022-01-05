@@ -1,3 +1,7 @@
+'''
+In the Edit_Mode, polygons can be moved. This should facilitate the reorganization of polygons to be placed better on the grid cells, if needed.
+'''
+
 from pygame.locals import KEYDOWN, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_s, K_MINUS, K_PLUS, K_SPACE
 from pygame import font
 import shapely

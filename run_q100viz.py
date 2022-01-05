@@ -207,22 +207,7 @@ while True:
     grid_1.draw(canvas)
     grid_2.draw(canvas)
 
-    # highlight lowest row as slider control
-    for cell, rect_points in grid_1.rects_transformed:
-        if cell.y is len(grid_1.grid) - 1:
-            stroke = 4 if cell.selected else 1
-            color = pygame.Color(120,240,189)
-            pygame.draw.polygon(canvas, color, rect_points, stroke)
-
-    # highlight lowest row as slider control
-    # for cell, rect_points in grid_1.slider_controls_transformed:
-    #     if cell.y is len(grid_1.grid) - 1:
-    #         stroke = 4 if cell.selected else 1
-    #         color = pygame.Color(120,240,189)
-    #         pygame.draw.polygon(canvas, color, rect_points, stroke)
-
     print(pygame.mouse.get_pos())
-
 
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
@@ -251,6 +236,30 @@ while True:
     if show_grid:
         canvas.blit(grid_1.surface, (0, 0))
         canvas.blit(grid_2.surface, (0, 0))
+
+    for cell, rect_points in grid_1.rects_transformed:
+        if cell.y is len(grid_1.grid) - 1:  # last row
+            stroke = 4 if cell.selected else 1
+
+            # colors via slider parameter fields:
+            if cell.x >= 0 and cell.x < 3:
+                color = pygame.Color(73, 156, 156)
+            elif cell.x >= 3 and cell.x < 6:
+                color = pygame.Color(126, 185, 207)
+            elif cell.x >= 6 and cell.x < 9:
+                color = pygame.Color(247, 79, 115)
+            elif cell.x >= 9 and cell.x < 12:
+                color = pygame.Color(193, 135, 77)
+            elif cell.x >= 12 and cell.x < 15:
+                color = pygame.Color(187, 210, 4)
+            elif cell.x >= 15 and cell.x < 18:
+                color = pygame.Color(249, 109, 175)
+            elif cell.x >= 18 and cell.x < 21:
+                color = pygame.Color(9, 221, 250)
+            elif cell.x >= 21 and cell.x < 24:
+                color = pygame.Color(150, 47, 28)
+
+            pygame.draw.polygon(canvas, color, rect_points, stroke)
 
     pygame.display.update()
 

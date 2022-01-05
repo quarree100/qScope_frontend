@@ -71,8 +71,12 @@ grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = session.grid_1 = grid.Grid(
-    canvas_size, ncols, nrows, [[50, 0], [50, 81.818], [100, 81.818], [100, 0]], viewport,
-    ['slider0'])
+    canvas_size, ncols, nrows, [
+        [config['GRID_1_X1'], config['GRID_1_Y1']],
+        [config['GRID_1_X1'], config['GRID_1_Y2']],
+        [config['GRID_1_X2'], config['GRID_1_Y2']],
+        [config['GRID_1_X2'], config['GRID_1_Y1']]],
+        viewport, ['slider0'])
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, ncols, nrows, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
 
@@ -237,29 +241,37 @@ while True:
         canvas.blit(grid_1.surface, (0, 0))
         canvas.blit(grid_2.surface, (0, 0))
 
+    # draw slider controls:
+    sliderColor = pygame.Color(20, 200, 150)
     for cell, rect_points in grid_1.rects_transformed:
         if cell.y is len(grid_1.grid) - 1:  # last row
             stroke = 4 if cell.selected else 1
 
             # colors via slider parameter fields:
             if cell.x >= 0 and cell.x < 3:
-                color = pygame.Color(73, 156, 156)
+                sliderColor = pygame.Color(73, 156, 156)
             elif cell.x >= 3 and cell.x < 6:
-                color = pygame.Color(126, 185, 207)
+                sliderColor = pygame.Color(126, 185, 207)
             elif cell.x >= 6 and cell.x < 9:
-                color = pygame.Color(247, 79, 115)
+                sliderColor = pygame.Color(247, 79, 115)
             elif cell.x >= 9 and cell.x < 12:
-                color = pygame.Color(193, 135, 77)
+                sliderColor = pygame.Color(193, 135, 77)
             elif cell.x >= 12 and cell.x < 15:
-                color = pygame.Color(187, 210, 4)
+                sliderColor = pygame.Color(187, 210, 4)
             elif cell.x >= 15 and cell.x < 18:
-                color = pygame.Color(249, 109, 175)
+                sliderColor = pygame.Color(249, 109, 175)
             elif cell.x >= 18 and cell.x < 21:
-                color = pygame.Color(9, 221, 250)
+                sliderColor = pygame.Color(9, 221, 250)
             elif cell.x >= 21 and cell.x < 24:
-                color = pygame.Color(150, 47, 28)
+                sliderColor = pygame.Color(150, 47, 28)
 
-            pygame.draw.polygon(canvas, color, rect_points, stroke)
+            pygame.draw.polygon(canvas, sliderColor, rect_points, stroke)
+
+    # draw slider area:
+    pygame.draw.polygon(canvas, sliderColor, [
+        [config['GRID_1_X1'], config['GRID_1_Y1']],
+        [config['GRID_1_X1'], 100-config['GRID_1_Y2']],
+        [config['GRID_1_X2'], 100-config['GRID_1_Y2']]], 5)
 
     pygame.display.update()
 

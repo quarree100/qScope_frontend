@@ -229,8 +229,8 @@ while True:
         active_handler.draw(canvas)
 
     # build clusters of selected buildings and send JSON message
-    clusters = stats.make_clusters(buildings[buildings.selected])
-    _stats.send_dataframe_with_environment_variables(clusters.sum(), session.environment)
+    # clusters = stats.make_clusters(buildings[buildings.selected])
+    _stats.send_simplified_dataframe_withenvironment_variables(buildings[buildings.selected], session.environment)
 
     # render surfaces
     if show_basemap:

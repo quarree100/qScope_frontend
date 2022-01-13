@@ -19,10 +19,13 @@ class Stats:
         self.previous_message = None
 
     def send_message(self, msg):
-        try:
-            self.io.emit('message', msg)
-        except Exception:
-            pass
+        if msg != self.previous_message:
+            session.print_verbose(msg)
+            try:
+                self.io.emit('message', msg)
+                self.previous_message = msg
+            except Exception:
+                pass
 
     def send_max_values(self, max_values, min_values):
         self.send_message("init\n" + "\n".join(map(str, max_values + min_values)))
@@ -35,10 +38,19 @@ class Stats:
         result = data[0] if len(data) > 0 else {}
         for key, value in env.items():
             result[key] = value
-        if result != self.previous_message:
+        self.send_message([json.dumps(result)])
+
+    def send_simplified_dataframe_withenvironment_variables(self, df, env):
+        sum = make_clusters(df).sum();
+        data = json.loads(export_json(sum, None))
+        if len(data) > 0:
+            result = data[0]
+            for key, value in env.items():
+                result[key] = value
+            # pass by co2, Address, Anschluss [["adresse","CO2","anschluss"]]
+            clusterData = json.loads(export_json(df[["adresse","CO2","anschluss","investment","versorgung","Wärmeverbrauch 2017 [kWh]","Stromverbrauch 2017 [kWh]"]], None))
+            result["clusters"] = clusterData
             self.send_message([json.dumps(result)])
-            session.print_verbose(json.dumps(result))
-            self.previous_message = result
 
     def send_dataframes_as_json(self, dfs):
         self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))

@@ -16,6 +16,8 @@ class Stats:
         thread = threading.Thread(target=run, daemon=True)
         thread.start()
 
+        self.previous_message = None
+
     def send_message(self, msg):
         try:
             self.io.emit('message', msg)
@@ -33,8 +35,10 @@ class Stats:
         result = data[0] if len(data) > 0 else {}
         for key, value in env.items():
             result[key] = value
-        self.send_message([json.dumps(result)])
-        session.print_verbose(json.dumps(result))
+        if result != self.previous_message:
+            self.send_message([json.dumps(result)])
+            session.print_verbose(json.dumps(result))
+            self.previous_message = result
 
     def send_dataframes_as_json(self, dfs):
         self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))

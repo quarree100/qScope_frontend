@@ -93,6 +93,8 @@ buildings = gis.read_shapefile(
 buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], buildings, {
     'Wärmeverbrauch 2017 [kWh]': 'float32',
     'Stromverbrauch 2017 [kWh]': 'float32',
+    'Straße' : 'string',
+    'Hausnr.': 'string',
 })
 
 # data normalized by max values
@@ -100,6 +102,7 @@ buildings['Wärme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / \
     buildings.max()['Wärmeverbrauch 2017 [kWh]']
 buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / \
     buildings.max()['Stromverbrauch 2017 [kWh]']
+buildings['adresse'] = buildings['Straße'] + ' ' + buildings['Hausnr.']
 
 # mock data
 buildings['CO2'] = [0.5 * random.random() for row in buildings.values]

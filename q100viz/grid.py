@@ -36,7 +36,7 @@ class Grid:
             for x, cell in enumerate(row):
                 if y == len(self.grid) - 1:
                     self.slider_controls.append(cell)
-        print(self.slider_controls)
+        # print(self.slider_controls)
 
         # list of transformed slider controls rectangles
         # self.slider_controls_transformed = [

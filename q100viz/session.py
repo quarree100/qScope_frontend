@@ -6,8 +6,7 @@ basemap = None
 grid_1 = None
 grid_2 = None
 buildings = None
-slider = None
-environment = {}
+environment = {'foerderung': 0}
 verbose = False
 
 def print_verbose(message):

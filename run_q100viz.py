@@ -110,7 +110,7 @@ buildings['investment'] = [random.randint(0,4) for row in buildings.values]
 
 versorgungsarten = ['konventionell', 'medium', 'gruen']
 buildings['versorgung'] = [versorgungsarten[random.randint(0,2)] for row in buildings.values]
-buildings['anschluss'] = [random.randint(0,1) for row in buildings.values]
+buildings['anschluss'] = [0 for row in buildings.values]
 
 # add cell column
 buildings['cell'] = ""
@@ -219,7 +219,7 @@ while True:
     grid_1.draw(canvas)
     grid_2.draw(canvas)
 
-    print(pygame.mouse.get_pos())
+    session.print_verbose(pygame.mouse.get_pos())
 
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))

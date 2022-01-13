@@ -19,6 +19,7 @@ class TuiMode:
         if event.type == MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
+            session.print_verbose(session.buildings)
 
     def draw(self, canvas):
         session.buildings['selected'] = False
@@ -43,10 +44,15 @@ class TuiMode:
                             self.slider_handle = self.slider_handles[x]
                             session.print_verbose(("slider_handle: ", self.slider_handle))
 
-                    if cell.id > 0 and cell.rel_rot == 1:
-                        i = get_intersection(session.buildings, grid, x, y)
-                        # arbitrarily increase a value associated with that building. TODO: give this some meaning.
-                        session.buildings.loc[i, 'CO2'] -= 20
+                    # increase/decrease emission by rotation:
+                    # if cell.id > 0:
+                    #     if cell.rel_rot == 1:
+                    #         i = get_intersection(session.buildings, grid, x, y)
+                    #         session.buildings.loc[i, 'CO2'] += 20
+                    #     elif cell.rel_rot == -1:
+                    #         i = get_intersection(session.buildings, grid, x, y)
+                    #         session.buildings.loc[i, 'CO2'] -= 20
+
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings
@@ -72,21 +78,19 @@ class TuiMode:
                 session.buildings.loc[(
                     session.buildings.selected == True), 'CO2'] = session.grid_1.sliders['slider0']  # sets CO2-value of selected buildings to slider value (absolute)
                 session.print_verbose((session.buildings[session.buildings['selected'] == True]))
-            elif self.slider_handle == 'Technologie':
-                if session.grid_1.sliders['slider0'] >= 0 and session.grid_1.sliders['slider0'] < 0.25:
-                    session.environment['Technologie'] = 'PV'
-                elif session.grid_1.sliders['slider0'] >= 0.25 and session.grid_1.sliders['slider0'] < 0.5:
-                    session.environment['Technologie'] = 'Geothermie'
-                if session.grid_1.sliders['slider0'] >= 0.5 and session.grid_1.sliders['slider0'] < 0.75:
-                    session.environment['Technologie'] = 'Solarthermie'
-                if session.grid_1.sliders['slider0'] >= 0.75 and session.grid_1.sliders['slider0'] < 1:
-                    session.environment['Technologie'] = 'Fernwärme'
+            elif self.slider_handle == 'versorgung':
+                if session.grid_1.sliders['slider0'] >= 0 and session.grid_1.sliders['slider0'] < 0.33:
+                    session.buildings.loc[(session.buildings.selected == True), 'versorgung'] = 'konventionell'
+                elif session.grid_1.sliders['slider0'] >= 0.33 and session.grid_1.sliders['slider0'] < 0.66:
+                    session.buildings.loc[(session.buildings.selected == True), 'versorgung'] = 'medium'
+                if session.grid_1.sliders['slider0'] >= 0.66 and session.grid_1.sliders['slider0'] < 1:
+                    session.buildings.loc[(session.buildings.selected == True), 'versorgung'] = 'gruen'
             elif self.slider_handle == 'investment':
                 # ranges from 0 to 10,000€
                 session.environment['investment'] = session.grid_1.sliders['slider0'] * 10000
-            elif self.slider_handle == 'Anschluss':
+            elif self.slider_handle == 'anschluss':
                 session.buildings.loc[(
-                    session.buildings.selected == True), 'Anschluss'] = session.grid_1.sliders['slider0'] > 0.5  # sets CO2-value of selected buildings to slider value (absolute)
+                    session.buildings.selected == True), 'anschluss'] = session.grid_1.sliders['slider0'] > 0.5  # sets CO2-value of selected buildings to slider value (absolute)
                 session.print_verbose((session.buildings[session.buildings['selected'] == True]))
 
 def get_intersection(df, grid, x, y):

@@ -98,14 +98,19 @@ buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], 
 })
 
 # data normalized by max values
-buildings['Wärme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / \
+buildings['waerme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / \
     buildings.max()['Wärmeverbrauch 2017 [kWh]']
-buildings['Strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / \
+buildings['strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / \
     buildings.max()['Stromverbrauch 2017 [kWh]']
 buildings['adresse'] = buildings['Straße'] + ' ' + buildings['Hausnr.']
 
 # mock data
 buildings['CO2'] = [0.5 * random.random() for row in buildings.values]
+buildings['investment'] = [random.randint(0,4) for row in buildings.values]
+
+versorgungsarten = ['konventionell', 'medium', 'gruen']
+buildings['versorgung'] = [versorgungsarten[random.randint(0,2)] for row in buildings.values]
+buildings['anschluss'] = [random.randint(0,1) for row in buildings.values]
 
 # add cell column
 buildings['cell'] = ""
@@ -204,11 +209,11 @@ while True:
         session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
     session.gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
     session.gis.draw_polygon_layer(
-        canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'Wärme_2017_rel')  # fill and lerp
+        canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'waerme_2017_rel')  # fill and lerp
     # session.gis.draw_polygon_layer(
-    #     canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'Wärme_2017_rel')  # fill all equally
+    #     canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'waerme_2017_rel')  # fill all equally
     session.gis.draw_polygon_layer(
-        canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'Wärme_2017_rel')  # stroke simple black
+        canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'waerme_2017_rel')  # stroke simple black
 
     # draw grid
     grid_1.draw(canvas)

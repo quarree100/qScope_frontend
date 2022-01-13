@@ -46,7 +46,7 @@ class TuiMode:
                     if cell.id > 0 and cell.rel_rot == 1:
                         i = get_intersection(session.buildings, grid, x, y)
                         # arbitrarily increase a value associated with that building. TODO: give this some meaning.
-                        session.buildings.loc[i, 'CO2'] += 20
+                        session.buildings.loc[i, 'CO2'] -= 20
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings

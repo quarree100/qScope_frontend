@@ -14,7 +14,7 @@ import q100viz.udp as udp
 import q100viz.stats as stats
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.edit_mode import EditMode
-from q100viz.interaction.tui_mode import TuiMode
+from q100viz.interaction.tui_mode import TuiMode, Slider
 import q100viz.session as session
 
 # Set FPS
@@ -85,6 +85,9 @@ show_basemap = False
 show_grid = False
 show_typologiezonen = False
 show_nahwaermenetz = True
+
+# initialize slider:
+slider = session.slider = Slider(canvas_size, grid_1, 50, 50, 100)
 
 # Load data
 buildings = gis.read_shapefile(
@@ -195,6 +198,7 @@ while True:
     _gis.surface.fill(0)
     grid_1.surface.fill(0)
     grid_2.surface.fill(0)
+    slider.surface.fill(0)
 
     session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     if show_typologiezonen:
@@ -210,8 +214,6 @@ while True:
     # draw grid
     grid_1.draw(canvas)
     grid_2.draw(canvas)
-
-    print(pygame.mouse.get_pos())
 
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
@@ -234,7 +236,9 @@ while True:
     if show_polygons:
         canvas.blit(_gis.surface, (0, 0))
 
-    canvas.blit(viewport, (0, 0))
+    # slider
+    slider.render()
+    canvas.blit(slider.surface, (0,0))
 
     # draw grid
     if show_grid:
@@ -242,36 +246,41 @@ while True:
         canvas.blit(grid_2.surface, (0, 0))
 
     # draw slider controls:
-    sliderColor = pygame.Color(20, 200, 150)
+    cell_color = pygame.Color(20, 200, 150)
     for cell, rect_points in grid_1.rects_transformed:
         if cell.y is len(grid_1.grid) - 1:  # last row
             stroke = 4 if cell.selected else 1
 
             # colors via slider parameter fields:
             if cell.x >= 0 and cell.x < 3:
-                sliderColor = pygame.Color(73, 156, 156)
+                cell_color = pygame.Color(73, 156, 156)
             elif cell.x >= 3 and cell.x < 6:
-                sliderColor = pygame.Color(126, 185, 207)
+                cell_color = pygame.Color(126, 185, 207)
             elif cell.x >= 6 and cell.x < 9:
-                sliderColor = pygame.Color(247, 79, 115)
+                cell_color = pygame.Color(247, 79, 115)
             elif cell.x >= 9 and cell.x < 12:
-                sliderColor = pygame.Color(193, 135, 77)
+                cell_color = pygame.Color(193, 135, 77)
             elif cell.x >= 12 and cell.x < 15:
-                sliderColor = pygame.Color(187, 210, 4)
+                cell_color = pygame.Color(187, 210, 4)
             elif cell.x >= 15 and cell.x < 18:
-                sliderColor = pygame.Color(249, 109, 175)
+                cell_color = pygame.Color(249, 109, 175)
             elif cell.x >= 18 and cell.x < 21:
-                sliderColor = pygame.Color(9, 221, 250)
+                cell_color = pygame.Color(9, 221, 250)
             elif cell.x >= 21 and cell.x < 24:
-                sliderColor = pygame.Color(150, 47, 28)
+                cell_color = pygame.Color(150, 47, 28)
 
-            pygame.draw.polygon(canvas, sliderColor, rect_points, stroke)
+            if cell.selected:
+                slider.color = cell_color
 
-    # draw slider area:
-    pygame.draw.polygon(canvas, sliderColor, [
-        [config['GRID_1_X1'], config['GRID_1_Y1']],
-        [config['GRID_1_X1'], 100-config['GRID_1_Y2']],
-        [config['GRID_1_X2'], 100-config['GRID_1_Y2']]], 5)
+            pygame.draw.polygon(canvas, cell_color, rect_points, stroke)
+
+    canvas.blit(viewport, (0, 0))
+
+    # render everything beyond/on top of canvas:
+    if session.verbose:
+        font = pygame.font.SysFont('Arial', 20)
+        canvas.blit(font.render(str(pygame.mouse.get_pos()), True, (255,255,255)), (300,800))
+
 
     pygame.display.update()
 

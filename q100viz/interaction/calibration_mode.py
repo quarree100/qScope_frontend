@@ -30,12 +30,18 @@ class CalibrationMode:
                 # recalculate all surface projections
                 session.viewport.calculate()
                 session.gis.surface.calculate(session.viewport.transform_mat)
+
                 session.grid_1.surface.calculate(session.viewport.transform_mat)
                 session.grid_1.transform()
+
                 session.grid_2.surface.calculate(session.viewport.transform_mat)
                 session.grid_2.transform()
+
                 session.basemap.surface.calculate(session.gis.surface.transform_mat)
                 session.basemap.warp()
+
+                session.slider.surface.calculate(session.viewport.transform_mat)
+                session.slider.transform()
             elif event.key == K_s:
                 session.viewport.save(keystone_file)
 

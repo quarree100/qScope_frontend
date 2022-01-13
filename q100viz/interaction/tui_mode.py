@@ -1,6 +1,8 @@
-from pygame.locals import MOUSEBUTTONDOWN
+import pygame
 
+import q100viz.keystone as keystone
 import q100viz.session as session
+from config import config
 
 
 class TuiMode:
@@ -16,7 +18,7 @@ class TuiMode:
         self.slider_handle = self.slider_handles[0]
 
     def process_event(self, event, config):
-        if event.type == MOUSEBUTTONDOWN:
+        if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
 
@@ -41,7 +43,8 @@ class TuiMode:
                         # consider last row as slider control
                         if y == len(grid.grid)-1:
                             self.slider_handle = self.slider_handles[x]
-                            session.print_verbose(("slider_handle: ", self.slider_handle))
+                            session.print_verbose(
+                                ("slider_handle: ", self.slider_handle))
 
                     if cell.id > 0 and cell.rel_rot == 1:
                         i = get_intersection(session.buildings, grid, x, y)
@@ -55,7 +58,6 @@ class TuiMode:
                 session.buildings[session.buildings.selected], 2, (255, 0, 127)
             )
 
-
     def update_slider(self):
         if session.grid_1.sliders['slider0'] is not None:
             if self.slider_handle == 'year':
@@ -67,11 +69,13 @@ class TuiMode:
                     session.grid_1.sliders['slider0'] * 10000)  # ranges from 0 to 10,000€
             elif self.slider_handle == 'CO2-Preis':
                 session.environment['CO2-Preis'] = 55 + \
-                    session.grid_1.sliders['slider0'] * 195  # ranges from 55 to 240€/t
+                    session.grid_1.sliders['slider0'] * \
+                    195  # ranges from 55 to 240€/t
             elif self.slider_handle == 'CO2-emissions':
                 session.buildings.loc[(
                     session.buildings.selected == True), 'CO2'] = session.grid_1.sliders['slider0']  # sets CO2-value of selected buildings to slider value (absolute)
-                session.print_verbose((session.buildings[session.buildings['selected'] == True]))
+                session.print_verbose(
+                    (session.buildings[session.buildings['selected'] == True]))
             elif self.slider_handle == 'Technologie':
                 if session.grid_1.sliders['slider0'] >= 0 and session.grid_1.sliders['slider0'] < 0.25:
                     session.environment['Technologie'] = 'PV'
@@ -87,7 +91,9 @@ class TuiMode:
             elif self.slider_handle == 'Anschluss':
                 session.buildings.loc[(
                     session.buildings.selected == True), 'Anschluss'] = session.grid_1.sliders['slider0'] > 0.5  # sets CO2-value of selected buildings to slider value (absolute)
-                session.print_verbose((session.buildings[session.buildings['selected'] == True]))
+                session.print_verbose(
+                    (session.buildings[session.buildings['selected'] == True]))
+
 
 def get_intersection(df, grid, x, y):
     # get viewport coordinates of the cell rectangle
@@ -96,3 +102,34 @@ def get_intersection(df, grid, x, y):
     )
     # find elements intersecting with selected cell
     return session.gis.get_intersection_indexer(df, cell_vertices)
+
+
+class Slider:
+    def __init__(self, canvas_size, grid, x_, y_, width):
+        self.x = x_
+        self.y = y_
+        self.width = width
+        self.color = pygame.Color(20, 200, 150)
+
+        # create rectangle around centerpoint:
+        self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
+        self.surface.src_points = [
+            [self.x - width, self.y + width], [self.x - width, self.y - width],
+            [self.x + width, self.y - width], [self.x + width, self.y + width]]
+
+        self.surface.dst_points = session.viewport.dst_points
+
+        self.surface.calculate(session.viewport.transform_mat)
+
+        self.coords_transformed = self.surface.transform([
+            [self.x - width, self.y + width], [self.x - width, self.y - width],
+            [self.x + width, self.y - width], [self.x + width, self.y + width]])
+
+    def render(self):
+        pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
+
+    def transform(self):
+        width = self.width
+        self.coords_transformed = self.surface.transform([
+            [self.x - width, self.y + width], [self.x - width, self.y - width],
+            [self.x + width, self.y - width], [self.x + width, self.y + width]])

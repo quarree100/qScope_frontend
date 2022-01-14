@@ -106,34 +106,27 @@ def get_intersection(df, grid, x, y):
 
 
 class Slider:
-    def __init__(self, canvas_size, grid, x_, y_, width):
-        self.x = x_
-        self.y = y_
-        self.width = width
+    def __init__(self, canvas_size, grid, coords):
+        self.coords = coords
         self.color = pygame.Color(20, 200, 150)
 
         # create rectangle around centerpoint:
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
         self.surface.src_points = [
             [0, 0], [0, 100], [100, 100], [100, 0]]
-            # [self.x, self.y], [self.x, self.y+0.2], [self.x+0.2, self.y],[self.x + 0.2, self.y+0.2]]
-            # [self.x - width, self.y + width], [self.x - width, self.y - width],
-            # [self.x + width, self.y - width], [self.x + width, self.y + width]]
 
-        self.surface.dst_points = session.viewport.dst_points
+        self.surface.dst_points = session.grid_1.surface.dst_points  # relative coordinate system
 
-        self.surface.calculate(session.viewport.transform_mat)
+        self.surface.calculate(session.viewport.transform_mat)  # get matrix to transform by
 
         self.coords_transformed = self.surface.transform([
-            [self.x - width, self.y + width], [self.x - width, self.y - width],
-            [self.x + width, self.y - width], [self.x + width, self.y + width]])
+            [self.coords[0], self.coords[3]], [self.coords[0], self.coords[1]],
+            [self.coords[2], self.coords[1]], [self.coords[2], self.coords[3]]])
 
     def render(self):
         pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
 
     def transform(self):
-        width = self.width
-        # self.surface.calculate(session.viewport.transform_mat)
         self.coords_transformed = self.surface.transform([
-            [self.x - width, self.y + width], [self.x - width, self.y - width],
-            [self.x + width, self.y - width], [self.x + width, self.y + width]])
+            [self.coords[0], self.coords[3]], [self.coords[0], self.coords[1]],
+            [self.coords[2], self.coords[1]], [self.coords[2], self.coords[3]]])

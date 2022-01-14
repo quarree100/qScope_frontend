@@ -89,7 +89,7 @@ show_typologiezonen = False
 show_nahwaermenetz = True
 
 # initialize slider:
-slider = session.slider = Slider(canvas_size, grid_1, 0.3,0.5,0.1)
+slider = session.slider = Slider(canvas_size, grid_1, [0, 100, 50, 150])
 
 # Load data
 buildings = gis.read_shapefile(

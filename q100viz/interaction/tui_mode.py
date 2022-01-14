@@ -115,8 +115,10 @@ class Slider:
         # create rectangle around centerpoint:
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
         self.surface.src_points = [
-            [self.x - width, self.y + width], [self.x - width, self.y - width],
-            [self.x + width, self.y - width], [self.x + width, self.y + width]]
+            [0, 0], [0, 100], [100, 100], [100, 0]]
+            # [self.x, self.y], [self.x, self.y+0.2], [self.x+0.2, self.y],[self.x + 0.2, self.y+0.2]]
+            # [self.x - width, self.y + width], [self.x - width, self.y - width],
+            # [self.x + width, self.y - width], [self.x + width, self.y + width]]
 
         self.surface.dst_points = session.viewport.dst_points
 
@@ -131,6 +133,7 @@ class Slider:
 
     def transform(self):
         width = self.width
+        # self.surface.calculate(session.viewport.transform_mat)
         self.coords_transformed = self.surface.transform([
             [self.x - width, self.y + width], [self.x - width, self.y - width],
             [self.x + width, self.y - width], [self.x + width, self.y + width]])

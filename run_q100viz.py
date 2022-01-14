@@ -3,7 +3,9 @@ import os
 import random
 import threading
 import json
+import cv2
 import pygame
+import numpy as np
 from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, K_n, K_p, K_t, K_v, K_PLUS, K_MINUS, QUIT
 
 from config import config
@@ -87,7 +89,7 @@ show_typologiezonen = False
 show_nahwaermenetz = True
 
 # initialize slider:
-slider = session.slider = Slider(canvas_size, grid_1, 50, 50, 100)
+slider = session.slider = Slider(canvas_size, grid_1, 0.3,0.5,0.1)
 
 # Load data
 buildings = gis.read_shapefile(
@@ -287,8 +289,8 @@ while True:
     # render everything beyond/on top of canvas:
     if session.verbose:
         font = pygame.font.SysFont('Arial', 20)
-        canvas.blit(font.render(str(pygame.mouse.get_pos()), True, (255,255,255)), (300,800))
-
+        mouse_pos = pygame.mouse.get_pos()
+        canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (300,800))
 
     pygame.display.update()
 

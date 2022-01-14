@@ -7,6 +7,9 @@ from config import config
 
 class TuiMode:
     def __init__(self):
+        # TODO: use session.slider_handles instead and pick active slider via \
+        # int(cell.x/(session.grid_settings['ncols']/(len(session.slider_handles) - 1)))],
+
         self.slider_handles = ['year', 'year', 'year',
                                'foerderung', 'foerderung', 'foerderung',
                                'CO2-Preis', 'CO2-Preis', 'CO2-Preis', ' CO2-Preis',

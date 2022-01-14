@@ -69,7 +69,7 @@ basemap = session.basemap = gis.Basemap(
 basemap.warp()
 
 # Initialize grid, projected onto the viewport
-grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))
+grid_settings = session.grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = session.grid_1 = grid.Grid(
@@ -222,8 +222,9 @@ while True:
         canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'waerme_2017_rel')  # stroke simple black
 
     # draw grid
-    grid_1.draw(canvas)
-    grid_2.draw(canvas)
+    grid_1.draw(canvas, show_grid)
+    grid_2.draw(canvas, show_grid)
+
 
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
@@ -251,9 +252,8 @@ while True:
     canvas.blit(slider.surface, (0,0))
 
     # draw grid
-    if show_grid:
-        canvas.blit(grid_1.surface, (0, 0))
-        canvas.blit(grid_2.surface, (0, 0))
+    canvas.blit(grid_1.surface, (0, 0))
+    canvas.blit(grid_2.surface, (0, 0))
 
     # draw slider controls:
     cell_color = pygame.Color(20, 200, 150)

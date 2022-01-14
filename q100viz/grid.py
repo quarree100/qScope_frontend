@@ -30,44 +30,49 @@ class Grid:
         # set up sliders
         self.sliders = {slider_id: None for slider_id in slider_ids}
 
-        # last row: slider controls
-        self.slider_controls = []
-        for y, row in enumerate(self.grid):
-            for x, cell in enumerate(row):
-                if y == len(self.grid) - 1:
-                    self.slider_controls.append(cell)
-        # print(self.slider_controls)
-
         # list of transformed slider controls rectangles
         # self.slider_controls_transformed = [
         #     (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
         #     for y, row in enumerate(self.slider_controls) for x, cell in enumerate(row)]
 
-    def draw(self, surface):
+    def draw(self, surface, show_grid):
 
         font = pygame.font.SysFont('Arial', 20)
 
         # draw grid data
-        for cell, rect_points in self.rects_transformed:
-            self.surface.blit(
-                font.render(str(cell.id), True, (255, 255, 255)),
-                rect_points[0]
-            )
-            self.surface.blit(
-                font.render(str(cell.rot), True, (255, 255, 0)),
-                [rect_points[0][0] + 20, rect_points[0][1]]
-            )
-            self.surface.blit(
-                font.render(str(cell.rel_rot), True, (255, 127, 0)),
-                [rect_points[0][0] + 20, rect_points[0][1] + 20]
-            )
+        if show_grid:
+            for cell, rect_points in self.rects_transformed:
+                self.surface.blit(
+                    font.render(str(cell.id), True, (255, 255, 255)),
+                    rect_points[0]
+                )
+                self.surface.blit(
+                    font.render(str(cell.rot), True, (255, 255, 0)),
+                    [rect_points[0][0] + 20, rect_points[0][1]]
+                )
+                self.surface.blit(
+                    font.render(str(cell.rel_rot), True, (255, 127, 0)),
+                    [rect_points[0][0] + 20, rect_points[0][1] + 20]
+                )
 
         # draw rectangle outlines
         for cell, rect_points in self.rects_transformed:
             # do not apply to last row; it will be treated seperatedly as slider controls:
-            if cell.y is not len(self.grid) - 1:
+            if cell.y is not len(self.grid) - 1 and show_grid:
                 stroke = 4 if cell.selected else 1
                 pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), rect_points, stroke)
+
+            # print function on sliderControl cells:
+            if cell.y == len(self.grid) - 1:
+                if cell.x % 3 == 0:
+                    font = pygame.font.SysFont('Arial', 14)
+                    self.surface.blit(
+                        font.render(session.slider_handles[
+                            int(cell.x/(session.grid_settings['ncols']/(len(session.slider_handles) - 1)))],
+                            True, (255, 255, 255)),
+                            [rect_points[0][0], rect_points[0][1]]
+                    )
+
 
     def mouse_pressed(self, button):
         pos = pygame.mouse.get_pos()

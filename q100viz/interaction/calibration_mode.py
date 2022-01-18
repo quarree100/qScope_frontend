@@ -45,6 +45,9 @@ class CalibrationMode:
             elif event.key == K_s:
                 session.viewport.save(keystone_file)
 
+    def update(self):
+        pass
+
     def draw(self, canvas):
         # draw calibration anchors
         for i, anchor in enumerate(

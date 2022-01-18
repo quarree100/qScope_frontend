@@ -67,7 +67,8 @@ class TuiMode:
                 session.buildings[session.buildings.selected], 2, (255, 0, 127)
             )
 
-    def update_slider(self):
+    def update(self):
+        # update slider:
         if session.grid_1.sliders['slider0'] is not None:
             if self.slider_handle == 'year':
                 # ranges from 2020 to 2050

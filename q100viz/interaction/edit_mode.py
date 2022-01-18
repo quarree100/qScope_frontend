@@ -65,6 +65,9 @@ class EditMode:
                     for osm_id in self.relevant_polygons:
                         txt_file.write(str(osm_id) + ",")
 
+    def update(self):
+        pass
+
     def draw(self, canvas):
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings

@@ -6,7 +6,7 @@ import json
 import cv2
 import pygame
 import numpy as np
-from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, K_n, K_p, K_t, K_v, K_PLUS, K_MINUS, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, K_n, K_p, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
 
 from config import config
 import q100viz.keystone as keystone
@@ -17,10 +17,11 @@ import q100viz.stats as stats
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.edit_mode import EditMode
 from q100viz.interaction.tui_mode import TuiMode, Slider
+from q100viz.interaction.simulation_mode import SimulationMode
 import q100viz.session as session
 
 # Set FPS
-FPS = 12
+FPS = session.FPS = 12
 
 # set window position
 # os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
@@ -85,7 +86,7 @@ grid_2 = session.grid_2 = grid.Grid(
 show_polygons = True
 show_basemap = False
 show_grid = False
-show_typologiezonen = False
+show_typologiezonen = True
 show_nahwaermenetz = True
 
 # initialize slider:
@@ -109,7 +110,7 @@ buildings['strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / \
     buildings.max()['Stromverbrauch 2017 [kWh]']
 buildings['adresse'] = buildings['Straße'] + ' ' + buildings['Hausnr.']
 
-# mock data
+# technical data
 buildings['CO2'] = [0.5 * random.random() for row in buildings.values]
 buildings['investment'] = [random.randint(0,4) for row in buildings.values]
 
@@ -117,10 +118,14 @@ versorgungsarten = ['konventionell', 'medium', 'gruen']
 buildings['versorgung'] = [versorgungsarten[random.randint(0,2)] for row in buildings.values]
 buildings['anschluss'] = [0 for row in buildings.values]
 
-# add cell column
+# psychological data
+buildings['EEH'] = [random.random() for row in buildings.values]
+
+# buildings interaction
 buildings['cell'] = ""
 buildings['selected'] = False
 
+# GIS layers
 typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])
 nahwaermenetz = gis.read_shapefile(config['NAHWAERMENETZ_FILE'])
 waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Wärmespeicher').append(
@@ -146,11 +151,12 @@ print(buildings)
 handlers = {
     'calibrate': CalibrationMode(),
     'edit': EditMode(),
-    'tui': TuiMode()
+    'tui': TuiMode(),
+    'simulation': SimulationMode()
 }
 active_handler = handlers['tui']
 
-# Begin Game Loop
+############################ Begin Game Loop ##########################
 while True:
     # process mouse/keyboard events
     for event in pygame.event.get():
@@ -167,9 +173,9 @@ while True:
             # toggle grid:
             elif event.key == K_g:
                 show_grid = not show_grid
-            # toggle typologiezonen:
+            # activate tui_mode:
             if event.key == K_t:
-                show_typologiezonen = not show_typologiezonen
+                active_handler = handlers['tui']
             # toggle nahwaermenetz:
             if event.key == K_n:
                 show_nahwaermenetz = not show_nahwaermenetz
@@ -180,6 +186,11 @@ while True:
             # toggle edit-mode to move polygons:
             elif event.key == K_e:
                 active_handler = handlers['edit' if active_handler != handlers['edit'] else 'tui']
+            # toggle simulation_mode:
+            elif event.key == K_s:
+                active_handler = handlers[
+                    'simulation' if active_handler != handlers['simulation'] else 'tui']
+                active_handler = handlers['simulation']
             elif event.key == K_PLUS:
                 if session.grid_1.sliders['slider0'] is not None:
                     session.grid_1.sliders['slider0'] += 0.1
@@ -199,8 +210,8 @@ while True:
             pygame.quit()
             sys.exit()
 
-    if active_handler != handlers['calibrate'] and active_handler != handlers['edit']:
-        active_handler.update_slider()
+    # if active_handler != handlers['calibrate'] and active_handler != handlers['edit']:
+    active_handler.update()
 
     # clear surfaces
     canvas.fill(0)
@@ -210,9 +221,9 @@ while True:
     grid_2.surface.fill(0)
     slider.surface.fill(0)
 
-    session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     if show_typologiezonen:
         session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
+    session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     session.gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
     session.gis.draw_polygon_layer(
         canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'waerme_2017_rel')  # fill and lerp
@@ -222,9 +233,9 @@ while True:
         canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'waerme_2017_rel')  # stroke simple black
 
     # draw grid
-    grid_1.draw(canvas, show_grid)
-    grid_2.draw(canvas, show_grid)
-
+    if active_handler != handlers['simulation']:
+        grid_1.draw(canvas, show_grid)
+        grid_2.draw(canvas, show_grid)
 
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
@@ -248,45 +259,19 @@ while True:
         canvas.blit(_gis.surface, (0, 0))
 
     # slider
-    slider.render()
-    canvas.blit(slider.surface, (0,0))
+    if active_handler != handlers['simulation']:
+        slider.render()
+        canvas.blit(slider.surface, (0,0))
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))
     canvas.blit(grid_2.surface, (0, 0))
 
-    # draw slider controls:
-    cell_color = pygame.Color(20, 200, 150)
-    for cell, rect_points in grid_1.rects_transformed:
-        if cell.y is len(grid_1.grid) - 1:  # last row
-            stroke = 4 if cell.selected else 1
-
-            # colors via slider parameter fields:
-            if cell.x >= 0 and cell.x < 3:
-                cell_color = pygame.Color(73, 156, 156)
-            elif cell.x >= 3 and cell.x < 6:
-                cell_color = pygame.Color(126, 185, 207)
-            elif cell.x >= 6 and cell.x < 9:
-                cell_color = pygame.Color(247, 79, 115)
-            elif cell.x >= 9 and cell.x < 12:
-                cell_color = pygame.Color(193, 135, 77)
-            elif cell.x >= 12 and cell.x < 15:
-                cell_color = pygame.Color(187, 210, 4)
-            elif cell.x >= 15 and cell.x < 18:
-                cell_color = pygame.Color(249, 109, 175)
-            elif cell.x >= 18 and cell.x < 21:
-                cell_color = pygame.Color(9, 221, 250)
-            elif cell.x >= 21 and cell.x < 24:
-                cell_color = pygame.Color(150, 47, 28)
-
-            if cell.selected:
-                slider.color = cell_color
-
-            pygame.draw.polygon(canvas, cell_color, rect_points, stroke)
-
     canvas.blit(viewport, (0, 0))
 
-    # render everything beyond/on top of canvas:
+    ############ render everything beyond/on top of canvas: ###########
+
+    # mouse position
     if session.verbose:
         font = pygame.font.SysFont('Arial', 20)
         mouse_pos = pygame.mouse.get_pos()
@@ -295,3 +280,6 @@ while True:
     pygame.display.update()
 
     clock.tick(FPS)
+
+    session.ticks_elapsed = (session.ticks_elapsed + 1)
+    session.seconds_elapsed = int(session.ticks_elapsed / 12)

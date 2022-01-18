@@ -20,7 +20,6 @@ class Grid:
 
         # initialize two-dimensional array of grid cells
         self.grid = [[GridCell(x, y) for x in range(x_size)] for y in range(y_size)]
-        # print((self.grid))
 
         # create a list of transformed rectangles
         self.rects_transformed = [

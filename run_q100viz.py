@@ -14,12 +14,9 @@ import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
 import q100viz.stats as stats
-from q100viz.interaction.calibration_mode import CalibrationMode
-from q100viz.interaction.edit_mode import EditMode
-from q100viz.interaction.tui_mode import TuiMode, Slider
+from q100viz.interaction.tui_mode import Slider
 from q100viz.interaction.simulation_mode import SimulationMode
 import q100viz.session as session
-
 # Set FPS
 FPS = session.FPS = 12
 
@@ -148,13 +145,9 @@ _stats = stats.Stats(stats_io)
 
 print(buildings)
 
-handlers = {
-    'calibrate': CalibrationMode(),
-    'edit': EditMode(),
-    'tui': TuiMode(),
-    'simulation': SimulationMode()
-}
-active_handler = handlers['tui']
+handlers = session.handlers
+active_handler = session.active_handler
+simulation = SimulationMode()
 
 ############################ Begin Game Loop ##########################
 while True:
@@ -188,9 +181,11 @@ while True:
                 active_handler = handlers['edit' if active_handler != handlers['edit'] else 'tui']
             # toggle simulation_mode:
             elif event.key == K_s:
-                active_handler = handlers[
-                    'simulation' if active_handler != handlers['simulation'] else 'tui']
-                active_handler = handlers['simulation']
+                if active_handler == handlers['simulation']:
+                    simulation.send_data(_stats)
+                    active_handler = handlers['tui']
+                else:
+                    active_handler = handlers['simulation']
             elif event.key == K_PLUS:
                 if session.grid_1.sliders['slider0'] is not None:
                     session.grid_1.sliders['slider0'] += 0.1
@@ -210,8 +205,9 @@ while True:
             pygame.quit()
             sys.exit()
 
-    # if active_handler != handlers['calibrate'] and active_handler != handlers['edit']:
-    active_handler.update()
+    if active_handler != handlers['simulation']:
+        active_handler.update()
+    simulation.update()
 
     # clear surfaces
     canvas.fill(0)
@@ -246,7 +242,8 @@ while True:
 
     # build clusters of selected buildings and send JSON message
     # clusters = stats.make_clusters(buildings[buildings.selected])
-    _stats.send_simplified_dataframe_withenvironment_variables(buildings[buildings.selected], session.environment)
+    if active_handler == handlers['tui']:
+        _stats.send_simplified_dataframe_withenvironment_variables(buildings[buildings.selected], session.environment)
 
     # render surfaces
     if show_basemap:

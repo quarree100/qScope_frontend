@@ -29,13 +29,17 @@ class SimulationMode:
                     (session.buildings.selected == True), 'EEH']
             session.buildings['EEH'] += np.random.uniform(-0.5, 0.5)
 
-            self.simulation_df.loc[len(self.simulation_df.index)] = [self.simulation_step, session.buildings[session.buildings.selected == True]]
+            if not session.buildings[session.buildings.selected == True].empty:
+                self.simulation_df.loc[len(self.simulation_df.index)] = [self.simulation_step, session.buildings[session.buildings.selected == True]]
 
             self.simulation_step += 1
             self.previous_tick = session.seconds_elapsed
 
     def draw(self, canvas):
-        pass
+        if session.verbose:
+            font = pygame.font.SysFont('Arial', 20)
+            canvas.blit(font.render(str(self.simulation_step), True, (255,255,255)), (300,900))
 
     def send_data(self, stats):
         stats.send_dataframe_as_json(self.simulation_df)
+        # self.simulation_df.set_index('step').to_csv('simulation_df.csv')

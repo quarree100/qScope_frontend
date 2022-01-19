@@ -274,6 +274,9 @@ while True:
         mouse_pos = pygame.mouse.get_pos()
         canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (300,800))
 
+    if active_handler == handlers['simulation']:
+        simulation.draw(canvas)
+
     pygame.display.update()
 
     clock.tick(FPS)

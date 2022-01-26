@@ -63,7 +63,7 @@ class Grid:
 
             # print function on sliderControl cells:
             if cell.y == len(self.grid) - 1:
-                if cell.x % 3 == 0:
+                if cell.x % int((session.grid_settings['ncols'] / len(session.slider_handles))) == 1:
                     font = pygame.font.SysFont('Arial', 14)
                     self.surface.blit(
                         font.render(session.slider_handles[
@@ -76,22 +76,17 @@ class Grid:
                 cell_color = pygame.Color(20, 200, 150)
                 stroke = 4 if cell.selected else 1
                 # colors via slider parameter fields:
-                if cell.x >= 0 and cell.x < 3:
-                    cell_color = pygame.Color(73, 156, 156)
-                elif cell.x >= 3 and cell.x < 6:
-                    cell_color = pygame.Color(126, 185, 207)
-                elif cell.x >= 6 and cell.x < 9:
-                    cell_color = pygame.Color(247, 79, 115)
-                elif cell.x >= 9 and cell.x < 12:
-                    cell_color = pygame.Color(193, 135, 77)
-                elif cell.x >= 12 and cell.x < 15:
-                    cell_color = pygame.Color(187, 210, 4)
-                elif cell.x >= 15 and cell.x < 18:
-                    cell_color = pygame.Color(249, 109, 175)
-                elif cell.x >= 18 and cell.x < 21:
-                    cell_color = pygame.Color(9, 221, 250)
-                elif cell.x >= 21 and cell.x < 24:
-                    cell_color = pygame.Color(150, 47, 28)
+                colors = [
+                    (73, 156, 156),
+                    (126, 185, 207),
+                    (247, 79, 115),
+                    (193, 135, 77),
+                    (187, 210, 4),
+                    (249, 109, 175),
+                    (9, 221, 250),
+                    (150, 47, 28)]
+
+                cell_color = pygame.Color(colors[int(cell.x / (session.grid_settings['ncols'] / len(session.slider_handles)))])
 
                 if cell.selected:
                     session.slider.color = cell_color

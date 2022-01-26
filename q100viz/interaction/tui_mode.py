@@ -7,18 +7,8 @@ from config import config
 
 class TuiMode:
     def __init__(self):
-        # TODO: use session.slider_handles instead and pick active slider via \
-        # int(cell.x/(session.grid_settings['ncols']/(len(session.slider_handles) - 1)))],
 
-        self.slider_handles = ['year', 'year', 'year',
-                               'foerderung', 'foerderung', 'foerderung',
-                               'CO2-Preis', 'CO2-Preis', 'CO2-Preis', ' CO2-Preis',
-                               'CO2-emissions', 'CO2-emissions', 'CO2-emissions',
-                               'Technologie', 'Technologie', 'Technologie',
-                               'investment', 'investment', 'investment',
-                               'Anschluss', 'Anschluss', 'Anschluss']
-
-        self.slider_handle = self.slider_handles[0]
+        self.slider_handle = session.slider_handles[0]
 
     def process_event(self, event, config):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -44,21 +34,12 @@ class TuiMode:
                             session.buildings.loc[selection.name,
                                                   'selected'] = True
 
-                        # consider last row as slider control
+                        # define slider control via selected cell in last row:
                         if y == len(grid.grid)-1:
-                            self.slider_handle = self.slider_handles[x]
+                            self.slider_handle = session.slider_handles[
+                                int(x/len(session.slider_handles))]
                             session.print_verbose(
                                 ("slider_handle: ", self.slider_handle))
-
-                    # increase/decrease emission by rotation:
-                    # if cell.id > 0:
-                    #     if cell.rel_rot == 1:
-                    #         i = get_intersection(session.buildings, grid, x, y)
-                    #         session.buildings.loc[i, 'CO2'] += 20
-                    #     elif cell.rel_rot == -1:
-                    #         i = get_intersection(session.buildings, grid, x, y)
-                    #         session.buildings.loc[i, 'CO2'] -= 20
-
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings

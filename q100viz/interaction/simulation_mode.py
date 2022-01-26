@@ -25,9 +25,9 @@ class SimulationMode:
 
             # mockup data:
             session.buildings.loc[
-                (session.buildings.selected == True), 'EEH'] *= session.buildings.loc[
-                    (session.buildings.selected == True), 'EEH']
-            session.buildings['EEH'] += np.random.uniform(-0.5, 0.5)
+                (session.buildings.selected == True), 'CO2'] *= session.buildings.loc[
+                    (session.buildings.selected == True), 'CO2']
+            session.buildings['CO2'] += np.random.uniform(-0.5, 0.5)
 
             if not session.buildings[session.buildings.selected == True].empty:
                 self.simulation_df.loc[len(self.simulation_df.index)] = [self.simulation_step, session.buildings[session.buildings.selected == True]]
@@ -40,6 +40,15 @@ class SimulationMode:
             font = pygame.font.SysFont('Arial', 20)
             canvas.blit(font.render(str(self.simulation_step), True, (255,255,255)), (300,900))
 
+        if len(session.buildings[session.buildings.selected]):
+            # highlight selected buildings
+            session.gis.draw_polygon_layer(
+                canvas,
+                session.buildings[session.buildings.selected], 2, (255, 0, 127)
+            )
+
     def send_data(self, stats):
         stats.send_dataframe_as_json(self.simulation_df)
-        # self.simulation_df.set_index('step').to_csv('simulation_df.csv')
+        if session.verbose:
+            self.simulation_df.set_index('step').to_csv('simulation_df.csv')
+            self.simulation_df.set_index('step').to_json('simulation_df.json', default_handler=str)

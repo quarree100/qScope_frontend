@@ -78,7 +78,12 @@ grid_1 = session.grid_1 = grid.Grid(
         [config['GRID_1_X2'], config['GRID_1_Y1']]],
         viewport, ['slider0'])
 grid_2 = session.grid_2 = grid.Grid(
-    canvas_size, ncols, nrows, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
+    canvas_size, ncols, nrows, [
+        [config['GRID_2_X1'], config['GRID_2_Y1']],
+        [config['GRID_2_X1'], config['GRID_2_Y2']],
+        [config['GRID_2_X2'], config['GRID_2_Y2']],
+        [config['GRID_2_X2'], config['GRID_2_Y1']]],
+        viewport, [None])
 
 show_polygons = True
 show_basemap = False
@@ -207,7 +212,8 @@ while True:
 
     if active_handler != handlers['simulation']:
         active_handler.update()
-    simulation.update()
+    else:
+        simulation.update()
 
     # clear surfaces
     canvas.fill(0)
@@ -276,6 +282,13 @@ while True:
 
     if active_handler == handlers['simulation']:
         simulation.draw(canvas)
+
+
+    # export canvas every 5s:
+    if session.seconds_elapsed % 5 == 0 and session.verbose:
+        pygame.image.save(viewport, 'canvas.png')
+
+    ############################# pygame time #########################
 
     pygame.display.update()
 

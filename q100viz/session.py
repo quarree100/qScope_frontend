@@ -13,7 +13,7 @@ grid_1 = None
 grid_2 = None
 buildings = None
 environment = {'foerderung': 0}
-verbose = False
+verbose = True
 slider_handles = ['year', 'foerderung', ' CO2-Preis',
                     'CO2-emissions', 'versorgung', 'investment', 'anschluss']
 

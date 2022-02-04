@@ -108,8 +108,15 @@ class Slider:
             [self.coords[0], self.coords[3]], [self.coords[0], self.coords[1]],
             [self.coords[2], self.coords[1]], [self.coords[2], self.coords[3]]])
 
-    def render(self):
+    def render(self, canvas=None):
         pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
+        font = pygame.font.SysFont('Arial', 12)
+
+        # position = self.coords[1][0]
+        self.surface.blit(font.render(str("0"), True, (255,255,255)), [self.coords_transformed[0][0] - 50, self.coords_transformed[0][1] + 50])
+        self.surface.blit(font.render(str("1"), True, (255,255,255)), self.coords_transformed[1])
+        self.surface.blit(font.render(str("2"), True, (255,255,255)), self.coords_transformed[2])
+        self.surface.blit(font.render(str("3"), True, (255,255,255)), self.coords_transformed[3])
 
     def transform(self):
         self.coords_transformed = self.surface.transform([

@@ -28,7 +28,7 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-# UDP
+# UDP receive
 grid_udp_1 = ('localhost', 5000)
 grid_udp_2 = ('localhost', 5001)
 
@@ -191,6 +191,7 @@ while True:
                     active_handler = handlers['tui']
                 else:
                     active_handler = handlers['simulation']
+            # manual slider control for test purposes:
             elif event.key == K_PLUS:
                 if session.grid_1.sliders['slider0'] is not None:
                     session.grid_1.sliders['slider0'] += 0.1
@@ -203,6 +204,7 @@ while True:
                     session.print_verbose(("slider0 =", session.grid_1.sliders['slider0']))
                 else:
                     session.grid_1.sliders['slider0'] = 0.1
+            # verbose mode:
             elif event.key == K_v:
                 session.verbose = not session.verbose
 
@@ -249,7 +251,7 @@ while True:
     # build clusters of selected buildings and send JSON message
     # clusters = stats.make_clusters(buildings[buildings.selected])
     if active_handler == handlers['tui']:
-        _stats.send_simplified_dataframe_withenvironment_variables(buildings[buildings.selected], session.environment)
+        _stats.send_simplified_dataframe_with_environment_variables(buildings[buildings.selected], session.environment)
 
     # render surfaces
     if show_basemap:
@@ -263,7 +265,7 @@ while True:
 
     # slider
     if active_handler != handlers['simulation']:
-        slider.render()
+        slider.render(canvas)
         canvas.blit(slider.surface, (0,0))
 
     # draw grid
@@ -278,8 +280,9 @@ while True:
     if session.verbose:
         font = pygame.font.SysFont('Arial', 20)
         mouse_pos = pygame.mouse.get_pos()
-        canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (300,800))
+        canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
 
+    # simulation steps:
     if active_handler == handlers['simulation']:
         simulation.draw(canvas)
 

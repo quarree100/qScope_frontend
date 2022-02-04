@@ -67,7 +67,7 @@ class Grid:
                     font = pygame.font.SysFont('Arial', 14)
                     self.surface.blit(
                         font.render(session.slider_handles[
-                            int(cell.x/(session.grid_settings['ncols']/(len(session.slider_handles) - 1)))],
+                            int(cell.x / (session.grid_settings['ncols']/(len(session.slider_handles))))],
                             True, (255, 255, 255)),
                             [rect_points[0][0], rect_points[0][1]]
                     )

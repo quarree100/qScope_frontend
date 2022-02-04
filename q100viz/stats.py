@@ -40,8 +40,8 @@ class Stats:
             result[key] = value
         self.send_message([json.dumps(result)])
 
-    def send_simplified_dataframe_withenvironment_variables(self, df, env):
-        sum = make_clusters(df).sum();
+    def send_simplified_dataframe_with_environment_variables(self, df, env):
+        sum = make_clusters(df).sum()
         data = json.loads(export_json(sum, None))
         if len(data) > 0:
             result = data[0]

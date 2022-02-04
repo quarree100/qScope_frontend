@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
+import json
 
 import q100viz.session as session
 import pygame
+
 
 class SimulationMode:
     def __init__(self):
@@ -48,7 +50,8 @@ class SimulationMode:
             )
 
     def send_data(self, stats):
-        stats.send_dataframe_as_json(self.simulation_df)
-        if session.verbose:
-            self.simulation_df.set_index('step').to_csv('simulation_df.csv')
-            self.simulation_df.set_index('step').to_json('simulation_df.json', default_handler=str)
+        stats.send_dataframe_as_json(pd.DataFrame({'simulation': [self.simulation_df]}))
+
+        # save as csv in global data folder:
+        self.simulation_df.set_index('step').to_csv('../data/simulation_df_reindexed.csv')
+        self.simulation_df.to_csv('../data/simulation_df.csv')

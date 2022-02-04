@@ -238,8 +238,8 @@ while True:
 
     # draw grid
     if active_handler != handlers['simulation']:
-        grid_1.draw(canvas, show_grid)
-        grid_2.draw(canvas, show_grid)
+        grid_1.draw(show_grid)
+        grid_2.draw(show_grid)
 
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
@@ -263,6 +263,13 @@ while True:
     if show_polygons:
         canvas.blit(_gis.surface, (0, 0))
 
+    # export canvas every 1s:
+    if session.seconds_elapsed % 1 == 0 and session.verbose:
+        # create a cropped output canvas and export:
+        temp = pygame.Surface((1400, 630))
+        temp.blit(canvas, (0,0))
+        pygame.image.save(temp, '../data/canvas.png')
+
     # slider
     if active_handler != handlers['simulation']:
         slider.render(canvas)
@@ -285,11 +292,6 @@ while True:
     # simulation steps:
     if active_handler == handlers['simulation']:
         simulation.draw(canvas)
-
-
-    # export canvas every 5s:
-    if session.seconds_elapsed % 5 == 0 and session.verbose:
-        pygame.image.save(viewport, 'canvas.png')
 
     ############################# pygame time #########################
 

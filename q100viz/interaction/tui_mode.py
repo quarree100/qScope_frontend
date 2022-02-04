@@ -89,7 +89,7 @@ def get_intersection(df, grid, x, y):
     # find elements intersecting with selected cell
     return session.gis.get_intersection_indexer(df, cell_vertices)
 
-
+############################ SLIDER ###################################
 class Slider:
     def __init__(self, canvas_size, grid, coords):
         self.coords = coords
@@ -109,14 +109,16 @@ class Slider:
             [self.coords[2], self.coords[1]], [self.coords[2], self.coords[3]]])
 
     def render(self, canvas=None):
+        # coloring slider area:
         pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
         font = pygame.font.SysFont('Arial', 12)
 
-        # position = self.coords[1][0]
-        self.surface.blit(font.render(str("0"), True, (255,255,255)), [self.coords_transformed[0][0] - 50, self.coords_transformed[0][1] + 50])
-        self.surface.blit(font.render(str("1"), True, (255,255,255)), self.coords_transformed[1])
-        self.surface.blit(font.render(str("2"), True, (255,255,255)), self.coords_transformed[2])
-        self.surface.blit(font.render(str("3"), True, (255,255,255)), self.coords_transformed[3])
+        # show corner points:
+        if session.verbose:
+            self.surface.blit(font.render(str("0"), True, (255,255,255)), [self.coords_transformed[0][0] - 50, self.coords_transformed[0][1] + 50])
+            self.surface.blit(font.render(str("1"), True, (255,255,255)), self.coords_transformed[1])
+            self.surface.blit(font.render(str("2"), True, (255,255,255)), self.coords_transformed[2])
+            self.surface.blit(font.render(str("3"), True, (255,255,255)), self.coords_transformed[3])
 
     def transform(self):
         self.coords_transformed = self.surface.transform([

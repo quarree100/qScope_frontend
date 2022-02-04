@@ -34,7 +34,7 @@ class Grid:
         #     (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
         #     for y, row in enumerate(self.slider_controls) for x, cell in enumerate(row)]
 
-    def draw(self, surface, show_grid):
+    def draw(self, show_grid):
 
         font = pygame.font.SysFont('Arial', 20)
 
@@ -91,7 +91,7 @@ class Grid:
                 if cell.selected:
                     session.slider.color = cell_color
 
-                pygame.draw.polygon(surface, cell_color, rect_points, stroke)
+                pygame.draw.polygon(self.surface, cell_color, rect_points, stroke)
 
 
     def mouse_pressed(self, button):

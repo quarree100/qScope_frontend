@@ -1,3 +1,5 @@
+''' Simulation Mode fakes parameter changes for buildings later done by the ABM'''
+
 import numpy as np
 import pandas as pd
 import json
@@ -8,12 +10,9 @@ import pygame
 
 class SimulationMode:
     def __init__(self):
-        '''in collect_data, q100viz will collect incoming data from the ABM and compile it into a list; send_data will flush it to q100_info. The handles shall be received from the ABM'''
-        self.state_handles = ['collect_data', 'send_data']
-        self.mode = 'collect_data'
         self.simulation_step = 0
 
-        self.previous_tick = -1
+        self.previous_tick = -1  # stores moment of last step change
 
         self.simulation_df = pd.DataFrame(columns=['step', 'buildings'])
 
@@ -53,5 +52,6 @@ class SimulationMode:
         stats.send_dataframe_as_json(pd.DataFrame({'simulation': [self.simulation_df]}))
 
         # save as csv in global data folder:
-        self.simulation_df.set_index('step').to_csv('../data/simulation_df_reindexed.csv')
+        self.simulation_df.set_index('step').to_csv('../data/simulation_df-reindexed.csv')
         self.simulation_df.to_csv('../data/simulation_df.csv')
+        self.simulation_df.to_json('../data/simulation_df.simulation_df.json')

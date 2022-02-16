@@ -1,4 +1,5 @@
 '''
+DEPRECATED!
 In the Edit_Mode, polygons can be moved. This should facilitate the reorganization of polygons to be placed better on the grid cells, if needed.
 '''
 

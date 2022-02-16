@@ -14,7 +14,7 @@ import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
 import q100viz.stats as stats
-from q100viz.interaction.tui_mode import Slider
+from q100viz.interaction.interface import *
 from q100viz.interaction.simulation_mode import SimulationMode
 import q100viz.session as session
 # Set FPS
@@ -91,8 +91,9 @@ show_grid = False
 show_typologiezonen = True
 show_nahwaermenetz = True
 
-# initialize slider:
-slider = session.slider = Slider(canvas_size, grid_1, [0, 100, 50, 150])
+# initialize input area
+slider = session.slider = Slider(canvas_size, grid_1, [0, 100, 50, 150])  # in %, relative to grid
+mode_selector = session.mode_selector = ModeSelector(canvas_size, grid_1, [50, 100, 100, 150]) # mode selector
 
 # Load data
 buildings = gis.read_shapefile(
@@ -119,9 +120,6 @@ buildings['investment'] = [random.randint(0,4) for row in buildings.values]
 versorgungsarten = ['konventionell', 'medium', 'gruen']
 buildings['versorgung'] = [versorgungsarten[random.randint(0,2)] for row in buildings.values]
 buildings['anschluss'] = [0 for row in buildings.values]
-
-# psychological data
-buildings['EEH'] = [random.random() for row in buildings.values]
 
 # buildings interaction
 buildings['cell'] = ""
@@ -171,7 +169,7 @@ while True:
             # toggle grid:
             elif event.key == K_g:
                 show_grid = not show_grid
-            # activate tui_mode:
+            # activate input_mode:
             if event.key == K_t:
                 active_handler = handlers['tui']
             # toggle nahwaermenetz:
@@ -182,8 +180,8 @@ while True:
                 active_handler = handlers[
                     'calibrate' if active_handler != handlers['calibrate'] else 'tui']
             # toggle edit-mode to move polygons:
-            elif event.key == K_e:
-                active_handler = handlers['edit' if active_handler != handlers['edit'] else 'tui']
+            # elif event.key == K_e:
+            #     active_handler = handlers['edit' if active_handler != handlers['edit'] else 'tui']
             # toggle simulation_mode:
             elif event.key == K_s:
                 if active_handler == handlers['simulation']:
@@ -212,11 +210,13 @@ while True:
             pygame.quit()
             sys.exit()
 
+    # update running mode:
     if active_handler != handlers['simulation']:
         active_handler.update()
     else:
         simulation.update()
 
+    ################################## DRAWING ########################
     # clear surfaces
     canvas.fill(0)
     viewport.fill(0)
@@ -264,16 +264,18 @@ while True:
         canvas.blit(_gis.surface, (0, 0))
 
     # export canvas every 1s:
-    if session.seconds_elapsed % 1 == 0 and session.verbose:
+    if session.seconds_elapsed % 1 == 0 and session.verbose and session.flag_export_canvas:
         # create a cropped output canvas and export:
         temp = pygame.Surface((1400, 630))
         temp.blit(canvas, (0,0))
+        temp = pygame.transform.rotate(temp, 270)
         pygame.image.save(temp, '../data/canvas.png')
+        session.flag_export_canvas = False
 
     # slider
     if active_handler != handlers['simulation']:
         slider.render(canvas)
-        canvas.blit(slider.surface, (0,0))
+        mode_selector.render(canvas)
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))

@@ -42,6 +42,8 @@ class CalibrationMode:
 
                 session.slider.surface.calculate(session.viewport.transform_mat)
                 session.slider.transform()
+                session.slider_1.surface.calculate(session.viewport.transform_mat)
+                session.slider_1.transform()
             elif event.key == K_s:
                 session.viewport.save(keystone_file)
 

@@ -45,10 +45,12 @@ pygame.display.set_caption("q100viz")
 viewport = session.viewport = keystone.Surface(canvas_size, pygame.SRCALPHA)
 try:
     viewport.load(config['SAVED_KEYSTONE_FILE'])
+    print('loading src_points:' , viewport.src_points)
+    print('loading dst_points:' , viewport.dst_points)
 except Exception:
     print("Failed to open keystone file")
     viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
-    viewport.dst_points = [[80, 45], [80, 1035], [1840, 1035], [1840, 45]]
+    viewport.dst_points = [[0, 0], [0, canvas_size[1]], [canvas_size[0], canvas_size[1]], [canvas_size[0], 0]]
 viewport.calculate()
 
 # Initialize geographic viewport and basemap
@@ -83,7 +85,7 @@ grid_2 = session.grid_2 = grid.Grid(
         [config['GRID_2_X1'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
-        viewport, [None])
+        viewport, ['slider0'])
 
 show_polygons = True
 show_basemap = False
@@ -92,8 +94,9 @@ show_typologiezonen = True
 show_nahwaermenetz = True
 
 # initialize input area
-slider = session.slider = Slider(canvas_size, grid_1, [0, 100, 50, 150])  # in %, relative to grid
-mode_selector = session.mode_selector = ModeSelector(canvas_size, grid_1, [50, 100, 100, 150]) # mode selector
+slider = session.slider = Slider(canvas_size, grid_2, [0, 100, 50, 150])  # in %, relative to grid
+slider_1 = session.slider_1 = Slider(canvas_size, grid_1, [0, 100, 50, 150])  # in %, relative to grid
+mode_selector = session.mode_selector = ModeSelector(viewport, [[20, 70], [20, 20], [80, 20], [80,70]]) # mode selector
 
 # Load data
 buildings = gis.read_shapefile(
@@ -151,6 +154,8 @@ print(buildings)
 handlers = session.handlers
 active_handler = session.active_handler
 simulation = SimulationMode()
+
+mouse_position = MousePosition(canvas_size)
 
 ############################ Begin Game Loop ##########################
 while True:
@@ -224,6 +229,7 @@ while True:
     grid_1.surface.fill(0)
     grid_2.surface.fill(0)
     slider.surface.fill(0)
+    slider_1.surface.fill(0)
 
     if show_typologiezonen:
         session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
@@ -243,6 +249,8 @@ while True:
 
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
+    # rect_points = [[20, 70], [20, 20], [80, 20], [80,70]]
+    # pygame.draw.polygon(viewport, (255, 0, 0), viewport.transform(rect_points))
 
     # draw extras
     if active_handler:
@@ -275,7 +283,12 @@ while True:
     # slider
     if active_handler != handlers['simulation']:
         slider.render(canvas)
+        slider_1.render(canvas)
         mode_selector.render(canvas)
+
+    # circle at mouse position:
+    if session.verbose:
+        pygame.draw.circle(grid_1.surface, (255,255,255), (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]), 20)
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))
@@ -290,6 +303,9 @@ while True:
         font = pygame.font.SysFont('Arial', 20)
         mouse_pos = pygame.mouse.get_pos()
         canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
+
+        # mouse_transformed = np.dot(viewport.transform_mat, np.float32(np.array([[[mouse_pos[0], mouse_pos[1]]]])))
+        # print(mouse_transformed)
 
     # simulation steps:
     if active_handler == handlers['simulation']:

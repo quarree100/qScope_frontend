@@ -14,9 +14,9 @@ see "machine states"
 - there are different machine states, defined by the files in `q100viz/interaction/` → these are the modes the program is running at (per time)
 - states are defined via `session.handlers`
 - implemented modes are:
-    - CalibrationMode:
+    - CalibrationMode
     - EditMode: deprecated!
-    - InputMode:
+    - InputMode
     - SimulationMode
 
 ### CalibrationMode
@@ -51,13 +51,30 @@ e.g. emission, in `InputMode.draw()`:
 
 **displaying text**:
 ``` python
-font = pygame.font.SysFont('Arial', 20)  # 1. define font
-canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))  # 2. use font to write to canvas
+# 1. define font:
+font = pygame.font.SysFont('Arial', 20)
+# 2. use font to write to canvas:
+canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
 ```
 
-**drawing polygons**:
+**drawing polygons onto a specific surface**:
+``` python
+# [[bottom-left], [top-left], [bottom-right], [top-right]]
+#             [[x1, y1], [x1, y2], [x2, y1], [x2, y2]]
+rect_points = [[20, 70], [20, 20], [80, 20], [80, 70]]  # percentage relative to viewport
 
-`pygame.draw.polygon(self.surface, self.color, self.coords_transformed)`
+#                   surface,   color,      coords_transformed
+pygame.draw.polygon(viewport, (255, 0, 0), viewport.transform(rect_points))
+```
+
+## keystone transformation
+https://docs.opencv.org/3.4/da/d6e/tutorial_py_geometric_transformations.html
+
+using [cv.perspectiveTransform](https://docs.opencv.org/3.4/d2/de8/group__core__array.html#gad327659ac03e5fd6894b90025e6900a7) for vectors and
+[cv.warpPerspective](https://docs.opencv.org/3.4/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87) for images
+
+in file `q100viz/keystone.py`
+
 
 ## sliders
 

@@ -10,13 +10,13 @@ config = {
     'SAVED_KEYSTONE_FILE': 'keystone.save',
     'SAVED_BUILDINGS_FILE': 'export/buildings_export.shp',
 
-    'GRID_1_X1' : 50,
-    'GRID_1_X2' : 100,
-    'GRID_1_Y1' : 0,
-    'GRID_1_Y2' : 81.818,
-
-    'GRID_2_X1' : 0,
-    'GRID_2_X2' : 50,
+    'GRID_2_X1' : 50,
+    'GRID_2_X2' : 100,
     'GRID_2_Y1' : 0,
-    'GRID_2_Y2' : 81.818
+    'GRID_2_Y2' : 81.818,
+
+    'GRID_1_X1' : 0,
+    'GRID_1_X2' : 50,
+    'GRID_1_Y1' : 0,
+    'GRID_1_Y2' : 81.818
 }

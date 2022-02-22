@@ -17,7 +17,7 @@ class Slider:
         self.surface.src_points = [
             [0, 0], [0, 100], [100, 100], [100, 0]]
 
-        self.surface.dst_points = session.grid_1.surface.dst_points  # relative coordinate system
+        self.surface.dst_points = grid.surface.dst_points  # relative coordinate system
 
         self.surface.calculate(session.viewport.transform_mat)  # get matrix to transform by
 
@@ -46,29 +46,21 @@ class Slider:
 
 ############################### MODE SELECTOR #########################
 class ModeSelector:
-    def __init__(self, canvas_size, grid, coords):
-        self.coords = coords
+    def __init__(self, surface, rect_points):
         self.color = pygame.Color(200, 150, 20)
+        self.surface = surface
+        self.rect_points = rect_points
 
-        # create rectangle around centerpoint:
-        self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
-        self.surface.src_points = [
-            [0, 0], [0, 100], [100, 100], [100, 0]]
-
-        self.surface.dst_points = session.grid_1.surface.dst_points  # relative coordinate system
-
-        self.surface.calculate(session.viewport.transform_mat)  # get matrix to transform by
-
-        self.coords_transformed = self.surface.transform([
-            [self.coords[0], self.coords[3]], [self.coords[0], self.coords[1]],
-            [self.coords[2], self.coords[1]], [self.coords[2], self.coords[3]]])
+        # self.coords_transformed = self.surface.transform(rect_points)
 
     def render(self, canvas=None):
-        pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
+        # pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
+        pygame.draw.polygon(self.surface, self.color, self.surface.transform(self.rect_points))
 
-        canvas.blit(self.surface, (0,0))
+class MousePosition:
+    def __init__(self, canvas_size):
+        self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
 
-    def transform(self):
-        self.coords_transformed = self.surface.transform([
-            [self.coords[0], self.coords[3]], [self.coords[0], self.coords[1]],
-            [self.coords[2], self.coords[1]], [self.coords[2], self.coords[3]]])
+
+    def draw(self, surface, x, y):
+        pygame.draw.circle(surface, pygame.color.Color(50, 160, 123), (x, y), 20)

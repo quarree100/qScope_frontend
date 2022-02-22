@@ -6,7 +6,7 @@ import json
 import cv2
 import pygame
 import numpy as np
-from pygame.locals import NOFRAME, KEYDOWN, K_c, K_e, K_g, K_m, K_n, K_p, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
 
 from config import config
 import q100viz.keystone as keystone
@@ -21,7 +21,7 @@ import q100viz.session as session
 FPS = session.FPS = 12
 
 # set window position
-# os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,0)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
 
 # Initialize program
 pygame.init()
@@ -92,11 +92,10 @@ show_basemap = False
 show_grid = False
 show_typologiezonen = True
 show_nahwaermenetz = True
+display_viewport = True
 
 # initialize input area
-slider = session.slider = Slider(canvas_size, grid_2, [0, 100, 50, 150])  # in %, relative to grid
-slider_1 = session.slider_1 = Slider(canvas_size, grid_1, [0, 100, 50, 150])  # in %, relative to grid
-mode_selector = session.mode_selector = ModeSelector(viewport, [[20, 70], [20, 20], [80, 20], [80,70]]) # mode selector
+mode_selector = session.mode_selector = ModeSelector(viewport, [[80, 81.818], [80, 100], [90, 100], [90, 81.818]]) # mode selector
 
 # Load data
 buildings = gis.read_shapefile(
@@ -135,8 +134,8 @@ waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Wärmespeich
     gis.read_shapefile(config['HEIZZENTRALE_FILE']))
 
 # mask viewport with black surface
-mask_points = [[0, 0], [100, 0], [100, 100], [0, 100], [0, -50],
-               [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
+mask_points = [[-10, 0], [100, 0], [100, 100], [-10, 100], [-10, -50],
+               [-35, -50], [-35, 200], [200, 200], [200, -50], [-10, -50]]
 
 # UDP server for incoming cspy messages
 for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
@@ -180,6 +179,8 @@ while True:
             # toggle nahwaermenetz:
             if event.key == K_n:
                 show_nahwaermenetz = not show_nahwaermenetz
+            elif event.key == K_b:
+                display_viewport = not display_viewport
             # toggle calibration:
             elif event.key == K_c:
                 active_handler = handlers[
@@ -226,10 +227,9 @@ while True:
     canvas.fill(0)
     viewport.fill(0)
     _gis.surface.fill(0)
-    grid_1.surface.fill(0)
-    grid_2.surface.fill(0)
-    slider.surface.fill(0)
-    slider_1.surface.fill(0)
+    for grid in (grid_1, grid_2):
+        grid.surface.fill(0)
+        grid.slider.surface.fill(0)
 
     if show_typologiezonen:
         session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
@@ -248,9 +248,7 @@ while True:
         grid_2.draw(show_grid)
 
     # draw mask
-    pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
-    # rect_points = [[20, 70], [20, 20], [80, 20], [80,70]]
-    # pygame.draw.polygon(viewport, (255, 0, 0), viewport.transform(rect_points))
+    pygame.draw.polygon(viewport, (86, 0, 0), viewport.transform(mask_points))
 
     # draw extras
     if active_handler:
@@ -264,7 +262,7 @@ while True:
     # render surfaces
     if show_basemap:
         crop_width = 4644
-        crop_height = 620
+        crop_height = 590
         canvas.blit(basemap.image, (0, 0), (0, 0, crop_width, crop_height))
 
     # GIS layer
@@ -282,9 +280,9 @@ while True:
 
     # slider
     if active_handler != handlers['simulation']:
-        slider.render(canvas)
-        slider_1.render(canvas)
-        mode_selector.render(canvas)
+        grid_1.slider.render(canvas)
+        grid_2.slider.render(canvas)
+        mode_selector.render(viewport)
 
     # circle at mouse position:
     if session.verbose:
@@ -294,7 +292,8 @@ while True:
     canvas.blit(grid_1.surface, (0, 0))
     canvas.blit(grid_2.surface, (0, 0))
 
-    canvas.blit(viewport, (0, 0))
+    if display_viewport:
+        canvas.blit(viewport, (0, 0))
 
     ############ render everything beyond/on top of canvas: ###########
 

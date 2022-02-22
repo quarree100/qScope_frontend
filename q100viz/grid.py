@@ -3,6 +3,7 @@ import pygame
 
 import q100viz.keystone as keystone
 import q100viz.session as session
+from q100viz.interaction.interface import Slider
 
 
 class Grid:
@@ -28,6 +29,8 @@ class Grid:
 
         # set up sliders
         self.sliders = {slider_id: None for slider_id in slider_ids}
+
+        self.slider = Slider(canvas_size, self, [0, 100, 50, 150])
 
         # list of transformed slider controls rectangles
         # self.slider_controls_transformed = [
@@ -89,7 +92,7 @@ class Grid:
                 cell_color = pygame.Color(colors[int(cell.x / (session.grid_settings['ncols'] / len(session.slider_handles)))])
 
                 if cell.selected:
-                    session.slider.color = cell_color
+                    self.slider.color = cell_color
 
                 pygame.draw.polygon(self.surface, cell_color, rect_points, stroke)
 

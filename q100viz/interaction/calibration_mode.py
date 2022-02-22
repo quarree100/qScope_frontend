@@ -31,19 +31,15 @@ class CalibrationMode:
                 session.viewport.calculate()
                 session.gis.surface.calculate(session.viewport.transform_mat)
 
-                session.grid_1.surface.calculate(session.viewport.transform_mat)
-                session.grid_1.transform()
-
-                session.grid_2.surface.calculate(session.viewport.transform_mat)
-                session.grid_2.transform()
+                for grid in (session.grid_1, session.grid_2):
+                    grid.surface.calculate(session.viewport.transform_mat)
+                    grid.transform()
+                    grid.slider.surface.calculate(session.viewport.transform_mat)
+                    grid.slider.transform()
 
                 session.basemap.surface.calculate(session.gis.surface.transform_mat)
                 session.basemap.warp()
 
-                session.slider.surface.calculate(session.viewport.transform_mat)
-                session.slider.transform()
-                session.slider_1.surface.calculate(session.viewport.transform_mat)
-                session.slider_1.transform()
             elif event.key == K_s:
                 session.viewport.save(keystone_file)
 

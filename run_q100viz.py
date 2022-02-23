@@ -95,7 +95,7 @@ show_nahwaermenetz = True
 display_viewport = True
 
 # initialize input area
-mode_selector = session.mode_selector = ModeSelector(viewport, [[80, 81.818], [80, 100], [90, 100], [90, 81.818]]) # mode selector
+# mode_selector = session.mode_selector = ModeSelector(viewport, [[80, 81.818], [80, 100], [90, 100], [90, 81.818]]) # mode selector
 
 # Load data
 buildings = gis.read_shapefile(
@@ -146,13 +146,13 @@ for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
     udp_thread.start()
 
 # stats viz communication
-_stats = stats.Stats(stats_io)
+_stats = session.stats = stats.Stats(stats_io)
 
 print(buildings)
 
 handlers = session.handlers
 active_handler = session.active_handler
-simulation = SimulationMode()
+simulation = session.simulation = SimulationMode()
 
 mouse_position = MousePosition(canvas_size)
 
@@ -217,10 +217,13 @@ while True:
             sys.exit()
 
     # update running mode:
+    active_handler = session.active_handler
     if active_handler != handlers['simulation']:
         active_handler.update()
     else:
         simulation.update()
+
+    session.print_verbose(active_handler)
 
     ################################## DRAWING ########################
     # clear surfaces
@@ -282,7 +285,7 @@ while True:
     if active_handler != handlers['simulation']:
         grid_1.slider.render(canvas)
         grid_2.slider.render(canvas)
-        mode_selector.render(viewport)
+        # mode_selector.render(viewport)
 
     # circle at mouse position:
     if session.verbose:

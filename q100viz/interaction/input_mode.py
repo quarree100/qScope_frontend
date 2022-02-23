@@ -36,14 +36,28 @@ class InputMode:
                             session.buildings.loc[selection.name,
                                                   'selected'] = True
 
-                        # define slider control via selected cell in last row:
+                        # set slider handles via selected cell in last row:
                         if y == len(grid.grid)-1:
-                            grid.slider.handle = session.slider_handles[
-                                int(x / session.grid_settings['ncols'] * len(session.slider_handles))]
-                            if grid.slider.previous_handle is not grid.slider.handle:
-                                session.print_verbose(
-                                    ("slider_handle: ", grid.slider.handle))
-                                grid.slider.previous_handle = grid.slider.handle
+                            if x < session.grid_settings['ncols'] / 2:
+                                grid.slider.handle = session.slider_handles[
+                                    int(x / session.grid_settings['ncols'] * len(session.slider_handles))]
+                                if grid.slider.previous_handle is not grid.slider.handle:
+                                    session.print_verbose(
+                                        ("slider_handle: ", grid.slider.handle))
+                                    grid.slider.previous_handle = grid.slider.handle
+
+                            # select input mode:
+                            elif x == int(session.grid_settings['ncols'] * 2 / 3):
+                                if session.active_handler == session.handlers['simulation']:
+                                    session.simulation.send_data(session.stats)
+                                session.active_handler = session.handlers['tui']
+                                grid.deselect(int(session.grid_settings['ncols'] * 2 / 3 + 2), len(grid.grid) - 1)
+
+                            # select simulation mode:
+                            elif x == int(session.grid_settings['ncols'] * 2 / 3 + 2):
+                                session.active_handler = session.handlers['simulation']
+                                grid.deselect(int(session.grid_settings['ncols'] * 2 / 3), len(grid.grid) - 1)
+
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings

@@ -18,7 +18,6 @@ class InputMode:
             session.print_verbose(session.buildings)
             session.flag_export_canvas = True
 
-    def draw(self, canvas):
         session.buildings['selected'] = False
 
         # process grid changes
@@ -46,18 +45,14 @@ class InputMode:
                                         ("slider_handle: ", grid.slider.handle))
                                     grid.slider.previous_handle = grid.slider.handle
 
-                            # select input mode:
-                            elif x == int(session.grid_settings['ncols'] * 2 / 3):
-                                if session.active_handler == session.handlers['simulation']:
-                                    session.simulation.send_data(session.stats)
-                                session.active_handler = session.handlers['tui']
-                                grid.deselect(int(session.grid_settings['ncols'] * 2 / 3 + 2), len(grid.grid) - 1)
-
-                            # select simulation mode:
+                            # enter simulation mode:
                             elif x == int(session.grid_settings['ncols'] * 2 / 3 + 2):
                                 session.active_handler = session.handlers['simulation']
                                 grid.deselect(int(session.grid_settings['ncols'] * 2 / 3), len(grid.grid) - 1)
+                                print(session.active_handler)
 
+
+    def draw(self, canvas):
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings

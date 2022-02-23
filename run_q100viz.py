@@ -151,7 +151,6 @@ _stats = session.stats = stats.Stats(stats_io)
 print(buildings)
 
 handlers = session.handlers
-active_handler = session.active_handler
 simulation = session.simulation = SimulationMode()
 
 mouse_position = MousePosition(canvas_size)
@@ -160,8 +159,8 @@ mouse_position = MousePosition(canvas_size)
 while True:
     # process mouse/keyboard events
     for event in pygame.event.get():
-        if active_handler:
-            active_handler.process_event(event, config)
+        if session.active_handler:
+            session.active_handler.process_event(event, config)
 
         if event.type == KEYDOWN:
             # toggle polygons:
@@ -175,7 +174,7 @@ while True:
                 show_grid = not show_grid
             # activate input_mode:
             if event.key == K_t:
-                active_handler = handlers['tui']
+                session.active_handler = handlers['tui']
             # toggle nahwaermenetz:
             if event.key == K_n:
                 show_nahwaermenetz = not show_nahwaermenetz
@@ -183,18 +182,20 @@ while True:
                 display_viewport = not display_viewport
             # toggle calibration:
             elif event.key == K_c:
-                active_handler = handlers[
-                    'calibrate' if active_handler != handlers['calibrate'] else 'tui']
+                session.active_handler = handlers[
+                    'calibrate' if session.active_handler != handlers['calibrate'] else 'tui']
+                print(session.active_handler)
+
             # toggle edit-mode to move polygons:
             # elif event.key == K_e:
-            #     active_handler = handlers['edit' if active_handler != handlers['edit'] else 'tui']
+            #     session.active_handler = handlers['edit' if session.active_handler != handlers['edit'] else 'tui']
             # toggle simulation_mode:
             elif event.key == K_s:
-                if active_handler == handlers['simulation']:
+                if session.active_handler == handlers['simulation']:
                     simulation.send_data(_stats)
-                    active_handler = handlers['tui']
+                    session.active_handler = handlers['tui']
                 else:
-                    active_handler = handlers['simulation']
+                    session.active_handler = handlers['simulation']
             # manual slider control for test purposes:
             elif event.key == K_PLUS:
                 if session.grid_1.sliders['slider0'] is not None:
@@ -217,13 +218,12 @@ while True:
             sys.exit()
 
     # update running mode:
-    active_handler = session.active_handler
-    if active_handler != handlers['simulation']:
-        active_handler.update()
+    if session.active_handler != handlers['simulation']:
+        session.active_handler.update()
     else:
         simulation.update()
 
-    session.print_verbose(active_handler)
+    # print(session.active_handler)
 
     ################################## DRAWING ########################
     # clear surfaces
@@ -246,20 +246,19 @@ while True:
         canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'waerme_2017_rel')  # stroke simple black
 
     # draw grid
-    if active_handler != handlers['simulation']:
-        grid_1.draw(show_grid)
-        grid_2.draw(show_grid)
+    grid_1.draw(show_grid)
+    grid_2.draw(show_grid)
 
     # draw mask
-    pygame.draw.polygon(viewport, (86, 0, 0), viewport.transform(mask_points))
+    pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
 
     # draw extras
-    if active_handler:
-        active_handler.draw(canvas)
+    if session.active_handler:
+        session.active_handler.draw(canvas)
 
     # build clusters of selected buildings and send JSON message
     # clusters = stats.make_clusters(buildings[buildings.selected])
-    if active_handler == handlers['tui']:
+    if session.active_handler == handlers['tui']:
         _stats.send_simplified_dataframe_with_environment_variables(buildings[buildings.selected], session.environment)
 
     # render surfaces
@@ -282,14 +281,10 @@ while True:
         session.flag_export_canvas = False
 
     # slider
-    if active_handler != handlers['simulation']:
+    if session.active_handler != handlers['simulation']:
         grid_1.slider.render(canvas)
         grid_2.slider.render(canvas)
         # mode_selector.render(viewport)
-
-    # circle at mouse position:
-    if session.verbose:
-        pygame.draw.circle(grid_1.surface, (255,255,255), (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]), 20)
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))
@@ -310,7 +305,7 @@ while True:
         # print(mouse_transformed)
 
     # simulation steps:
-    if active_handler == handlers['simulation']:
+    if session.active_handler == handlers['simulation']:
         simulation.draw(canvas)
 
     ############################# pygame time #########################

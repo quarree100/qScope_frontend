@@ -17,10 +17,27 @@ class SimulationMode:
         self.simulation_df = pd.DataFrame(columns=['step', 'buildings'])
 
     def process_event(self, event, config):
-        pass
+        if event.type == pygame.locals.MOUSEBUTTONDOWN:
+            session.grid_1.mouse_pressed(event.button)
+            session.grid_2.mouse_pressed(event.button)
+            session.flag_export_canvas = True
 
     def update(self):
 
+        # process grid changes
+        for grid in [session.grid_1, session.grid_2]:
+            for y, row in enumerate(grid.grid):
+                for x, cell in enumerate(row):
+                    if cell.selected and y == len(grid.grid)-1:
+                        # enter input mode:
+                        if x == int(session.grid_settings['ncols'] * 2 / 3):
+                            if session.active_handler == session.handlers['simulation']:
+                                self.send_data(session.stats)
+                            session.active_handler = session.handlers['tui']
+                            grid.deselect(int(session.grid_settings['ncols'] * 2 / 3 + 2), len(grid.grid) - 1)
+                            print(session.active_handler)
+
+        ######################## SIMULATION UPDATE ####################
         # one step per second:
         if session.seconds_elapsed != self.previous_tick:
 
@@ -49,9 +66,8 @@ class SimulationMode:
             )
 
     def send_data(self, stats):
-        stats.send_dataframe_as_json(pd.DataFrame({'simulation': [self.simulation_df]}))
+        stats.send_dataframe_as_json(pd.DataFrame(self.simulation_df))
 
         # save as csv in global data folder:
-        self.simulation_df.set_index('step').to_csv('../data/simulation_df-reindexed.csv')
-        self.simulation_df.to_csv('../data/simulation_df.csv')
-        self.simulation_df.to_json('../data/simulation_df.simulation_df.json')
+        self.simulation_df.set_index('step').to_csv('../data/simulation_df.csv')
+        # self.simulation_df.to_json('../data/simulation_df.json')

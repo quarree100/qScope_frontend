@@ -1,0 +1,4 @@
+Data View
+=========
+
+The data view opens after the simulation is done. Here, variables are displayed in graphs as f(t) and can be interactively accessed.

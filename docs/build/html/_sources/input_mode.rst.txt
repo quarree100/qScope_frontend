@@ -1,0 +1,4 @@
+Input Mode
+==========
+
+In the input mode, users can access households to change their contained parameters, as well as global variables.

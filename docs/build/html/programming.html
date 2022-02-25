@@ -1,0 +1,302 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Programming &#8212; qScope-doc 0.0.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="prev" title="Welcome to qScope’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="programming">
+<h1>Programming<a class="headerlink" href="#programming" title="Permalink to this headline">¶</a></h1>
+<p>How to program the Q-Scope</p>
+<div class="section" id="file-structure">
+<h2>File Structure<a class="headerlink" href="#file-structure" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">session.py</span></code> contains global variables</p>
+</div>
+<div class="section" id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="coordinates">
+<h3>coordinates:<a class="headerlink" href="#coordinates" title="Permalink to this headline">¶</a></h3>
+<p><strong>ROI for distorted polygons:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Initialize geographic viewport and basemap</span>
+
+<span class="n">_gis</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">gis</span> <span class="o">=</span> <span class="n">gis</span><span class="o">.</span><span class="n">GIS</span><span class="p">(</span><span class="n">canvas_size</span><span class="p">,</span>
+               <span class="c1"># northeast          northwest           southwest           southeast</span>
+               <span class="p">[[</span><span class="mi">1013622</span><span class="p">,</span> <span class="mi">7207331</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013083</span><span class="p">,</span> <span class="mi">7207150</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013414</span><span class="p">,</span> <span class="mi">7206159</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013990</span><span class="p">,</span> <span class="mi">7206366</span><span class="p">]],</span>
+               <span class="n">session</span><span class="o">.</span><span class="n">viewport</span><span class="p">)</span>
+
+
+<span class="n">_gis</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">gis</span> <span class="o">=</span> <span class="n">gis</span><span class="o">.</span><span class="n">GIS</span><span class="p">(</span><span class="n">canvas_size</span><span class="p">,</span>
+               <span class="c1"># northeast          northwest           southwest           southeast</span>
+               <span class="p">[[</span><span class="mi">1013640</span><span class="p">,</span> <span class="mi">7207470</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013000</span><span class="p">,</span> <span class="mi">7207270</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013400</span><span class="p">,</span> <span class="mi">7206120</span><span class="p">],</span> <span class="p">[</span><span class="mi">1014040</span><span class="p">,</span> <span class="mi">7206320</span><span class="p">]],</span>
+               <span class="n">viewport</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>???</p>
+<p><strong>kleinerer Kartenausschnitt:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_gis</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">gis</span> <span class="o">=</span> <span class="n">gis</span><span class="o">.</span><span class="n">GIS</span><span class="p">(</span><span class="n">canvas_size</span><span class="p">,</span>
+               <span class="c1"># northeast          northwest           southwest           southeast</span>
+               <span class="p">[[</span><span class="mi">1013578</span><span class="p">,</span> <span class="mi">7207412</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013010</span><span class="p">,</span> <span class="mi">7207210</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013386</span><span class="p">,</span> <span class="mi">7206155</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013953</span><span class="p">,</span> <span class="mi">7206357</span><span class="p">]],</span>
+               <span class="n">viewport</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>mit Input Area am linken Rand und Aussparung unten:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_gis</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">gis</span> <span class="o">=</span> <span class="n">gis</span><span class="o">.</span><span class="n">GIS</span><span class="p">(</span>
+    <span class="n">canvas_size</span><span class="p">,</span>
+    <span class="c1"># northeast          northwest           southwest           southeast</span>
+    <span class="p">[[</span><span class="mi">1013554</span><span class="p">,</span> <span class="mi">7207623</span><span class="p">],</span> <span class="p">[</span><span class="mi">1012884</span><span class="p">,</span> <span class="mi">7207413</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013281</span><span class="p">,</span> <span class="mi">7206147</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013952</span><span class="p">,</span> <span class="mi">7206357</span><span class="p">]],</span>
+    <span class="n">viewport</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>mit Input Area am rechten Rand und Aussparung unten:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gis</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">gis</span> <span class="o">=</span> <span class="n">gis</span><span class="o">.</span><span class="n">GIS</span><span class="p">(</span>
+    <span class="n">canvas_size</span><span class="p">,</span>
+    <span class="c1"># northeast          northwest           southwest           southeast</span>
+    <span class="p">[[</span><span class="mi">1013631</span><span class="p">,</span> <span class="mi">7207409</span><span class="p">],</span> <span class="p">[</span><span class="mi">1012961</span><span class="p">,</span> <span class="mi">7207198</span><span class="p">],</span> <span class="p">[</span><span class="mi">1013359</span><span class="p">,</span> <span class="mi">7205932</span><span class="p">],</span> <span class="p">[</span><span class="mi">1014029</span><span class="p">,</span> <span class="mi">7206143</span><span class="p">]],</span>
+    <span class="n">viewport</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="grid">
+<h3>grid<a class="headerlink" href="#grid" title="Permalink to this headline">¶</a></h3>
+<p><strong>single grid, upper left:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">grid_1</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">grid_1</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">canvas_size</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="p">[[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">75</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">75</span><span class="p">,</span> <span class="mi">50</span><span class="p">]],</span> <span class="n">viewport</span><span class="p">)</span>
+<span class="n">grid_2</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">grid_2</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">canvas_size</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">viewport</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>16 x 22 grid rechts:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">grid_1</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">grid_1</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">canvas_size</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="p">[[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">72</span><span class="p">],</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">72</span><span class="p">],</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">viewport</span><span class="p">)</span>
+<span class="n">grid_2</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">grid_2</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">canvas_size</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">viewport</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>18 x 22 grid rechts:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncols</span> <span class="o">=</span> <span class="mi">22</span>
+<span class="n">nrows</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="n">grid_1</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">grid_1</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">canvas_size</span><span class="p">,</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span><span class="p">,</span> <span class="p">[[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">81</span><span class="p">],</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">81</span><span class="p">],</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">viewport</span><span class="p">)</span>
+<span class="n">grid_2</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">grid_2</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">canvas_size</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">viewport</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="drawing-on-canvas">
+<h2>Drawing on Canvas<a class="headerlink" href="#drawing-on-canvas" title="Permalink to this headline">¶</a></h2>
+<p><strong>displaying text</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. define font:</span>
+<span class="n">font</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">SysFont</span><span class="p">(</span><span class="s1">&#39;Arial&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+<span class="c1"># 2. use font to write to canvas:</span>
+<span class="n">canvas</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">font</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">mouse_pos</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">,</span><span class="mi">255</span><span class="p">)),</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="mi">700</span><span class="p">))</span>
+</pre></div>
+</div>
+<p><strong>drawing polygons onto a specific surface</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># [[bottom-left], [top-left], [bottom-right], [top-right]]</span>
+<span class="c1">#             [[x1, y1], [x1, y2], [x2, y1], [x2, y2]]</span>
+<span class="n">rect_points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">70</span><span class="p">],</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">70</span><span class="p">]]</span>  <span class="c1"># percentage relative to viewport</span>
+
+<span class="c1">#                   surface,   color,      coords_transformed</span>
+<span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">viewport</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">viewport</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">rect_points</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="keystone-transformation">
+<h2>keystone transformation<a class="headerlink" href="#keystone-transformation" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://docs.opencv.org/3.4/da/d6e/tutorial_py_geometric_transformations.html">tutorial_py_geometric_transformations</a></p>
+<p><a class="reference external" href="https://docs.opencv.org/3.4/d2/de8/group__core__array.html#gad327659ac03e5fd6894b90025e6900a7">using cv.perspectiveTransform for vectors</a>
+and <a class="reference external" href="https://docs.opencv.org/3.4/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87">cv.warpPerspective for images</a></p>
+<p>in file <code class="docutils literal notranslate"><span class="pre">q100viz/keystone.py</span></code></p>
+</div>
+<div class="section" id="sliders">
+<h2>Sliders<a class="headerlink" href="#sliders" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="recognition-data">
+<h3>recognition/data<a class="headerlink" href="#recognition-data" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>from cspy via UDP (json)</p></li>
+<li><p>definition via <code class="docutils literal notranslate"><span class="pre">cityscopy.json</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="frontend-representation">
+<h3>frontend representation<a class="headerlink" href="#frontend-representation" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>slider uses the transformation of the grid</p></li>
+<li><p><strong>drawing of polygons and values</strong> should be done via <code class="docutils literal notranslate"><span class="pre">self.surface.blit(...)</span></code>. Slider surface is rendered and “blitted” to main canvas.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">print(slider.coords_transformed)</span></code> returns:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span><span class="mf">860.9641723632812</span><span class="p">,</span> <span class="mf">915.1583862304688</span><span class="p">],</span>
+<span class="p">[</span><span class="mf">863.9833984375</span><span class="p">,</span> <span class="mf">614.8511352539062</span><span class="p">],</span>
+<span class="p">[</span><span class="mf">1228.917724609375</span><span class="p">,</span> <span class="mf">622.6510009765625</span><span class="p">],</span>
+<span class="p">[</span><span class="mf">1226.5196533203125</span><span class="p">,</span> <span class="mf">923.7374267578125</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>with <code class="docutils literal notranslate"><span class="pre">[[???[x],</span> <span class="pre">???[y]],</span> <span class="pre">[upper-left[x],</span> <span class="pre">upper-left[y]],</span> <span class="pre">[upper-right[x],</span> <span class="pre">upper-right[y]],</span> <span class="pre">[???[x],</span> <span class="pre">???[y]]]</span></code></p>
+</div>
+</div>
+<div class="section" id="modes">
+<h2>Modes<a class="headerlink" href="#modes" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>there are different machine states, defined by the files in <code class="docutils literal notranslate"><span class="pre">q100viz/interaction/</span></code> → these are the modes the program is running at (per time)</p></li>
+<li><p>states are defined via <cite>session.handlers</cite></p></li>
+<li><dl class="simple">
+<dt>implemented modes are:</dt><dd><ul>
+<li><p>CalibrationMode</p></li>
+<li><p>EditMode: deprecated!</p></li>
+<li><p>InputMode</p></li>
+<li><p>SimulationMode</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="section" id="calibrationmode">
+<h3>CalibrationMode<a class="headerlink" href="#calibrationmode" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="editmode">
+<h3>EditMode<a class="headerlink" href="#editmode" title="Permalink to this headline">¶</a></h3>
+<p>…deprecated!</p>
+</div>
+<div class="section" id="inputmode">
+<h3>InputMode<a class="headerlink" href="#inputmode" title="Permalink to this headline">¶</a></h3>
+<p>general mode for interaction with Tangible User Interface.</p>
+<div class="section" id="examples">
+<h4>examples:<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h4>
+<p><strong>increase/decrease value by relative rotation:</strong></p>
+<p>e.g. emission, in <code class="docutils literal notranslate"><span class="pre">InputMode.draw()</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+   <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">rel_rot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+       <span class="n">i</span> <span class="o">=</span> <span class="n">get_intersection</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">buildings</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+       <span class="n">session</span><span class="o">.</span><span class="n">buildings</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;CO2&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">20</span>
+   <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">rel_rot</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+       <span class="n">i</span> <span class="o">=</span> <span class="n">get_intersection</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">buildings</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+       <span class="n">session</span><span class="o">.</span><span class="n">buildings</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;CO2&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">20</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="simulationmode">
+<h3>SimulationMode<a class="headerlink" href="#simulationmode" title="Permalink to this headline">¶</a></h3>
+<p>… will start the GAMA headless simulation and wait for the results.</p>
+</div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<p>JSON and CSV constructs used for the communication between GAMA, the Q-Scope-infoscreen and -frontend.</p>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">qScope-doc</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Programming</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#file-structure">File Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setup">Setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#coordinates">coordinates:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#grid">grid</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#drawing-on-canvas">Drawing on Canvas</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#keystone-transformation">keystone transformation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sliders">Sliders</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#recognition-data">recognition/data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#frontend-representation">frontend representation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#modes">Modes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#calibrationmode">CalibrationMode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#editmode">EditMode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inputmode">InputMode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simulationmode">SimulationMode</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to qScope’s documentation!</a></li>
+      <li>Next: <a href="usage.html" title="next chapter">Usage</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, dunland.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.4.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/programming.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

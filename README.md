@@ -1,10 +1,10 @@
-# q100_viz
+# qScope_frontend
 
-Code für die Projektion und Bespielung des Monitors des CityScope-Setups in QUARREE100.
+Code für die Projektion und Interaktion via _Tangible User Interface_ des Q-Scope-Setups (basierend auf dem MIT-CityScope-Projekt) in QUARREE100.
 
 ## q100viz_pygame
 
-*q100viz_pygame* is a Python port of the *q100viz* Processing sketch, based on [pygame](https://www.pygame.org/).
+*q100viz_pygame* is based on [pygame](https://www.pygame.org/).
 
 Before you can run the sketch, you need to install required packages:
 ```
@@ -24,7 +24,7 @@ python run_q100viz.py
 - **M** key: toggle basemap
 - **G** key: toggle grid
 - **C** key: toggle calibration mode
-- **E** key: toggle edit mode (for displacement of polygons)
+- **V** key: toggle verbose mode
 
 - In calibration mode:
   - **TAB** key: select active corner
@@ -44,11 +44,11 @@ project qScope
 │   │   GAMA workspace folder
 │   └───Project_RuesdorferKamp_Network
 │   │   │   Project 1: Social Agents Communication Network
-│   │	└───RuesdorferKamp_Network_Model-01.gaml
+│   │	  └───RuesdorferKamp_Network_Model-01.gaml
 │   └───Project_RuesdorferKamp_Restoration
-│    	└───Restoration_Model_01.gaml
+│      	└───Restoration_Model_01.gaml
 └───qScope_infoscreen
-│       infoscreen (JavaScript)
+│       infoscreen (NodeJS/JavaScript)
 └───qScope_frontend
 │       projection (Python)
 └───settings

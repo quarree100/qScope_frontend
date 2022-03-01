@@ -20,7 +20,7 @@ class Stats:
 
     def send_message(self, msg):
         if msg != self.previous_message:
-            session.print_verbose(msg)
+            session.print_verbose("sending data:\n" + str(msg))
             try:
                 self.io.emit('message', msg)
                 self.previous_message = msg
@@ -71,3 +71,10 @@ def export_json(df, outfile):
     """Export a dataframe to JSON file."""
     return pandas.DataFrame(df).to_json(
         outfile, orient='records', force_ascii=False, default_handler=str)
+
+def to_xml(row):
+    xml = ['<item>']
+    for field in row.index:
+        xml.append('  <field name="{0}">{1}</field>'.format(field, row[field]))
+    xml.append('</item>')
+    return '\n'.join(xml)

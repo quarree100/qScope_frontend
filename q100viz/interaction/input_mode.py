@@ -1,9 +1,11 @@
 ''' The Input Mode displays everything needed for standard User Interaction '''
 
 import pygame
+import pandas as pd
 
 import q100viz.keystone as keystone
 import q100viz.session as session
+import q100viz.stats as stats
 from config import config
 
 
@@ -15,7 +17,7 @@ class InputMode:
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
-            session.print_verbose(session.buildings)
+            session.print_verbose(session.buildings[session.buildings['selected']])
             session.flag_export_canvas = True
 
         session.buildings['selected'] = False
@@ -51,6 +53,13 @@ class InputMode:
                                 grid.deselect(int(session.grid_settings['ncols'] * 2 / 3), len(grid.grid) - 1)
                                 print(session.active_handler)
 
+                                # compose dataframe to start
+                                df = pd.DataFrame.from_dict({'col_1': [1,4,6], 'col_2': [7,8,9]})
+                                xml = '\n'.join(df.apply(stats.to_xml, axis=1))
+                                print(xml)
+                                f = open('simulation_df.xml', 'w')
+                                f.write(xml)
+                                f.close()
 
     def draw(self, canvas):
 

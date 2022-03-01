@@ -57,7 +57,7 @@ class InputMode:
                                 df = pd.DataFrame(session.environment, index=[0])
                                 xml = '\n'.join(df.apply(stats.to_xml, axis=1))
                                 print(xml)
-                                f = open('simulation_df.xml', 'w')
+                                f = open('../data/simulation_df.xml', 'w')
                                 f.write(xml)
                                 f.close()
 

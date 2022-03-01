@@ -201,9 +201,57 @@ and <a class="reference external" href="https://docs.opencv.org/3.4/da/d54/group
 <p>… will start the GAMA headless simulation and wait for the results.</p>
 </div>
 </div>
+<div class="section" id="modeselector">
+<h2>ModeSelector<a class="headerlink" href="#modeselector" title="Permalink to this headline">¶</a></h2>
+<p>The Modes can be switched using either the input keys:
+* T: <a class="reference internal" href="#inputmode">InputMode</a> (TUI Mode)
+* C: <a class="reference internal" href="#calibrationmode">CalibrationMode</a>
+* S: SimulationMode (when in Input Mode)</p>
+</div>
 <div class="section" id="api">
 <h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
 <p>JSON and CSV constructs used for the communication between GAMA, the Q-Scope-infoscreen and -frontend.</p>
+<div class="section" id="starting-the-gama-simulation-via-xml">
+<h3>Starting the GAMA Simulation via XML<a class="headerlink" href="#starting-the-gama-simulation-via-xml" title="Permalink to this headline">¶</a></h3>
+<p>When moving from Input Mode to Simulation Mode (by Placing a Token on the according <a class="reference internal" href="#modeselector">ModeSelector</a>), an xml file is composed containing all the global environment data. The general structure looks like this:</p>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;Experiment&gt;</span>
+  <span class="nt">&lt;Parameter</span> <span class="na">name=</span><span class="s">&quot;year&quot;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/Parameter&gt;</span>
+  <span class="nt">&lt;Parameter</span> <span class="na">name=</span><span class="s">&quot;foerderung&quot;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/Parameter&gt;</span>
+  <span class="nt">&lt;Parameter</span> <span class="na">name=</span><span class="s">&quot;CO2-Preis&quot;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/Parameter&gt;</span>
+  <span class="nt">&lt;Parameter</span> <span class="na">name=</span><span class="s">&quot;CO2-emissions&quot;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/Parameter&gt;</span>
+  <span class="nt">&lt;Parameter</span> <span class="na">name=</span><span class="s">&quot;versorgung&quot;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/Parameter&gt;</span>
+  <span class="nt">&lt;Parameter</span> <span class="na">name=</span><span class="s">&quot;investment&quot;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/Parameter&gt;</span>
+  <span class="nt">&lt;Parameter</span> <span class="na">name=</span><span class="s">&quot;anschluss&quot;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/Parameter&gt;</span>
+  <span class="nt">&lt;Parameter</span> <span class="na">name=</span><span class="s">&quot;connection_speed&quot;</span><span class="nt">&gt;</span>0<span class="nt">&lt;/Parameter&gt;</span>
+<span class="nt">&lt;/Experiment&gt;</span>
+</pre></div>
+</div>
+<p>Composing the xml struct is done via <code class="docutils literal notranslate"><span class="pre">stats.to_xml</span></code> and receives single rows of a dataframe.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">to_xml</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+  <span class="n">xml</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&lt;Experiment&gt;&#39;</span><span class="p">]</span>
+  <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+      <span class="n">xml</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;  &lt;Parameter name=&quot;</span><span class="si">{0}</span><span class="s1">&quot;&gt;</span><span class="si">{1}</span><span class="s1">&lt;/Parameter&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="n">field</span><span class="p">]))</span>
+  <span class="n">xml</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&lt;/Experiment&gt;&#39;</span><span class="p">)</span>
+  <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and then in <cite>input_mode.py</cite>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>  <span class="c1"># enter simulation mode:</span>
+<span class="k">elif</span> <span class="n">x</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">grid_settings</span><span class="p">[</span><span class="s1">&#39;ncols&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span><span class="p">):</span>
+    <span class="n">session</span><span class="o">.</span><span class="n">active_handler</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="s1">&#39;simulation&#39;</span><span class="p">]</span>
+    <span class="n">grid</span><span class="o">.</span><span class="n">deselect</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">grid_settings</span><span class="p">[</span><span class="s1">&#39;ncols&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">3</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">grid</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">active_handler</span><span class="p">)</span>
+
+    <span class="c1"># compose dataframe to start</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">session</span><span class="o">.</span><span class="n">environment</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">xml</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">to_xml</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;../data/simulation_df.xml&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">xml</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
@@ -246,7 +294,11 @@ and <a class="reference external" href="https://docs.opencv.org/3.4/da/d54/group
 <li class="toctree-l3"><a class="reference internal" href="#simulationmode">SimulationMode</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#api">API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modeselector">ModeSelector</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#api">API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#starting-the-gama-simulation-via-xml">Starting the GAMA Simulation via XML</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>

@@ -177,9 +177,10 @@ class Grid:
                         cell.rel_rot = cell.rot - cell.prev_rot if cell.prev_rot > -1 else 0
                     cell.prev_rot = cell.rot
 
-            # update slider values
+            # update slider values TODO: adjust this if more than 1 slider per grid
             for slider_id in self.sliders.keys():
-                self.sliders[slider_id] = msg['sliders'][slider_id]
+                self.slider.value = msg['sliders'][slider_id]
+                self.slider.update()
 
         except TypeError:
             pass

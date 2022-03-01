@@ -73,8 +73,8 @@ def export_json(df, outfile):
         outfile, orient='records', force_ascii=False, default_handler=str)
 
 def to_xml(row):
-    xml = ['<item>']
+    xml = ['<Experiment>']
     for field in row.index:
-        xml.append('  <field name="{0}">{1}</field>'.format(field, row[field]))
-    xml.append('</item>')
+        xml.append('  <Parameter name="{0}">{1}</Parameter>'.format(field, row[field]))
+    xml.append('</Experiment>')
     return '\n'.join(xml)

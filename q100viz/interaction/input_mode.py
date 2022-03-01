@@ -54,7 +54,7 @@ class InputMode:
                                 print(session.active_handler)
 
                                 # compose dataframe to start
-                                df = pd.DataFrame.from_dict({'col_1': [1,4,6], 'col_2': [7,8,9]})
+                                df = pd.DataFrame(session.environment, index=[0])
                                 xml = '\n'.join(df.apply(stats.to_xml, axis=1))
                                 print(xml)
                                 f = open('simulation_df.xml', 'w')

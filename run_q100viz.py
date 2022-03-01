@@ -21,7 +21,7 @@ import q100viz.session as session
 FPS = session.FPS = 12
 
 # set window position
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
+# os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
 
 # Initialize program
 pygame.init()
@@ -117,7 +117,7 @@ buildings['adresse'] = buildings['Straße'] + ' ' + buildings['Hausnr.']
 
 # technical data
 buildings['CO2'] = [0.5 * random.random() for row in buildings.values]
-buildings['investment'] = [random.randint(0,4) for row in buildings.values]
+buildings['investment'] = [random.randint(0,3) for row in buildings.values]
 
 versorgungsarten = ['konventionell', 'medium', 'gruen']
 buildings['versorgung'] = [versorgungsarten[random.randint(0,2)] for row in buildings.values]
@@ -198,17 +198,21 @@ while True:
                     session.active_handler = handlers['simulation']
             # manual slider control for test purposes:
             elif event.key == K_PLUS:
-                if session.grid_1.sliders['slider0'] is not None:
-                    session.grid_1.sliders['slider0'] += 0.1
-                    session.print_verbose(("slider0 =", session.grid_1.sliders['slider0']))
-                else:
-                    session.grid_1.sliders['slider0'] = 0.1
+                for grid in grid_1, grid_2:
+                    if grid.slider.value is not None:
+                        grid.slider.value += 0.1
+                        session.print_verbose(("slider0 =", grid.slider.value))
+                    else:
+                        grid.slider.value = 0.1
+                    grid.slider.update()
             elif event.key == K_MINUS:
-                if session.grid_1.sliders['slider0'] is not None:
-                    session.grid_1.sliders['slider0'] -= 0.1
-                    session.print_verbose(("slider0 =", session.grid_1.sliders['slider0']))
-                else:
-                    session.grid_1.sliders['slider0'] = 0.1
+                for grid in grid_1, grid_2:
+                    if grid.slider.value is not None:
+                        grid.slider.value -= 0.1
+                        session.print_verbose(("slider0 =", grid.slider.value))
+                    else:
+                        grid.slider.value = 0.1
+                    grid.slider.update()
             # verbose mode:
             elif event.key == K_v:
                 session.verbose = not session.verbose

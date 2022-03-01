@@ -9,6 +9,8 @@ from config import config
 ############################ SLIDER ###################################
 class Slider:
     def __init__(self, canvas_size, grid, coords):
+        self.value = 0
+
         self.coords = coords
         self.color = pygame.Color(20, 200, 150)
 
@@ -48,35 +50,46 @@ class Slider:
             [self.coords[2], self.coords[1]], [self.coords[2], self.coords[3]]])
 
     def update(self):
+        ''' TODO: set up a struct (maybe csv) to import standard values >> this section should be automatized!
+        e.g.
+        if self.handle == 'name':
+            session.environment['name'] = val_from_struct * slider_val
+        '''
+
+        # globals:
         if self.handle == 'year':
-            # ranges from 2020 to 2050
             session.environment['year'] = 2020 + \
-                int(grid.sliders['slider0'] * 30)
+                int(self.value * 30) # ranges from 2020 to 2050
         elif self.handle == 'foerderung':
             session.environment['foerderung'] = int(
-                grid.sliders['slider0'] * 10000)  # ranges from 0 to 10,000€
+                self.value * 10000)  # ranges from 0 to 10,000€
         elif self.handle == 'CO2-Preis':
             session.environment['CO2-Preis'] = 55 + \
-                grid.sliders['slider0'] * \
-                195  # ranges from 55 to 240€/t
+                self.value * 195  # ranges from 55 to 240€/t
+        elif self.handle == 'connection_speed':
+            session.environment['connection_speed'] = self.value
+
+        # household-specific:
         elif self.handle == 'CO2-emissions':
             session.buildings.loc[(
-                session.buildings.selected == True), 'CO2'] = grid.sliders['slider0']  # sets CO2-value of selected buildings to slider value (absolute)
+                session.buildings.selected == True), 'CO2'] = self.value  # sets CO2-value of selected buildings to slider value (absolute)
             session.print_verbose((session.buildings[session.buildings['selected'] == True]))
         elif self.handle == 'versorgung':
-            if grid.sliders['slider0'] >= 0 and grid.sliders['slider0'] < 0.33:
+            if self.value >= 0 and self.value < 0.33:
                 session.buildings.loc[(session.buildings.selected == True), 'versorgung'] = 'konventionell'
-            elif grid.sliders['slider0'] >= 0.33 and grid.sliders['slider0'] < 0.66:
+            elif self.value >= 0.33 and self.value < 0.66:
                 session.buildings.loc[(session.buildings.selected == True), 'versorgung'] = 'medium'
-            if grid.sliders['slider0'] >= 0.66 and grid.sliders['slider0'] < 1:
+            if self.value >= 0.66 and self.value < 1:
                 session.buildings.loc[(session.buildings.selected == True), 'versorgung'] = 'gruen'
         elif self.handle == 'investment':
             # ranges from 0 to 10,000€
-            session.environment['investment'] = grid.sliders['slider0'] * 10000
+            session.environment['investment'] = self.value * 10000
         elif self.handle == 'anschluss':
             session.buildings.loc[(
-                session.buildings.selected == True), 'anschluss'] = grid.sliders['slider0'] > 0.5  # sets CO2-value of selected buildings to slider value (absolute)
+                session.buildings.selected == True), 'anschluss'] = self.value > 0.5  # sets CO2-value of selected buildings to slider value (absolute)
             session.print_verbose((session.buildings[session.buildings['selected'] == True]))
+
+        print(self.handle)
 
 ############################### MODE SELECTOR #########################
 class ModeSelector:

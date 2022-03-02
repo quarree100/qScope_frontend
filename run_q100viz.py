@@ -174,7 +174,7 @@ while True:
                 show_grid = not show_grid
             # activate input_mode:
             if event.key == K_t:
-                session.active_handler = handlers['tui']
+                session.active_handler = handlers['input']
             # toggle nahwaermenetz:
             if event.key == K_n:
                 show_nahwaermenetz = not show_nahwaermenetz
@@ -183,17 +183,17 @@ while True:
             # toggle calibration:
             elif event.key == K_c:
                 session.active_handler = handlers[
-                    'calibrate' if session.active_handler != handlers['calibrate'] else 'tui']
+                    'calibrate' if session.active_handler != handlers['calibrate'] else 'input']
                 print(session.active_handler)
 
             # toggle edit-mode to move polygons:
             # elif event.key == K_e:
-            #     session.active_handler = handlers['edit' if session.active_handler != handlers['edit'] else 'tui']
+            #     session.active_handler = handlers['edit' if session.active_handler != handlers['edit'] else 'input']
             # toggle simulation_mode:
             elif event.key == K_s:
                 if session.active_handler == handlers['simulation']:
                     simulation.send_data(_stats)
-                    session.active_handler = handlers['tui']
+                    session.active_handler = handlers['input']
                 else:
                     session.active_handler = handlers['simulation']
             # manual slider control for test purposes:
@@ -262,7 +262,7 @@ while True:
 
     # build clusters of selected buildings and send JSON message
     # clusters = stats.make_clusters(buildings[buildings.selected])
-    if session.active_handler == handlers['tui']:
+    if session.active_handler == handlers['input']:
         _stats.send_simplified_dataframe_with_environment_variables(buildings[buildings.selected], session.environment)
 
     # render surfaces

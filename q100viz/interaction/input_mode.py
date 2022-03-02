@@ -51,7 +51,7 @@ class InputMode:
                             elif x == int(session.grid_settings['ncols'] * 2 / 3 + 2):
                                 session.active_handler = session.handlers['simulation']
                                 grid.deselect(int(session.grid_settings['ncols'] * 2 / 3), len(grid.grid) - 1)
-                                print(session.active_handler)
+                                session.environment['mode'] = 'simulation'
 
                                 # compose dataframe to start
                                 df = pd.DataFrame(session.environment, index=[0])
@@ -60,6 +60,9 @@ class InputMode:
                                 f = open('../data/simulation_df.xml', 'w')
                                 f.write(xml)
                                 f.close()
+
+        session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+
 
     def draw(self, canvas):
 

@@ -17,6 +17,7 @@ verbose = True
 slider_handles = ['year', 'foerderung', 'CO2-Preis',
                     'CO2-emissions', 'versorgung', 'investment', 'anschluss', 'connection_speed']
 environment = dict.fromkeys(slider_handles, 0)
+environment['mode'] = 'input'
 
 # interaction
 seconds_elapsed = 0
@@ -25,10 +26,10 @@ ticks_elapsed = 0
 handlers = {
     'calibrate': CalibrationMode(),
     # 'edit': EditMode(),
-    'tui': InputMode(),
+    'input': InputMode(),
     'simulation': SimulationMode()
 }
-active_handler = handlers['tui']
+active_handler = handlers['input']
 flag_export_canvas = False
 
 # global functions:

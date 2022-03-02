@@ -2,9 +2,8 @@
 
 Code für die Projektion und Interaktion via _Tangible User Interface_ des Q-Scope-Setups (basierend auf dem MIT-CityScope-Projekt) in QUARREE100.
 
-## q100viz_pygame
-
-*q100viz_pygame* is based on [pygame](https://www.pygame.org/).
+## q100viz
+*q100viz* is based on [pygame](https://www.pygame.org/).
 
 Before you can run the sketch, you need to install required packages:
 ```

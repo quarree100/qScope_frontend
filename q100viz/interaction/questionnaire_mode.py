@@ -15,9 +15,11 @@ class Questionnaire_Mode():
 
     def activate(self):
         session.show_polygons = False
-        session.grid_1.slider.show_text = False  # without text
-        session.grid_1.slider.handle = 'yes_no'
+        session.grid_1.slider.show_text = False
+        session.grid_1.slider.show_controls = False
         session.grid_2.slider.show_text = False
+        session.grid_2.slider.show_controls = False
+        session.grid_1.slider.handle = 'yes_no'
 
         for grid in session.grid_1, session.grid_2:
             for selector in grid.selectors:
@@ -25,6 +27,7 @@ class Questionnaire_Mode():
 
         session.active_handler = session.handlers['questionnaire']
         session.environment['mode'] = 'questionnaire'
+        session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 
     def process_event(self, event, config):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:

@@ -22,6 +22,7 @@ class SimulationMode:
         session.active_handler = session.handlers['simulation']
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = False
+            slider.show_controls = False
 
         # compose dataframe to start
         df = pd.DataFrame(session.environment, index=[0])

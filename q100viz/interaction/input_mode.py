@@ -16,6 +16,7 @@ class InputMode:
     def activate(self):
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = True
+            slider.show_controls = True
         for selector in session.grid_1.selectors:
             selector.show = False
         for selector in session.grid_2.selectors:

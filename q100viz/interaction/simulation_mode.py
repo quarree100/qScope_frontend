@@ -5,6 +5,7 @@ import pandas as pd
 import json
 
 import q100viz.session as session
+import q100viz.stats as stats
 import pygame
 
 
@@ -15,6 +16,20 @@ class SimulationMode:
         self.previous_tick = -1  # stores moment of last step change
 
         self.simulation_df = pd.DataFrame(columns=['step', 'buildings'])
+
+    def activate(self):
+        session.environment['mode'] = 'simulation'
+        session.active_handler = session.handlers['simulation']
+        for slider in session.grid_1.slider, session.grid_2.slider:
+            slider.show_text = False
+
+        # compose dataframe to start
+        df = pd.DataFrame(session.environment, index=[0])
+        xml = '\n'.join(df.apply(stats.to_xml, axis=1))
+        print(xml)
+        f = open('../data/simulation_df.xml', 'w')
+        f.write(xml)
+        f.close()
 
     def process_event(self, event, config):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -33,10 +48,8 @@ class SimulationMode:
                         if x == int(session.grid_settings['ncols'] * 2 / 3):
                             if session.active_handler == session.handlers['simulation']:
                                 self.send_data(session.stats)
-                            session.active_handler = session.handlers['input']
                             grid.deselect(int(session.grid_settings['ncols'] * 2 / 3 + 2), len(grid.grid) - 1)
-
-                            session.environment['mode'] = 'input'
+                            session.handlers['input'].activate()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
     def update(self):

@@ -103,12 +103,22 @@ Drawing on Canvas
 
 .. code-block:: python
 
-  # [[bottom-left], [top-left], [bottom-right], [top-right]]
-  #             [[x1, y1], [x1, y2], [x2, y1], [x2, y2]]
-  rect_points = [[20, 70], [20, 20], [80, 20], [80, 70]]  # percentage relative to viewport
+  # general:
+  # points = [[x1, y1], [x1, y2], [x2, y1], [x2, y2]]
+  #          [[bottom-left], [top-left], [bottom-right], [top-right]]
+  # points_transformed = reference_surface.transform(points)
+  # pygame.draw.polygon(reference_surface, color, points_transformed)
+
+  # example:
+  points = [[20, 70], [20, 20], [80, 20], [80, 70]]  # percentage relative to surface
+  points_transformend = session.grid_1.surface.transform(points)
 
   #                   surface,   color,      coords_transformed
   pygame.draw.polygon(viewport, (255, 0, 0), viewport.transform(rect_points))
+
+**display sliders**:
+The sliders have a bool called ``show`` that, when ``True``, activates the display of the slider. This variable can be used for the usage modes to define whether the slider (and which) shall be seen and used.
+
 
 keystone transformation
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -119,9 +129,6 @@ keystone transformation
 and `cv.warpPerspective for images <https://docs.opencv.org/3.4/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87>`_
 
 in file ``q100viz/keystone.py``
-
-Sliders
-^^^^^^^
 
 recognition/data
 ----------------
@@ -152,10 +159,14 @@ Modes
 * there are different machine states, defined by the files in ``q100viz/interaction/`` → these are the modes the program is running at (per time)
 * states are defined via `session.handlers`
 * implemented modes are:
-    * CalibrationMode
-    * EditMode: deprecated!
-    * InputMode
-    * SimulationMode
+    * CalibrationMode_
+    * EditMode_: deprecated!
+    * InputMode_
+    * SimulationMode_
+    * QuestionnaireMode_
+
+each mode has a function called ``activate()`` which is used to (re-)active the mode and set the specific display settings accordingly. Do I want to see a slider (or two)? Shall the basemap be visible? Define it here.
+The ``__init__`` function is seldomly used, since it will be run in the beginning of the script (in ``session.py``), before the variables (e.g. ``grid``) are initialized.
 
 CalibrationMode
 ---------------
@@ -189,8 +200,25 @@ SimulationMode
 --------------
 ... will start the GAMA headless simulation and wait for the results.
 
+QuestionnaireMode
+-----------------
+In this mode, the user will be confronted with questions that can be asked either
+- via slider (only one or two user/s at a time)
+- via grid (multiple users, using individual tokens)
+(the options are yet to be decided)
+
 ModeSelector
 ^^^^^^^^^^^^
+
+A ModeSelector is a specific cell on the grid, which, when selected via token, activates a certain Mode.
+
+The ``ModeSelector`` class in ``interface.py`` is created inside a grid and holds the following important variables:
+- ``show``: a bool whether or not to display the mode selector
+- ``color``: cell color
+- ``grid``: the grid it is instantiated by. The ModeSelector needs to know the grid in order to be able to draw onto the grid's surface.
+- ``x``: x-position of the selector (y is always last row)
+- ``name``: the mode name to be displayed below the cell.
+
 The Modes can be switched using either the input keys:
 * T: InputMode_ (TUI Mode)
 * C: CalibrationMode_

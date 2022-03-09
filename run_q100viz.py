@@ -6,7 +6,7 @@ import json
 import cv2
 import pygame
 import numpy as np
-from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
 
 from config import config
 import q100viz.keystone as keystone
@@ -87,7 +87,7 @@ grid_2 = session.grid_2 = grid.Grid(
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
         viewport, ['slider0'])
 
-show_polygons = True
+session.show_polygons = False
 show_basemap = False
 show_grid = False
 show_typologiezonen = True
@@ -155,6 +155,8 @@ simulation = session.simulation = SimulationMode()
 
 mouse_position = MousePosition(canvas_size)
 
+session.active_handler.activate()
+
 ############################ Begin Game Loop ##########################
 while True:
     # process mouse/keyboard events
@@ -165,7 +167,7 @@ while True:
         if event.type == KEYDOWN:
             # toggle polygons:
             if event.key == K_p:
-                show_polygons = event.key == K_p and not show_polygons
+                session.show_polygons = event.key == K_p and not session.show_polygons
             # toggle basemap:
             if event.key == K_m:
                 show_basemap = event.key == K_m and not show_basemap
@@ -174,7 +176,7 @@ while True:
                 show_grid = not show_grid
             # activate input_mode:
             if event.key == K_t:
-                session.active_handler = handlers['input']
+                session.handlers['input'].activate()
             # toggle nahwaermenetz:
             if event.key == K_n:
                 show_nahwaermenetz = not show_nahwaermenetz
@@ -196,6 +198,10 @@ while True:
                     session.active_handler = handlers['input']
                 else:
                     session.active_handler = handlers['simulation']
+                    simulation.activate()
+
+            elif event.key == K_q:
+                session.handlers['questionnaire'].activate()
             # manual slider control for test purposes:
             elif event.key == K_PLUS:
                 for grid in grid_1, grid_2:
@@ -238,6 +244,7 @@ while True:
         grid.surface.fill(0)
         grid.slider.surface.fill(0)
 
+    # draw GIS layers:
     if show_typologiezonen:
         session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
     session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
@@ -256,14 +263,9 @@ while True:
     # draw mask
     pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
 
-    # draw extras
+    # draw mode-specific surface:
     if session.active_handler:
         session.active_handler.draw(canvas)
-
-    # build clusters of selected buildings and send JSON message
-    # clusters = stats.make_clusters(buildings[buildings.selected])
-    if session.active_handler == handlers['input']:
-        _stats.send_simplified_dataframe_with_environment_variables(buildings[buildings.selected], session.environment)
 
     # render surfaces
     if show_basemap:
@@ -272,8 +274,15 @@ while True:
         canvas.blit(basemap.image, (0, 0), (0, 0, crop_width, crop_height))
 
     # GIS layer
-    if show_polygons:
+    if session.show_polygons:
         canvas.blit(_gis.surface, (0, 0))
+
+    ########################## DATA PROCESSING ########################
+
+    # build clusters of selected buildings and send JSON message
+    # clusters = stats.make_clusters(buildings[buildings.selected])
+    if session.active_handler == handlers['input']:
+        _stats.send_simplified_dataframe_with_environment_variables(buildings[buildings.selected], session.environment)
 
     # export canvas every 1s:
     if session.seconds_elapsed % 1 == 0 and session.verbose and session.flag_export_canvas:
@@ -285,10 +294,10 @@ while True:
         session.flag_export_canvas = False
 
     # slider
-    if session.active_handler != handlers['simulation']:
+    for grid in grid_1, grid_2:
         grid_1.slider.render(canvas)
         grid_2.slider.render(canvas)
-        # mode_selector.render(viewport)
+    # mode_selector.render(viewport)
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))

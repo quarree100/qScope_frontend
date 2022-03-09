@@ -114,14 +114,22 @@
 </pre></div>
 </div>
 <p><strong>drawing polygons onto a specific surface</strong>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># [[bottom-left], [top-left], [bottom-right], [top-right]]</span>
-<span class="c1">#             [[x1, y1], [x1, y2], [x2, y1], [x2, y2]]</span>
-<span class="n">rect_points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">70</span><span class="p">],</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">70</span><span class="p">]]</span>  <span class="c1"># percentage relative to viewport</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># general:</span>
+<span class="c1"># points = [[x1, y1], [x1, y2], [x2, y1], [x2, y2]]</span>
+<span class="c1">#          [[bottom-left], [top-left], [bottom-right], [top-right]]</span>
+<span class="c1"># points_transformed = reference_surface.transform(points)</span>
+<span class="c1"># pygame.draw.polygon(reference_surface, color, points_transformed)</span>
+
+<span class="c1"># example:</span>
+<span class="n">points</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">70</span><span class="p">],</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span> <span class="p">[</span><span class="mi">80</span><span class="p">,</span> <span class="mi">70</span><span class="p">]]</span>  <span class="c1"># percentage relative to surface</span>
+<span class="n">points_transformend</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">grid_1</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
 
 <span class="c1">#                   surface,   color,      coords_transformed</span>
 <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">viewport</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">viewport</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">rect_points</span><span class="p">))</span>
 </pre></div>
 </div>
+<p><strong>display sliders</strong>:
+The sliders have a bool called <code class="docutils literal notranslate"><span class="pre">show</span></code> that, when <code class="docutils literal notranslate"><span class="pre">True</span></code>, activates the display of the slider. This variable can be used for the usage modes to define whether the slider (and which) shall be seen and used.</p>
 </div>
 <div class="section" id="keystone-transformation">
 <h2>keystone transformation<a class="headerlink" href="#keystone-transformation" title="Permalink to this headline">¶</a></h2>
@@ -129,9 +137,6 @@
 <p><a class="reference external" href="https://docs.opencv.org/3.4/d2/de8/group__core__array.html#gad327659ac03e5fd6894b90025e6900a7">using cv.perspectiveTransform for vectors</a>
 and <a class="reference external" href="https://docs.opencv.org/3.4/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87">cv.warpPerspective for images</a></p>
 <p>in file <code class="docutils literal notranslate"><span class="pre">q100viz/keystone.py</span></code></p>
-</div>
-<div class="section" id="sliders">
-<h2>Sliders<a class="headerlink" href="#sliders" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="recognition-data">
 <h3>recognition/data<a class="headerlink" href="#recognition-data" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
@@ -162,15 +167,18 @@ and <a class="reference external" href="https://docs.opencv.org/3.4/da/d54/group
 <li><p>states are defined via <cite>session.handlers</cite></p></li>
 <li><dl class="simple">
 <dt>implemented modes are:</dt><dd><ul>
-<li><p>CalibrationMode</p></li>
-<li><p>EditMode: deprecated!</p></li>
-<li><p>InputMode</p></li>
-<li><p>SimulationMode</p></li>
+<li><p><a class="reference internal" href="#calibrationmode">CalibrationMode</a></p></li>
+<li><p><a class="reference internal" href="#editmode">EditMode</a>: deprecated!</p></li>
+<li><p><a class="reference internal" href="#inputmode">InputMode</a></p></li>
+<li><p><a class="reference internal" href="#simulationmode">SimulationMode</a></p></li>
+<li><p><a class="reference internal" href="#questionnairemode">QuestionnaireMode</a></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
+<p>each mode has a function called <code class="docutils literal notranslate"><span class="pre">activate()</span></code> which is used to (re-)active the mode and set the specific display settings accordingly. Do I want to see a slider (or two)? Shall the basemap be visible? Define it here.
+The <code class="docutils literal notranslate"><span class="pre">__init__</span></code> function is seldomly used, since it will be run in the beginning of the script (in <code class="docutils literal notranslate"><span class="pre">session.py</span></code>), before the variables (e.g. <code class="docutils literal notranslate"><span class="pre">grid</span></code>) are initialized.</p>
 <div class="section" id="calibrationmode">
 <h3>CalibrationMode<a class="headerlink" href="#calibrationmode" title="Permalink to this headline">¶</a></h3>
 </div>
@@ -200,9 +208,23 @@ and <a class="reference external" href="https://docs.opencv.org/3.4/da/d54/group
 <h3>SimulationMode<a class="headerlink" href="#simulationmode" title="Permalink to this headline">¶</a></h3>
 <p>… will start the GAMA headless simulation and wait for the results.</p>
 </div>
+<div class="section" id="questionnairemode">
+<h3>QuestionnaireMode<a class="headerlink" href="#questionnairemode" title="Permalink to this headline">¶</a></h3>
+<p>In this mode, the user will be confronted with questions that can be asked either
+- via slider (only one or two user/s at a time)
+- via grid (multiple users, using individual tokens)
+(the options are yet to be decided)</p>
+</div>
 </div>
 <div class="section" id="modeselector">
 <h2>ModeSelector<a class="headerlink" href="#modeselector" title="Permalink to this headline">¶</a></h2>
+<p>A ModeSelector is a specific cell on the grid, which, when selected via token, activates a certain Mode.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">ModeSelector</span></code> class in <code class="docutils literal notranslate"><span class="pre">interface.py</span></code> is created inside a grid and holds the following important variables:
+- <code class="docutils literal notranslate"><span class="pre">show</span></code>: a bool whether or not to display the mode selector
+- <code class="docutils literal notranslate"><span class="pre">color</span></code>: cell color
+- <code class="docutils literal notranslate"><span class="pre">grid</span></code>: the grid it is instantiated by. The ModeSelector needs to know the grid in order to be able to draw onto the grid’s surface.
+- <code class="docutils literal notranslate"><span class="pre">x</span></code>: x-position of the selector (y is always last row)
+- <code class="docutils literal notranslate"><span class="pre">name</span></code>: the mode name to be displayed below the cell.</p>
 <p>The Modes can be switched using either the input keys:
 * T: <a class="reference internal" href="#inputmode">InputMode</a> (TUI Mode)
 * C: <a class="reference internal" href="#calibrationmode">CalibrationMode</a>
@@ -281,8 +303,7 @@ and <a class="reference external" href="https://docs.opencv.org/3.4/da/d54/group
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#drawing-on-canvas">Drawing on Canvas</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#keystone-transformation">keystone transformation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#sliders">Sliders</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#keystone-transformation">keystone transformation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#recognition-data">recognition/data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#frontend-representation">frontend representation</a></li>
 </ul>
@@ -292,6 +313,7 @@ and <a class="reference external" href="https://docs.opencv.org/3.4/da/d54/group
 <li class="toctree-l3"><a class="reference internal" href="#editmode">EditMode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#inputmode">InputMode</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#simulationmode">SimulationMode</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#questionnairemode">QuestionnaireMode</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#modeselector">ModeSelector</a></li>

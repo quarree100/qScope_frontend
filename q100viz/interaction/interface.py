@@ -10,12 +10,14 @@ from config import config
 class Slider:
     def __init__(self, canvas_size, grid, coords):
         self.value = 0
+        self.show_text = True  # display slider control text on grid
 
-        self.coords = coords
         self.color = pygame.Color(20, 200, 150)
 
         self.handle = session.slider_handles[0]
         self.previous_handle = None
+
+        self.grid = grid
 
         # create rectangle around centerpoint:
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
@@ -26,23 +28,45 @@ class Slider:
 
         self.surface.calculate(session.viewport.transform_mat)  # get matrix to transform by
 
-        self.coords_transformed = self.surface.transform([
-            [self.coords[0], self.coords[3]], [self.coords[0], self.coords[1]],
-            [self.coords[2], self.coords[1]], [self.coords[2], self.coords[3]]])
+        self.coords_transformed = self.surface.transform(coords)
 
     def render(self, canvas=None):
-        # coloring slider area:
-        pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
-        font = pygame.font.SysFont('Arial', 12)
-
-        # show corner points:
-        if session.verbose:
-            self.surface.blit(font.render(str("0"), True, (255,255,255)), [self.coords_transformed[0][0] - 50, self.coords_transformed[0][1] + 50])
-            self.surface.blit(font.render(str("1"), True, (255,255,255)), self.coords_transformed[1])
-            self.surface.blit(font.render(str("2"), True, (255,255,255)), self.coords_transformed[2])
-            self.surface.blit(font.render(str("3"), True, (255,255,255)), self.coords_transformed[3])
-
         canvas.blit(self.surface, (0,0))
+
+        # print function text on sliderControl cells:
+        for cell, rect_points in self.grid.rects_transformed:
+            if cell.y == len(self.grid.grid) - 1:
+                if cell.x < session.grid_settings['ncols'] / 2:
+                    if cell.x % int((session.grid_settings['ncols'] / 2 / len(session.slider_handles))) == 0 and self.show_text:
+                        index = int(cell.x / ((session.grid_settings['ncols'] / 2) / len(session.slider_handles)))
+                        font = pygame.font.SysFont('Arial', 8)
+                        self.grid.surface.blit(
+                            font.render(session.slider_handles[index],
+                                True, (255, 255, 255)),
+                                [rect_points[0][0] + 10, rect_points[0][1]+ 35]
+                        )
+
+                    # slider control colors:
+                    cell_color = pygame.Color(20, 200, 150)
+                    stroke = 4 if cell.selected else 1
+                    # colors via slider parameter fields:
+                    colors = [
+                        (73, 156, 156),
+                        (126, 185, 207),
+                        (247, 79, 115),
+                        (193, 135, 77),
+                        (187, 210, 4),
+                        (249, 109, 175),
+                        (9, 221, 250),
+                        (150, 47, 28)]
+
+                    index = int(cell.x / ((session.grid_settings['ncols'] / 2) / len(session.slider_handles)))
+                    cell_color = pygame.Color(colors[index])
+
+                    if cell.selected:
+                        self.color = cell_color
+
+                    if session.show_polygons: pygame.draw.polygon(self.grid.surface, cell_color, rect_points, stroke)
 
     def transform(self):
         self.coords_transformed = self.surface.transform([
@@ -89,22 +113,41 @@ class Slider:
                 session.buildings.selected == True), 'anschluss'] = self.value > 0.5  # sets CO2-value of selected buildings to slider value (absolute)
             session.print_verbose((session.buildings[session.buildings['selected'] == True]))
 
+        # questionnaire:
+        elif self.handle == 'yes_no':
+            if self.value >= 0.5:
+                session.environment['answer'] = 'no'
+            else:
+                session.environment['answer'] = 'yes'
+
         print(self.handle)
 
 ############################### MODE SELECTOR #########################
 class ModeSelector:
-    def __init__(self, surface, rect_points):
-        self.color = pygame.Color(200, 150, 20)
-        self.surface = surface
-        self.rect_points = rect_points
+    def __init__(self, grid, x, color, name):
+        self.show = True
+        self.color = pygame.Color(color)
+        self.grid = grid
+        self.x = x
+        self.name = name
 
-        # self.coords_transformed = self.surface.transform(rect_points)
+    def render(self):
 
-    def render(self, canvas=None):
-        # pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
-        pygame.draw.polygon(self.surface, self.color, self.surface.transform(self.rect_points))
+        if self.show:
+            for cell, rect_points in self.grid.rects_transformed:
+                if cell.y == len(self.grid.grid) - 1:
+                    # ModeSelector
+                    if cell.x == self.x:  # TODO: global positions of mode selectors (also used in intput_mode)
+                        stroke = 4 if cell.selected else 1
+                        pygame.draw.polygon(self.grid.surface, self.color, rect_points, stroke)
+                        font = pygame.font.SysFont('Arial', 8)
 
-        pygame.draw.rect(self.surface, self.color, pygame.Rect(50, 50, 50,50))
+                        # display mode name
+                        self.grid.surface.blit(
+                            font.render(self.name,
+                                True, (255, 255, 255)),
+                                [rect_points[0][0] + 10, rect_points[0][1]+ 35]
+                        )
 
 class MousePosition:
     def __init__(self, canvas_size):
@@ -113,3 +156,10 @@ class MousePosition:
 
     def draw(self, surface, x, y):
         pygame.draw.circle(surface, pygame.color.Color(50, 160, 123), (x, y), 20)
+
+class Rectangle:
+    def __init__(self, surface):
+        pass
+
+    def draw(surface):
+        pygame.draw.rect(surface, color, [[20, 70], [20, 20], [80, 20], [80, 70]])

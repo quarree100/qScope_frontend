@@ -4,6 +4,7 @@ from q100viz.interaction.calibration_mode import CalibrationMode
 # from q100viz.interaction.edit_mode import EditMode
 from q100viz.interaction.input_mode import InputMode
 from q100viz.interaction.simulation_mode import SimulationMode
+from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
 
 
 # graphics
@@ -27,9 +28,10 @@ handlers = {
     'calibrate': CalibrationMode(),
     # 'edit': EditMode(),
     'input': InputMode(),
-    'simulation': SimulationMode()
+    'simulation': SimulationMode(),
+    'questionnaire': Questionnaire_Mode()
 }
-active_handler = handlers['input']
+active_handler = handlers['questionnaire']
 flag_export_canvas = False
 
 # global functions:

@@ -13,6 +13,17 @@ class InputMode:
     def __init__(self):
         pass
 
+    def activate(self):
+        for slider in session.grid_1.slider, session.grid_2.slider:
+            slider.show_text = True
+        for selector in session.grid_1.selectors:
+            selector.show = False
+        for selector in session.grid_2.selectors:
+            selector.show = True
+        session.show_polygons = True
+        session.active_handler = session.handlers['input']
+        session.environment['mode'] = 'input'
+
     def process_event(self, event, config):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
@@ -49,17 +60,8 @@ class InputMode:
 
                             # enter simulation mode:
                             elif x == int(session.grid_settings['ncols'] * 2 / 3 + 2):
-                                session.active_handler = session.handlers['simulation']
                                 grid.deselect(int(session.grid_settings['ncols'] * 2 / 3), len(grid.grid) - 1)
-                                session.environment['mode'] = 'simulation'
-
-                                # compose dataframe to start
-                                df = pd.DataFrame(session.environment, index=[0])
-                                xml = '\n'.join(df.apply(stats.to_xml, axis=1))
-                                print(xml)
-                                f = open('../data/simulation_df.xml', 'w')
-                                f.write(xml)
-                                f.close()
+                                session.handlers['simulation'].activate()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 
@@ -72,6 +74,10 @@ class InputMode:
                 canvas,
                 session.buildings[session.buildings.selected], 2, (255, 0, 127)
             )
+
+        # coloring slider area:
+        for slider in session.grid_1.slider, session.grid_2.slider:
+            pygame.draw.polygon(slider.surface, slider.color, slider.coords_transformed)
 
     def update(self):
         pass

@@ -60,8 +60,8 @@ class InputMode:
                                     grid.slider.previous_handle = grid.slider.handle
 
                             # enter simulation mode:
-                            elif x == int(session.grid_settings['ncols'] * 2 / 3 + 2):
-                                grid.deselect(int(session.grid_settings['ncols'] * 2 / 3), len(grid.grid) - 1)
+                            if x == session.grid_1.selectors[1].x:
+                                grid.deselect(session.grid_1.selectors[0].x, y)
                                 session.handlers['simulation'].activate()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)

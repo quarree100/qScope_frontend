@@ -2,16 +2,15 @@
 
 import pygame
 import pandas as pd
+import json
 
 import q100viz.keystone as keystone
 import q100viz.session as session
-import q100viz.stats as stats
-from q100viz.interaction.generic_mode import Generic_Mode
 from config import config
 
 class Questionnaire_Mode():
     def __init__(self):
-        pass
+        session.environment['question_number'] = 0
 
     def activate(self):
         session.show_polygons = False

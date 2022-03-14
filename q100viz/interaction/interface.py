@@ -145,7 +145,7 @@ class ModeSelector:
             for cell, rect_points in self.grid.rects_transformed:
                 if cell.y == len(self.grid.grid) - 1:
                     # ModeSelector
-                    if cell.x == self.x:  # TODO: global positions of mode selectors (also used in intput_mode)
+                    if cell.x == self.x:
                         stroke = 4 if cell.selected else 1
                         pygame.draw.polygon(self.grid.surface, self.color, rect_points, stroke)
                         font = pygame.font.SysFont('Arial', 8)

@@ -46,10 +46,10 @@ class SimulationMode:
                 for x, cell in enumerate(row):
                     if cell.selected and y == len(grid.grid)-1:
                         # enter input mode:
-                        if x == int(session.grid_settings['ncols'] * 2 / 3):
+                        if x == grid.selectors[0].x:
                             if session.active_handler == session.handlers['simulation']:
                                 self.send_data(session.stats)
-                            grid.deselect(int(session.grid_settings['ncols'] * 2 / 3 + 2), len(grid.grid) - 1)
+                            grid.deselect(grid.selectors[1].x, y)
                             session.handlers['input'].activate()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)

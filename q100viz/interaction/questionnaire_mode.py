@@ -40,16 +40,14 @@ class Questionnaire_Mode():
     def draw(self, canvas):
 
         # green slider field:
-        points = [[0, 120], [0, 100], [25, 100], [25, 120]]
+        points = [[25, 120], [25, 100], [50, 100], [50, 120]]
         points_transformed = session.grid_2.slider.surface.transform(points)
         pygame.draw.polygon(session.grid_2.slider.surface, pygame.Color(200,20,55), points_transformed)
 
         # red slider field:
-        points = [[25, 120], [25, 100], [50, 100], [50, 120]]
+        points = [[0, 120], [0, 100], [25, 100], [25, 120]]
         points_transformed = session.grid_2.slider.surface.transform(points)
         pygame.draw.polygon(session.grid_2.slider.surface, pygame.Color(20,200,55), points_transformed)
-
-
 
     def update(self):
         pass

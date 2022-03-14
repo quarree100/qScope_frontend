@@ -1,21 +1,24 @@
 ''' Interface Elements needed for User Interaction '''
 
 import pygame
+import json
 
 import q100viz.keystone as keystone
 import q100viz.session as session
+
 from config import config
 
 ############################ SLIDER ###################################
 class Slider:
     def __init__(self, canvas_size, grid, coords):
         self.value = 0
+        self.previous_value = 0
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
 
         self.color = pygame.Color(20, 200, 150)
 
-        self.handle = session.slider_handles[0]
+        self.handle = None
         self.previous_handle = None
 
         self.grid = grid
@@ -122,7 +125,10 @@ class Slider:
             else:
                 session.environment['answer'] = 'yes'
 
-        print(self.handle)
+        if self.previous_value is not self.value:
+            print(self.handle)
+            session.stats.send_message(json.dumps(session.environment))
+            self.previous_value = self.value
 
 ############################### MODE SELECTOR #########################
 class ModeSelector:

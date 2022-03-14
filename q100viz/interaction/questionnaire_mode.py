@@ -19,7 +19,7 @@ class Questionnaire_Mode():
         session.grid_1.slider.show_controls = False
         session.grid_2.slider.show_text = False
         session.grid_2.slider.show_controls = False
-        session.grid_1.slider.handle = 'yes_no'
+        session.grid_1.slider.handle = 'answer'
 
         for grid in session.grid_1, session.grid_2:
             for selector in grid.selectors:

@@ -119,7 +119,7 @@ class Slider:
             session.print_verbose((session.buildings[session.buildings['selected'] == True]))
 
         # questionnaire:
-        elif self.handle == 'yes_no':
+        elif self.handle == 'answer':
             if self.value >= 0.5:
                 session.environment['answer'] = 'no'
             else:

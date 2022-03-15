@@ -32,14 +32,9 @@ class Grid:
         self.slider = Slider(canvas_size, self, [[0, 130], [0, 100], [50, 100], [50, 130]])
 
         self.selectors = [
-            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3), (200, 150, 20), "INPUT"), ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3 + 2), (20, 150, 200),"SIMULATION")
-
+            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3), len(self.grid) - 1, (200, 150, 20), ModeSelector.activate_input_mode),
+            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3 + 2), len(self.grid) - 1, (20, 150, 200), ModeSelector.activate_simulation_mode)
         ]
-
-        # list of transformed slider controls rectangles
-        # self.slider_controls_transformed = [
-        #     (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
-        #     for y, row in enumerate(self.slider_controls) for x, cell in enumerate(row)]
 
     def draw(self, show_grid):
 
@@ -125,6 +120,7 @@ class Grid:
             for slider_id in self.sliders.keys():
                 self.slider.value = msg['sliders'][slider_id]
                 self.slider.update()
+            session.active_handler.process_grid_change()()
 
         except TypeError:
             pass

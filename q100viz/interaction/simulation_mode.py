@@ -32,27 +32,26 @@ class SimulationMode:
         f.write(xml)
         f.close()
 
-    def process_event(self, event, config):
+    def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
             session.print_verbose(session.buildings[session.buildings['selected']])
             session.flag_export_canvas = True
 
-
+    def process_grid_change(self):
         # process grid changes
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
-                    if cell.selected and y == len(grid.grid)-1:
-                        # enter input mode:
-                        if x == grid.selectors[0].x:
-                            if session.active_handler == session.handlers['simulation']:
-                                self.send_data(session.stats)
-                            grid.deselect(grid.selectors[1].x, y)
-                            session.handlers['input'].activate()
+                    if cell.selected:
+                        # ModeSelector
+                        for selector in grid.selectors:
+                            if x == selector.x and y == selector.y:
+                                selector.callback_function()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+
     def update(self):
 
         ######################## SIMULATION UPDATE ####################

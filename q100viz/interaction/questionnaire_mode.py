@@ -6,6 +6,7 @@ import json
 
 import q100viz.keystone as keystone
 import q100viz.session as session
+from q100viz.interaction.interface import ModeSelector
 from config import config
 
 class Questionnaire_Mode():
@@ -20,21 +21,35 @@ class Questionnaire_Mode():
         session.grid_2.slider.show_controls = False
         session.grid_1.slider.handle = 'answer'
 
-        for grid in session.grid_1, session.grid_2:
-            for selector in grid.selectors:
-                selector.show = False  # disable selectors (InputMode will be started automatically when all questions are answered)
+        for selector in session.grid_1.selectors:
+            selector.show = True  # enable selectors for table 1
+            selector.callback_function = ModeSelector.get_next_question
+        for selector in session.grid_2.selectors:
+            selector.show = False  # disable selectors for table 2
 
         session.active_handler = session.handlers['questionnaire']
         session.environment['mode'] = 'questionnaire'
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 
-    def process_event(self, event, config):
+    def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
             session.stats.send_simplified_dataframe_with_environment_variables(
                 session.buildings[session.buildings.selected],
                 session.environment)
+
+            self.process_grid_change()
+
+    def process_grid_change(self):
+        # process grid changes
+        for y, row in enumerate(session.grid_1.grid):
+            for x, cell in enumerate(row):
+                if cell.selected:
+                    # ModeSelector
+                    for selector in session.grid_1.selectors:
+                        if x == selector.x and y == selector.y:
+                            selector.callback_function()
 
     def draw(self, canvas):
 

@@ -132,30 +132,42 @@ class Slider:
 
 ############################### MODE SELECTOR #########################
 class ModeSelector:
-    def __init__(self, grid, x, color, name):
+    def __init__(self, grid, x, y, color, callback_function):
         self.show = True
+        self.name = "NAME"  # TODO: name them right
         self.color = pygame.Color(color)
         self.grid = grid
         self.x = x
-        self.name = name
+        self.y = y
+        self.callback_function = callback_function
 
     def render(self):
 
         if self.show:
             for cell, rect_points in self.grid.rects_transformed:
-                if cell.y == len(self.grid.grid) - 1:
-                    # ModeSelector
-                    if cell.x == self.x:
-                        stroke = 4 if cell.selected else 1
-                        pygame.draw.polygon(self.grid.surface, self.color, rect_points, stroke)
-                        font = pygame.font.SysFont('Arial', 8)
+                # ModeSelector
+                if cell.x == self.x and cell.y == self.y:
+                    stroke = 4 if cell.selected else 1
+                    pygame.draw.polygon(self.grid.surface, self.color, rect_points, stroke)
+                    font = pygame.font.SysFont('Arial', 8)
 
-                        # display mode name
-                        self.grid.surface.blit(
-                            font.render(self.name,
-                                True, (255, 255, 255)),
-                                [rect_points[0][0] + 10, rect_points[0][1]+ 35]
-                        )
+                    # display mode name
+                    self.grid.surface.blit(
+                        font.render(self.name,
+                            True, (255, 255, 255)),
+                            [rect_points[0][0] + 10, rect_points[0][1]+ 35]
+                    )
+
+    def activate_input_mode():
+        print("activating input mode")
+        pass
+
+    def activate_simulation_mode():
+        print("activating simulation mode")
+        session.handlers['simulation'].activate()
+
+    def get_next_question():
+        print("getting next question")
 
 class MousePosition:
     def __init__(self, canvas_size):

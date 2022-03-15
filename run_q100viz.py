@@ -162,7 +162,7 @@ while True:
     # process mouse/keyboard events
     for event in pygame.event.get():
         if session.active_handler:
-            session.active_handler.process_event(event, config)
+            session.active_handler.process_event(event)
 
         if event.type == KEYDOWN:
             # toggle polygons:

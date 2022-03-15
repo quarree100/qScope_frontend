@@ -25,15 +25,18 @@ class InputMode:
         session.active_handler = session.handlers['input']
         session.environment['mode'] = 'input'
 
-    def process_event(self, event, config):
-        if event.type == pygame.locals.MOUSEBUTTONDOWN:
-            session.grid_1.mouse_pressed(event.button)
-            session.grid_2.mouse_pressed(event.button)
-            session.print_verbose(session.buildings[session.buildings['selected']])
-            session.flag_export_canvas = True
+    def process_event(self, event):
+            if event.type == pygame.locals.MOUSEBUTTONDOWN:
+                session.grid_1.mouse_pressed(event.button)
+                session.grid_2.mouse_pressed(event.button)
+                session.print_verbose(session.buildings[session.buildings['selected']])
+                session.flag_export_canvas = True
 
-        session.buildings['selected'] = False
+                session.buildings['selected'] = False
 
+                self.process_grid_change()
+
+    def process_grid_change(self):
         # process grid changes
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
@@ -47,7 +50,7 @@ class InputMode:
                         if n > 0:
                             selection = session.buildings[i].iloc[cell.rot % n]
                             session.buildings.loc[selection.name,
-                                                  'selected'] = True
+                                                'selected'] = True
 
                         # set slider handles via selected cell in last row:
                         if y == len(grid.grid)-1:
@@ -59,13 +62,12 @@ class InputMode:
                                         ("slider_handle: ", grid.slider.handle))
                                     grid.slider.previous_handle = grid.slider.handle
 
-                            # enter simulation mode:
-                            if x == session.grid_1.selectors[1].x:
-                                grid.deselect(session.grid_1.selectors[0].x, y)
-                                session.handlers['simulation'].activate()
+                        # ModeSelector
+                        for selector in grid.selectors:
+                            if x == selector.x and y == selector.y:
+                                selector.callback_function()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
-
 
     def draw(self, canvas):
 

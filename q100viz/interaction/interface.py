@@ -168,6 +168,8 @@ class ModeSelector:
 
     def get_next_question():
         print("getting next question")
+        session.environment['question_index'] = (session.environment['question_index'] + 1 ) % len(session.environment['questions'])
+        session.stats.send_message(json.dumps({'question':session.environment['questions'][session.environment['question_index']]}, ensure_ascii=False))
 
 class MousePosition:
     def __init__(self, canvas_size):

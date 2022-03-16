@@ -38,7 +38,7 @@ class Stats:
         result = data[0] if len(data) > 0 else {}
         for key, value in env.items():
             result[key] = value
-        self.send_message([json.dumps(result)])
+        self.send_message([json.dumps(result, ensure_ascii=False)])
 
     def send_simplified_dataframe_with_environment_variables(self, df, env):
         sum = make_clusters(df).sum()

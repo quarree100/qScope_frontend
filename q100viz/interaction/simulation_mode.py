@@ -25,7 +25,7 @@ class SimulationMode:
             slider.show_controls = False
 
         # compose dataframe to start
-        df = pd.DataFrame(session.environment, index=[0])
+        df = pd.DataFrame(session.environment)
         xml = '\n'.join(df.apply(stats.to_xml, axis=1))
         print(xml)
         f = open('../data/simulation_df.xml', 'w')

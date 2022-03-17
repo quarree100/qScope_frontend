@@ -28,7 +28,6 @@ environment['questions'] = [  # TODO: externalize this to yet another csv
         "Ich würde meinen Energieverbrauch reduzieren, wenn mein Haushalt mehr Energie verbraucht als ähnliche Haushalte.",
         "Wenn ein erneuerbarer Energietarif bei einem anderen Energieversorger verfügbar wäre, würde ich meinen Anbieter wechseln."
 ]
-environment['question_index'] = 0
 
 # interaction
 seconds_elapsed = 0

@@ -11,7 +11,8 @@ from config import config
 
 class Questionnaire_Mode():
     def __init__(self):
-        session.environment['question_number'] = 0
+        self.question_index = 0
+        session.environment['question'] = session.environment['questions'][self.question_index]
 
     def activate(self):
         session.show_polygons = False
@@ -62,6 +63,12 @@ class Questionnaire_Mode():
         points = [[0, 120], [0, 100], [25, 100], [25, 120]]
         points_transformed = session.grid_2.slider.surface.transform(points)
         pygame.draw.polygon(session.grid_2.slider.surface, pygame.Color(20,200,55), points_transformed)
+
+    def get_next_question(self):
+        print("getting next question")
+        self.question_index = (self.question_index + 1 ) % len(session.environment['questions'])
+        session.environment['question'] = session.environment['questions'][self.question_index]
+        session.stats.send_dataframe_with_environment_variables(None, session.environment)
 
     def update(self):
         pass

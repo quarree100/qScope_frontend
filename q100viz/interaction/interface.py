@@ -160,17 +160,14 @@ class ModeSelector:
 
     def activate_input_mode():
         print("activating input mode")
-        pass
+        session.handlers['input'].activate()
 
     def activate_simulation_mode():
         print("activating simulation mode")
         session.handlers['simulation'].activate()
 
     def get_next_question():
-        print("getting next question")
-        session.environment['question_index'] = (session.environment['question_index'] + 1 ) % len(session.environment['questions'])
-        session.environment['question'] = session.environment['questions'][session.environment['question_index']]
-        session.stats.send_message(json.dumps({'question':session.environment['questions'][session.environment['question_index']]}, ensure_ascii=False))
+        session.handlers['questionnaire'].get_next_question()
 
 class MousePosition:
     def __init__(self, canvas_size):

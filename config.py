@@ -9,6 +9,8 @@ config = {
     'CSPY_SETTINGS_FILE': '../cspy/settings/cityscopy.json',
     'SAVED_KEYSTONE_FILE': 'keystone.save',
     'SAVED_BUILDINGS_FILE': 'export/buildings_export.shp',
+    'GAMA_HEADLESS_FILE' : '/home/dunland/opt/GAMA/headless/gama-headless.sh',
+    'GAMA_SIMULATION_FILE' : '/home/dunland/github/qScope/q100_abm/q100/models/qScope_ABM.gaml',
 
     'GRID_2_X1' : 50,
     'GRID_2_X2' : 100,

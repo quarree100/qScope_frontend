@@ -12,46 +12,30 @@ experiment_name = "agent_decision_making"
 
 def compose_xml(parameters, outputs, simulation_file, finalStep=None, until=None, experiment_name=None):
     # header
-    xml = ['<Experiment>']
-    xml.append('  <Simulation id="1" sourcePath=' + str(simulation_file) + " "
-        + "finalStep=" + str(finalStep) + " "
-        + "until=" + str(until) + " "
-        + "experiment=" + str(experiment_name))
+    xml = ['<Experiment_plan>']
+    xml.append('  <Simulation id="1" sourcePath="{0}" finalStep="{1}" until="{2}" experiment="{3}" >'.format(str(simulation_file), str(finalStep), str(until), str(experiment_name)))
 
     # parameters
     xml.append('  <Parameters>')
-    # for row in parameters.iterrows():
-    #     xml.append('  <Parameter name="{0}">{1}</Parameter>'.format(row, row[field]))
-
-
-def to_xml(row, simulation_file, finalStep=None, until=None, experiment_name=None):
-    # header
-    xml = ['<Experiment>']
-    xml.append('  <Simulation id="1" sourcePath=' + str(simulation_file) + " "
-        + "finalStep=" + str(finalStep) + " "
-        + "until=" + str(until) + " "
-        + "experiment=" + str(experiment_name))
-    xml.append('  <Parameters>')
-
-    # parameters
-    for field in row.index:
-        xml.append('  <Parameter name="{0}">{1}</Parameter>'.format(field, row[field]))
-    xml.append('</Parameters>')
+    for index, row in parameters.iterrows():
+        xml.append('    <Parameter name="{0}" type="{1}" value="{2}" />'.format(row['name'], row['type'], row['value']))
+    xml.append('  </Parameters>')
 
     # outputs
-    xml.append('<Outputs></Outputs>')
-
-    # end
+    xml.append('  <Outputs>')
+    for index, row in outputs.iterrows():
+        xml.append('    <Output id="{0}" name="{1}" framerate="{2}" />'.format(row['id'], row['name'], row['framerate']))
+    xml.append('  </Outputs>')
     xml.append('</Simulation>')
-    xml.append('</Experiment>')
+    xml.append('</Experiment_plan>')
 
     return '\n'.join(xml)
 
 def main():
-    data = {'param 1': 1, 'param 2' : 'asdf'}
+    data = {'param 1': 'abc', 'param 2' : 'asdf'}
     df = pd.DataFrame(data, index=[0])
 
-    outputs = pd.DataFrame(columns=['id', 'name', 'frameRate'])
+    outputs = pd.DataFrame(columns=['id', 'name', 'framerate'])
     outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
     outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
 
@@ -60,17 +44,18 @@ def main():
     params.loc[len(params)] = ['eeh', 'float', '0.3']
     params.loc[len(params)] = ['investment', 'int', '15123']
 
-    compose_xml(params, outputs)
-
     # compose xml
-    xml = '\n'.join(df.apply(to_xml, axis=1, args=(simulation_file, final_step, until, experiment_name)))
+    xml = compose_xml(params, outputs, simulation_file)
+
+    # export xml
     print(xml)
     f = open('simulation_parameters.xml', 'w')
     f.write(xml)
     f.close()
 
     # run script
-    args = "simulation_parameters.xml " + output_folder
+    command = script + " 64 " + " simulation_parameters.xml " + output_folder
+    subprocess.call(command, shell=True)
     # subprocess.run(script, args)
 
 main()

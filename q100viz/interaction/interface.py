@@ -2,6 +2,7 @@
 
 import pygame
 import json
+import random
 
 import q100viz.keystone as keystone
 import q100viz.session as session
@@ -17,6 +18,8 @@ class Slider:
         self.show_controls = True
 
         self.color = pygame.Color(20, 200, 150)
+        # colors via slider parameter fields:
+        self.colors = [(random.randint(0, 222), random.randint(0, 222), random.randint(0, 222)) for x in range(len(session.slider_handles))]
 
         self.handle = None
         self.previous_handle = None
@@ -54,19 +57,9 @@ class Slider:
                     if self.show_controls:
                         cell_color = pygame.Color(20, 200, 150)
                         stroke = 4 if cell.selected else 1
-                        # colors via slider parameter fields:
-                        colors = [
-                            (73, 156, 156),
-                            (126, 185, 207),
-                            (247, 79, 115),
-                            (193, 135, 77),
-                            (187, 210, 4),
-                            (249, 109, 175),
-                            (9, 221, 250),
-                            (150, 47, 28)]
 
-                        index = int(cell.x / ((session.grid_settings['ncols'] / 2) / len(session.slider_handles)))
-                        cell_color = pygame.Color(colors[index])
+                        index = int(cell.x / ((session.grid_settings['ncols'] / 2) / len(session.slider_handles)) - 1)
+                        cell_color = pygame.Color(self.colors[index])
 
                         if cell.selected:
                             self.color = cell_color
@@ -160,17 +153,14 @@ class ModeSelector:
 
     def activate_input_mode():
         print("activating input mode")
-        pass
+        session.handlers['input'].activate()
 
     def activate_simulation_mode():
         print("activating simulation mode")
         session.handlers['simulation'].activate()
 
     def get_next_question():
-        print("getting next question")
-        session.environment['question_index'] = (session.environment['question_index'] + 1 ) % len(session.environment['questions'])
-        session.environment['question'] = session.environment['questions'][session.environment['question_index']]
-        session.stats.send_message(json.dumps({'question':session.environment['questions'][session.environment['question_index']]}, ensure_ascii=False))
+        session.handlers['questionnaire'].get_next_question()
 
 class MousePosition:
     def __init__(self, canvas_size):

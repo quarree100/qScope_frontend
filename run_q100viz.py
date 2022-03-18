@@ -108,6 +108,10 @@ buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], 
     'Hausnr.': 'string',
 })
 
+# get rid of null values
+buildings['Wärmeverbrauch 2017 [kWh]'].fillna(0, inplace=True)
+buildings['Stromverbrauch 2017 [kWh]'].fillna(0, inplace=True)
+
 # data normalized by max values
 buildings['waerme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / \
     buildings.max()['Wärmeverbrauch 2017 [kWh]']

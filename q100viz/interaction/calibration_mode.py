@@ -2,14 +2,14 @@ import pygame
 from pygame.locals import KEYDOWN, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_s
 
 import q100viz.session as session
-
+from config import config
 
 class CalibrationMode:
     def __init__(self):
         self.active_anchor = 0
         self.magnitude = 1
 
-    def process_event(self, event, config):
+    def process_event(self, event):
         keystone_file = config['SAVED_KEYSTONE_FILE']
 
         if event.type == KEYDOWN:

@@ -15,7 +15,7 @@ grid_1 = None
 grid_2 = None
 buildings = None
 verbose = True
-slider_handles = ['year', 'foerderung', 'CO2-Preis', 'connection_speed'
+slider_handles = ['year', 'foerderung', 'CO2-Preis', 'connection_speed',
                     'CO2-emissions', 'versorgung', 'investment', 'anschluss', 'answer']
 environment = dict.fromkeys(slider_handles, 0)
 environment['mode'] = 'input'
@@ -28,6 +28,7 @@ environment['questions'] = [  # TODO: externalize this to yet another csv
         "Ich würde meinen Energieverbrauch reduzieren, wenn mein Haushalt mehr Energie verbraucht als ähnliche Haushalte.",
         "Wenn ein erneuerbarer Energietarif bei einem anderen Energieversorger verfügbar wäre, würde ich meinen Anbieter wechseln."
 ]
+environment['question'] = environment['questions'][0]
 
 # interaction
 seconds_elapsed = 0

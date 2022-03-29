@@ -33,6 +33,8 @@ class SimulationMode:
         f.write(xml)
         f.close()
 
+        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)

@@ -31,7 +31,7 @@ class Questionnaire_Mode():
 
         session.active_handler = session.handlers['questionnaire']
         session.environment['mode'] = self.name
-        session.stats.send_dataframe_as_json(session.environment)
+        session.stats.send_dataframe_with_environment_variables(None, session.environment)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:

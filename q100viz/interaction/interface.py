@@ -151,15 +151,15 @@ class ModeSelector:
                             [rect_points[0][0] + 10, rect_points[0][1]+ 35]
                     )
 
-    def activate_input_mode():
+    def callback_activate_input_mode():
         print("activating input mode")
         session.handlers['input'].activate()
 
-    def activate_simulation_mode():
+    def callback_activate_simulation_mode():
         print("activating simulation mode")
         session.handlers['simulation'].activate()
 
-    def get_next_question():
+    def callback_get_next_question():
         session.handlers['questionnaire'].get_next_question()
 
 class MousePosition:

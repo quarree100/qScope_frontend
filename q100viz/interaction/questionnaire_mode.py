@@ -11,6 +11,7 @@ from config import config
 
 class Questionnaire_Mode():
     def __init__(self):
+        self.name = 'questionnaire'
         self.question_index = 0
         session.environment['question'] = session.environment['questions'][self.question_index]
 
@@ -24,13 +25,13 @@ class Questionnaire_Mode():
 
         for selector in session.grid_1.selectors:
             selector.show = True  # enable selectors for table 1
-            selector.callback_function = ModeSelector.get_next_question
+            selector.callback_function = ModeSelector.callback_get_next_question
         for selector in session.grid_2.selectors:
             selector.show = False  # disable selectors for table 2
 
         session.active_handler = session.handlers['questionnaire']
-        session.environment['mode'] = 'questionnaire'
-        session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+        session.environment['mode'] = self.name
+        session.stats.send_dataframe_as_json(session.environment)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -66,9 +67,14 @@ class Questionnaire_Mode():
 
     def get_next_question(self):
         print("getting next question")
-        self.question_index = (self.question_index + 1 ) % len(session.environment['questions'])
-        session.environment['question'] = session.environment['questions'][self.question_index]
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        # self.question_index = (self.question_index + 1 ) % len(session.environment['questions'])
+        self.question_index += 1
+        if self.question_index == len(session.environment['questions']):
+            self.question_index = 0
+            session.handlers['input'].activate()
+        else:
+            session.environment['question'] = session.environment['questions'][self.question_index]
+            session.stats.send_dataframe_with_environment_variables(None, session.environment)
 
     def update(self):
         pass

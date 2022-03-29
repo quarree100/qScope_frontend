@@ -11,6 +11,7 @@ import pygame
 
 class SimulationMode:
     def __init__(self):
+        self.name = 'simulation'
         self.simulation_step = 0
 
         self.previous_tick = -1  # stores moment of last step change
@@ -18,7 +19,7 @@ class SimulationMode:
         self.simulation_df = pd.DataFrame(columns=['step', 'buildings'])
 
     def activate(self):
-        session.environment['mode'] = 'simulation'
+        session.environment['mode'] = self.name
         session.active_handler = session.handlers['simulation']
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = False

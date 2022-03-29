@@ -32,8 +32,8 @@ class Grid:
         self.slider = Slider(canvas_size, self, [[0, 130], [0, 100], [50, 100], [50, 130]])
 
         self.selectors = [
-            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3), len(self.grid) - 1, (200, 150, 20), ModeSelector.activate_input_mode),
-            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3 + 2), len(self.grid) - 1, (20, 150, 200), ModeSelector.activate_simulation_mode)
+            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3), len(self.grid) - 1, (200, 150, 20), ModeSelector.callback_activate_input_mode),
+            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3 + 2), len(self.grid) - 1, (20, 150, 200), ModeSelector.callback_activate_simulation_mode)
         ]
 
     def draw(self, show_grid):

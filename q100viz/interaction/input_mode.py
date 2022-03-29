@@ -11,7 +11,7 @@ from config import config
 
 class InputMode:
     def __init__(self):
-        pass
+        self.name = 'input'
 
     def activate(self):
         for slider in session.grid_1.slider, session.grid_2.slider:
@@ -23,7 +23,8 @@ class InputMode:
             selector.show = True
         session.show_polygons = True
         session.active_handler = session.handlers['input']
-        session.environment['mode'] = 'input'
+        session.environment['mode'] = self.name
+        session.stats.send_dataframe_with_environment_variables(None, session.environment)
 
     def process_event(self, event):
             if event.type == pygame.locals.MOUSEBUTTONDOWN:

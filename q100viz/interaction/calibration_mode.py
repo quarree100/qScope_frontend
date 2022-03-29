@@ -6,6 +6,7 @@ from config import config
 
 class CalibrationMode:
     def __init__(self):
+        self.name = 'calibration'
         self.active_anchor = 0
         self.magnitude = 1
 

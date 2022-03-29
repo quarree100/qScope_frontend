@@ -1,19 +1,28 @@
+# example script to start the gama-headless.sh bash file via python.
+# @dunland, March 2022
+
 import subprocess
 import pandas as pd
+import os
 
-script = '/home/dunland/opt/GAMA/headless/gama-headless.sh'
-simulation_file = '/home/dunland/github/qScope/q100_abm/q100/models/qScope_ABM.gaml'
+headless_folder = '/home/dunland/opt/GAMA/headless/'
+script = headless_folder + 'gama-headless.sh'
+simulation_file = '/home/dunland/github/qScope/q100_abm/q100/models/qscope_ABM.gaml'
 output_folder = "/home/dunland/github/qScope/q100_abm/q100/outputHeadless"
+
 
 # simulation data:
 final_step = 200
 until = None
-experiment_name = "agent_decision_making"
+experiment_name = "agent_decision_making"  # must be identical to GAMA experiment
 
 def compose_xml(parameters, outputs, simulation_file, finalStep=None, until=None, experiment_name=None):
     # header
     xml = ['<Experiment_plan>']
-    xml.append('  <Simulation id="1" sourcePath="{0}" finalStep="{1}" until="{2}" experiment="{3}" >'.format(str(simulation_file), str(finalStep), str(until), str(experiment_name)))
+    if until is not None:
+        xml.append('  <Simulation id="1" sourcePath="{0}" finalStep="{1}" until="{2}" experiment="{3}" >'.format(str(simulation_file), str(finalStep), str(until), str(experiment_name)))
+    else:
+        xml.append('  <Simulation id="1" sourcePath="{0}" finalStep="{1}" experiment="{2}" >'.format(str(simulation_file), str(finalStep), str(experiment_name)))
 
     # parameters
     xml.append('  <Parameters>')
@@ -32,6 +41,7 @@ def compose_xml(parameters, outputs, simulation_file, finalStep=None, until=None
     return '\n'.join(xml)
 
 def main():
+    # provide data:
     data = {'param 1': 'abc', 'param 2' : 'asdf'}
     df = pd.DataFrame(data, index=[0])
 
@@ -45,17 +55,22 @@ def main():
     params.loc[len(params)] = ['investment', 'int', '15123']
 
     # compose xml
-    xml = compose_xml(params, outputs, simulation_file)
+    xml = compose_xml(params, outputs, simulation_file, finalStep=final_step, experiment_name=experiment_name)
 
     # export xml
+    if os.path.isdir(output_folder) is False:
+        os.mkdir(output_folder)
+    os.chdir(headless_folder)
+
     print(xml)
     f = open('simulation_parameters.xml', 'w')
     f.write(xml)
     f.close()
 
     # run script
-    command = script + " 64 " + " simulation_parameters.xml " + output_folder
+    xml_path = 'simulation_parameters.xml'
+    # xml_path = 'test_params.xml'
+    command = script + " " + xml_path + " " + output_folder
     subprocess.call(command, shell=True)
-    # subprocess.run(script, args)
 
 main()

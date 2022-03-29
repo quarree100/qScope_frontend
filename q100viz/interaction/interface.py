@@ -93,6 +93,9 @@ class ModeSelector:
 
         pygame.draw.rect(self.surface, self.color, pygame.Rect(50, 50, 50,50))
 
+    def callback_none():
+        pass
+
 class MousePosition:
     def __init__(self, canvas_size):
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)

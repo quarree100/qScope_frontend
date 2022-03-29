@@ -5,6 +5,8 @@ import pandas as pd
 import json
 
 import q100viz.session as session
+import q100viz.stats as stats
+from q100viz.interaction.interface import ModeSelector
 import pygame
 
 
@@ -16,8 +18,54 @@ class SimulationMode:
 
         self.simulation_df = pd.DataFrame(columns=['step', 'buildings'])
 
-    def process_event(self, event, config):
-        pass
+    def activate(self):
+        session.environment['mode'] = self.name
+        session.active_handler = session.handlers['simulation']
+
+        # setup sliders:
+        for slider in session.grid_1.slider, session.grid_2.slider:
+            slider.show_text = False
+            slider.show_controls = False
+
+        # setup mode selectors:
+        for selector in session.grid_1.selectors:
+            selector.show = False  # disable selectors for table 1
+        session.grid_2.selectors[0].show = True
+        session.grid_2.selectors[0].callback_function = ModeSelector.callback_activate_input_mode()
+        session.grid_2.selectors[1].show = True
+        session.grid_2.selectors[1].callback_function = ModeSelector.callback_none
+
+        # compose dataframe to start
+        df = pd.DataFrame(session.environment)
+        xml = '\n'.join(df.apply(stats.to_xml, axis=1))
+        print(xml)
+        f = open('../data/simulation_df.xml', 'w')
+        f.write(xml)
+        f.close()
+
+        # send data
+        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+
+    def process_event(self, event):
+        if event.type == pygame.locals.MOUSEBUTTONDOWN:
+            session.grid_1.mouse_pressed(event.button)
+            session.grid_2.mouse_pressed(event.button)
+            session.print_verbose(session.buildings[session.buildings['selected']])
+            session.flag_export_canvas = True
+
+    def process_grid_change(self):
+        # process grid changes
+        for grid in [session.grid_1, session.grid_2]:
+            for y, row in enumerate(grid.grid):
+                for x, cell in enumerate(row):
+                    if cell.selected:
+                        # ModeSelector
+                        for selector in grid.selectors:
+                            if x == selector.x and y == selector.y:
+                                selector.callback_function()
+                                cell.selected = False  # deselect to prevent loops
+
+        session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 
     def update(self):
 

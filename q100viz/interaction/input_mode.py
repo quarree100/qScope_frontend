@@ -4,12 +4,42 @@ import pygame
 
 import q100viz.keystone as keystone
 import q100viz.session as session
+from q100viz.interaction.interface import ModeSelector
+import q100viz.stats as stats
 from config import config
 
 
 class InputMode:
     def __init__(self):
-        pass
+        self.name = 'input'
+
+    def activate(self):
+        session.show_polygons = True
+        session.active_handler = session.handlers['input']
+        session.environment['mode'] = self.name
+
+        # sliders:
+        for slider in session.grid_1.slider, session.grid_2.slider:
+            slider.show_text = True
+            slider.show_controls = True
+
+        # setup mode selectors:
+        for selector in session.grid_1.selectors:
+            selector.show = False  # disable selectors for table 1
+        session.grid_2.selectors[0].show = True
+        session.grid_2.selectors[0].callback_function = ModeSelector.callback_none()
+        session.grid_2.selectors[1].show = True
+        session.grid_2.selectors[1].callback_function = ModeSelector.callback_activate_simulation_mode()
+
+        # send data:
+        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+
+    def process_event(self, event):
+            if event.type == pygame.locals.MOUSEBUTTONDOWN:
+                session.grid_1.mouse_pressed(event.button)
+                session.grid_2.mouse_pressed(event.button)
+                session.print_verbose(session.buildings[session.buildings['selected']])
+                session.flag_export_canvas = True
 
     def process_event(self, event, config):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -46,12 +76,11 @@ class InputMode:
                                         ("slider_handle: ", grid.slider.handle))
                                     grid.slider.previous_handle = grid.slider.handle
 
-                            # select input mode:
-                            elif x == int(session.grid_settings['ncols'] * 2 / 3):
-                                if session.active_handler == session.handlers['simulation']:
-                                    session.simulation.send_data(session.stats)
-                                session.active_handler = session.handlers['tui']
-                                grid.deselect(int(session.grid_settings['ncols'] * 2 / 3 + 2), len(grid.grid) - 1)
+                        # ModeSelector
+                        for selector in grid.selectors:
+                            if x == selector.x and y == selector.y:
+                                selector.callback_function()
+                                grid.deselect(x,y) # deselect to prevent loops
 
                             # select simulation mode:
                             elif x == int(session.grid_settings['ncols'] * 2 / 3 + 2):

@@ -32,10 +32,10 @@ class Grid:
 
         self.slider = Slider(canvas_size, self, [0, 100, 50, 150])
 
-        # list of transformed slider controls rectangles
-        # self.slider_controls_transformed = [
-        #     (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
-        #     for y, row in enumerate(self.slider_controls) for x, cell in enumerate(row)]
+        self.selectors = [
+            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3), len(self.grid) - 1, (200, 150, 20), ModeSelector.callback_none),
+            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3 + 2), len(self.grid) - 1, (20, 150, 200), ModeSelector.callback_none)
+        ]
 
     def draw(self, show_grid):
 

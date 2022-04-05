@@ -27,6 +27,7 @@ class Slider:
         self.grid = grid
 
         # create rectangle around centerpoint:
+        self.coords = coords
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
         self.surface.src_points = [
             [0, 0], [0, 100], [100, 100], [100, 0]]
@@ -66,10 +67,11 @@ class Slider:
 
                         if session.show_polygons: pygame.draw.polygon(self.grid.surface, cell_color, rect_points, stroke)
 
+    def draw_area(self):
+        pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
+
     def transform(self):
-        self.coords_transformed = self.surface.transform([
-            [self.coords[0], self.coords[3]], [self.coords[0], self.coords[1]],
-            [self.coords[2], self.coords[1]], [self.coords[2], self.coords[3]]])
+        self.coords_transformed = self.surface.transform(self.coords)
 
     def update(self):
         ''' TODO: set up a struct (maybe csv) to import standard values >> this section should be automatized!
@@ -127,7 +129,7 @@ class Slider:
 class ModeSelector:
     def __init__(self, grid, x, y, color, callback_function):
         self.show = True
-        self.name = "NAME"  # TODO: name them right
+        self.name = "NAME"
         self.color = pygame.Color(color)
         self.grid = grid
         self.x = x

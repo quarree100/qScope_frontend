@@ -92,7 +92,7 @@ class InputMode:
 
         # coloring slider area:
         for slider in session.grid_1.slider, session.grid_2.slider:
-            pygame.draw.polygon(slider.surface, slider.color, slider.coords_transformed)
+            slider.draw_area()
 
     def update(self):
         pass

@@ -8,7 +8,7 @@ import q100viz.session as session
 import q100viz.stats as stats
 from q100viz.interaction.interface import ModeSelector
 import pygame
-
+from q100viz.interaction.interface import ModeSelector
 
 class SimulationMode:
     def __init__(self):
@@ -21,6 +21,7 @@ class SimulationMode:
 
     def activate(self):
         session.environment['mode'] = self.name
+        session.show_polygons = True
         session.active_handler = session.handlers['simulation']
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = False
@@ -52,6 +53,8 @@ class SimulationMode:
             session.print_verbose(session.buildings[session.buildings['selected']])
             session.flag_export_canvas = True
 
+            self.process_grid_change()
+
     def process_grid_change(self):
         # process grid changes
         for grid in [session.grid_1, session.grid_2]:
@@ -62,7 +65,6 @@ class SimulationMode:
                         for selector in grid.selectors:
                             if x == selector.x and y == selector.y:
                                 selector.callback_function()
-                                cell.selected = False  # deselect to prevent loops
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 

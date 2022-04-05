@@ -94,9 +94,6 @@ show_typologiezonen = True
 show_nahwaermenetz = True
 display_viewport = True
 
-# initialize input area
-# mode_selector = session.mode_selector = ModeSelector(viewport, [[80, 81.818], [80, 100], [90, 100], [90, 81.818]]) # mode selector
-
 # Load data
 buildings = gis.read_shapefile(
     config['BUILDINGS_OSM_FILE'], columns={'osm_id': 'int64'}).set_index('osm_id')
@@ -237,7 +234,6 @@ while True:
     else:
         simulation.update()
 
-    # print(session.active_handler)
 
     ################################## DRAWING ########################
     # clear surfaces
@@ -318,13 +314,9 @@ while True:
         mouse_pos = pygame.mouse.get_pos()
         canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
 
-        # mouse_transformed = np.dot(viewport.transform_mat, np.float32(np.array([[[mouse_pos[0], mouse_pos[1]]]])))
-        # print(mouse_transformed)
-
     # simulation steps:
     if session.active_handler == handlers['simulation']:
         simulation.draw(canvas)
-
     ############################# pygame time #########################
 
     pygame.display.update()

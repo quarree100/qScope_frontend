@@ -31,6 +31,7 @@ class Questionnaire_Mode():
         for selector in session.grid_1.selectors:
             selector.show = True  # enable selectors for table 1
             selector.callback_function = ModeSelector.callback_get_next_question
+            selector.name = "WEITER"
         for selector in session.grid_2.selectors:
             selector.show = False  # disable selectors for table 2
 
@@ -74,12 +75,14 @@ class Questionnaire_Mode():
         print("getting next question")
         # self.question_index = (self.question_index + 1 ) % len(session.environment['questions'])
         self.question_index += 1
-        if self.question_index == len(session.environment['questions']):
-            self.question_index = 0
-            session.handlers['input'].activate()
-        else:
+
+        # get next question
+        if self.question_index is not len(session.environment['questions']):
             session.environment['question'] = session.environment['questions'][self.question_index]
             session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        else:  # leave questionnaire mode, enter input mode
+            self.question_index = 0
+            session.handlers['input'].activate()
 
     def update(self):
         pass

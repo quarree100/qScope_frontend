@@ -8,7 +8,7 @@ import q100viz.session as session
 from q100viz.interaction.interface import ModeSelector
 import q100viz.stats as stats
 from config import config
-
+from q100viz.interaction.interface import ModeSelector
 
 class InputMode:
     def __init__(self):
@@ -29,30 +29,12 @@ class InputMode:
             selector.show = False  # disable selectors for table 1
         session.grid_2.selectors[0].show = True
         session.grid_2.selectors[0].callback_function = ModeSelector.callback_none
+        session.grid_2.selectors[0].name = "INPUT"
         session.grid_2.selectors[1].show = True
         session.grid_2.selectors[1].callback_function = ModeSelector.callback_activate_simulation_mode
+        session.grid_2.selectors[1].name = "SIMULATION"
 
         # send data:
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
-
-    def process_event(self, event):
-            if event.type == pygame.locals.MOUSEBUTTONDOWN:
-                session.grid_1.mouse_pressed(event.button)
-                session.grid_2.mouse_pressed(event.button)
-                session.print_verbose(session.buildings[session.buildings['selected']])
-                session.flag_export_canvas = True
-
-    def activate(self):
-        for slider in session.grid_1.slider, session.grid_2.slider:
-            slider.show_text = True
-            slider.show_controls = True
-        for selector in session.grid_1.selectors:
-            selector.show = False
-        for selector in session.grid_2.selectors:
-            selector.show = True
-        session.show_polygons = True
-        session.active_handler = session.handlers['input']
-        session.environment['mode'] = self.name
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
 
     def process_event(self, event):
@@ -96,7 +78,6 @@ class InputMode:
                         for selector in grid.selectors:
                             if x == selector.x and y == selector.y:
                                 selector.callback_function()
-                                grid.deselect(x,y) # deselect to prevent loops
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 

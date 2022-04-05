@@ -12,6 +12,7 @@ import pygame
 
 class SimulationMode:
     def __init__(self):
+        self.name = 'simulation'
         self.simulation_step = 0
 
         self.previous_tick = -1  # stores moment of last step change
@@ -21,8 +22,6 @@ class SimulationMode:
     def activate(self):
         session.environment['mode'] = self.name
         session.active_handler = session.handlers['simulation']
-
-        # setup sliders:
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = False
             slider.show_controls = False
@@ -31,7 +30,7 @@ class SimulationMode:
         for selector in session.grid_1.selectors:
             selector.show = False  # disable selectors for table 1
         session.grid_2.selectors[0].show = True
-        session.grid_2.selectors[0].callback_function = ModeSelector.callback_activate_input_mode()
+        session.grid_2.selectors[0].callback_function = ModeSelector.callback_activate_input_mode
         session.grid_2.selectors[1].show = True
         session.grid_2.selectors[1].callback_function = ModeSelector.callback_none
 
@@ -69,6 +68,7 @@ class SimulationMode:
 
     def update(self):
 
+        ######################## SIMULATION UPDATE ####################
         # one step per second:
         if session.seconds_elapsed != self.previous_tick:
 
@@ -97,9 +97,8 @@ class SimulationMode:
             )
 
     def send_data(self, stats):
-        stats.send_dataframe_as_json(pd.DataFrame({'simulation': [self.simulation_df]}))
+        stats.send_dataframe_as_json(pd.DataFrame(self.simulation_df))
 
         # save as csv in global data folder:
-        self.simulation_df.set_index('step').to_csv('../data/simulation_df-reindexed.csv')
-        self.simulation_df.to_csv('../data/simulation_df.csv')
-        self.simulation_df.to_json('../data/simulation_df.simulation_df.json')
+        self.simulation_df.set_index('step').to_csv('../data/simulation_df.csv')
+        # self.simulation_df.to_json('../data/simulation_df.json')

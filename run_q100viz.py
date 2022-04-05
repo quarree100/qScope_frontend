@@ -6,7 +6,7 @@ import json
 import cv2
 import pygame
 import numpy as np
-from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
 
 from config import config
 import q100viz.keystone as keystone
@@ -21,7 +21,7 @@ import q100viz.session as session
 FPS = session.FPS = 12
 
 # set window position
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
+# os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
 
 # Initialize program
 pygame.init()
@@ -87,7 +87,7 @@ grid_2 = session.grid_2 = grid.Grid(
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
         viewport, ['slider0'])
 
-show_polygons = True
+session.show_polygons = False
 show_basemap = False
 show_grid = False
 show_typologiezonen = True
@@ -108,6 +108,10 @@ buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], 
     'Hausnr.': 'string',
 })
 
+# get rid of null values
+buildings['Wärmeverbrauch 2017 [kWh]'].fillna(0, inplace=True)
+buildings['Stromverbrauch 2017 [kWh]'].fillna(0, inplace=True)
+
 # data normalized by max values
 buildings['waerme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / \
     buildings.max()['Wärmeverbrauch 2017 [kWh]']
@@ -117,7 +121,7 @@ buildings['adresse'] = buildings['Straße'] + ' ' + buildings['Hausnr.']
 
 # technical data
 buildings['CO2'] = [0.5 * random.random() for row in buildings.values]
-buildings['investment'] = [random.randint(0,4) for row in buildings.values]
+buildings['investment'] = [random.randint(0,3) for row in buildings.values]
 
 versorgungsarten = ['konventionell', 'medium', 'gruen']
 buildings['versorgung'] = [versorgungsarten[random.randint(0,2)] for row in buildings.values]
@@ -151,22 +155,23 @@ _stats = session.stats = stats.Stats(stats_io)
 print(buildings)
 
 handlers = session.handlers
-active_handler = session.active_handler
 simulation = session.simulation = SimulationMode()
 
 mouse_position = MousePosition(canvas_size)
+
+session.active_handler.activate()
 
 ############################ Begin Game Loop ##########################
 while True:
     # process mouse/keyboard events
     for event in pygame.event.get():
-        if active_handler:
-            active_handler.process_event(event, config)
+        if session.active_handler:
+            session.active_handler.process_event(event)
 
         if event.type == KEYDOWN:
             # toggle polygons:
             if event.key == K_p:
-                show_polygons = event.key == K_p and not show_polygons
+                session.show_polygons = event.key == K_p and not session.show_polygons
             # toggle basemap:
             if event.key == K_m:
                 show_basemap = event.key == K_m and not show_basemap
@@ -175,7 +180,7 @@ while True:
                 show_grid = not show_grid
             # activate input_mode:
             if event.key == K_t:
-                active_handler = handlers['tui']
+                session.handlers['input'].activate()
             # toggle nahwaermenetz:
             if event.key == K_n:
                 show_nahwaermenetz = not show_nahwaermenetz
@@ -183,31 +188,41 @@ while True:
                 display_viewport = not display_viewport
             # toggle calibration:
             elif event.key == K_c:
-                active_handler = handlers[
-                    'calibrate' if active_handler != handlers['calibrate'] else 'tui']
+                session.active_handler = handlers[
+                    'calibrate' if session.active_handler != handlers['calibrate'] else 'input']
+                print(session.active_handler)
+
             # toggle edit-mode to move polygons:
             # elif event.key == K_e:
-            #     active_handler = handlers['edit' if active_handler != handlers['edit'] else 'tui']
+            #     session.active_handler = handlers['edit' if session.active_handler != handlers['edit'] else 'input']
             # toggle simulation_mode:
             elif event.key == K_s:
-                if active_handler == handlers['simulation']:
+                if session.active_handler == handlers['simulation']:
                     simulation.send_data(_stats)
-                    active_handler = handlers['tui']
+                    session.active_handler = handlers['input']
                 else:
-                    active_handler = handlers['simulation']
+                    session.active_handler = handlers['simulation']
+                    simulation.activate()
+
+            elif event.key == K_q:
+                session.handlers['questionnaire'].activate()
             # manual slider control for test purposes:
             elif event.key == K_PLUS:
-                if session.grid_1.sliders['slider0'] is not None:
-                    session.grid_1.sliders['slider0'] += 0.1
-                    session.print_verbose(("slider0 =", session.grid_1.sliders['slider0']))
-                else:
-                    session.grid_1.sliders['slider0'] = 0.1
+                for grid in grid_1, grid_2:
+                    if grid.slider.value is not None:
+                        grid.slider.value += 0.1
+                        session.print_verbose(("slider0 =", grid.slider.value))
+                    else:
+                        grid.slider.value = 0.1
+                    grid.slider.update()
             elif event.key == K_MINUS:
-                if session.grid_1.sliders['slider0'] is not None:
-                    session.grid_1.sliders['slider0'] -= 0.1
-                    session.print_verbose(("slider0 =", session.grid_1.sliders['slider0']))
-                else:
-                    session.grid_1.sliders['slider0'] = 0.1
+                for grid in grid_1, grid_2:
+                    if grid.slider.value is not None:
+                        grid.slider.value -= 0.1
+                        session.print_verbose(("slider0 =", grid.slider.value))
+                    else:
+                        grid.slider.value = 0.1
+                    grid.slider.update()
             # verbose mode:
             elif event.key == K_v:
                 session.verbose = not session.verbose
@@ -217,13 +232,12 @@ while True:
             sys.exit()
 
     # update running mode:
-    active_handler = session.active_handler
-    if active_handler != handlers['simulation']:
-        active_handler.update()
+    if session.active_handler != handlers['simulation']:
+        session.active_handler.update()
     else:
         simulation.update()
 
-    session.print_verbose(active_handler)
+    # print(session.active_handler)
 
     ################################## DRAWING ########################
     # clear surfaces
@@ -234,6 +248,7 @@ while True:
         grid.surface.fill(0)
         grid.slider.surface.fill(0)
 
+    # draw GIS layers:
     if show_typologiezonen:
         session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
     session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
@@ -246,21 +261,15 @@ while True:
         canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'waerme_2017_rel')  # stroke simple black
 
     # draw grid
-    if active_handler != handlers['simulation']:
-        grid_1.draw(show_grid)
-        grid_2.draw(show_grid)
+    grid_1.draw(show_grid)
+    grid_2.draw(show_grid)
 
     # draw mask
-    pygame.draw.polygon(viewport, (86, 0, 0), viewport.transform(mask_points))
+    pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
 
-    # draw extras
-    if active_handler:
-        active_handler.draw(canvas)
-
-    # build clusters of selected buildings and send JSON message
-    # clusters = stats.make_clusters(buildings[buildings.selected])
-    if active_handler == handlers['tui']:
-        _stats.send_simplified_dataframe_with_environment_variables(buildings[buildings.selected], session.environment)
+    # draw mode-specific surface:
+    if session.active_handler:
+        session.active_handler.draw(canvas)
 
     # render surfaces
     if show_basemap:
@@ -269,8 +278,15 @@ while True:
         canvas.blit(basemap.image, (0, 0), (0, 0, crop_width, crop_height))
 
     # GIS layer
-    if show_polygons:
+    if session.show_polygons:
         canvas.blit(_gis.surface, (0, 0))
+
+    ########################## DATA PROCESSING ########################
+
+    # build clusters of selected buildings and send JSON message
+    # clusters = stats.make_clusters(buildings[buildings.selected])
+    if session.active_handler == handlers['input']:
+        _stats.send_simplified_dataframe_with_environment_variables(buildings[buildings.selected], session.environment)
 
     # export canvas every 1s:
     if session.seconds_elapsed % 1 == 0 and session.verbose and session.flag_export_canvas:
@@ -282,14 +298,10 @@ while True:
         session.flag_export_canvas = False
 
     # slider
-    if active_handler != handlers['simulation']:
+    for grid in grid_1, grid_2:
         grid_1.slider.render(canvas)
         grid_2.slider.render(canvas)
-        # mode_selector.render(viewport)
-
-    # circle at mouse position:
-    if session.verbose:
-        pygame.draw.circle(grid_1.surface, (255,255,255), (pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1]), 20)
+    # mode_selector.render(viewport)
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))
@@ -310,7 +322,7 @@ while True:
         # print(mouse_transformed)
 
     # simulation steps:
-    if active_handler == handlers['simulation']:
+    if session.active_handler == handlers['simulation']:
         simulation.draw(canvas)
 
     ############################# pygame time #########################

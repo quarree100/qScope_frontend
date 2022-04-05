@@ -28,14 +28,14 @@ class Questionnaire_Mode():
         session.grid_2.slider.show_controls = False
         session.grid_1.slider.handle = 'answer'
 
-        # setup mode selectors:
         for selector in session.grid_1.selectors:
             selector.show = True  # enable selectors for table 1
             selector.callback_function = ModeSelector.callback_get_next_question
         for selector in session.grid_2.selectors:
             selector.show = False  # disable selectors for table 2
 
-        # send data
+        session.active_handler = session.handlers['questionnaire']
+        session.environment['mode'] = self.name
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
 
     def process_event(self, event):

@@ -1,0 +1,278 @@
+Programming
+===========
+How to program the Q-Scope
+
+File Structure
+^^^^^^^^^^^^^^
+``session.py`` contains global variables
+
+Setup
+^^^^^
+
+coordinates:
+------------
+
+**ROI for distorted polygons:**
+
+.. code-block:: python
+
+  # Initialize geographic viewport and basemap
+
+  _gis = session.gis = gis.GIS(canvas_size,
+                 # northeast          northwest           southwest           southeast
+                 [[1013622, 7207331], [1013083, 7207150], [1013414, 7206159], [1013990, 7206366]],
+                 session.viewport)
+
+
+  _gis = session.gis = gis.GIS(canvas_size,
+                 # northeast          northwest           southwest           southeast
+                 [[1013640, 7207470], [1013000, 7207270], [1013400, 7206120], [1014040, 7206320]],
+                 viewport)
+
+???
+
+**kleinerer Kartenausschnitt:**
+
+.. code-block:: python
+
+  _gis = session.gis = gis.GIS(canvas_size,
+                 # northeast          northwest           southwest           southeast
+                 [[1013578, 7207412], [1013010, 7207210], [1013386, 7206155], [1013953, 7206357]],
+                 viewport)
+
+**mit Input Area am linken Rand und Aussparung unten:**
+
+.. code-block:: python
+
+  _gis = session.gis = gis.GIS(
+      canvas_size,
+      # northeast          northwest           southwest           southeast
+      [[1013554, 7207623], [1012884, 7207413], [1013281, 7206147], [1013952, 7206357]],
+      viewport)
+
+**mit Input Area am rechten Rand und Aussparung unten:**
+
+.. code-block:: python
+
+  gis = session.gis = gis.GIS(
+      canvas_size,
+      # northeast          northwest           southwest           southeast
+      [[1013631, 7207409], [1012961, 7207198], [1013359, 7205932], [1014029, 7206143]],
+      viewport)
+
+grid
+----
+
+**single grid, upper left:**
+
+.. code-block:: python
+
+  grid_1 = session.grid_1 = grid.Grid(canvas_size, 11, 11, [[50, 50], [50, 0], [75, 0], [75, 50]], viewport)
+  grid_2 = session.grid_2 = grid.Grid(canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
+
+**16 x 22 grid rechts:**
+
+.. code-block:: python
+
+  grid_1 = session.grid_1 = grid.Grid(canvas_size, 16, 22, [[50, 0], [50, 72], [100, 72], [100, 0]], viewport)
+  grid_2 = session.grid_2 = grid.Grid(canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
+
+**18 x 22 grid rechts:**
+
+.. code-block:: python
+
+  ncols = 22
+  nrows = 18
+  grid_1 = session.grid_1 = grid.Grid(canvas_size, ncols, nrows, [[50, 0], [50, 81], [100, 81], [100, 0]], viewport)
+  grid_2 = session.grid_2 = grid.Grid(canvas_size, 22, 22, [[0, 0], [0, 100], [50, 100], [50, 0]], viewport)
+
+Drawing on Canvas
+^^^^^^^^^^^^^^^^^
+
+**displaying text**:
+
+.. code-block:: python
+
+  # 1. define font:
+  font = pygame.font.SysFont('Arial', 20)
+  # 2. use font to write to canvas:
+  canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
+
+**drawing polygons onto a specific surface**:
+
+
+.. code-block:: python
+
+  # general:
+  # points = [[x1, y1], [x1, y2], [x2, y1], [x2, y2]]
+  #          [[bottom-left], [top-left], [bottom-right], [top-right]]
+  # points_transformed = reference_surface.transform(points)
+  # pygame.draw.polygon(reference_surface, color, points_transformed)
+
+  # example:
+  points = [[20, 70], [20, 20], [80, 20], [80, 70]]  # percentage relative to surface
+  points_transformend = session.grid_1.surface.transform(points)
+
+  #                   surface,   color,      coords_transformed
+  pygame.draw.polygon(viewport, (255, 0, 0), viewport.transform(rect_points))
+
+**display sliders**:
+The sliders have a bool called ``show`` that, when ``True``, activates the display of the slider. This variable can be used for the usage modes to define whether the slider (and which) shall be seen and used.
+
+
+keystone transformation
+^^^^^^^^^^^^^^^^^^^^^^^
+
+`tutorial_py_geometric_transformations <https://docs.opencv.org/3.4/da/d6e/tutorial_py_geometric_transformations.html>`_
+
+`using cv.perspectiveTransform for vectors <https://docs.opencv.org/3.4/d2/de8/group__core__array.html#gad327659ac03e5fd6894b90025e6900a7>`_
+and `cv.warpPerspective for images <https://docs.opencv.org/3.4/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87>`_
+
+in file ``q100viz/keystone.py``
+
+recognition/data
+----------------
+
+* from cspy via UDP (json)
+* definition via ``cityscopy.json``
+
+frontend representation
+-----------------------
+
+* slider uses the transformation of the grid
+* **drawing of polygons and values** should be done via ``self.surface.blit(...)``. Slider surface is rendered and "blitted" to main canvas.
+
+``print(slider.coords_transformed)`` returns:
+
+.. code-block::
+
+  [[860.9641723632812, 915.1583862304688],
+  [863.9833984375, 614.8511352539062],
+  [1228.917724609375, 622.6510009765625],
+  [1226.5196533203125, 923.7374267578125]]
+
+with ``[[???[x], ???[y]], [upper-left[x], upper-left[y]], [upper-right[x], upper-right[y]], [???[x], ???[y]]]``
+
+
+Modes
+^^^^^
+* there are different machine states, defined by the files in ``q100viz/interaction/`` → these are the modes the program is running at (per time)
+* states are defined via `session.handlers`
+* implemented modes are:
+    * CalibrationMode_
+    * EditMode_: deprecated!
+    * InputMode_
+    * SimulationMode_
+    * QuestionnaireMode_
+
+each mode has a function called ``activate()`` which is used to (re-)active the mode and set the specific display settings accordingly. Do I want to see a slider (or two)? Shall the basemap be visible? Define it here.
+The ``__init__`` function is seldomly used, since it will be run in the beginning of the script (in ``session.py``), before the variables (e.g. ``grid``) are initialized.
+
+CalibrationMode
+---------------
+
+EditMode
+--------
+...deprecated!
+
+InputMode
+---------
+general mode for interaction with Tangible User Interface.
+
+examples:
+~~~~~~~~~
+
+**increase/decrease value by relative rotation:**
+
+e.g. emission, in ``InputMode.draw()``:
+
+.. code-block:: python
+
+  if cell.id > 0:
+     if cell.rel_rot == 1:
+         i = get_intersection(session.buildings, grid, x, y)
+         session.buildings.loc[i, 'CO2'] += 20
+     elif cell.rel_rot == -1:
+         i = get_intersection(session.buildings, grid, x, y)
+         session.buildings.loc[i, 'CO2'] -= 20
+
+SimulationMode
+--------------
+... will start the GAMA headless simulation and wait for the results.
+
+QuestionnaireMode
+-----------------
+In this mode, the user will be confronted with questions that can be asked either
+- via slider (only one or two user/s at a time)
+- via grid (multiple users, using individual tokens)
+(the options are yet to be decided)
+
+ModeSelector
+^^^^^^^^^^^^
+
+A ModeSelector is a specific cell on the grid, which, when selected via token, activates a certain Mode.
+
+The ``ModeSelector`` class in ``interface.py`` is created inside a grid and holds the following important variables:
+- ``show``: a bool whether or not to display the mode selector
+- ``color``: cell color
+- ``grid``: the grid it is instantiated by. The ModeSelector needs to know the grid in order to be able to draw onto the grid's surface.
+- ``x``: x-position of the selector (y is always last row)
+- ``name``: the mode name to be displayed below the cell.
+
+The Modes can be switched using either the input keys:
+* T: InputMode_ (TUI Mode)
+* C: CalibrationMode_
+* S: SimulationMode (when in Input Mode)
+
+
+API
+^^^
+JSON and CSV constructs used for the communication between GAMA, the Q-Scope-infoscreen and -frontend.
+
+
+Starting the GAMA Simulation via XML
+------------------------------------
+When moving from Input Mode to Simulation Mode (by Placing a Token on the according ModeSelector_), an xml file is composed containing all the global environment data. The general structure looks like this:
+
+.. code-block:: xml
+
+  <Experiment>
+    <Parameter name="year">0</Parameter>
+    <Parameter name="foerderung">0</Parameter>
+    <Parameter name="CO2-Preis">0</Parameter>
+    <Parameter name="CO2-emissions">0</Parameter>
+    <Parameter name="versorgung">0</Parameter>
+    <Parameter name="investment">0</Parameter>
+    <Parameter name="anschluss">0</Parameter>
+    <Parameter name="connection_speed">0</Parameter>
+  </Experiment>
+
+
+Composing the xml struct is done via ``stats.to_xml`` and receives single rows of a dataframe.
+
+.. code-block:: python
+
+  def to_xml(row):
+    xml = ['<Experiment>']
+    for field in row.index:
+        xml.append('  <Parameter name="{0}">{1}</Parameter>'.format(field, row[field]))
+    xml.append('</Experiment>')
+    return '\n'.join(xml)
+
+and then in `input_mode.py`:
+
+.. code-block:: python
+
+    # enter simulation mode:
+  elif x == int(session.grid_settings['ncols'] * 2 / 3 + 2):
+      session.active_handler = session.handlers['simulation']
+      grid.deselect(int(session.grid_settings['ncols'] * 2 / 3), len(grid.grid) - 1)
+      print(session.active_handler)
+
+      # compose dataframe to start
+      df = pd.DataFrame(session.environment, index=[0])
+      xml = '\n'.join(df.apply(stats.to_xml, axis=1))
+      print(xml)
+      f = open('../data/simulation_df.xml', 'w')
+      f.write(xml)
+      f.close()

@@ -1,0 +1,8 @@
+<Experiment_plan>
+  <Simulation id="1" sourcePath="/home/dunland/github/qScope/q100_abm/q100/models/qscope_ABM.gaml" finalStep="200" experiment="agent_decision_making" >
+  <Parameters>
+  </Parameters>
+  <Outputs>
+  </Outputs>
+</Simulation>
+</Experiment_plan>

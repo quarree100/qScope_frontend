@@ -1,6 +1,7 @@
 ''' The Input Mode displays everything needed for standard User Interaction '''
 
 import pygame
+import pandas as pd
 
 import q100viz.keystone as keystone
 import q100viz.session as session
@@ -27,9 +28,9 @@ class InputMode:
         for selector in session.grid_1.selectors:
             selector.show = False  # disable selectors for table 1
         session.grid_2.selectors[0].show = True
-        session.grid_2.selectors[0].callback_function = ModeSelector.callback_none()
+        session.grid_2.selectors[0].callback_function = ModeSelector.callback_none
         session.grid_2.selectors[1].show = True
-        session.grid_2.selectors[1].callback_function = ModeSelector.callback_activate_simulation_mode()
+        session.grid_2.selectors[1].callback_function = ModeSelector.callback_activate_simulation_mode
 
         # send data:
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
@@ -41,16 +42,31 @@ class InputMode:
                 session.print_verbose(session.buildings[session.buildings['selected']])
                 session.flag_export_canvas = True
 
-    def process_event(self, event, config):
-        if event.type == pygame.locals.MOUSEBUTTONDOWN:
-            session.grid_1.mouse_pressed(event.button)
-            session.grid_2.mouse_pressed(event.button)
-            session.print_verbose(session.buildings)
-            session.flag_export_canvas = True
+    def activate(self):
+        for slider in session.grid_1.slider, session.grid_2.slider:
+            slider.show_text = True
+            slider.show_controls = True
+        for selector in session.grid_1.selectors:
+            selector.show = False
+        for selector in session.grid_2.selectors:
+            selector.show = True
+        session.show_polygons = True
+        session.active_handler = session.handlers['input']
+        session.environment['mode'] = self.name
+        session.stats.send_dataframe_with_environment_variables(None, session.environment)
 
-    def draw(self, canvas):
-        session.buildings['selected'] = False
+    def process_event(self, event):
+            if event.type == pygame.locals.MOUSEBUTTONDOWN:
+                session.grid_1.mouse_pressed(event.button)
+                session.grid_2.mouse_pressed(event.button)
+                session.print_verbose(session.buildings[session.buildings['selected']])
+                session.flag_export_canvas = True
 
+                session.buildings['selected'] = False
+
+                self.process_grid_change()
+
+    def process_grid_change(self):
         # process grid changes
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
@@ -64,7 +80,7 @@ class InputMode:
                         if n > 0:
                             selection = session.buildings[i].iloc[cell.rot % n]
                             session.buildings.loc[selection.name,
-                                                  'selected'] = True
+                                                'selected'] = True
 
                         # set slider handles via selected cell in last row:
                         if y == len(grid.grid)-1:
@@ -82,11 +98,9 @@ class InputMode:
                                 selector.callback_function()
                                 grid.deselect(x,y) # deselect to prevent loops
 
-                            # select simulation mode:
-                            elif x == int(session.grid_settings['ncols'] * 2 / 3 + 2):
-                                session.active_handler = session.handlers['simulation']
-                                grid.deselect(int(session.grid_settings['ncols'] * 2 / 3), len(grid.grid) - 1)
+        session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 
+    def draw(self, canvas):
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings
@@ -94,6 +108,10 @@ class InputMode:
                 canvas,
                 session.buildings[session.buildings.selected], 2, (255, 0, 127)
             )
+
+        # coloring slider area:
+        for slider in session.grid_1.slider, session.grid_2.slider:
+            pygame.draw.polygon(slider.surface, slider.color, slider.coords_transformed)
 
     def update(self):
         pass

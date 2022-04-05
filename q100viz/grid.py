@@ -3,8 +3,7 @@ import pygame
 
 import q100viz.keystone as keystone
 import q100viz.session as session
-from q100viz.interaction.interface import Slider
-
+from q100viz.interaction.interface import Slider, ModeSelector
 
 class Grid:
     def __init__(self, canvas_size, x_size, y_size, dst_points, viewport, slider_ids=[]):
@@ -30,7 +29,7 @@ class Grid:
         # set up sliders
         self.sliders = {slider_id: None for slider_id in slider_ids}
 
-        self.slider = Slider(canvas_size, self, [0, 100, 50, 150])
+        self.slider = Slider(canvas_size, self, [[0, 130], [0, 100], [50, 100], [50, 130]])
 
         self.selectors = [
             ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3), len(self.grid) - 1, (200, 150, 20), ModeSelector.callback_none),
@@ -64,67 +63,8 @@ class Grid:
                 stroke = 4 if cell.selected else 1
                 pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), rect_points, stroke)
 
-            # process last row:
-            if cell.y == len(self.grid) - 1:
-                if cell.x < session.grid_settings['ncols']/2 :
-                    # display function on sliderControl cells:
-                    if cell.x % int((session.grid_settings['ncols'] / 2 / len(session.slider_handles))) == 0:
-                        index = int(cell.x / ((session.grid_settings['ncols'] / 2) / len(session.slider_handles)))
-                        font = pygame.font.SysFont('Arial', 8)
-                        self.surface.blit(
-                            font.render(session.slider_handles[index],
-                                True, (255, 255, 255)),
-                                [rect_points[0][0] + 10, rect_points[0][1]+ 35]
-                        )
-
-                    # slider control colors:
-                    cell_color = pygame.Color(20, 200, 150)
-                    stroke = 4 if cell.selected else 1
-                    # colors via slider parameter fields:
-                    colors = [
-                        (73, 156, 156),
-                        (126, 185, 207),
-                        (247, 79, 115),
-                        (193, 135, 77),
-                        (187, 210, 4),
-                        (249, 109, 175),
-                        (9, 221, 250),
-                        (150, 47, 28)]
-
-                    index = int(cell.x / ((session.grid_settings['ncols'] / 2) / len(session.slider_handles)))
-                    cell_color = pygame.Color(colors[index])
-
-                    if cell.selected:
-                        self.slider.color = cell_color
-
-                    pygame.draw.polygon(self.surface, cell_color, rect_points, stroke)
-
-                # ModeSelector
-                elif cell.x == int(session.grid_settings['ncols'] * 2 / 3):  # TODO: global positions of mode selectors (also used in intput_mode)
-                    cell_color = pygame.Color(200, 150, 20)
-                    stroke = 4 if session.active_handler == session.handlers['tui'] else 1
-                    pygame.draw.polygon(self.surface, cell_color, rect_points, stroke)
-                    font = pygame.font.SysFont('Arial', 8)
-
-                    # display mode
-                    self.surface.blit(
-                        font.render("INPUT",
-                            True, (255, 255, 255)),
-                            [rect_points[0][0] + 10, rect_points[0][1]+ 35]
-                    )
-
-                elif cell.x == int(session.grid_settings['ncols'] * 2 / 3 + 2):
-                    cell_color = pygame.Color(20, 150, 200)
-                    stroke = 4 if session.active_handler == session.handlers['simulation'] else 1
-                    pygame.draw.polygon(self.surface, cell_color, rect_points, stroke)
-
-                    # display mode
-                    font = pygame.font.SysFont('Arial', 8)
-                    self.surface.blit(
-                        font.render("SIMULATION",
-                            True, (255, 255, 255)),
-                            [rect_points[0][0] + 10, rect_points[0][1]+ 35]
-                    )
+        for selector in self.selectors:
+            selector.render()
 
 
     def mouse_pressed(self, button):
@@ -147,10 +87,10 @@ class Grid:
         except IndexError:
             pass
 
-    def deselect(self, x, y):
+    def deselect(self, x_deselect, y_deselect):
         for y, row in enumerate(self.grid):
             for x, cell in enumerate(row):
-                if cell.x == x and cell.y == y:
+                if cell.x == x_deselect and cell.y == y_deselect:
                     cell.selected = False
 
     def read_scanner_data(self, message):
@@ -176,9 +116,11 @@ class Grid:
                         cell.rel_rot = cell.rot - cell.prev_rot if cell.prev_rot > -1 else 0
                     cell.prev_rot = cell.rot
 
-            # update slider values
+            # update slider values TODO: adjust this if more than 1 slider per grid
             for slider_id in self.sliders.keys():
-                self.sliders[slider_id] = msg['sliders'][slider_id]
+                self.slider.value = msg['sliders'][slider_id]
+                self.slider.update()
+            session.active_handler.process_grid_change()()
 
         except TypeError:
             pass

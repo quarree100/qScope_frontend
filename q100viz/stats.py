@@ -20,7 +20,7 @@ class Stats:
 
     def send_message(self, msg):
         if msg != self.previous_message:
-            session.print_verbose(msg)
+            session.print_verbose("sending data:\n" + str(msg))
             try:
                 self.io.emit('message', msg)
                 self.previous_message = msg
@@ -38,7 +38,7 @@ class Stats:
         result = data[0] if len(data) > 0 else {}
         for key, value in env.items():
             result[key] = value
-        self.send_message([json.dumps(result)])
+        self.send_message([json.dumps(result, ensure_ascii=False)])
 
     def send_simplified_dataframe_with_environment_variables(self, df, env):
         sum = make_clusters(df).sum()
@@ -71,3 +71,10 @@ def export_json(df, outfile):
     """Export a dataframe to JSON file."""
     return pandas.DataFrame(df).to_json(
         outfile, orient='records', force_ascii=False, default_handler=str)
+
+def to_xml(row):
+    xml = ['<Experiment>']
+    for field in row.index:
+        xml.append('  <Parameter name="{0}">{1}</Parameter>'.format(field, row[field]))
+    xml.append('</Experiment>')
+    return '\n'.join(xml)

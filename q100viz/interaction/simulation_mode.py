@@ -50,7 +50,6 @@ class SimulationMode:
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
-            session.print_verbose(session.buildings[session.buildings['selected']])
             session.flag_export_canvas = True
 
             self.process_grid_change()

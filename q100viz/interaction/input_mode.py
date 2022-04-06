@@ -39,17 +39,16 @@ class InputMode:
 
     def process_event(self, event):
             if event.type == pygame.locals.MOUSEBUTTONDOWN:
+                session.print_verbose(event)
+
                 session.grid_1.mouse_pressed(event.button)
                 session.grid_2.mouse_pressed(event.button)
-                session.print_verbose(session.buildings[session.buildings['selected']])
+
                 session.flag_export_canvas = True
-
-                session.buildings['selected'] = False
-
                 self.process_grid_change()
 
     def process_grid_change(self):
-        # process grid changes
+        session.buildings['selected'] = False
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):

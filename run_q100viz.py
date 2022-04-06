@@ -30,8 +30,8 @@ pygame.init()
 clock = pygame.time.Clock()
 
 # UDP receive
-grid_udp_1 = ('localhost', 5000)
-grid_udp_2 = ('localhost', 5001)
+grid_udp_1 = ('localhost', 5001)
+grid_udp_2 = ('localhost', 5000)
 
 # Socket.io
 stats_io = 'http://localhost:8081'
@@ -195,12 +195,13 @@ while True:
             #     session.active_handler = handlers['edit' if session.active_handler != handlers['edit'] else 'input']
             # toggle simulation_mode:
             elif event.key == K_s:
-                if session.active_handler == handlers['simulation']:
-                    simulation.send_data(_stats)
-                    session.active_handler = handlers['input']
-                else:
-                    session.active_handler = handlers['simulation']
-                    simulation.activate()
+                if session.active_handler is not handlers['calibrate']:
+                    if session.active_handler == handlers['simulation']:
+                        simulation.send_data(_stats)
+                        session.active_handler = handlers['input']
+                    else:
+                        session.active_handler = handlers['simulation']
+                        simulation.activate()
 
             elif event.key == K_q:
                 session.handlers['questionnaire'].activate()

@@ -116,14 +116,17 @@ class Grid:
                         cell.rel_rot = cell.rot - cell.prev_rot if cell.prev_rot > -1 else 0
                     cell.prev_rot = cell.rot
 
+            session.active_handler.process_grid_change()
+
             # update slider values TODO: adjust this if more than 1 slider per grid
+            # TODO: this causes type error when no slider value provided in cspy → provide 0 by default?
             for slider_id in self.sliders.keys():
                 self.slider.value = msg['sliders'][slider_id]
                 self.slider.update()
-            session.active_handler.process_grid_change()()
 
-        except TypeError:
-            pass
+        except TypeError as t:
+            # pass
+            print("type error", t)
         except IndexError:
             print("Warning: incoming grid data is incomplete")
 

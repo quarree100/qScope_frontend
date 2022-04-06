@@ -27,5 +27,7 @@ class UDPServer:
 
                 callback(message.decode())
 
+                print("receiving message at", self.port)
+
         except KeyboardInterrupt:
             exit()

@@ -67,7 +67,7 @@ class InputMode:
                         if y == len(grid.grid)-1:
                             if x < session.grid_settings['ncols'] / 2:
                                 grid.slider.handle = session.slider_handles[
-                                    int(x / session.grid_settings['ncols'] * len(session.slider_handles))]
+                                    int(x / session.grid_settings['ncols'] * 2 * len(session.slider_handles))]
                                 if grid.slider.previous_handle is not grid.slider.handle:
                                     session.print_verbose(
                                         ("slider_handle: ", grid.slider.handle))

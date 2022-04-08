@@ -84,11 +84,11 @@ class Slider:
         if self.handle == 'year':
             session.environment['year'] = 2020 + \
                 int(self.value * 30) # ranges from 2020 to 2050
-        elif self.handle == 'foerderung':
-            session.environment['foerderung'] = int(
+        elif self.handle == 'funding':
+            session.environment['funding'] = int(
                 self.value * 10000)  # ranges from 0 to 10,000€
-        elif self.handle == 'CO2-Preis':
-            session.environment['CO2-Preis'] = 55 + \
+        elif self.handle == 'CO2-prize':
+            session.environment['CO2-prize'] = 55 + \
                 self.value * 195  # ranges from 55 to 240€/t
         elif self.handle == 'connection_speed':
             session.environment['connection_speed'] = self.value
@@ -98,19 +98,22 @@ class Slider:
             session.buildings.loc[(
                 session.buildings.selected == True), 'CO2'] = self.value  # sets CO2-value of selected buildings to slider value (absolute)
             session.print_verbose((session.buildings[session.buildings['selected'] == True]))
-        elif self.handle == 'versorgung':
+        elif self.handle == 'electricity_supplier':
             if self.value >= 0 and self.value < 0.33:
-                session.buildings.loc[(session.buildings.selected == True), 'versorgung'] = 'konventionell'
+                session.buildings.loc[(session.buildings.selected == True), 'electricity_supplier'] = 'gray'
             elif self.value >= 0.33 and self.value < 0.66:
-                session.buildings.loc[(session.buildings.selected == True), 'versorgung'] = 'medium'
+                session.buildings.loc[(session.buildings.selected == True), 'electricity_supplier'] = 'mix'
             if self.value >= 0.66 and self.value < 1:
-                session.buildings.loc[(session.buildings.selected == True), 'versorgung'] = 'gruen'
-        elif self.handle == 'investment':
-            # ranges from 0 to 10,000€
-            session.environment['investment'] = self.value * 10000
-        elif self.handle == 'anschluss':
+                session.buildings.loc[(session.buildings.selected == True), 'electricity_supplier'] = 'green'
+        # elif self.handle == 'investment':
+        #     # ranges from 0 to 10,000€
+        #     session.environment['investment'] = self.value * 10000
+        elif self.handle == 'connection_to_heat_grid':
             session.buildings.loc[(
-                session.buildings.selected == True), 'anschluss'] = self.value > 0.5  # sets CO2-value of selected buildings to slider value (absolute)
+                session.buildings.selected == True), 'connection_to_heat_grid'] = self.value > 0.5
+        elif self.handle == 'refurbished':
+            session.buildings.loc[(
+                session.buildings.selected == True), 'refurbished'] = self.value > 0.5
             session.print_verbose((session.buildings[session.buildings['selected'] == True]))
 
         # questionnaire:

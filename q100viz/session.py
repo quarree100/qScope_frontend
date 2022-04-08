@@ -15,8 +15,8 @@ grid_1 = None
 grid_2 = None
 buildings = None
 verbose = True
-slider_handles = ['year', 'foerderung', 'CO2-Preis', 'connection_speed',
-                    'CO2-emissions', 'versorgung', 'investment', 'anschluss', 'answer']
+slider_handles = ['year', 'funding', 'CO2-prize', 'connection_speed',
+                    'CO2-emissions', 'electricity_supplier', 'connection_to_heat_grid', 'refurbished', 'answer']
 environment = dict.fromkeys(slider_handles, 0)
 environment['mode'] = 'input'
 

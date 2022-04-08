@@ -47,8 +47,7 @@ class Stats:
             result = data[0]
             for key, value in env.items():
                 result[key] = value
-            # pass by co2, Address, Anschluss [["adresse","CO2","anschluss"]]
-            clusterData = json.loads(export_json(df[["adresse","CO2","anschluss","investment","versorgung","Wärmeverbrauch 2017 [kWh]","Stromverbrauch 2017 [kWh]"]], None))
+            clusterData = json.loads(export_json(df[["address","CO2","connection_to_heat_grid","electricity_supplier","heat_consumption","electricity_consumption", "refurbished"]], None))
             result["clusters"] = clusterData
             self.send_message([json.dumps(result)])
 

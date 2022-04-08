@@ -70,7 +70,7 @@ basemap = session.basemap = gis.Basemap(
 basemap.warp()
 
 # Initialize grid, projected onto the viewport
-grid_settings = session.grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))
+grid_settings = session.grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))  # TODO: seperate files for the two grids
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = session.grid_1 = grid.Grid(
@@ -100,34 +100,27 @@ buildings = gis.read_shapefile(
     config['BUILDINGS_OSM_FILE'], columns={'osm_id': 'int64'}).set_index('osm_id')
 
 buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], buildings, {
-    'Wärmeverbrauch 2017 [kWh]': 'float32',
-    'Stromverbrauch 2017 [kWh]': 'float32',
     'Straße' : 'string',
     'Hausnr.': 'string',
 })
+buildings['address'] = buildings['Straße'] + ' ' + buildings['Hausnr.']
+buildings.drop('Straße', 1)
+buildings.drop('Hausnr.', 1)
 
-# get rid of null values
-buildings['Wärmeverbrauch 2017 [kWh]'].fillna(0, inplace=True)
-buildings['Stromverbrauch 2017 [kWh]'].fillna(0, inplace=True)
-
-# data normalized by max values
-buildings['waerme_2017_rel'] = buildings['Wärmeverbrauch 2017 [kWh]'] / \
-    buildings.max()['Wärmeverbrauch 2017 [kWh]']
-buildings['strom_2017_rel'] = buildings['Stromverbrauch 2017 [kWh]'] / \
-    buildings.max()['Stromverbrauch 2017 [kWh]']
-buildings['adresse'] = buildings['Straße'] + ' ' + buildings['Hausnr.']
-
-# technical data
-buildings['CO2'] = [0.5 * random.random() for row in buildings.values]
-buildings['investment'] = [random.randint(0,3) for row in buildings.values]
-
-versorgungsarten = ['konventionell', 'medium', 'gruen']
-buildings['versorgung'] = [versorgungsarten[random.randint(0,2)] for row in buildings.values]
-buildings['anschluss'] = [0 for row in buildings.values]
+# generic data
+buildings['heat_consumption'] = [5000 * random.random() for row in buildings.values]
+buildings['electricity_consumption'] = [5000 * random.random() for row in buildings.values]
+buildings['CO2'] = (buildings['heat_consumption'] + buildings['electricity_consumption']) / 20000
+electricity_supply_types = ['green', 'gray', 'mix']
+buildings['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings.values]
+buildings['connection_to_heat_grid'] = [True if random.random() > 0.5 else False for row in buildings.values]
+buildings['refurbished'] = buildings['connection_to_heat_grid']
 
 # buildings interaction
 buildings['cell'] = ""
 buildings['selected'] = False
+
+print(buildings)
 
 # GIS layers
 typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])
@@ -149,8 +142,6 @@ for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
 
 # stats viz communication
 _stats = session.stats = stats.Stats(stats_io)
-
-print(buildings)
 
 handlers = session.handlers
 simulation = session.simulation = SimulationMode()
@@ -210,6 +201,7 @@ while True:
                 for grid in grid_1, grid_2:
                     if grid.slider.value is not None:
                         grid.slider.value += 0.1
+                        # grid.slider.value = round(grid.slider.value + 0.1, 3)
                         session.print_verbose(("slider0 =", grid.slider.value))
                     else:
                         grid.slider.value = 0.1
@@ -217,7 +209,7 @@ while True:
             elif event.key == K_MINUS:
                 for grid in grid_1, grid_2:
                     if grid.slider.value is not None:
-                        grid.slider.value -= 0.1
+                        grid.slider.value = round(grid.slider.value - 0.1, 3)
                         session.print_verbose(("slider0 =", grid.slider.value))
                     else:
                         grid.slider.value = 0.1
@@ -252,11 +244,11 @@ while True:
     session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     session.gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
     session.gis.draw_polygon_layer(
-        canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'waerme_2017_rel')  # fill and lerp
+        canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'CO2')  # fill and lerp
     # session.gis.draw_polygon_layer(
-    #     canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'waerme_2017_rel')  # fill all equally
+    #     canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'CO2')  # fill all equally
     session.gis.draw_polygon_layer(
-        canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'waerme_2017_rel')  # stroke simple black
+        canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'CO2')  # stroke simple black
 
     # draw grid
     grid_1.draw(show_grid)

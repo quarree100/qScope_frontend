@@ -97,7 +97,6 @@ class Slider:
         elif self.handle == 'CO2-emissions':
             session.buildings.loc[(
                 session.buildings.selected == True), 'CO2'] = self.value  # sets CO2-value of selected buildings to slider value (absolute)
-            session.print_verbose((session.buildings[session.buildings['selected'] == True]))
         elif self.handle == 'electricity_supplier':
             if self.value >= 0 and self.value < 0.33:
                 session.buildings.loc[(session.buildings.selected == True), 'electricity_supplier'] = 'gray'
@@ -114,7 +113,6 @@ class Slider:
         elif self.handle == 'refurbished':
             session.buildings.loc[(
                 session.buildings.selected == True), 'refurbished'] = self.value > 0.5
-            session.print_verbose((session.buildings[session.buildings['selected'] == True]))
 
         # questionnaire:
         elif self.handle == 'answer':
@@ -124,8 +122,8 @@ class Slider:
                 session.environment['answer'] = 'yes'
 
         if self.previous_value is not self.value:
-            print(self.handle)
-            session.stats.send_message(json.dumps(session.environment))
+            # print(self.handle)
+            session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
             self.previous_value = self.value
 
 ############################### MODE SELECTOR #########################

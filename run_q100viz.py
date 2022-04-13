@@ -3,7 +3,6 @@ import os
 import random
 import threading
 import json
-import cv2
 import pygame
 import numpy as np
 from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
@@ -275,8 +274,6 @@ while True:
 
     # build clusters of selected buildings and send JSON message
     # clusters = stats.make_clusters(buildings[buildings.selected])
-    if session.active_handler == handlers['input']:
-        _stats.send_simplified_dataframe_with_environment_variables(buildings[buildings.selected], session.environment)
 
     # export canvas every 1s:
     if session.seconds_elapsed % 1 == 0 and session.verbose and session.flag_export_canvas:

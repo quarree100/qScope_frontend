@@ -3,6 +3,7 @@ import pandas
 import threading
 import socketio
 import q100viz.session as session
+import datetime
 
 class Stats:
     def __init__(self, socket_addr):
@@ -20,7 +21,7 @@ class Stats:
 
     def send_message(self, msg):
         if msg != self.previous_message:
-            session.print_verbose("sending data:\n" + str(msg))
+            session.print_verbose(datetime.datetime.now().strftime(" %H:%M:%S ") + "sending data:\n" + str(msg))
             try:
                 self.io.emit('message', msg)
                 self.previous_message = msg

@@ -122,8 +122,11 @@ class Slider:
                 session.environment['answer'] = 'yes'
 
         if self.previous_value is not self.value:
-            # print(self.handle)
-            session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+            # TODO: this is a workaround! the upper functions enables questionnaire communication, the latter one does not refresh the buildings status in infoscreen constantly.. --> create better functions in stats!
+            if session.active_handler == session.handlers['questionnaire']:
+                session.stats.send_message(json.dumps(session.environment))
+            else:
+                session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
             self.previous_value = self.value
 
 ############################### MODE SELECTOR #########################
@@ -175,10 +178,3 @@ class MousePosition:
 
     def draw(self, surface, x, y):
         pygame.draw.circle(surface, pygame.color.Color(50, 160, 123), (x, y), 20)
-
-class Rectangle:
-    def __init__(self, surface):
-        pass
-
-    def draw(surface):
-        pygame.draw.rect(surface, color, [[20, 70], [20, 20], [80, 20], [80, 70]])

@@ -304,6 +304,8 @@ while True:
         font = pygame.font.SysFont('Arial', 20)
         mouse_pos = pygame.mouse.get_pos()
         canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
+        canvas.blit(font.render(str(grid_1.slider.value), True, (255,255,255)), (800,670))
+        canvas.blit(font.render(str(grid_2.slider.value), True, (255,255,255)), (1150,670))
 
     # simulation steps:
     if session.active_handler == handlers['simulation']:

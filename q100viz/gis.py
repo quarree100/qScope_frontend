@@ -4,6 +4,7 @@ import shapely
 import pygame
 
 import q100viz.keystone as keystone
+import q100viz.session as session
 
 crs = "EPSG:3857"
 

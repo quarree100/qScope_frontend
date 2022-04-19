@@ -23,8 +23,9 @@ class Slider:
 
         self.handle = None
         self.previous_handle = None
+        self.last_change = session.seconds_elapsed  # time of last slider change
 
-        self.toggle_question = False  # this is used for the activation of the next question in questionnaire mode
+        self.toggle_question = False  # this is used for the activation of the next question in questionnaire mode  # TODO: get slider position initially and set toggle accordingly (Slider should not "start at" this position)
 
         self.grid = grid  # the slider needs a grid to be able to refer back to it
 
@@ -121,14 +122,17 @@ class Slider:
             session.environment['answer'] = 'no' if self.value >= 0.5 else 'yes'
 
         elif self.handle == 'next_question':
-            if self.toggle_question:
-                if self.value >= 0.5:
-                    self.toggle_question = not self.toggle_question
-                    if session.active_handler is session.handlers['questionnaire']: session.active_handler.get_next_question()
-            else:
-                if self.value < 0.5:
-                    self.toggle_question = not self.toggle_question
-                    if session.active_handler is session.handlers['questionnaire']: session.active_handler.get_next_question()
+            if session.seconds_elapsed > self.last_change + 1:  # some delay for stable interaction
+                if self.toggle_question:
+                    if self.value >= 0.5:
+                        self.toggle_question = not self.toggle_question
+                        if session.active_handler is session.handlers['questionnaire']: session.active_handler.get_next_question()
+                        self.last_change = session.seconds_elapsed
+                else:
+                    if self.value < 0.5:
+                        self.toggle_question = not self.toggle_question
+                        if session.active_handler is session.handlers['questionnaire']: session.active_handler.get_next_question()
+                        self.last_change = session.seconds_elapsed
 
         if self.previous_value is not self.value:
             # TODO: this is a workaround! the upper functions enables questionnaire communication, the latter one does not refresh the buildings status in infoscreen constantly.. --> create better functions in stats!

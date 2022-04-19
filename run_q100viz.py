@@ -6,7 +6,7 @@ import json
 import pygame
 import numpy as np
 import datetime
-from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, K_ESCAPE, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
 
 from config import config
 import q100viz.keystone as keystone
@@ -219,7 +219,7 @@ while True:
                 session.verbose = not session.verbose
 
         elif event.type == QUIT:
-            if session.log is not "":
+            if session.log != "":
                 with open("qScope-log_%s_.txt" % datetime.datetime.now(), "w") as f:
                     f.write(session.log)
                     f.close()

@@ -24,7 +24,9 @@ class Slider:
         self.handle = None
         self.previous_handle = None
 
-        self.grid = grid
+        self.toggle_question = False  # this is used for the activation of the next question in questionnaire mode
+
+        self.grid = grid  # the slider needs a grid to be able to refer back to it
 
         # create rectangle around centerpoint:
         self.coords = coords
@@ -116,10 +118,17 @@ class Slider:
 
         # questionnaire:
         elif self.handle == 'answer':
-            if self.value >= 0.5:
-                session.environment['answer'] = 'no'
+            session.environment['answer'] = 'no' if self.value >= 0.5 else 'yes'
+
+        elif self.handle == 'next_question':
+            if self.toggle_question:
+                if self.value >= 0.5:
+                    self.toggle_question = not self.toggle_question
+                    if session.active_handler is session.handlers['questionnaire']: session.active_handler.get_next_question()
             else:
-                session.environment['answer'] = 'yes'
+                if self.value < 0.5:
+                    self.toggle_question = not self.toggle_question
+                    if session.active_handler is session.handlers['questionnaire']: session.active_handler.get_next_question()
 
         if self.previous_value is not self.value:
             # TODO: this is a workaround! the upper functions enables questionnaire communication, the latter one does not refresh the buildings status in infoscreen constantly.. --> create better functions in stats!

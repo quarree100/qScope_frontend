@@ -218,15 +218,11 @@ while True:
             elif event.key == K_v:
                 session.verbose = not session.verbose
 
-            # quit pygame and export log file
-            elif event.key == K_ESCAPE:
+        elif event.type == QUIT:
+            if session.log is not "":
                 with open("qScope-log_%s_.txt" % datetime.datetime.now(), "w") as f:
                     f.write(session.log)
                     f.close()
-                    pygame.quit()
-                    sys.exit()
-
-        elif event.type == QUIT:
             pygame.quit()
             sys.exit()
 

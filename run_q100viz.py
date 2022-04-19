@@ -5,7 +5,8 @@ import threading
 import json
 import pygame
 import numpy as np
-from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
+import datetime
+from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, K_ESCAPE, QUIT
 
 from config import config
 import q100viz.keystone as keystone
@@ -216,6 +217,14 @@ while True:
             # verbose mode:
             elif event.key == K_v:
                 session.verbose = not session.verbose
+
+            # quit pygame and export log file
+            elif event.key == K_ESCAPE:
+                with open("qScope-log_%s_.txt" % datetime.datetime.now(), "w") as f:
+                    f.write(session.log)
+                    f.close()
+                    pygame.quit()
+                    sys.exit()
 
         elif event.type == QUIT:
             pygame.quit()

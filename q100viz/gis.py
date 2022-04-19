@@ -29,16 +29,20 @@ class GIS:
             pygame.draw.lines(self.surface, pygame.Color(color), False, points, stroke)
 
     def draw_polygon_layer(self, surface, df, stroke, fill, lerp_target=None, lerp_attr=None):
-        for polygon in df.to_dict('records'):
-            if fill:
-                fill_color = pygame.Color(*fill)
+        try:
+            for polygon in df.to_dict('records'):
+                if fill:
+                    fill_color = pygame.Color(*fill)
 
-                if lerp_target:
-                    target_color = pygame.Color(lerp_target)
-                    fill_color = fill_color.lerp(target_color, polygon[lerp_attr])
+                    if lerp_target:
+                        target_color = pygame.Color(lerp_target)
+                        fill_color = fill_color.lerp(target_color, polygon[lerp_attr])
 
-            points = self.surface.transform(polygon['geometry'].exterior.coords)
-            pygame.draw.polygon(self.surface, fill_color, points, stroke)
+                points = self.surface.transform(polygon['geometry'].exterior.coords)
+                pygame.draw.polygon(self.surface, fill_color, points, stroke)
+
+        except Exception as e:
+            session.log += "\n%s" % e
 
 
 class Basemap:

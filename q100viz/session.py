@@ -6,6 +6,7 @@ from q100viz.interaction.input_mode import InputMode
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
 
+log = ""
 
 # graphics
 viewport = None

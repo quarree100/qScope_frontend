@@ -5,7 +5,7 @@ import random
 
 import q100viz.keystone as keystone
 import q100viz.session as session
-from q100viz.interaction.interface import Slider, ModeSelector
+from q100viz.interaction.interface import Slider
 
 class Grid:
     def __init__(self, canvas_size, x_size, y_size, dst_points, viewport, setup_data, slider_ids=[], slider_coords=[[0, 100], [0, 0], [100, 0], [100, 100]]):
@@ -36,11 +36,6 @@ class Grid:
 
         self.slider = Slider(canvas_size, self, slider_coords)
 
-        self.selectors = [
-            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3), len(self.grid) - 1, (200, 150, 20), ModeSelector.callback_none),
-            ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3 + 2), len(self.grid) - 1, (20, 150, 200), ModeSelector.callback_none)
-        ]
-
     def draw(self, show_grid):
 
         font = pygame.font.SysFont('Arial', 20)
@@ -67,10 +62,6 @@ class Grid:
             if cell.y is not len(self.grid) - 1 and show_grid:
                 stroke = 4 if cell.selected else 1
                 pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), rect_points, stroke)
-
-        for selector in self.selectors:
-            selector.render()
-
 
     def mouse_pressed(self, button):
         pos = pygame.mouse.get_pos()

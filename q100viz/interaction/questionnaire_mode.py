@@ -7,7 +7,6 @@ import numpy
 
 import q100viz.keystone as keystone
 import q100viz.session as session
-from q100viz.interaction.interface import ModeSelector
 from config import config
 
 class Questionnaire_Mode():
@@ -29,10 +28,6 @@ class Questionnaire_Mode():
         session.grid_2.slider.show_controls = False
         session.grid_1.slider.handle = 'answer'
         session.grid_2.slider.handle = 'next_question'
-
-        for selectors in [session.grid_1.selectors, session.grid_2.selectors]:
-            for selector in selectors:
-                selector.show = False  # enable selectors for table 1
 
         session.active_handler = session.handlers['questionnaire']
         session.environment['mode'] = self.name

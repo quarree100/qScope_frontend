@@ -6,10 +6,7 @@ import json
 
 import q100viz.session as session
 import q100viz.stats as stats
-from q100viz.interaction.interface import ModeSelector
 import pygame
-from q100viz.interaction.interface import ModeSelector
-
 class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
@@ -26,14 +23,6 @@ class SimulationMode:
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = False
             slider.show_controls = False
-
-        # setup mode selectors:
-        for selector in session.grid_1.selectors:
-            selector.show = False  # disable selectors for table 1
-        session.grid_2.selectors[0].show = True
-        session.grid_2.selectors[0].callback_function = ModeSelector.callback_activate_input_mode
-        session.grid_2.selectors[1].show = True
-        session.grid_2.selectors[1].callback_function = ModeSelector.callback_none
 
         # compose dataframe to start
         df = pd.DataFrame(session.environment)
@@ -59,10 +48,7 @@ class SimulationMode:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
                     if cell.selected:
-                        # ModeSelector
-                        for selector in grid.selectors:
-                            if x == selector.x and y == selector.y:
-                                selector.callback_function()
+                        pass
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 

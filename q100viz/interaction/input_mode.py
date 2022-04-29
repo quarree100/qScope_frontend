@@ -5,7 +5,6 @@ import pandas as pd
 
 import q100viz.keystone as keystone
 import q100viz.session as session
-from q100viz.interaction.interface import ModeSelector
 import q100viz.stats as stats
 from config import config
 class InputMode:
@@ -23,15 +22,6 @@ class InputMode:
             slider.show_controls = True
 
         # setup mode selectors:
-        for selector in session.grid_1.selectors:
-            selector.show = False  # disable selectors for table 1
-        session.grid_2.selectors[0].show = False
-        session.grid_2.selectors[0].callback_function = ModeSelector.callback_none
-        session.grid_2.selectors[0].name = "HOUSEHOLDS"
-        session.grid_2.selectors[1].show = False
-        session.grid_2.selectors[1].callback_function = ModeSelector.callback_activate_input_environment
-        session.grid_2.selectors[1].name = "ENVIRONMENT"
-
         session.grid_1.update_cell_data(session.input_households_grid_1)
         session.grid_2.update_cell_data(session.input_households_grid_2)
 
@@ -64,19 +54,15 @@ class InputMode:
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
-                            grid.slider.handle = cell.handle
-                            if grid.slider.previous_handle is not grid.slider.handle:
-                                session.print_verbose(
-                                    ("slider_handle: ", grid.slider.handle))
-                                grid.slider.previous_handle = grid.slider.handle
+                            if cell.handle in cell.handle in ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement']:
+                                grid.slider.handle = cell.handle
+                                if grid.slider.previous_handle is not grid.slider.handle:
+                                    session.print_verbose(
+                                        ("slider_handle: ", grid.slider.handle))
+                                    grid.slider.previous_handle = grid.slider.handle
 
-                            if cell.handle == 'start_input_environment':
+                            elif cell.handle == 'start_input_environment':
                                 session.handlers['input_environment'].activate()
-
-                        # ModeSelector
-                        # for selector in grid.selectors:
-                        #     if x == selector.x and y == selector.y:
-                        #         selector.callback_function()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 
@@ -120,15 +106,6 @@ class Input_Environment:
             slider.show_controls = True
 
         # setup mode selectors:
-        for selector in session.grid_1.selectors:
-            selector.show = False  # disable selectors for table 1
-        session.grid_2.selectors[0].show = False
-        session.grid_2.selectors[0].callback_function = ModeSelector.callback_none
-        session.grid_2.selectors[0].name = "HOUSEHOLDS"
-        session.grid_2.selectors[1].show = False
-        session.grid_2.selectors[1].callback_function = ModeSelector.callback_activate_input_mode
-        session.grid_2.selectors[1].name = "ENVIRONMENT"
-
         session.grid_1.update_cell_data(session.input_environment_grid_1)
         session.grid_2.update_cell_data(session.input_environment_grid_2)
 
@@ -161,21 +138,18 @@ class Input_Environment:
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
-                            grid.slider.handle = cell.handle
-                            if grid.slider.previous_handle is not grid.slider.handle:
-                                session.print_verbose(
-                                    ("slider_handle: ", grid.slider.handle))
-                                grid.slider.previous_handle = grid.slider.handle
+                            if cell.handle in cell.handle in ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement']:
+                                grid.slider.handle = cell.handle
+                                if grid.slider.previous_handle is not grid.slider.handle:
+                                    session.print_verbose(
+                                        ("slider_handle: ", grid.slider.handle))
+                                    grid.slider.previous_handle = grid.slider.handle
 
-                            if cell.handle == 'start_input_households':
+                            elif cell.handle == 'start_input_households':
                                 session.handlers['input_households'].activate()
 
-                        # ModeSelector
-                        # for selector in grid.selectors:
-                        #     if x == selector.x and y == selector.y:
-                        #         selector.callback_function()
-
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+
     def draw(self, canvas):
 
         if len(session.buildings[session.buildings.selected]):

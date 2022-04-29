@@ -47,7 +47,7 @@ class Slider:
             if cell.handle is not None and self.show_controls:  # cells have handles if set in csv
                 stroke = 4 if cell.selected else 1
 
-                if cell.selected:
+                if cell.selected and cell.handle in ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement']:  # TODO: store valid slider handles somewhere globally
                     self.color = cell.color
 
                 if session.show_polygons: pygame.draw.polygon(self.grid.surface, cell.color, rect_points, stroke)
@@ -123,53 +123,6 @@ class Slider:
             else:
                 session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
             self.previous_value = self.value
-
-############################### MODE SELECTOR #########################
-class ModeSelector:
-    def __init__(self, grid, x, y, color, callback_function):
-        self.show = True
-        self.name = "NAME"
-        self.color = pygame.Color(color)
-        self.grid = grid
-        self.x = x
-        self.y = y
-        self.callback_function = callback_function
-
-    def render(self):
-
-        if self.show:
-            for cell, rect_points in self.grid.rects_transformed:
-                # ModeSelector
-                if cell.x == self.x and cell.y == self.y:
-                    stroke = 4 if cell.selected else 1
-                    pygame.draw.polygon(self.grid.surface, self.color, rect_points, stroke)
-                    font = pygame.font.SysFont('Arial', 8)
-
-                    # display mode name
-                    self.grid.surface.blit(
-                        font.render(self.name,
-                            True, (255, 255, 255)),
-                            [rect_points[0][0] + 10, rect_points[0][1]+ 35]
-                    )
-
-    def callback_activate_input_mode():
-        print("activating input mode B")
-        session.handlers['input_households'].activate()
-
-    def callback_activate_input_environment():
-        print("activating input mode A")
-        session.handlers['input_environment'].activate()
-
-    def callback_activate_simulation_mode():
-        print("activating simulation mode")
-        session.handlers['simulation'].activate()
-
-    def callback_get_next_question():
-        session.handlers['questionnaire'].get_next_question()
-
-    def callback_none():
-        pass
-
 class MousePosition:
     def __init__(self, canvas_size):
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)

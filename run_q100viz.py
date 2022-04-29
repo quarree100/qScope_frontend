@@ -131,8 +131,8 @@ waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Wärmespeich
     gis.read_shapefile(config['HEIZZENTRALE_FILE']))
 
 # mask viewport with black surface
-mask_points = [[-10, 0], [100, 0], [100, 100], [-10, 100], [-10, -50],
-               [-35, -50], [-35, 200], [200, 200], [200, -50], [-10, -50]]
+mask_points = [[0, 0], [100, 0], [100, 82], [0, 82], [0, -50],
+               [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
 # UDP server for incoming cspy messages
 for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
@@ -267,7 +267,7 @@ while True:
     # render surfaces
     if show_basemap:
         crop_width = 4644
-        crop_height = 590
+        crop_height = 800
         canvas.blit(basemap.image, (0, 0), (0, 0, crop_width, crop_height))
 
     # GIS layer
@@ -290,8 +290,9 @@ while True:
 
     # slider
     for grid in grid_1, grid_2:
-        grid_1.slider.render(canvas)
-        grid_2.slider.render(canvas)
+        grid_1.slider.render(viewport)
+        grid_2.slider.render(viewport)
+    # mode_selector.render(viewport)
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))

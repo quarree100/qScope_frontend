@@ -82,7 +82,7 @@ class Questionnaire_Mode():
             session.stats.send_dataframe_with_environment_variables(None, session.environment)
         else:  # leave questionnaire mode, enter input mode
             self.question_index = 0
-            session.handlers['input'].activate()
+            session.handlers['input_environment'].activate()
 
     def update(self):
         pass

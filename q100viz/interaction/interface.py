@@ -69,8 +69,8 @@ class Slider:
         if self.handle == 'year':
             session.environment['year'] = 2020 + \
                 int(self.value * 30) # ranges from 2020 to 2050
-        elif self.handle == 'funding':
-            session.environment['funding'] = int(
+        elif self.handle == 'renovation_cost':
+            session.environment['renovation_cost'] = int(
                 self.value * 10000)  # ranges from 0 to 10,000€
         elif self.handle == 'CO2-prize':
             session.environment['CO2-prize'] = 55 + \
@@ -153,8 +153,12 @@ class ModeSelector:
                     )
 
     def callback_activate_input_mode():
-        print("activating input mode")
-        session.handlers['input'].activate()
+        print("activating input mode B")
+        session.handlers['input_households'].activate()
+
+    def callback_activate_input_environment():
+        print("activating input mode A")
+        session.handlers['input_environment'].activate()
 
     def callback_activate_simulation_mode():
         print("activating simulation mode")

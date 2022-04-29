@@ -24,3 +24,6 @@ config = {
     'GRID_1_Y1' : 0,
     'GRID_1_Y2' : 81.818
 }
+
+
+# TODO: replace grid_x_setup.csv with mode names: input_mode.csv ? so each mode is customizable by an according csv

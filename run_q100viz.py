@@ -171,7 +171,7 @@ while True:
                 show_grid = not show_grid
             # activate input_mode:
             if event.key == K_t:
-                session.handlers['input'].activate()
+                session.handlers['input_environment'].activate()
             # toggle nahwaermenetz:
             if event.key == K_n:
                 show_nahwaermenetz = not show_nahwaermenetz
@@ -180,18 +180,15 @@ while True:
             # toggle calibration:
             elif event.key == K_c:
                 session.active_handler = handlers[
-                    'calibrate' if session.active_handler != handlers['calibrate'] else 'input']
+                    'calibrate' if session.active_handler != handlers['calibrate'] else 'input_environment']
                 print(session.active_handler)
 
-            # toggle edit-mode to move polygons:
-            # elif event.key == K_e:
-            #     session.active_handler = handlers['edit' if session.active_handler != handlers['edit'] else 'input']
             # toggle simulation_mode:
             elif event.key == K_s:
                 if session.active_handler is not handlers['calibrate']:
                     if session.active_handler == handlers['simulation']:
                         simulation.send_data(_stats)
-                        session.active_handler = handlers['input']
+                        session.active_handler = handlers['input_environment']
                     else:
                         session.active_handler = handlers['simulation']
                         simulation.activate()

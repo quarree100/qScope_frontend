@@ -55,7 +55,6 @@ class SimulationMode:
             self.process_grid_change()
 
     def process_grid_change(self):
-        # process grid changes
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):

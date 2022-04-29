@@ -1,8 +1,10 @@
 '''This module keeps variables shared among other modules.'''
 
+import pandas as pd
+
 from q100viz.interaction.calibration_mode import CalibrationMode
 # from q100viz.interaction.edit_mode import EditMode
-from q100viz.interaction.input_mode import InputMode
+from q100viz.interaction.input_mode import InputMode, Input_Environment
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
 
@@ -17,7 +19,7 @@ grid_2 = None
 buildings = None
 verbose = True
 
-environment = {'mode': 'input'}
+environment = {'mode': 'input_environment'}
 
 environment['questions'] = [  # TODO: externalize this to yet another csv
 
@@ -29,6 +31,11 @@ environment['questions'] = [  # TODO: externalize this to yet another csv
 ]
 environment['question'] = environment['questions'][0]
 
+input_households_grid_1 = pd.read_csv('/home/dunland/github/qScope/data/grid_1_setup.csv')
+input_households_grid_2 = pd.read_csv('/home/dunland/github/qScope/data/grid_2_setup.csv')
+input_environment_grid_1 = pd.read_csv('/home/dunland/github/qScope/data/input_environment_grid_1.csv')
+input_environment_grid_2 = pd.read_csv('/home/dunland/github/qScope/data/input_environment_grid_2.csv')
+
 # interaction
 seconds_elapsed = 0
 ticks_elapsed = 0
@@ -36,7 +43,8 @@ ticks_elapsed = 0
 handlers = {
     'calibrate': CalibrationMode(),
     # 'edit': EditMode(),
-    'input': InputMode(),
+    'input_environment': Input_Environment(),
+    'input_households': InputMode(),
     'simulation': SimulationMode(),
     'questionnaire': Questionnaire_Mode()
 }

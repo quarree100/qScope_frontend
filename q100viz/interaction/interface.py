@@ -17,9 +17,7 @@ class Slider:
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
 
-        self.color = pygame.Color(20, 200, 150)
-        # colors via slider parameter fields:
-        self.colors = [(random.randint(0, 222), random.randint(0, 222), random.randint(0, 222)) for x in range(len(session.slider_handles))]
+        self.color = pygame.Color(125, 125, 125)  # slider area
 
         self.handle = None
         self.previous_handle = None
@@ -46,29 +44,13 @@ class Slider:
 
         # print function text on sliderControl cells:
         for cell, rect_points in self.grid.rects_transformed:
-            if cell.y == len(self.grid.grid) - 1:
-                if cell.x < session.grid_settings['ncols'] / 2:
-                    if cell.x % int((session.grid_settings['ncols'] / 2 / len(session.slider_handles))) == 0 and self.show_text:
-                        index = int(cell.x / ((session.grid_settings['ncols'] / 2) / len(session.slider_handles)))
-                        font = pygame.font.SysFont('Arial', 8)
-                        self.grid.surface.blit(
-                            font.render(session.slider_handles[index],
-                                True, (255, 255, 255)),
-                                [rect_points[0][0] + 10, rect_points[0][1]+ 35]
-                        )
+            if cell.handle is not None and self.show_controls:  # cells have handles if set in csv
+                stroke = 4 if cell.selected else 1
 
-                    # slider control colors:
-                    if self.show_controls:
-                        cell_color = pygame.Color(20, 200, 150)
-                        stroke = 4 if cell.selected else 1
+                if cell.selected:
+                    self.color = cell.color
 
-                        index = int(cell.x / ((session.grid_settings['ncols'] / 2) / len(session.slider_handles)) - 1)
-                        cell_color = pygame.Color(self.colors[index])
-
-                        if cell.selected:
-                            self.color = cell_color
-
-                        if session.show_polygons: pygame.draw.polygon(self.grid.surface, cell_color, rect_points, stroke)
+                if session.show_polygons: pygame.draw.polygon(self.grid.surface, cell.color, rect_points, stroke)
 
     def draw_area(self):
         pygame.draw.polygon(self.surface, self.color, self.coords_transformed)

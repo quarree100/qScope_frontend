@@ -79,14 +79,16 @@ grid_1 = session.grid_1 = grid.Grid(
         [config['GRID_1_X1'], config['GRID_1_Y2']],
         [config['GRID_1_X2'], config['GRID_1_Y2']],
         [config['GRID_1_X2'], config['GRID_1_Y1']]],
-        viewport, ['slider0'])
+        viewport, config['GRID_1_SETUP_FILE'],
+        ['slider0'], [[50, 130], [50, 100], [100, 100], [100, 130]])  # TODO: rename sliders
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, ncols, nrows, [
         [config['GRID_2_X1'], config['GRID_2_Y1']],
         [config['GRID_2_X1'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
-        viewport, ['slider0'])
+        viewport, config['GRID_2_SETUP_FILE'],
+        ['slider0'], [[0, 130], [0, 100], [50, 100], [50, 130]])
 
 session.show_polygons = False
 show_basemap = False
@@ -293,7 +295,6 @@ while True:
     for grid in grid_1, grid_2:
         grid_1.slider.render(canvas)
         grid_2.slider.render(canvas)
-    # mode_selector.render(viewport)
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))

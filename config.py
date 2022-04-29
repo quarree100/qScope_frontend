@@ -11,6 +11,8 @@ config = {
     'SAVED_BUILDINGS_FILE': 'export/buildings_export.shp',
     'GAMA_HEADLESS_FILE' : '/home/dunland/opt/GAMA/headless/gama-headless.sh',
     'GAMA_SIMULATION_FILE' : '/home/dunland/github/qScope/q100_abm/q100/models/qScope_ABM.gaml',
+    'GRID_1_SETUP_FILE': '/home/dunland/github/qScope/data/grid_1_setup.csv',
+    'GRID_2_SETUP_FILE': '/home/dunland/github/qScope/data/grid_2_setup.csv',
 
     'GRID_2_X1' : 50,
     'GRID_2_X2' : 100,

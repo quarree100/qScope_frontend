@@ -16,10 +16,8 @@ grid_1 = None
 grid_2 = None
 buildings = None
 verbose = True
-slider_handles = ['year', 'funding', 'CO2-prize', 'connection_speed',
-                    'CO2-emissions', 'electricity_supplier', 'connection_to_heat_grid', 'refurbished', 'answer']
-environment = dict.fromkeys(slider_handles, 0)
-environment['mode'] = 'input'
+
+environment = {'mode': 'input'}
 
 environment['questions'] = [  # TODO: externalize this to yet another csv
 

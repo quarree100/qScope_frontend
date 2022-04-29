@@ -64,14 +64,12 @@ class InputMode:
                                                 'selected'] = True
 
                         # set slider handles via selected cell in last row:
-                        if y == len(grid.grid)-1:
-                            if x < session.grid_settings['ncols'] / 2:
-                                grid.slider.handle = session.slider_handles[
-                                    int(x / session.grid_settings['ncols'] * 2 * len(session.slider_handles))]
-                                if grid.slider.previous_handle is not grid.slider.handle:
-                                    session.print_verbose(
-                                        ("slider_handle: ", grid.slider.handle))
-                                    grid.slider.previous_handle = grid.slider.handle
+                        if cell.handle is not None:
+                            grid.slider.handle = cell.handle
+                            if grid.slider.previous_handle is not grid.slider.handle:
+                                session.print_verbose(
+                                    ("slider_handle: ", grid.slider.handle))
+                                grid.slider.previous_handle = grid.slider.handle
 
                         # ModeSelector
                         for selector in grid.selectors:

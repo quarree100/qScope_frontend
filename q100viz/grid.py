@@ -1,12 +1,14 @@
 import json
 import pygame
+import pandas
+import random
 
 import q100viz.keystone as keystone
 import q100viz.session as session
 from q100viz.interaction.interface import Slider, ModeSelector
 
 class Grid:
-    def __init__(self, canvas_size, x_size, y_size, dst_points, viewport, slider_ids=[]):
+    def __init__(self, canvas_size, x_size, y_size, dst_points, viewport, setup_data, slider_ids=[], slider_coords=[[0, 100], [0, 0], [100, 0], [100, 100]]):
         self.x_size = x_size
         self.y_size = y_size
 
@@ -21,6 +23,9 @@ class Grid:
         # initialize two-dimensional array of grid cells
         self.grid = [[GridCell(x, y) for x in range(x_size)] for y in range(y_size)]
 
+        # load cell-specific information from csv:
+        self.update_cell_data(pandas.read_csv(setup_data))
+
         # create a list of transformed rectangles
         self.rects_transformed = [
             (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
@@ -29,7 +34,7 @@ class Grid:
         # set up sliders
         self.sliders = {slider_id: None for slider_id in slider_ids}
 
-        self.slider = Slider(canvas_size, self, [[0, 130], [0, 100], [50, 100], [50, 130]])
+        self.slider = Slider(canvas_size, self, slider_coords)
 
         self.selectors = [
             ModeSelector(self, int(session.grid_settings['ncols'] * 2 / 3), len(self.grid) - 1, (200, 150, 20), ModeSelector.callback_none),
@@ -121,7 +126,7 @@ class Grid:
             # update slider values TODO: adjust this if more than 1 slider per grid
             # TODO: this causes type error when no slider value provided in cspy → provide 0 by default?
             for slider_id in self.sliders.keys():
-                if msg['sliders'][slider_id] is not None: self.slider.value = msg['sliders'][slider_id] 
+                if msg['sliders'][slider_id] is not None: self.slider.value = msg['sliders'][slider_id]
                 self.slider.update()
 
         except TypeError as t:
@@ -145,6 +150,15 @@ class Grid:
             (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
             for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
+    def update_cell_data(self, df):
+            for y, row in enumerate(self.grid):
+                for x, cell in enumerate(row):
+                    df_handle = df.loc[(df['x'] == cell.x) & (df['y'] == cell.y), ['handle']]
+                    if not df_handle.empty:
+                        cell.handle = df_handle.iloc[0,0]
+                    df_color = df.loc[(df['x'] == cell.x) & (df['y'] == cell.y), ['color']]
+                    if not df_color.empty:
+                        cell.color = pygame.color.Color(df_color.iloc[0,0])
 class GridCell:
     def __init__(self, x, y, id=-1, rot=-1):
         self.x = x
@@ -154,3 +168,5 @@ class GridCell:
         self.prev_rot = -1
         self.rel_rot = 0
         self.selected = False
+        self.color = pygame.color.Color(125, 125, 125)
+        self.handle = None  # used to add functionality (e.g. slider controls) to cell, managed by qScope/data/grid_X_setup.csv

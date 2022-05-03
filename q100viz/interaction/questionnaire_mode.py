@@ -20,6 +20,7 @@ class Questionnaire_Mode():
         session.environment['mode'] = self.name
 
         session.show_polygons = False
+        session.show_basemap = False
 
         # setup sliders:
         session.grid_1.slider.show_text = False

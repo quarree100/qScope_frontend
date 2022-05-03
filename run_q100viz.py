@@ -4,7 +4,6 @@ import random
 import threading
 import json
 import pygame
-import numpy as np
 import datetime
 from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
 
@@ -91,7 +90,7 @@ grid_2 = session.grid_2 = grid.Grid(
         ['slider0'], [[0, 130], [0, 100], [50, 100], [50, 130]])
 
 session.show_polygons = False
-show_basemap = False
+session.show_basemap = False
 show_grid = False
 show_typologiezonen = True
 show_nahwaermenetz = True
@@ -117,6 +116,7 @@ electricity_supply_types = ['green', 'gray', 'mix']
 buildings['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings.values]
 buildings['connection_to_heat_grid'] = [True if random.random() > 0.5 else False for row in buildings.values]
 buildings['refurbished'] = buildings['connection_to_heat_grid']
+buildings['environmental_engagement'] = [random.random() for row in buildings.values]
 
 # buildings interaction
 buildings['cell'] = ""
@@ -165,7 +165,7 @@ while True:
                 session.show_polygons = event.key == K_p and not session.show_polygons
             # toggle basemap:
             if event.key == K_m:
-                show_basemap = event.key == K_m and not show_basemap
+                session.show_basemap = event.key == K_m and not session.show_basemap
             # toggle grid:
             elif event.key == K_g:
                 show_grid = not show_grid
@@ -265,7 +265,7 @@ while True:
         session.active_handler.draw(canvas)
 
     # render surfaces
-    if show_basemap:
+    if session.show_basemap:
         crop_width = 4644
         crop_height = 800
         canvas.blit(basemap.image, (0, 0), (0, 0, crop_width, crop_height))

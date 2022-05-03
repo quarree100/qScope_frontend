@@ -2,8 +2,8 @@
 
 import pandas as pd
 
+from config import config
 from q100viz.interaction.calibration_mode import CalibrationMode
-# from q100viz.interaction.edit_mode import EditMode
 from q100viz.interaction.input_mode import InputMode, Input_Environment
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
@@ -31,10 +31,14 @@ environment['questions'] = [  # TODO: externalize this to yet another csv
 ]
 environment['question'] = environment['questions'][0]
 
-input_households_grid_1 = pd.read_csv('/home/dunland/github/qScope/data/grid_1_setup.csv')
-input_households_grid_2 = pd.read_csv('/home/dunland/github/qScope/data/grid_2_setup.csv')
-input_environment_grid_1 = pd.read_csv('/home/dunland/github/qScope/data/input_environment_grid_1.csv')
-input_environment_grid_2 = pd.read_csv('/home/dunland/github/qScope/data/input_environment_grid_2.csv')
+input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
+input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
+input_environment_grid_1 = pd.read_csv(config['GRID_1_INPUT_ENVIRONMENT_FILE'])
+input_environment_grid_2 = pd.read_csv(config['GRID_2_INPUT_ENVIRONMENT_FILE'])
+
+# list of possible handles
+input_environment_variables = ['CO2-prize', 'renovation_cost']
+mode_selector_handles = ['start_input_environment', 'start_input_households']
 
 # interaction
 seconds_elapsed = 0

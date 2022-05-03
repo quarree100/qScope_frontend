@@ -40,17 +40,19 @@ class Slider:
         self.coords_transformed = self.surface.transform(coords)
 
     def render(self, canvas=None):
-        canvas.blit(self.surface, (0,0))
-
-        # print function text on sliderControl cells:
+        # set slider color:
         for cell, rect_points in self.grid.rects_transformed:
             if cell.handle is not None and self.show_controls:  # cells have handles if set in csv
                 stroke = 4 if cell.selected else 1
 
-                if cell.selected and cell.handle in ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement']:  # TODO: store valid slider handles somewhere globally
+                if cell.selected and cell.handle not in session.mode_selector_handles:  # do not adopt color of mode selectors
                     self.color = cell.color
+                    print(cell.x, cell.y, self.handle)
 
                 if session.show_polygons: pygame.draw.polygon(self.grid.surface, cell.color, rect_points, stroke)
+
+        canvas.blit(self.surface, (0,0))
+
 
     def draw_area(self):
         pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
@@ -98,6 +100,9 @@ class Slider:
         elif self.handle == 'refurbished':
             session.buildings.loc[(
                 session.buildings.selected == True), 'refurbished'] = self.value > 0.5
+        elif self.handle == 'environmental_engagement':
+            session.buildings.loc[(
+                session.buildings.selected == True), 'environmental_engagement'] = self.value
 
         # questionnaire:
         elif self.handle == 'answer':

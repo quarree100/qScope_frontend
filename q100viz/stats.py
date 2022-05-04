@@ -58,7 +58,7 @@ class Stats:
 def append_csv(file, df, cols):
     """Open data from CSV and join them with a GeoDataFrame based on osm_id."""
     values = pandas.read_csv(
-        file, usecols=['osm_id', *cols.keys()], dtype=cols).set_index('osm_id')
+        file, usecols=['osm_id', *cols.keys()], dtype=cols, error_bad_lines=False, delimiter=';').set_index('osm_id')
     return df.join(values, on='osm_id')
 
 

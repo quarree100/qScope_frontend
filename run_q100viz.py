@@ -3,6 +3,7 @@ import os
 import random
 import threading
 import json
+import pandas
 import pygame
 import datetime
 from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
@@ -97,16 +98,36 @@ show_nahwaermenetz = True
 display_viewport = True
 
 # Load data
-buildings = gis.read_shapefile(
-    config['BUILDINGS_OSM_FILE'], columns={'osm_id': 'int64'}).set_index('osm_id')
+gis.print_shapefile(config['GEBAEUDE_BESTAND_FILE'], print_each_column=True)
+bestand = gis.read_shapefile(
+    config['GEBAEUDE_BESTAND_FILE'], columns={
+        'osm_id': 'int64',
+        'addr_stree': 'string',
+        'addr_house': 'string'}).set_index('osm_id')
 
-buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], buildings, {
-    'Straße' : 'string',
-    'Hausnr.': 'string',
-})
-buildings['address'] = buildings['Straße'] + ' ' + buildings['Hausnr.']
-buildings.drop('Straße', 1)
-buildings.drop('Hausnr.', 1)
+bestand.index.names = ['id']
+
+bestand['address'] = bestand['addr_stree'] + ' ' + bestand['addr_house']
+bestand = bestand.drop('addr_stree', 1)
+bestand = bestand.drop('addr_house', 1)
+
+print("bestand from shapefile:", bestand)
+
+gis.print_shapefile(config['GEBAEUDE_NEUBAU_FILE'])
+
+neubau = gis.read_shapefile(
+    config['GEBAEUDE_NEUBAU_FILE'], columns={
+        'fid': 'int64',
+        'Kataster_S': 'string'}).set_index('fid')
+
+neubau.index.names = ['id']
+
+neubau['address'] = neubau['Kataster_S']
+neubau = neubau.drop('Kataster_S', 1)
+print("neubau from shapefile:", neubau)
+
+buildings = session.buildings = pandas.concat([bestand, neubau])
+print("buildings:\n", buildings)
 
 # generic data
 buildings['heat_consumption'] = [5000 * random.random() for row in buildings.values]
@@ -127,7 +148,7 @@ print(buildings)
 # GIS layers
 typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])
 nahwaermenetz = gis.read_shapefile(config['NAHWAERMENETZ_FILE'])
-waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Wärmespeicher').append(
+waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Waermespeicher').append(
     gis.read_shapefile(config['HEIZZENTRALE_FILE']))
 
 # mask viewport with black surface

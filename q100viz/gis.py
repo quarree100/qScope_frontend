@@ -71,3 +71,11 @@ def read_shapefile(file, layer=None, columns=None):
         df = df.astype(columns)
         return df.loc[:, ['geometry', *columns.keys()]]
     return df
+
+def print_shapefile(file, print_each_column=False):
+    df = geopandas.read_file(file)
+    print("df:", df)
+    print("columns: ", df.columns)
+    if print_each_column:
+        for column in df.columns:
+            print(df[column])

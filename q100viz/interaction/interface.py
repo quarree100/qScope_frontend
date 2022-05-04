@@ -47,7 +47,6 @@ class Slider:
 
                 if cell.selected and cell.handle not in session.mode_selector_handles:  # do not adopt color of mode selectors
                     self.color = cell.color
-                    print(cell.x, cell.y, self.handle)
 
                 if session.show_polygons: pygame.draw.polygon(self.grid.surface, cell.color, rect_points, stroke)
 

@@ -127,7 +127,7 @@ print(buildings)
 # GIS layers
 typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])
 nahwaermenetz = gis.read_shapefile(config['NAHWAERMENETZ_FILE'])
-waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Wärmespeicher').append(
+waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Waermespeicher').append(
     gis.read_shapefile(config['HEIZZENTRALE_FILE']))
 
 # mask viewport with black surface

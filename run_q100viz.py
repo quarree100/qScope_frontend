@@ -130,25 +130,21 @@ neubau = gis.read_shapefile(
 neubau.index.names = ['id']
 
 neubau = neubau.rename(columns={'Kataster_S': 'address', 'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption'})
-print("neubau from shapefile:", neubau)
 neubau['energy_source'] = None
 
 # merge:
 buildings = session.buildings = pandas.concat([bestand, neubau])
-print("buildings:\n", buildings)
+
+# adjust data
+buildings['spec_heat_consumption'] = buildings['spec_heat_consumption'].fillna(0).to_numpy()
+buildings['spec_power_consumption'] = buildings['spec_power_consumption'].fillna(0).to_numpy()
 
 # generic data
 buildings['CO2'] = (buildings['spec_heat_consumption'] + buildings['spec_power_consumption']) / 20000
 electricity_supply_types = ['green', 'gray', 'mix']
 buildings['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings.values]
-# buildings['connection_to_heat_grid'] = np.where(buildings['energy_source'].isna(), True, False)
-# buildings['connection_to_heat_grid'] = buildings.loc[buildings['energy_source'] is None]
-buildings['connection_to_heat_grid'] = None
-# buildings.loc[(buildings.energy_source == None), 'energy_source'] = 'nix'
-for idx, row in buildings.iterrows():
-    if row['energy_source'] == None:
-        row['connection_to_heat_grid'] = 'null'
-# buildings['connection_to_heat_grid'] = [True if buildings.at[row, 'energy_source'] is None else False for row in buildings.values]
+buildings['connection_to_heat_grid'] = buildings['energy_source'].isna().to_numpy()
+# buildings['connection_to_heat_grid'] = buildings['']
 buildings['refurbished'] = buildings['connection_to_heat_grid']
 buildings['environmental_engagement'] = [random.random() for row in buildings.values]
 
@@ -156,8 +152,7 @@ buildings['environmental_engagement'] = [random.random() for row in buildings.va
 buildings['cell'] = ""
 buildings['selected'] = False
 
-print(buildings)
-stats.print_full_df(buildings[['energy_source', 'connection_to_heat_grid']])
+stats.print_full_df(buildings)
 
 # GIS layers
 typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])

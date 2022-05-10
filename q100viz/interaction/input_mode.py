@@ -142,7 +142,7 @@ class Input_Environment:
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
-                            if cell.handle in cell.handle in ['connection_to_heat_grid', 'energy_source', 'refurbished', 'environmental_engagement']:
+                            if cell.handle in cell.handle in ['connection_to_heat_grid', 'energy_source', 'refurbished', 'environmental_engagement']:  # TODO: provide valid handles somewhere globally..
                                 grid.slider.handle = cell.handle
                                 if grid.slider.previous_handle is not grid.slider.handle:
                                     session.print_verbose(

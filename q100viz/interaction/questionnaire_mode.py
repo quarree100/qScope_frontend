@@ -13,11 +13,12 @@ class Questionnaire_Mode():
     def __init__(self):
         self.name = 'questionnaire'
         self.question_index = 0
-        session.environment['question'] = session.environment['questions'][self.question_index]
 
     def activate(self):
         session.active_handler = session.handlers['questionnaire']
         session.environment['mode'] = self.name
+
+        self.question_index = 0
 
         session.show_polygons = False
         session.show_basemap = False
@@ -69,13 +70,11 @@ class Questionnaire_Mode():
 
     def get_next_question(self):
         print("getting next question")
-        # self.question_index = (self.question_index + 1 ) % len(session.environment['questions'])
         self.question_index += 1
 
         # get next question
-        if self.question_index is not len(session.environment['questions']):
-            session.environment['question'] = session.environment['questions'][self.question_index]
-            session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        if self.question_index < session.environment['num_questions']:
+            session.stats.send_message(json.dumps({'question_index' : self.question_index}))
         else:  # leave questionnaire mode, enter input mode
             self.question_index = 0
             session.handlers['input_environment'].activate()

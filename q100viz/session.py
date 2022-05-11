@@ -1,6 +1,7 @@
 '''This module keeps variables shared among other modules.'''
 
 import pandas as pd
+import csv
 
 from config import config
 from q100viz.interaction.calibration_mode import CalibrationMode
@@ -21,15 +22,8 @@ verbose = True
 
 environment = {'mode': 'input_environment'}
 
-environment['questions'] = [  # TODO: externalize this to yet another csv
-
-        "Die globale Erderwärmung wird durch von Menschen produzierte Emissionen verstärkt.",
-        "Der Schutz der Umwelt ist ein Mittel zur Stärkung des Wirtschaftswachstums in Deutschland.",
-        "Ich glaube, dass wir jedes Mal, wenn wir Kohle, Öl oder Gas verwenden, zum Klimawandel beitragen.",
-        "Ich würde meinen Energieverbrauch reduzieren, wenn mein Haushalt mehr Energie verbraucht als ähnliche Haushalte.",
-        "Wenn ein erneuerbarer Energietarif bei einem anderen Energieversorger verfügbar wäre, würde ich meinen Anbieter wechseln."
-]
-environment['question'] = environment['questions'][0]
+with open(config['QUESTIONS_FILE'], newline='') as f:
+    environment['num_questions'] = len(list(csv.reader(f)))
 
 input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
 input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])

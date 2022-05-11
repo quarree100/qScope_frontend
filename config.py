@@ -6,15 +6,20 @@ config = {
     'HEIZZENTRALE_FILE': "../data/GIS/Shapefiles/Heizzentrale.shp",
     'NAHWAERMENETZ_FILE': "../data/GIS/Shapefiles/Nahwaermenetz.shp",
     'TYPOLOGIEZONEN_FILE': "../data/GIS/Shapefiles/Typologiezonen.shp",
+
     'CSPY_SETTINGS_FILE': '../cspy/settings/cityscopy.json',
     'SAVED_KEYSTONE_FILE': 'keystone.save',
     'SAVED_BUILDINGS_FILE': 'export/buildings_export.shp',
+
     'GAMA_HEADLESS_FILE' : '../data/headless/gama-headless.sh',
     'GAMA_SIMULATION_FILE' : '../q100_abm/q100/models/qScope_ABM.gaml',
+
     'GRID_1_SETUP_FILE': '../data/grid_1_setup.csv',
     'GRID_2_SETUP_FILE': '../data/grid_2_setup.csv',
     'GRID_1_INPUT_ENVIRONMENT_FILE': '../data/input_environment_grid_1.csv',
     'GRID_2_INPUT_ENVIRONMENT_FILE': '../data/input_environment_grid_2.csv',
+
+    'QUESTIONS_FILE': '../data/questions.csv',
 
     'GRID_2_X1' : 50,
     'GRID_2_X2' : 100,

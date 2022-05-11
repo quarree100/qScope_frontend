@@ -3,6 +3,8 @@ import os
 import random
 import threading
 import json
+import pandas
+import numpy as np
 import pygame
 import datetime
 from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
@@ -96,33 +98,62 @@ show_typologiezonen = True
 show_nahwaermenetz = True
 display_viewport = True
 
-# Load data
-buildings = gis.read_shapefile(
-    config['BUILDINGS_OSM_FILE'], columns={'osm_id': 'int64'}).set_index('osm_id')
+##################### Load data #####################
+session.buildings = pandas.DataFrame()
+session.buildings['energy_source'] = None
 
-buildings = session.buildings = stats.append_csv(config['BUILDINGS_DATA_FILE'], buildings, {
-    'Straße' : 'string',
-    'Hausnr.': 'string',
-})
-buildings['address'] = buildings['Straße'] + ' ' + buildings['Hausnr.']
-buildings.drop('Straße', 1)
-buildings.drop('Hausnr.', 1)
+# Bestand:
+bestand = gis.read_shapefile(
+    config['GEBAEUDE_BESTAND_FILE'], columns={
+        'Kataster_C': 'string',
+        'addr_stree': 'string',
+        'addr_house': 'string',
+        'Kataster13': 'float',
+        'Kataster15': 'float',
+        'Kataster_E': 'string'}).set_index('Kataster_C')
+
+bestand.index.names = ['id']
+
+bestand['address'] = bestand['addr_stree'] + ' ' + bestand['addr_house']
+bestand = bestand.drop('addr_stree', 1)
+bestand = bestand.drop('addr_house', 1)
+bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source'})
+
+# Neubau:
+neubau = gis.read_shapefile(
+    config['GEBAEUDE_NEUBAU_FILE'], columns={
+        'Kataster_C': 'string',
+        'Kataster_S': 'string',
+        'Kataster13': 'float',
+        'Kataster15': 'float'}).set_index('Kataster_C')
+
+neubau.index.names = ['id']
+
+neubau = neubau.rename(columns={'Kataster_S': 'address', 'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption'})
+
+gis.print_geodataframe(bestand, print_each_column=True)
+gis.print_geodataframe(neubau, print_each_column=True)
+
+# merge:
+# buildings = session.buildings = pandas.concat([bestand, neubau])
+buildings = session.buildings = bestand
+
+# adjust data
+buildings['spec_heat_consumption'] = buildings['spec_heat_consumption'].fillna(0).to_numpy()
+buildings['spec_power_consumption'] = buildings['spec_power_consumption'].fillna(0).to_numpy()
 
 # generic data
-buildings['heat_consumption'] = [5000 * random.random() for row in buildings.values]
-buildings['electricity_consumption'] = [5000 * random.random() for row in buildings.values]
-buildings['CO2'] = (buildings['heat_consumption'] + buildings['electricity_consumption']) / 20000
+buildings['CO2'] = (buildings['spec_heat_consumption'] + buildings['spec_power_consumption']) / 20000
 electricity_supply_types = ['green', 'gray', 'mix']
 buildings['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings.values]
-buildings['connection_to_heat_grid'] = [True if random.random() > 0.5 else False for row in buildings.values]
+buildings['connection_to_heat_grid'] = buildings['energy_source'].isna().to_numpy()
+# buildings['connection_to_heat_grid'] = buildings['']
 buildings['refurbished'] = buildings['connection_to_heat_grid']
 buildings['environmental_engagement'] = [random.random() for row in buildings.values]
 
 # buildings interaction
 buildings['cell'] = ""
 buildings['selected'] = False
-
-print(buildings)
 
 # GIS layers
 typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])

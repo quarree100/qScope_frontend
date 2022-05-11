@@ -48,7 +48,7 @@ class Stats:
             result = data[0]
             for key, value in env.items():
                 result[key] = value
-            clusterData = json.loads(export_json(df[["address","CO2","connection_to_heat_grid","electricity_supplier","heat_consumption","electricity_consumption", "refurbished", "environmental_engagement"]], None))
+            clusterData = json.loads(export_json(df[["address","CO2","connection_to_heat_grid","energy_source","spec_heat_consumption","spec_power_consumption", "refurbished", "environmental_engagement"]], None))
             result["clusters"] = clusterData
             self.send_message([json.dumps(result)])
 
@@ -58,7 +58,7 @@ class Stats:
 def append_csv(file, df, cols):
     """Open data from CSV and join them with a GeoDataFrame based on osm_id."""
     values = pandas.read_csv(
-        file, usecols=['osm_id', *cols.keys()], dtype=cols).set_index('osm_id')
+        file, usecols=['osm_id', *cols.keys()], dtype=cols, error_bad_lines=False, delimiter=';').set_index('osm_id')
     return df.join(values, on='osm_id')
 
 
@@ -78,3 +78,10 @@ def to_xml(row):
         xml.append('  <Parameter name="{0}">{1}</Parameter>'.format(field, row[field]))
     xml.append('</Experiment>')
     return '\n'.join(xml)
+
+def print_full_df(df):
+    with pandas.option_context('display.max_rows', None,
+                        'display.max_columns', None,
+                        'display.precision', 3,
+                        ):
+        print(df)

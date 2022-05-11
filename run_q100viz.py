@@ -130,10 +130,13 @@ neubau = gis.read_shapefile(
 neubau.index.names = ['id']
 
 neubau = neubau.rename(columns={'Kataster_S': 'address', 'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption'})
-neubau['energy_source'] = None
+
+gis.print_geodataframe(bestand, print_each_column=True)
+gis.print_geodataframe(neubau, print_each_column=True)
 
 # merge:
-buildings = session.buildings = pandas.concat([bestand, neubau])
+# buildings = session.buildings = pandas.concat([bestand, neubau])
+buildings = session.buildings = bestand
 
 # adjust data
 buildings['spec_heat_consumption'] = buildings['spec_heat_consumption'].fillna(0).to_numpy()
@@ -151,8 +154,6 @@ buildings['environmental_engagement'] = [random.random() for row in buildings.va
 # buildings interaction
 buildings['cell'] = ""
 buildings['selected'] = False
-
-stats.print_full_df(buildings)
 
 # GIS layers
 typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])

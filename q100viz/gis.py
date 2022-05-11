@@ -79,3 +79,10 @@ def print_shapefile(file, print_each_column=False):
     if print_each_column:
         for column in df.columns:
             print(df[column])
+
+def print_geodataframe(df, print_each_column=False):
+    print("GeoDataFrame: ", df)
+    print("columns: ", df.columns)
+    if print_each_column:
+        for column in df.columns:
+            print(df[column])

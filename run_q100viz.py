@@ -106,17 +106,17 @@ session.buildings['energy_source'] = None
 bestand = gis.read_shapefile(
     config['GEBAEUDE_BESTAND_FILE'], columns={
         'Kataster_C': 'string',
-        'addr_stree': 'string',
-        'addr_house': 'string',
+        'Kataster_S': 'string',
+        'Kataster_H': 'string',
         'Kataster13': 'float',
         'Kataster15': 'float',
         'Kataster_E': 'string'}).set_index('Kataster_C')
 
 bestand.index.names = ['id']
 
-bestand['address'] = bestand['addr_stree'] + ' ' + bestand['addr_house']
-bestand = bestand.drop('addr_stree', 1)
-bestand = bestand.drop('addr_house', 1)
+bestand['address'] = bestand['Kataster_S'] + ' ' + bestand['Kataster_H']
+bestand = bestand.drop('Kataster_S', 1)
+bestand = bestand.drop('Kataster_H', 1)
 bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source'})
 
 # Neubau:

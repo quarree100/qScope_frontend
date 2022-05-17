@@ -38,7 +38,7 @@ input_environment_grid_2 = pd.read_csv(config['GRID_2_INPUT_ENVIRONMENT_FILE'])
 
 # list of possible handles
 input_environment_variables = ['CO2-prize', 'renovation_cost']
-mode_selector_handles = ['start_input_environment', 'start_input_households']
+mode_selector_handles = ['start_input_environment', 'start_input_households', 'start_simulation']
 
 # interaction
 seconds_elapsed = 0

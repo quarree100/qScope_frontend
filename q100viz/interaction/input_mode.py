@@ -43,7 +43,6 @@ class InputMode:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
                     if cell.selected:
-                        # print(cell.x, cell.y, cell.handle)
                         # high performance impact, use sparingly
                         i = get_intersection(session.buildings, grid, x, y)
 
@@ -57,7 +56,6 @@ class InputMode:
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
                             if cell.handle in ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement']:
-                                # grid.slider.handle = cell.handle
                                 session.grid_2.slider.handle = cell.handle
                                 if grid.slider.previous_handle is not grid.slider.handle:
                                     session.print_verbose(
@@ -66,6 +64,9 @@ class InputMode:
 
                             elif cell.handle == 'start_input_environment':
                                 session.handlers['input_environment'].activate()
+
+                            elif cell.handle == 'start_simulation':
+                                session.handlers['simulation'].activate()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 
@@ -151,6 +152,9 @@ class Input_Environment:
 
                             elif cell.handle == 'start_input_households':
                                 session.handlers['input_households'].activate()
+
+                            elif cell.handle == 'start_simulation':
+                                session.handlers['simulation'].activate()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 

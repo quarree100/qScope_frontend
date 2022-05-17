@@ -15,6 +15,7 @@ import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
 import q100viz.stats as stats
+from q100viz.gama_start import Simulation
 from q100viz.interaction.interface import *
 from q100viz.interaction.simulation_mode import SimulationMode
 import q100viz.session as session
@@ -106,17 +107,17 @@ session.buildings['energy_source'] = None
 bestand = gis.read_shapefile(
     config['GEBAEUDE_BESTAND_FILE'], columns={
         'Kataster_C': 'string',
-        'addr_stree': 'string',
-        'addr_house': 'string',
+        'Kataster_S': 'string',
+        'Kataster_H': 'string',
         'Kataster13': 'float',
         'Kataster15': 'float',
         'Kataster_E': 'string'}).set_index('Kataster_C')
 
 bestand.index.names = ['id']
 
-bestand['address'] = bestand['addr_stree'] + ' ' + bestand['addr_house']
-bestand = bestand.drop('addr_stree', 1)
-bestand = bestand.drop('addr_house', 1)
+bestand['address'] = bestand['Kataster_S'] + ' ' + bestand['Kataster_H']
+bestand = bestand.drop('Kataster_S', 1)
+bestand = bestand.drop('Kataster_H', 1)
 bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source'})
 
 # Neubau:
@@ -177,7 +178,6 @@ for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
 _stats = session.stats = stats.Stats(stats_io)
 
 handlers = session.handlers
-simulation = session.simulation = SimulationMode()
 
 mouse_position = MousePosition(canvas_size)
 
@@ -191,6 +191,7 @@ while True:
             session.active_handler.process_event(event)
 
         if event.type == KEYDOWN:
+            ############################# graphics ####################
             # toggle polygons:
             if event.key == K_p:
                 session.show_polygons = event.key == K_p and not session.show_polygons
@@ -200,6 +201,8 @@ while True:
             # toggle grid:
             elif event.key == K_g:
                 show_grid = not show_grid
+
+            ##################### mode selection ######################
             # activate input_mode:
             if event.key == K_t:
                 session.handlers['input_environment'].activate()
@@ -212,21 +215,56 @@ while True:
             elif event.key == K_c:
                 session.active_handler = handlers[
                     'calibrate' if session.active_handler != handlers['calibrate'] else 'input_environment']
-                print(session.active_handler)
-
             # toggle simulation_mode:
             elif event.key == K_s:
-                if session.active_handler is not handlers['calibrate']:
-                    if session.active_handler == handlers['simulation']:
-                        simulation.send_data(_stats)
-                        session.active_handler = handlers['input_environment']
-                    else:
-                        session.active_handler = handlers['simulation']
-                        simulation.activate()
+                # if session.active_handler == handlers['simulation']:  # leaving simulation mode
+                #     session.active_handler = handlers['input_environment']
+                # else:  # enter simulation mode
+                #     session.handlers['simulation'].activate()
+                #     session.handlers['simulation'].start_simulation()
 
+                # provide data:
+                outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
+                outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
+                outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
+
+                params = pandas.DataFrame(columns=['scenario', 'type', 'value'])
+                params.loc[len(params)] = ['alpha_scenario', 'string', 'Static_mean']
+                params.loc[len(params)] = ['carbon_price_scenario', 'string', 'A-Conservative']
+                params.loc[len(params)] = ['energy_price_scenario', 'string', 'Prices_Project start']
+                params.loc[len(params)] = ['q100_price_opex_scenario', 'string', '12 ct / kWh (static)']
+                params.loc[len(params)] = ['q100_price_capex_scenario', 'string', '1 payment']
+                params.loc[len(params)] = ['q100_emissions_scenario', 'string', 'Constant_50g / kWh']
+
+                simulation = Simulation(
+                    headless_folder = config['GAMA_HEADLESS_FOLDER'],
+                    model_file = config['GAMA_MODEL_FILE'],
+                    final_step = 200,
+                    until = None,
+                    experiment_name = "agent_decision_making")
+
+                # compose dataframe to start gama simulation
+                outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
+                outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
+                outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
+
+                params = pandas.DataFrame(columns=['scenario', 'type', 'value'])
+                params.loc[len(params)] = ['alpha_scenario', 'string', 'Static_mean']
+                params.loc[len(params)] = ['carbon_price_scenario', 'string', 'A-Conservative']
+                params.loc[len(params)] = ['energy_price_scenario', 'string', 'Prices_Project start']
+                params.loc[len(params)] = ['q100_price_opex_scenario', 'string', '12 ct / kWh (static)']
+                params.loc[len(params)] = ['q100_price_capex_scenario', 'string', '1 payment']
+                params.loc[len(params)] = ['q100_emissions_scenario', 'string', 'Constant_50g / kWh']
+
+                simulation.make_xml(params, outputs)
+                simulation.run_script()
+
+            # toggle poll mode:
             elif event.key == K_q:
                 session.handlers['questionnaire'].activate()
-            # manual slider control for test purposes:
+
+
+            ########## manual slider control for test purposes: #######
             elif event.key == K_PLUS:
                 for grid in grid_1, grid_2:
                     if grid.slider.value is not None:
@@ -244,24 +282,22 @@ while True:
                     else:
                         grid.slider.value = 0.1
                     grid.slider.update()
+
+
             # verbose mode:
             elif event.key == K_v:
                 session.verbose = not session.verbose
 
         elif event.type == QUIT:
             if session.log != "":
-                with open("qScope-log_%s_.txt" % datetime.datetime.now(), "w") as f:
+                with open("qScope-log_%s.txt" % datetime.datetime.now(), "w") as f:
                     f.write(session.log)
                     f.close()
             pygame.quit()
             sys.exit()
 
     # update running mode:
-    if session.active_handler != handlers['simulation']:
-        session.active_handler.update()
-    else:
-        simulation.update()
-
+    session.active_handler.update()
 
     ################################## DRAWING ########################
     # clear surfaces
@@ -342,9 +378,6 @@ while True:
         canvas.blit(font.render(str(grid_1.slider.value), True, (255,255,255)), (800,670))
         canvas.blit(font.render(str(grid_2.slider.value), True, (255,255,255)), (1150,670))
 
-    # simulation steps:
-    if session.active_handler == handlers['simulation']:
-        simulation.draw(canvas)
     ############################# pygame time #########################
 
     pygame.display.update()

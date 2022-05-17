@@ -42,9 +42,6 @@ def compose_xml(parameters, outputs, simulation_file, finalStep=None, until=None
 
 def main():
     # provide data:
-    data = {'param 1': 'abc', 'param 2' : 'asdf'}
-    df = pd.DataFrame(data, index=[0])
-
     outputs = pd.DataFrame(columns=['id', 'name', 'framerate'])
     outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
     outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']

@@ -17,7 +17,7 @@ class Simulation:
 
         """
         - experiment_name must be identical to GAMA experiment.
-        - gama-headless.sh must stay in folder relative to gama executable → symlink ?
+        - gama-headless.sh must stay in folder relative to gama executable --> use absolute path
         """
 
         self.headless_folder = headless_folder
@@ -59,7 +59,7 @@ class Simulation:
         # export xml
         if os.path.isdir(self.output_folder) is False:
             os.mkdir(self.output_folder)
-        # os.chdir(self.headless_folder)
+        os.chdir(self.headless_folder)
 
         print(xml)
         f = open(self.headless_folder + 'simulation_parameters.xml', 'w')

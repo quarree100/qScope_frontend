@@ -11,7 +11,7 @@ config = {
     'SAVED_KEYSTONE_FILE': 'keystone.save',
     'SAVED_BUILDINGS_FILE': 'export/buildings_export.shp',
 
-    'GAMA_HEADLESS_FOLDER' : '../data/headless/',
+    'GAMA_HEADLESS_FOLDER' : '/home/dunland/opt/GAMA/headless/',
     'GAMA_MODEL_FILE' : '../q100_abm/q100/models/qscope_ABM.gaml',
 
     'GRID_1_SETUP_FILE': '../data/grid_1_setup.csv',

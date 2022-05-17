@@ -15,7 +15,7 @@ import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
 import q100viz.stats as stats
-from q100viz.gama_start import Simulation
+from q100viz.simulation_start import Simulation
 from q100viz.interaction.interface import *
 from q100viz.interaction.simulation_mode import SimulationMode
 import q100viz.session as session

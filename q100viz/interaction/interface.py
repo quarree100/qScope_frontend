@@ -3,6 +3,7 @@
 import pygame
 import json
 import random
+import numpy
 
 import q100viz.keystone as keystone
 import q100viz.session as session
@@ -40,15 +41,22 @@ class Slider:
         self.coords_transformed = self.surface.transform(coords)
 
     def render(self, canvas=None):
-        # set slider color:
+        # slider controls → set slider color
+        a = 100 + abs(int(numpy.sin(pygame.time.get_ticks() / 1000) * 105))  # alpha value for unselected cells
+
         for cell, rect_points in self.grid.rects_transformed:
             if cell.handle is not None and self.show_controls:  # cells have handles if set in csv
-                stroke = 4 if cell.selected else 1
+                stroke = 4 if cell.selected else 0
 
-                if cell.selected and cell.handle not in session.mode_selector_handles:  # do not adopt color of mode selectors
-                    self.color = cell.color
+                if cell.selected:
+                    if cell.handle not in session.mode_selector_handles:  # do not adopt color of mode selectors
+                        cell.color = pygame.Color(cell.color.r, cell.color.g, cell.color.b, 255)
+                        self.color = cell.color
+                else:
+                    cell.color = pygame.Color(cell.color.r, cell.color.g, cell.color.b, a)
 
                 if session.show_polygons: pygame.draw.polygon(self.grid.surface, cell.color, rect_points, stroke)
+
 
         canvas.blit(self.surface, (0,0))
 

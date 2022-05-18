@@ -56,11 +56,12 @@ class InputMode:
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
                             if cell.handle in ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement']:
-                                session.grid_2.slider.handle = cell.handle
-                                if grid.slider.previous_handle is not grid.slider.handle:
-                                    session.print_verbose(
-                                        ("slider_handle: ", grid.slider.handle))
-                                    grid.slider.previous_handle = grid.slider.handle
+                                if grid.slider.show_controls:
+                                    session.grid_2.slider.handle = cell.handle
+                                    if grid.slider.previous_handle is not grid.slider.handle:
+                                        session.print_verbose(
+                                            ("slider_handle: ", grid.slider.handle))
+                                        grid.slider.previous_handle = grid.slider.handle
 
                             elif cell.handle == 'start_input_environment':
                                 session.handlers['input_environment'].activate()
@@ -106,9 +107,10 @@ class Input_Environment:
         session.environment['mode'] = self.name
 
         # sliders:
-        for slider in session.grid_1.slider, session.grid_2.slider:
-            slider.show_text = True
-            slider.show_controls = True
+        session.grid_1.slider.show_text = False
+        session.grid_1.slider.show_controls = False
+        session.grid_2.slider.show_text = True
+        session.grid_2.slider.show_controls = True
 
         # setup mode selectors:
         session.grid_1.update_cell_data(session.input_environment_grid_1)
@@ -143,12 +145,13 @@ class Input_Environment:
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
-                            if cell.handle in cell.handle in ['connection_to_heat_grid', 'energy_source', 'refurbished', 'environmental_engagement']:  # TODO: provide valid handles somewhere globally..
-                                grid.slider.handle = cell.handle
-                                if grid.slider.previous_handle is not grid.slider.handle:
-                                    session.print_verbose(
-                                        ("slider_handle: ", grid.slider.handle))
-                                    grid.slider.previous_handle = grid.slider.handle
+                            if cell.handle in cell.handle in ['renovation_cost', 'CO2-prize']:  # TODO: provide valid handles somewhere globally..
+                                if grid.slider.show_controls:
+                                    grid.slider.handle = cell.handle
+                                    if grid.slider.previous_handle is not grid.slider.handle:
+                                        session.print_verbose(
+                                            ("slider_handle: ", grid.slider.handle))
+                                        grid.slider.previous_handle = grid.slider.handle
 
                             elif cell.handle == 'start_input_households':
                                 session.handlers['input_households'].activate()

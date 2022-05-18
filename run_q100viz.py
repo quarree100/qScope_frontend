@@ -217,11 +217,6 @@ while True:
                     'calibrate' if session.active_handler != handlers['calibrate'] else 'input_environment']
             # toggle simulation_mode:
             elif event.key == K_s:
-                # if session.active_handler == handlers['simulation']:  # leaving simulation mode
-                #     session.active_handler = handlers['input_environment']
-                # else:  # enter simulation mode
-                #     session.handlers['simulation'].activate()
-                #     session.handlers['simulation'].start_simulation()
 
                 # provide data:
                 outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
@@ -237,11 +232,9 @@ while True:
                 params.loc[len(params)] = ['q100_emissions_scenario', 'string', 'Constant_50g / kWh']
 
                 simulation = Simulation(
-                    headless_folder = config['GAMA_HEADLESS_FOLDER'],
-                    model_file = config['GAMA_MODEL_FILE'],
                     final_step = 200,
-                    until = None,
-                    experiment_name = "agent_decision_making")
+                    until = None
+                    )
 
                 # compose dataframe to start gama simulation
                 outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])

@@ -4,13 +4,14 @@
 import subprocess
 import pandas as pd
 import os
+from config import config
 
 class Simulation:
 
     def __init__(self,
-        headless_folder = '/home/dunland/opt/GAMA/headless/',
-        model_file = '/home/dunland/github/qScope/q100_abm/q100/models/qscope_ABM.gaml',
-        output_folder= "/home/dunland/github/qScope/q100_abm/q100/outputHeadless",
+        headless_folder = config['GAMA_HEADLESS_FOLDER'],
+        model_file = config['GAMA_MODEL_FILE'],
+        output_folder= config['GAMA_OUTPUT_FOLDER'],
         final_step= 200,
         until=None,
         experiment_name="agent_decision_making"):
@@ -31,6 +32,8 @@ class Simulation:
         self.final_step = final_step
         self.until = until
         self.experiment_name = experiment_name
+
+        self.cwd = os.getcwd()  # hold current working directory to return to later
 
     def make_xml(self, parameters, outputs, finalStep=None, until=None, experiment_name=None):
         # header
@@ -59,7 +62,7 @@ class Simulation:
         # export xml
         if os.path.isdir(self.output_folder) is False:
             os.mkdir(self.output_folder)
-        os.chdir(self.headless_folder)
+        os.chdir(self.headless_folder)  # change working directory temporarily
 
         print(xml)
         f = open(self.headless_folder + 'simulation_parameters.xml', 'w')
@@ -71,3 +74,5 @@ class Simulation:
         xml_path = self.headless_folder + 'simulation_parameters.xml'
         command = self.script + " " + xml_path + " " + self.output_folder
         subprocess.call(command, shell=True)
+
+        os.chdir(self.cwd)  # return to previous cwd

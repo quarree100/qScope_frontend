@@ -46,7 +46,7 @@ class Simulation:
         # parameters
         xml_temp.append('  <Parameters>')
         for index, row in parameters.iterrows():
-            xml_temp.append('    <Parameter name="{0}" type="{1}" value="{2}" />'.format(row['scenario'], row['type'], row['value']))
+            xml_temp.append('    <Parameter name="{0}" type="{1}" value="{2}" />'.format(row['name'], row['type'], row['value']))
         xml_temp.append('  </Parameters>')
 
         # outputs

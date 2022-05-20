@@ -223,13 +223,14 @@ while True:
                 outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
                 outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
 
-                params = pandas.DataFrame(columns=['scenario', 'type', 'value'])
+                params = pandas.DataFrame(columns=['name', 'type', 'value'])
                 params.loc[len(params)] = ['alpha_scenario', 'string', 'Static_mean']
                 params.loc[len(params)] = ['carbon_price_scenario', 'string', 'A-Conservative']
                 params.loc[len(params)] = ['energy_price_scenario', 'string', 'Prices_Project start']
                 params.loc[len(params)] = ['q100_price_opex_scenario', 'string', '12 ct / kWh (static)']
                 params.loc[len(params)] = ['q100_price_capex_scenario', 'string', '1 payment']
                 params.loc[len(params)] = ['q100_emissions_scenario', 'string', 'Constant_50g / kWh']
+                params.loc[len(params)] = ['keep_seed', 'bool', 'true']
 
                 simulation = Simulation(
                     final_step = 200,

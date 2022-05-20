@@ -199,6 +199,15 @@ e.g. emission, in ``InputMode.draw()``:
 SimulationMode
 --------------
 ... will start the GAMA headless simulation and wait for the results.
+You will have to have [GAMA](https://gama-platform.org/download) installed. It's best to choose the Version with JDK.
+Q-Scope needs to know where to find the ``gama-headless.sh`` file, which can be found in the extracted folder ``gama/headless``. Set this up in ``config.py``, providing the headless folder and the location of the gama model file:
+
+.. code-block:: python
+
+  'GAMA_HEADLESS_FOLDER' : '/home/qscope/GAMA/headless/',
+  'GAMA_MODEL_FILE' : '../q100_abm/q100/models/qscope_ABM.gaml',
+
+**ATTENTION**: make sure to set the user rights of ``gama-headless.sh`` executable via ``chmod u+x gama-headless.sh``
 
 QuestionnaireMode
 -----------------
@@ -212,17 +221,60 @@ ModeSelector
 
 A ModeSelector is a specific cell on the grid, which, when selected via token, activates a certain Mode.
 
-The ``ModeSelector`` class in ``interface.py`` is created inside a grid and holds the following important variables:
-- ``show``: a bool whether or not to display the mode selector
-- ``color``: cell color
-- ``grid``: the grid it is instantiated by. The ModeSelector needs to know the grid in order to be able to draw onto the grid's surface.
-- ``x``: x-position of the selector (y is always last row)
-- ``name``: the mode name to be displayed below the cell.
+``grid_1_setup.csv``, ``grid_2_setup.csv``, ``input_environment_grid_1.csv`` and ``input_environment_grid_1.csv`` are used to assign functionality to grid cells.
+
+valid handles are:
+
+**environment handles:**
+
+.. csv-table:: environment handles
+  :header: "parameter", "possible values"
+  :widths: auto
+
+  "alpha_scenario", "Static_mean, Dynamic_moderate, Dynamic_high, Static_high"
+  carbon_price_scenario, "A - Conservative, B - Moderate, C1 - Progressive, C2 - Progressive, C3 - Progressive"
+  energy_price_scenario, "Prices_Project start, Prices_2021, Prices_2022 1st half"
+  q100_price_opex_scenario, "12 ct / kWh (static), 9-15 ct / kWh (dynamic)"
+  q100_price_capex_scenario, "1 payment, 2 payments, 5 payments"
+  q100_emissions_scenario, "Constant_50g / kWh, Declining_Steps, Declining_Linear, ``Constant_ Zero emissions``"
+
+
+**household-individual handles:**
+
+.. csv-table:: household-individual handles
+  :header: "adjustable", "parameter", "possible values"
+  :widths: auto
+
+  o, my_heat_consumption, float
+  o, my_power_consumption, float
+  o, my_heat_expenses, float
+  o, my_power_expenses, float
+  o, my_heat_emissions, float
+  o, my_power_emissions, float
+  o, my_energy_emissions, float
+  ✓, mod_status, "'u', 's'"
+  ✓, spec_heat_consumption, float
+  ✓, spec_power_consumption, float
+  ✓, energy_source,"gas, oil, None"
+
+zusätzlich kann `environmental_engagement` eingestellt werden als Einstellung von Agentenverhalten (TODO!)
+
+**questionnaire**:
+
+- 'answer' (deprecated?)
+
+**mode selection**:
+
+- 'start_input_environment' (starts input mode A for global parameters)
+- 'start_input_households' (input mode B for individual household parameters)
+- 'start_simulation' (creates xml to start GAMA simulation)
+
+**colors** can be set using strings from this list: https://www.pygame.org/docs/ref/color_list.html
 
 The Modes can be switched using either the input keys:
 * T: InputMode_ (TUI Mode)
 * C: CalibrationMode_
-* S: SimulationMode (when in Input Mode)
+* S: Simulation
 
 
 API

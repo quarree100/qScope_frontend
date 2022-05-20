@@ -129,7 +129,7 @@
 </pre></div>
 </div>
 <p><strong>display sliders</strong>:
-The sliders have a bool called <code class="docutils literal notranslate"><span class="pre">show</span></code> that, when <code class="docutils literal notranslate"><span class="pre">True</span></code>, activates the display of the slider. This variable can be used for the usage modes to define whether the slider (and which) shall be seen and used.</p>
+The sliders have a bool called <code class="docutils literal notranslate"><span class="pre">show_text</span></code> that, when <code class="docutils literal notranslate"><span class="pre">True</span></code>, activates the display of the slider control texts. This variable can be used for the usage modes to define whether the slider controls shall be displayed.</p>
 </div>
 <div class="section" id="keystone-transformation">
 <h2>keystone transformation<a class="headerlink" href="#keystone-transformation" title="Permalink to this headline">¶</a></h2>
@@ -206,7 +206,14 @@ The <code class="docutils literal notranslate"><span class="pre">__init__</span>
 </div>
 <div class="section" id="simulationmode">
 <h3>SimulationMode<a class="headerlink" href="#simulationmode" title="Permalink to this headline">¶</a></h3>
-<p>… will start the GAMA headless simulation and wait for the results.</p>
+<p>… will start the GAMA headless simulation and wait for the results.
+You will have to have [GAMA](<a class="reference external" href="https://gama-platform.org/download">https://gama-platform.org/download</a>) installed. It’s best to choose the Version with JDK.
+Q-Scope needs to know where to find the <code class="docutils literal notranslate"><span class="pre">gama-headless.sh</span></code> file, which can be found in the extracted folder <code class="docutils literal notranslate"><span class="pre">gama/headless</span></code>. Set this up in <code class="docutils literal notranslate"><span class="pre">config.py</span></code>, providing the headless folder and the location of the gama model file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;GAMA_HEADLESS_FOLDER&#39;</span> <span class="p">:</span> <span class="s1">&#39;/home/qscope/GAMA/headless/&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GAMA_MODEL_FILE&#39;</span> <span class="p">:</span> <span class="s1">&#39;../q100_abm/q100/models/qscope_ABM.gaml&#39;</span><span class="p">,</span>
+</pre></div>
+</div>
+<p><strong>ATTENTION</strong>: make sure to set the user rights of <code class="docutils literal notranslate"><span class="pre">gama-headless.sh</span></code> executable via <code class="docutils literal notranslate"><span class="pre">chmod</span> <span class="pre">u+x</span> <span class="pre">gama-headless.sh</span></code></p>
 </div>
 <div class="section" id="questionnairemode">
 <h3>QuestionnaireMode<a class="headerlink" href="#questionnairemode" title="Permalink to this headline">¶</a></h3>
@@ -219,16 +226,109 @@ The <code class="docutils literal notranslate"><span class="pre">__init__</span>
 <div class="section" id="modeselector">
 <h2>ModeSelector<a class="headerlink" href="#modeselector" title="Permalink to this headline">¶</a></h2>
 <p>A ModeSelector is a specific cell on the grid, which, when selected via token, activates a certain Mode.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">ModeSelector</span></code> class in <code class="docutils literal notranslate"><span class="pre">interface.py</span></code> is created inside a grid and holds the following important variables:
-- <code class="docutils literal notranslate"><span class="pre">show</span></code>: a bool whether or not to display the mode selector
-- <code class="docutils literal notranslate"><span class="pre">color</span></code>: cell color
-- <code class="docutils literal notranslate"><span class="pre">grid</span></code>: the grid it is instantiated by. The ModeSelector needs to know the grid in order to be able to draw onto the grid’s surface.
-- <code class="docutils literal notranslate"><span class="pre">x</span></code>: x-position of the selector (y is always last row)
-- <code class="docutils literal notranslate"><span class="pre">name</span></code>: the mode name to be displayed below the cell.</p>
+<p><code class="docutils literal notranslate"><span class="pre">grid_1_setup.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">grid_2_setup.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">input_environment_grid_1.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">input_environment_grid_1.csv</span></code> are used to assign functionality to grid cells.</p>
+<p>valid handles are:</p>
+<p><strong>environment handles:</strong></p>
+<table class="colwidths-auto docutils align-default" id="id1">
+<caption><span class="caption-text">environment handles</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>parameter</p></th>
+<th class="head"><p>possible values</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>alpha_scenario</p></td>
+<td><p>Static_mean, Dynamic_moderate, Dynamic_high, Static_high</p></td>
+</tr>
+<tr class="row-odd"><td><p>carbon_price_scenario</p></td>
+<td><p>A - Conservative, B - Moderate, C1 - Progressive, C2 - Progressive, C3 - Progressive</p></td>
+</tr>
+<tr class="row-even"><td><p>energy_price_scenario</p></td>
+<td><p>Prices_Project start, Prices_2021, Prices_2022 1st half</p></td>
+</tr>
+<tr class="row-odd"><td><p>q100_price_opex_scenario</p></td>
+<td><p>12 ct / kWh (static), 9-15 ct / kWh (dynamic)</p></td>
+</tr>
+<tr class="row-even"><td><p>q100_price_capex_scenario</p></td>
+<td><p>1 payment, 2 payments, 5 payments</p></td>
+</tr>
+<tr class="row-odd"><td><p>q100_emissions_scenario</p></td>
+<td><p>Constant_50g / kWh, Declining_Steps, Declining_Linear, <code class="docutils literal notranslate"><span class="pre">Constant_</span> <span class="pre">Zero</span> <span class="pre">emissions</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>household-individual handles:</strong></p>
+<table class="colwidths-auto docutils align-default" id="id2">
+<caption><span class="caption-text">household-individual handles</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>adjustable</p></th>
+<th class="head"><p>parameter</p></th>
+<th class="head"><p>possible values</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>o</p></td>
+<td><p>my_heat_consumption</p></td>
+<td><p>float</p></td>
+</tr>
+<tr class="row-odd"><td><p>o</p></td>
+<td><p>my_power_consumption</p></td>
+<td><p>float</p></td>
+</tr>
+<tr class="row-even"><td><p>o</p></td>
+<td><p>my_heat_expenses</p></td>
+<td><p>float</p></td>
+</tr>
+<tr class="row-odd"><td><p>o</p></td>
+<td><p>my_power_expenses</p></td>
+<td><p>float</p></td>
+</tr>
+<tr class="row-even"><td><p>o</p></td>
+<td><p>my_heat_emissions</p></td>
+<td><p>float</p></td>
+</tr>
+<tr class="row-odd"><td><p>o</p></td>
+<td><p>my_power_emissions</p></td>
+<td><p>float</p></td>
+</tr>
+<tr class="row-even"><td><p>o</p></td>
+<td><p>my_energy_emissions</p></td>
+<td><p>float</p></td>
+</tr>
+<tr class="row-odd"><td><p>✓</p></td>
+<td><p>mod_status</p></td>
+<td><p>‘u’, ‘s’</p></td>
+</tr>
+<tr class="row-even"><td><p>✓</p></td>
+<td><p>spec_heat_consumption</p></td>
+<td><p>float</p></td>
+</tr>
+<tr class="row-odd"><td><p>✓</p></td>
+<td><p>spec_power_consumption</p></td>
+<td><p>float</p></td>
+</tr>
+<tr class="row-even"><td><p>✓</p></td>
+<td><p>energy_source</p></td>
+<td><p>gas, oil, None</p></td>
+</tr>
+</tbody>
+</table>
+<p>zusätzlich kann <cite>environmental_engagement</cite> eingestellt werden als Einstellung von Agentenverhalten (TODO!)</p>
+<p><strong>questionnaire</strong>:</p>
+<ul class="simple">
+<li><p>‘answer’ (deprecated?)</p></li>
+</ul>
+<p><strong>mode selection</strong>:</p>
+<ul class="simple">
+<li><p>‘start_input_environment’ (starts input mode A for global parameters)</p></li>
+<li><p>‘start_input_households’ (input mode B for individual household parameters)</p></li>
+<li><p>‘start_simulation’ (creates xml to start GAMA simulation)</p></li>
+</ul>
+<p><strong>colors</strong> can be set using strings from this list: <a class="reference external" href="https://www.pygame.org/docs/ref/color_list.html">https://www.pygame.org/docs/ref/color_list.html</a></p>
 <p>The Modes can be switched using either the input keys:
 * T: <a class="reference internal" href="#inputmode">InputMode</a> (TUI Mode)
 * C: <a class="reference internal" href="#calibrationmode">CalibrationMode</a>
-* S: SimulationMode (when in Input Mode)</p>
+* S: Simulation</p>
 </div>
 <div class="section" id="api">
 <h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>

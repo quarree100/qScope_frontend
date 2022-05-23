@@ -12,6 +12,7 @@ config = {
     'SAVED_BUILDINGS_FILE': 'export/buildings_export.shp',
 
     'GAMA_HEADLESS_FOLDER' : '/home/dunland/opt/GAMA/headless/',
+    'GAMA_OUTPUT_FOLDER': '/home/dunland/opt/GAMA/headless/output',
     'GAMA_MODEL_FILE' : '../q100_abm/q100/models/qscope_ABM.gaml',
 
     'GRID_1_SETUP_FILE': '../data/grid_1_setup.csv',

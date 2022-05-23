@@ -1,17 +1,32 @@
 '''This module keeps variables shared among other modules.'''
 
 import pandas as pd
+import pygame
 
 from config import config
 from q100viz.interaction.calibration_mode import CalibrationMode
-from q100viz.interaction.input_mode import InputMode, Input_Environment
+from q100viz.interaction.input_mode import Input_Households, Input_Environment
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
+import q100viz.keystone as keystone
 
 log = ""
 
 # graphics
-viewport = None
+canvas_size = 1920, 1080
+# create the main surface, projected to corner points
+# the viewport's coordinates are between 0 and 100 on each axis
+viewport = keystone.Surface(canvas_size, pygame.SRCALPHA)
+try:
+    viewport.load(config['SAVED_KEYSTONE_FILE'])
+    print('loading src_points:' , viewport.src_points)
+    print('loading dst_points:' , viewport.dst_points)
+except Exception:
+    print("Failed to open keystone file")
+    viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
+    viewport.dst_points = [[0, 0], [0, canvas_size[1]], [canvas_size[0], canvas_size[1]], [canvas_size[0], 0]]
+viewport.calculate()
+
 gis = None
 basemap = None
 grid_1 = None
@@ -48,7 +63,7 @@ handlers = {
     'calibrate': CalibrationMode(),
     # 'edit': EditMode(),
     'input_environment': Input_Environment(),
-    'input_households': InputMode(),
+    'input_households': Input_Households(),
     'simulation': SimulationMode(),
     'questionnaire': Questionnaire_Mode()
 }

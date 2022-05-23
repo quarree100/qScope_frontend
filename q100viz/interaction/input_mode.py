@@ -2,12 +2,13 @@
 
 import pygame
 import pandas as pd
+import cv2
 
 import q100viz.keystone as keystone
 import q100viz.session as session
 import q100viz.stats as stats
 from config import config
-class InputMode:
+class Input_Households:
     def __init__(self):
         self.name = 'input_households'
 
@@ -99,18 +100,25 @@ def get_intersection(df, grid, x, y):
 class Input_Environment:
     def __init__(self):
         self.name = 'input_environment'
+        self.surface = keystone.Surface(session.canvas_size, pygame.SRCALPHA)
+        self.surface.src_points = [[0,0], [0,1], [1, 1], [1, 0]]
+        self.surface.dst_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
+
+        self.surface.calculate(session.viewport.transform_mat)
+        self.image = Image("images/scenario_progressive.bmp", [[0,0], [0,100], [25,100], [25,0]])
+        self.image.warp()
 
     def activate(self):
-        session.show_polygons = True
-        session.show_basemap = True
+        session.show_polygons = False
+        session.show_basemap = False
         session.active_handler = session.handlers['input_environment']
         session.environment['mode'] = self.name
 
         # sliders:
         session.grid_1.slider.show_text = False
         session.grid_1.slider.show_controls = False
-        session.grid_2.slider.show_text = True
-        session.grid_2.slider.show_controls = True
+        session.grid_2.slider.show_text = False
+        session.grid_2.slider.show_controls = False
 
         # setup mode selectors:
         session.grid_1.update_cell_data(session.input_environment_grid_1)
@@ -163,6 +171,13 @@ class Input_Environment:
 
     def draw(self, canvas):
 
+        # pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), [[20, 70], [20, 20], [80, 20], [80, 70]])
+        # image = self.surface.warp_image("images/scenario_progressive.bmp", session.canvas_size)
+        # image = pygame.image.frombuffer(image, image.shape[1::-1], 'BGR')
+
+        # image = pygame.image.load("images/scenario_progressive.bmp")
+        canvas.blit(self.image.image, (0,0))
+
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings
             session.gis.draw_polygon_layer(
@@ -174,5 +189,25 @@ class Input_Environment:
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.draw_area()
 
+        # canvas.blit(self.surface, (0,0))
+
     def update(self):
         pass
+
+
+class Image:
+    def __init__(self, file, dst_points):
+        self.file = file
+        self.surface = keystone.Surface(session.canvas_size)
+
+        img_h, img_w, _ = cv2.imread(file).shape
+
+        # calculate the projection matrix (image pixels -> EPSG:3857)
+        self.surface.src_points = [[0, 0], [0, img_h], [img_w, img_h], [img_w, 0]],
+        self.surface.dst_points = dst_points
+        self.surface.calculate(session.viewport.transform_mat)
+
+    def warp(self):
+        # warp image and update the surface
+        image = self.surface.warp_image(self.file, session.canvas_size)
+        self.image = pygame.image.frombuffer(image, image.shape[1::-1], 'BGR')

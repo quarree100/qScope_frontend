@@ -10,7 +10,6 @@ import datetime
 from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
 
 from config import config
-import q100viz.keystone as keystone
 import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
@@ -23,8 +22,8 @@ import q100viz.session as session
 FPS = session.FPS = 12
 
 # set window position
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,2160)  # projection to the left
+# os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
+# os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,2160)  # projection to the left
 
 # Initialize program
 pygame.init()
@@ -39,22 +38,9 @@ grid_udp_2 = ('localhost', 5000)
 stats_io = 'http://localhost:8081'
 
 # Set up display
-canvas_size = 1920, 1080
+canvas_size = session.canvas_size
 canvas = pygame.display.set_mode(canvas_size, NOFRAME)
 pygame.display.set_caption("q100viz")
-
-# create the main surface, projected to corner points
-# the viewport's coordinates are between 0 and 100 on each axis
-viewport = session.viewport = keystone.Surface(canvas_size, pygame.SRCALPHA)
-try:
-    viewport.load(config['SAVED_KEYSTONE_FILE'])
-    print('loading src_points:' , viewport.src_points)
-    print('loading dst_points:' , viewport.dst_points)
-except Exception:
-    print("Failed to open keystone file")
-    viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
-    viewport.dst_points = [[0, 0], [0, canvas_size[1]], [canvas_size[0], canvas_size[1]], [canvas_size[0], 0]]
-viewport.calculate()
 
 # Initialize geographic viewport and basemap
 
@@ -62,7 +48,7 @@ _gis = session.gis = gis.GIS(
     canvas_size,
     # northeast          northwest           southwest           southeast
     [[1013631, 7207409], [1012961, 7207198], [1013359, 7205932], [1014029, 7206143]],
-    viewport)
+    session.viewport)
 
 basemap = session.basemap = gis.Basemap(
     canvas_size, config['BASEMAP_FILE'],
@@ -81,7 +67,7 @@ grid_1 = session.grid_1 = grid.Grid(
         [config['GRID_1_X1'], config['GRID_1_Y2']],
         [config['GRID_1_X2'], config['GRID_1_Y2']],
         [config['GRID_1_X2'], config['GRID_1_Y1']]],
-        viewport, config['GRID_1_SETUP_FILE'],
+        session.viewport, config['GRID_1_SETUP_FILE'],
         ['slider0'], [[50, 130], [50, 100], [100, 100], [100, 130]])  # TODO: rename sliders
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, ncols, nrows, [
@@ -89,13 +75,13 @@ grid_2 = session.grid_2 = grid.Grid(
         [config['GRID_2_X1'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
-        viewport, config['GRID_2_SETUP_FILE'],
+        session.viewport, config['GRID_2_SETUP_FILE'],
         ['slider0'], [[0, 130], [0, 100], [50, 100], [50, 130]])
 
 session.show_polygons = False
 session.show_basemap = False
 show_grid = False
-show_typologiezonen = True
+show_typologiezonen = False
 show_nahwaermenetz = True
 display_viewport = True
 
@@ -296,7 +282,7 @@ while True:
     ################################## DRAWING ########################
     # clear surfaces
     canvas.fill(0)
-    viewport.fill(0)
+    session.viewport.fill(0)
     _gis.surface.fill(0)
     for grid in (grid_1, grid_2):
         grid.surface.fill(0)
@@ -319,11 +305,11 @@ while True:
     grid_2.draw(show_grid)
 
     # draw mask
-    pygame.draw.polygon(viewport, (0, 0, 0), viewport.transform(mask_points))
+    pygame.draw.polygon(session.viewport, (0, 0, 0), session.viewport.transform(mask_points))
 
     # draw mode-specific surface:
     if session.active_handler:
-        session.active_handler.draw(canvas)
+        session.active_handler.draw(session.viewport)
 
     # render surfaces
     if session.show_basemap:
@@ -351,16 +337,15 @@ while True:
 
     # slider
     for grid in grid_1, grid_2:
-        grid_1.slider.render(viewport)
-        grid_2.slider.render(viewport)
-    # mode_selector.render(viewport)
+        grid_1.slider.render(session.viewport)
+        grid_2.slider.render(session.viewport)
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))
     canvas.blit(grid_2.surface, (0, 0))
 
     if display_viewport:
-        canvas.blit(viewport, (0, 0))
+        canvas.blit(session.viewport, (0, 0))
 
     ############ render everything beyond/on top of canvas: ###########
 

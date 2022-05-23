@@ -41,6 +41,9 @@ class CalibrationMode:
                 session.basemap.surface.calculate(session.gis.surface.transform_mat)
                 session.basemap.warp()
 
+                session.handlers['input_environment'].image.surface.calculate(session.viewport.transform_mat)
+                session.handlers['input_environment'].image.warp()
+
             elif event.key == K_s:
                 session.viewport.save(keystone_file)
 

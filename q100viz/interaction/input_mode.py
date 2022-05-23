@@ -105,8 +105,15 @@ class Input_Environment:
         self.surface.dst_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
 
         self.surface.calculate(session.viewport.transform_mat)
-        self.image = Image("images/scenario_progressive.bmp", [[0,0], [0,100], [25,100], [25,0]])
-        self.image.warp()
+        self.images = [
+            Image("images/scenario_conservative.bmp", [[0,0], [0,100], [25,100], [25,0]]),
+            Image("images/scenario_moderat_I.bmp", [[0,0], [0,100], [25,100], [25,0]]),
+            Image("images/scenario_moderat_II.bmp", [[0,0], [0,100], [25,100], [25,0]]),
+            Image("images/scenario_progressive.bmp", [[0,0], [0,100], [25,100], [25,0]])
+            ]
+
+        for image in self.images:
+            image.warp()
 
     def activate(self):
         session.show_polygons = False
@@ -171,13 +178,6 @@ class Input_Environment:
 
     def draw(self, canvas):
 
-        # pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), [[20, 70], [20, 20], [80, 20], [80, 70]])
-        # image = self.surface.warp_image("images/scenario_progressive.bmp", session.canvas_size)
-        # image = pygame.image.frombuffer(image, image.shape[1::-1], 'BGR')
-
-        # image = pygame.image.load("images/scenario_progressive.bmp")
-        canvas.blit(self.image.image, (0,0))
-
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings
             session.gis.draw_polygon_layer(
@@ -189,7 +189,11 @@ class Input_Environment:
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.draw_area()
 
-        # canvas.blit(self.surface, (0,0))
+        # display images:
+        x_displace = 0
+        for image in self.images:
+            canvas.blit(image.image, (x_displace,0))
+            x_displace += image.img_w
 
     def update(self):
         pass
@@ -200,10 +204,10 @@ class Image:
         self.file = file
         self.surface = keystone.Surface(session.canvas_size)
 
-        img_h, img_w, _ = cv2.imread(file).shape
+        self.img_h, self.img_w, _ = cv2.imread(file).shape
 
         # calculate the projection matrix (image pixels -> EPSG:3857)
-        self.surface.src_points = [[0, 0], [0, img_h], [img_w, img_h], [img_w, 0]],
+        self.surface.src_points = [[0, 0], [0, self.img_h], [self.img_w, self.img_h], [self.img_w, 0]],
         self.surface.dst_points = dst_points
         self.surface.calculate(session.viewport.transform_mat)
 

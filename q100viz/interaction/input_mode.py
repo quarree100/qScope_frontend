@@ -106,10 +106,10 @@ class Input_Environment:
 
         self.surface.calculate(session.viewport.transform_mat)
         self.images = [
-            Image("images/scenario_conservative.bmp", [[0,0], [0,100], [25,100], [25,0]]),
-            Image("images/scenario_moderat_I.bmp", [[0,0], [0,100], [25,100], [25,0]]),
-            Image("images/scenario_moderat_II.bmp", [[0,0], [0,100], [25,100], [25,0]]),
-            Image("images/scenario_progressive.bmp", [[0,0], [0,100], [25,100], [25,0]])
+            Image("images/scenario_conservative.tif"),
+            Image("images/scenario_moderat_I.tif"),
+            Image("images/scenario_moderat_II.tif"),
+            Image("images/scenario_progressive.tif")
             ]
 
         for image in self.images:
@@ -190,9 +190,9 @@ class Input_Environment:
             slider.draw_area()
 
         # display images:
-        x_displace = 0
+        x_displace = 300
         for image in self.images:
-            canvas.blit(image.image, (x_displace,0))
+            canvas.blit(image.image, (x_displace, 120))
             x_displace += image.img_w
 
     def update(self):
@@ -200,15 +200,18 @@ class Input_Environment:
 
 
 class Image:
-    def __init__(self, file, dst_points):
+    def __init__(self, file):
         self.file = file
         self.surface = keystone.Surface(session.canvas_size)
 
         self.img_h, self.img_w, _ = cv2.imread(file).shape
 
         # calculate the projection matrix (image pixels -> EPSG:3857)
-        self.surface.src_points = [[0, 0], [0, self.img_h], [self.img_w, self.img_h], [self.img_w, 0]],
-        self.surface.dst_points = dst_points
+        self.surface.src_points = [[0, 0], [0, self.img_h], [self.img_w, self.img_h], [self.img_w, 0]]
+
+        x_2 = self.img_w/session.canvas_size[0] * 100
+        y_2 = self.img_h/session.canvas_size[1] * 100
+        self.surface.dst_points = [[0, 0], [0, y_2], [x_2, y_2], [x_2, 0]]
         self.surface.calculate(session.viewport.transform_mat)
 
     def warp(self):

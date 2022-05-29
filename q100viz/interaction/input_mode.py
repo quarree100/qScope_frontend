@@ -106,7 +106,7 @@ class Input_Environment:
 
         self.surface.calculate(session.viewport.transform_mat)
         self.images = [
-            Image("images/scenario_conservative.tif"),
+            Image("images/scenario_conservative.png"),
             Image("images/scenario_moderat_I.tif"),
             Image("images/scenario_moderat_II.tif"),
             Image("images/scenario_progressive.tif")
@@ -218,3 +218,4 @@ class Image:
         # warp image and update the surface
         image = self.surface.warp_image(self.file, session.canvas_size)
         self.image = pygame.image.frombuffer(image, image.shape[1::-1], 'BGR')
+        self.image.set_colorkey((0, 0, 0))

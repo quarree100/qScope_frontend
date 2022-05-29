@@ -116,6 +116,15 @@ Drawing on Canvas
   #                   surface,   color,      coords_transformed
   pygame.draw.polygon(viewport, (255, 0, 0), viewport.transform(rect_points))
 
+**display image**
+Pygame is able to load images onto Surface objects from PNG, JPG, GIF, and BMP image files.
+
+.. code-block:: python
+
+  image = pygame.image.load("images/scenario_progressive.bmp")
+  canvas.blit(image, (0,0))
+
+
 **display sliders**:
 The sliders have a bool called ``show_text`` that, when ``True``, activates the display of the slider control texts. This variable can be used for the usage modes to define whether the slider controls shall be displayed.
 
@@ -123,10 +132,36 @@ The sliders have a bool called ``show_text`` that, when ``True``, activates the 
 keystone transformation
 ^^^^^^^^^^^^^^^^^^^^^^^
 
+general information on image transofrmation using opencv:
+
 `tutorial_py_geometric_transformations <https://docs.opencv.org/3.4/da/d6e/tutorial_py_geometric_transformations.html>`_
 
 `using cv.perspectiveTransform for vectors <https://docs.opencv.org/3.4/d2/de8/group__core__array.html#gad327659ac03e5fd6894b90025e6900a7>`_
 and `cv.warpPerspective for images <https://docs.opencv.org/3.4/da/d54/group__imgproc__transform.html#gaf73673a7e8e18ec6963e3774e6a94b87>`_
+
+adding a new surface, draw on it and transform it:
+--------------------------------------------------
+
+.. code-block::
+
+  class SomeClass:
+    # session.canvas_size = 1920, 1080
+    self.surface = keystone.Surface(session.canvas_size, pygame.SRCALPHA)
+
+    # x_size, y_size = 22, 22
+    self.surface.src_points = [[0, 0], [0, y_size], [x_size, y_size], [x_size, 0]]
+    self.surface.dst_points = [
+        [config['X1'], config['Y1']],
+        [config['X1'], config['Y2']],
+        [config['X2'], config['Y2']],
+        [config['X2'], config['Y1']]]
+    # where e.g. X1 = 0, X2 = 50, Y1 = 0, Y2 = 81.818
+
+    def draw(self, viewport):
+
+      pygame.draw.polygon(self.surface, pygame.Color(255, 255, 255), [[20, 70], [20, 20], [80, 20], [80, 70]])  # render polygon
+
+      viewport.blit(self.surface, (0,0))  # cast it to viewport
 
 in file ``q100viz/keystone.py``
 

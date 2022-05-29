@@ -105,15 +105,24 @@ class Input_Environment:
         self.surface.dst_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
 
         self.surface.calculate(session.viewport.transform_mat)
-        self.images = [
-            Image("images/scenario_conservative.tif"),
-            Image("images/scenario_moderat_I.tif"),
-            Image("images/scenario_moderat_II.tif"),
-            Image("images/scenario_progressive.tif")
+        self.images_active = [
+            Image("images/scenario_A_active.tif"),
+            Image("images/scenario_B_active.tif"),
+            Image("images/scenario_C_active.tif"),
+            Image("images/scenario_D_active.tif")
+            ]
+        self.images_disabled = [
+            Image("images/scenario_A_disabled.tif"),
+            Image("images/scenario_B_disabled.tif"),
+            Image("images/scenario_C_disabled.tif"),
+            Image("images/scenario_D_disabled.tif")
             ]
 
-        for image in self.images:
-            image.warp()
+        self.images = [image for image in self.images_disabled]
+
+        for lst in [self.images_active, self.images_disabled]:
+            for image in lst:
+                image.warp()
 
     def activate(self):
         session.show_polygons = False
@@ -124,8 +133,8 @@ class Input_Environment:
         # sliders:
         session.grid_1.slider.show_text = False
         session.grid_1.slider.show_controls = False
-        session.grid_2.slider.show_text = False
-        session.grid_2.slider.show_controls = False
+        session.grid_2.slider.show_text = True
+        session.grid_2.slider.show_controls = True
 
         # setup mode selectors:
         session.grid_1.update_cell_data(session.input_environment_grid_1)
@@ -144,6 +153,8 @@ class Input_Environment:
 
     def process_grid_change(self):
         session.buildings['selected'] = False
+        self.images = [image for image in self.images_disabled]
+
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
@@ -158,21 +169,24 @@ class Input_Environment:
                             session.buildings.loc[selection.name,
                                                 'selected'] = True
 
+                        # assumption: there is only one token to choose the scenario with
+                        if grid is session.grid_1 and x < len(row) / 2:
+                            self.images[0] = self.images_active[0]
+                            session.environment['active_scenario'] = 'A'
+                        elif grid is session.grid_1 and x > len(row) / 2:
+                            self.images[1] = self.images_active[1]
+                            session.environment['active_scenario'] = 'B'
+                        elif grid is session.grid_2 and x < len(row) / 2:
+                            self.images[2] = self.images_active[2]
+                            session.environment['active_scenario'] = 'C'
+                        elif grid is session.grid_2 and x > len(row) / 2:
+                            self.images[3] = self.images_active[3]
+                            session.environment['active_scenario'] = 'D'
+
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
-                            if cell.handle in cell.handle in ['renovation_cost', 'CO2-prize']:  # TODO: provide valid handles somewhere globally..
-                                if grid.slider.show_controls:
-                                    grid.slider.handle = cell.handle
-                                    if grid.slider.previous_handle is not grid.slider.handle:
-                                        session.print_verbose(
-                                            ("slider_handle: ", grid.slider.handle))
-                                        grid.slider.previous_handle = grid.slider.handle
-
-                            elif cell.handle == 'start_input_households':
+                            if cell.handle == 'start_input_households':
                                 session.handlers['input_households'].activate()
-
-                            elif cell.handle == 'start_simulation':
-                                session.handlers['simulation'].activate()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 
@@ -184,10 +198,6 @@ class Input_Environment:
                 canvas,
                 session.buildings[session.buildings.selected], 2, (255, 0, 127)
             )
-
-        # coloring slider area:
-        for slider in session.grid_1.slider, session.grid_2.slider:
-            slider.draw_area()
 
         # display images:
         x_displace = 65

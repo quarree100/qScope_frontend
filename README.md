@@ -5,6 +5,8 @@ Code für die Projektion und Interaktion via _Tangible User Interface_ des Q-Sco
 ## q100viz
 *q100viz* is based on [pygame](https://www.pygame.org/).
 
+Find some documentation at q-scope.readthedocs.io/
+
 Before you can run the sketch, you need to install required packages:
 ```
 pip install -r requirements.txt
@@ -55,9 +57,12 @@ project qScope
 
 ```
 where:
-- cspy: https://github.com/dunland/cspy
+- cspy_L and cspy_R: https://github.com/dunland/cspy (we are using two decoders to control two webcam streams with specific light settings)
 - data: has to be linked from server
 - q100_abm: https://github.com/quarree100/q100_abm
 - qScope_infoscreen: https://github.com/quarree100/qScope_infoscreen
 - qScope_frontend: https://github.com/quarree100/qScope_frontend
 - settings: t.b.a (currently from cspy/settings)
+
+## further requirements:
+- GAMA has to be installed and the path to its headless folder has to be provided in config.py

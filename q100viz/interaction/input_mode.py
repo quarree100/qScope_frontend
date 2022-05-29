@@ -106,7 +106,7 @@ class Input_Environment:
 
         self.surface.calculate(session.viewport.transform_mat)
         self.images = [
-            Image("images/scenario_conservative.png"),
+            Image("images/scenario_conservative.tif"),
             Image("images/scenario_moderat_I.tif"),
             Image("images/scenario_moderat_II.tif"),
             Image("images/scenario_progressive.tif")
@@ -190,10 +190,12 @@ class Input_Environment:
             slider.draw_area()
 
         # display images:
-        x_displace = 300
+        x_displace = 65
         for image in self.images:
-            canvas.blit(image.image, (x_displace, 120))
-            x_displace += image.img_w
+            canvas.blit(image.image,
+                (x_displace,
+                (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 2))
+            x_displace += session.viewport.dst_points[2][0] / 5
 
     def update(self):
         pass

@@ -45,21 +45,28 @@ class Slider:
         a = 100 + abs(int(numpy.sin(pygame.time.get_ticks() / 1000) * 105))  # alpha value for unselected cells
 
         for cell, rect_points in self.grid.rects_transformed:
-            if cell.handle is not None and self.show_controls:  # cells have handles if set in csv
-                stroke = 4 if cell.selected else 0
+            if cell.handle is not None: # cells have handles if set in csv
+                if self.show_controls:
+                    stroke = 4 if cell.selected else 0
 
-                if cell.selected:
-                    if cell.handle not in session.mode_selector_handles:  # do not adopt color of mode selectors
-                        cell.color = pygame.Color(cell.color.r, cell.color.g, cell.color.b, 255)
-                        self.color = cell.color
-                else:
-                    cell.color = pygame.Color(cell.color.r, cell.color.g, cell.color.b, a)
+                    if cell.selected:
+                        if cell.handle not in session.mode_selector_handles:  # do not adopt color of mode selectors
+                            cell.color = pygame.Color(cell.color.r, cell.color.g, cell.color.b, 255)
+                            self.color = cell.color
+                    else:
+                        cell.color = pygame.Color(cell.color.r, cell.color.g, cell.color.b, a)
 
-                if session.show_polygons: pygame.draw.polygon(self.grid.surface, cell.color, rect_points, stroke)
+                    if self.show_controls: pygame.draw.polygon(self.grid.surface, cell.color, rect_points, stroke)
 
+                # slider control texts:
+                if self.show_text and cell.y == len(self.grid.grid) - 1:
+                    font = pygame.font.SysFont('Arial', 20)
+                    self.surface.blit(
+                    font.render(str(cell.handle)[:4], True, (255, 255, 255)),
+                    [rect_points[0][0], rect_points[0][1] + 30]
+                    )
 
         canvas.blit(self.surface, (0,0))
-
 
     def draw_area(self):
         pygame.draw.polygon(self.surface, self.color, self.coords_transformed)

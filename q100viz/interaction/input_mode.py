@@ -199,7 +199,7 @@ class Input_Environment:
                 session.buildings[session.buildings.selected], 2, (255, 0, 127)
             )
 
-        # display images:
+        # display scenario images:
         x_displace = 65
         for image in self.images:
             canvas.blit(image.image,

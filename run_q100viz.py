@@ -7,7 +7,7 @@ import pandas
 import numpy as np
 import pygame
 import datetime
-from pygame.locals import NOFRAME, KEYDOWN, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_q, K_s, K_t, K_v, K_PLUS, K_MINUS, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
 from config import config
 import q100viz.gis as gis
@@ -118,8 +118,8 @@ neubau.index.names = ['id']
 
 neubau = neubau.rename(columns={'Kataster_S': 'address', 'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption'})
 
-gis.print_geodataframe(bestand, print_each_column=True)
-gis.print_geodataframe(neubau, print_each_column=True)
+# gis.print_geodataframe(bestand, print_each_column=True)
+# gis.print_geodataframe(neubau, print_each_column=True)
 
 # merge:
 # buildings = session.buildings = pandas.concat([bestand, neubau])
@@ -187,22 +187,25 @@ while True:
             # toggle grid:
             elif event.key == K_g:
                 show_grid = not show_grid
-
-            ##################### mode selection ######################
-            # activate input_mode:
-            if event.key == K_t:
-                session.handlers['input_environment'].activate()
             # toggle nahwaermenetz:
-            if event.key == K_n:
+            elif event.key == K_n:
                 show_nahwaermenetz = not show_nahwaermenetz
             elif event.key == K_b:
                 display_viewport = not display_viewport
-            # toggle calibration:
-            elif event.key == K_c:
-                session.active_handler = handlers[
-                    'calibrate' if session.active_handler != handlers['calibrate'] else 'input_environment']
-            # toggle simulation_mode:
-            elif event.key == K_s:
+
+            ##################### mode selection ######################
+            # enter questionnaire mode:
+            if event.key == K_1:
+                session.handlers['questionnaire'].activate()
+            # activate Input Environment Mode:
+            elif event.key == K_2:
+                session.handlers['input_environment'].activate()
+            # activate Input Households Mode:
+            elif event.key == K_3:
+                session.handlers['input_households'].activate()
+            # enter simulation mode:
+            elif event.key == K_4:
+                session.handlers['simulation'].activate()
 
                 # provide data:
                 outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
@@ -228,7 +231,7 @@ while True:
                 outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
                 outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
 
-                params = pandas.DataFrame(columns=['scenario', 'type', 'value'])
+                params = pandas.DataFrame(columns=['name', 'type', 'value'])
                 params.loc[len(params)] = ['alpha_scenario', 'string', 'Static_mean']
                 params.loc[len(params)] = ['carbon_price_scenario', 'string', 'A-Conservative']
                 params.loc[len(params)] = ['energy_price_scenario', 'string', 'Prices_Project start']
@@ -239,10 +242,13 @@ while True:
                 simulation.make_xml(params, outputs)
                 simulation.run_script()
 
-            # toggle poll mode:
-            elif event.key == K_q:
-                session.handlers['questionnaire'].activate()
+            elif event.key == K_5:
+                session.handlers['data_view'].activate()
 
+            # toggle calibration:
+            elif event.key == K_c:
+                session.active_handler = handlers[
+                    'calibrate' if session.active_handler != handlers['calibrate'] else 'input_environment']
 
             ########## manual slider control for test purposes: #######
             elif event.key == K_PLUS:
@@ -322,9 +328,6 @@ while True:
         canvas.blit(_gis.surface, (0, 0))
 
     ########################## DATA PROCESSING ########################
-
-    # build clusters of selected buildings and send JSON message
-    # clusters = stats.make_clusters(buildings[buildings.selected])
 
     # export canvas every 1s:
     if session.seconds_elapsed % 1 == 0 and session.verbose and session.flag_export_canvas:

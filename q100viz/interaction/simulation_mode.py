@@ -19,7 +19,7 @@ class SimulationMode:
     def activate(self):
         session.environment['mode'] = self.name
         session.show_polygons = True
-        session.active_handler = session.handlers['simulation']
+        session.active_handler = self
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = False
             slider.show_controls = False
@@ -69,6 +69,9 @@ class SimulationMode:
 
             self.simulation_step += 1
             self.previous_tick = session.seconds_elapsed
+
+            if self.simulation_step >= 4:  # leave this mode after 4 seconds
+                session.handlers['data_view'].activate()
 
     def draw(self, canvas):
         if session.verbose:

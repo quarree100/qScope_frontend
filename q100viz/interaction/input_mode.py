@@ -159,16 +159,6 @@ class Input_Environment:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
                     if cell.selected:
-                        # high performance impact, use sparingly
-                        i = get_intersection(session.buildings, grid, x, y)
-
-                        # use rotation value to cycle through buildings located in cell
-                        n = len(session.buildings[i])
-                        if n > 0:
-                            selection = session.buildings[i].iloc[cell.rot % n]
-                            session.buildings.loc[selection.name,
-                                                'selected'] = True
-
                         # assumption: there is only one token to choose the scenario with
                         if grid is session.grid_1 and x < len(row) / 2:
                             self.images[0] = self.images_active[0]

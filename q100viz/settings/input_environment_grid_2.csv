@@ -1,0 +1,4 @@
+x,y,handle,color
+17,17,start_input_environment,blue
+19,17,start_input_households,purple
+21,17,start_simulation,yellow

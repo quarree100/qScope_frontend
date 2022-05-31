@@ -15,10 +15,10 @@ config = {
     'GAMA_OUTPUT_FOLDER': '/home/dunland/opt/GAMA/headless/output',
     'GAMA_MODEL_FILE' : '../q100_abm/q100/models/qscope_ABM.gaml',
 
-    'GRID_1_SETUP_FILE': '../data/grid_1_setup.csv',
-    'GRID_2_SETUP_FILE': '../data/grid_2_setup.csv',
-    'GRID_1_INPUT_ENVIRONMENT_FILE': '../data/input_environment_grid_1.csv',
-    'GRID_2_INPUT_ENVIRONMENT_FILE': '../data/input_environment_grid_2.csv',
+    'GRID_1_SETUP_FILE': 'q100viz/settings/input_households_grid_1.csv',
+    'GRID_2_SETUP_FILE': 'q100viz/settings/input_households_grid_2.csv',
+    'GRID_1_INPUT_ENVIRONMENT_FILE': 'q100viz/settings/input_environment_grid_1.csv',
+    'GRID_2_INPUT_ENVIRONMENT_FILE': 'q100viz/settings/input_environment_grid_2.csv',
 
     'GRID_2_X1' : 50,
     'GRID_2_X2' : 100,

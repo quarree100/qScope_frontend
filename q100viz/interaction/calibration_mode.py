@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import KEYDOWN, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_s
 
 import q100viz.session as session
-from config import config
+from q100viz.settings.config import config
 
 class CalibrationMode:
     def __init__(self):

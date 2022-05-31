@@ -3,7 +3,7 @@ import pygame
 import q100viz.keystone as keystone
 import q100viz.session as session
 import q100viz.stats as stats
-from config import config
+from q100viz.settings.config import config
 from q100viz.graphics.graphictools import Image
 
 class Input_Environment:
@@ -36,7 +36,7 @@ class Input_Environment:
     def activate(self):
         session.show_polygons = False
         session.show_basemap = False
-        session.active_handler = session.handlers['input_environment']
+        session.active_handler = self
         session.environment['mode'] = self.name
 
         # sliders:

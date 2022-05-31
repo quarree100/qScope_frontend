@@ -9,7 +9,7 @@ import pygame
 import datetime
 from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
-from config import config
+from q100viz.settings.config import config
 import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp

@@ -3,7 +3,7 @@
 import pandas as pd
 import pygame
 
-from config import config
+from q100viz.settings.config import config
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
 from q100viz.interaction.input_environment_mode import Input_Environment

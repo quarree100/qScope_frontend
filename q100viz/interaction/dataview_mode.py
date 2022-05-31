@@ -7,11 +7,28 @@ import numpy
 
 import q100viz.keystone as keystone
 import q100viz.session as session
-from config import config
+from q100viz.settings.config import config
+from q100viz.graphics.graphictools import Image
 
 class DataView_Mode():
     def __init__(self):
         self.name = 'data_view'
+
+        self.images_active = [
+            Image("images/piechart.tif"),
+            Image("images/predator-prey.tif"),
+            Image("images/sankey.tif")
+            ]
+        self.images_disabled = [
+            Image("images/piechart_disabled.tif"),
+            Image("images/predator-prey_disabled.tif"),
+            Image("images/sankey_disabled.tif")
+            ]
+        self.images = [image for image in self.images_disabled]
+
+        for lst in [self.images_active, self.images_disabled]:
+            for image in lst:
+                image.warp()
 
     def activate(self):
         session.active_handler = self
@@ -28,6 +45,7 @@ class DataView_Mode():
         # session.grid_1.slider.handle = 'answer'
         # session.grid_2.slider.handle = 'next_question'
 
+
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
 
     def process_event(self, event):
@@ -40,8 +58,6 @@ class DataView_Mode():
 
             self.process_grid_change()
 
-            # session.stats.send_dataframe_using_keys(session.buildings[session.buildings['connection_to_heat_grid'] == True], keys=["address","connection_to_heat_grid"])
-
             connected_buildings = pd.DataFrame(data=[
                 {'connected_buildings' : len(session.buildings[session.buildings['connection_to_heat_grid'] == True])}])
             session.stats.send_dataframe_as_json(connected_buildings)
@@ -50,7 +66,13 @@ class DataView_Mode():
         pass
 
     def draw(self, canvas):
-
+        # display graphs:
+        x_displace = 65
+        for image in self.images:
+            canvas.blit(image.image,
+                (x_displace,
+                (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 3))
+            x_displace += session.viewport.dst_points[2][0] / 4
         pass
 
     def update(self):

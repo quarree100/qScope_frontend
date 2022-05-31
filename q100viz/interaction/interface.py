@@ -8,7 +8,7 @@ import numpy
 import q100viz.keystone as keystone
 import q100viz.session as session
 
-from config import config
+from q100viz.settings.config import config
 
 ############################ SLIDER ###################################
 class Slider:

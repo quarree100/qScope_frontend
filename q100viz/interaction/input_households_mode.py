@@ -5,7 +5,7 @@ import pygame
 import q100viz.keystone as keystone
 import q100viz.session as session
 import q100viz.stats as stats
-from config import config
+from q100viz.settings.config import config
 class Input_Households:
     def __init__(self):
         self.name = 'input_households'

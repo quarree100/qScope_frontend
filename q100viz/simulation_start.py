@@ -4,7 +4,7 @@
 import subprocess
 import pandas as pd
 import os
-from config import config
+from q100viz.settings.config import config
 
 class Simulation:
 

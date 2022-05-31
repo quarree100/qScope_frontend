@@ -118,9 +118,6 @@ neubau.index.names = ['id']
 
 neubau = neubau.rename(columns={'Kataster_S': 'address', 'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption'})
 
-# gis.print_geodataframe(bestand, print_each_column=True)
-# gis.print_geodataframe(neubau, print_each_column=True)
-
 # merge:
 # buildings = session.buildings = pandas.concat([bestand, neubau])
 buildings = session.buildings = bestand

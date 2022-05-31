@@ -6,7 +6,8 @@ import pygame
 from config import config
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
-from q100viz.interaction.input_mode import Input_Households, Input_Environment
+from q100viz.interaction.input_environment_mode import Input_Environment
+from q100viz.interaction.input_households_mode import Input_Households
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.dataview_mode import DataView_Mode
 import q100viz.keystone as keystone

@@ -1,3 +1,6 @@
 __pycache__
 
 keystone.save
+qScope-log_*
+.work*
+.vscode

@@ -6,7 +6,7 @@ import pygame
 from q100viz.settings.config import config
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
-from q100viz.interaction.input_environment_mode import Input_Environment
+from q100viz.interaction.input_scenarios_mode import Input_Scenarios
 from q100viz.interaction.input_households_mode import Input_Households
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.dataview_mode import DataView_Mode
@@ -36,7 +36,7 @@ grid_2 = None
 buildings = None
 verbose = True
 
-environment = {'mode': 'input_environment'}
+environment = {'mode': 'input_scenarios'}
 
 environment['questions'] = [  # TODO: externalize this to yet another csv
 
@@ -50,12 +50,12 @@ environment['question'] = environment['questions'][0]
 
 input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
 input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
-input_environment_grid_1 = pd.read_csv(config['GRID_1_INPUT_ENVIRONMENT_FILE'])
-input_environment_grid_2 = pd.read_csv(config['GRID_2_INPUT_ENVIRONMENT_FILE'])
+input_scenarios_grid_1 = pd.read_csv(config['GRID_1_INPUT_SCENARIOS_FILE'])
+input_scenarios_grid_2 = pd.read_csv(config['GRID_2_INPUT_SCENARIOS_FILE'])
 
 # list of possible handles
-input_environment_variables = ['CO2-prize', 'renovation_cost']
-mode_selector_handles = ['start_input_environment', 'start_input_households', 'start_simulation']
+input_scenarios_variables = ['CO2-prize', 'renovation_cost']
+mode_selector_handles = ['start_input_scenarios', 'start_input_households', 'start_simulation']
 
 # interaction
 seconds_elapsed = 0
@@ -64,7 +64,7 @@ ticks_elapsed = 0
 handlers = {
     'calibrate': CalibrationMode(),
     'questionnaire': Questionnaire_Mode(),
-    'input_environment': Input_Environment(),
+    'input_scenarios': Input_Scenarios(),
     'input_households': Input_Households(),
     'simulation': SimulationMode(),
     'data_view': DataView_Mode()

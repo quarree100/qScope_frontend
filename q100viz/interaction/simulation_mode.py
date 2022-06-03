@@ -1,36 +1,47 @@
 ''' Simulation Mode fakes parameter changes for buildings later done by the ABM'''
 
 import numpy as np
-import pandas as pd
+import pandas
 import json
+import pygame
 
 import q100viz.session as session
 import q100viz.stats as stats
-import pygame
+from q100viz.simulation import Simulation
 class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
-        self.simulation_step = 0
-
-        self.previous_tick = -1  # stores moment of last step change
-
-        self.simulation_df = pd.DataFrame(columns=['step', 'buildings'])
 
     def activate(self):
         session.environment['mode'] = self.name
-        session.show_polygons = True
         session.active_handler = self
+
+        # display setup:
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = False
             slider.show_controls = False
 
-        # compose dataframe to start
-        df = pd.DataFrame(session.environment)
-        xml = '\n'.join(df.apply(stats.to_xml, axis=1))
-        print(xml)
-        f = open('../data/simulation_df.xml', 'w')
-        f.write(xml)
-        f.close()
+        # provide data:
+        outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
+        outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
+        outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
+
+        params = pandas.DataFrame(columns=['name', 'type', 'value'])
+        params.loc[len(params)] = ['alpha_scenario', 'string', 'Static_mean']
+        params.loc[len(params)] = ['carbon_price_scenario', 'string', 'A-Conservative']
+        params.loc[len(params)] = ['energy_price_scenario', 'string', 'Prices_Project start']
+        params.loc[len(params)] = ['q100_price_opex_scenario', 'string', '12 ct / kWh (static)']
+        params.loc[len(params)] = ['q100_price_capex_scenario', 'string', '1 payment']
+        params.loc[len(params)] = ['q100_emissions_scenario', 'string', 'Constant_50g / kWh']
+        # params.loc[len(params)] = ['keep_seed', 'bool', 'true']
+
+        simulation = Simulation(
+            final_step = 200,
+            until = None
+            )
+
+        simulation.make_xml(params, outputs, experiment_name='agent_decision_making')
+        simulation.run_script()
 
         # send data
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
@@ -54,29 +65,12 @@ class SimulationMode:
 
     def update(self):
 
-        ######################## SIMULATION UPDATE ####################
-        # one step per second:
-        if session.seconds_elapsed != self.previous_tick:
-
-            # mockup data:
-            session.buildings.loc[
-                (session.buildings.selected == True), 'CO2'] *= session.buildings.loc[
-                    (session.buildings.selected == True), 'CO2']
-            session.buildings['CO2'] += np.random.uniform(-0.5, 0.5)
-
-            if not session.buildings[session.buildings.selected == True].empty:
-                self.simulation_df.loc[len(self.simulation_df.index)] = [self.simulation_step, session.buildings[session.buildings.selected == True]]
-
-            self.simulation_step += 1
-            self.previous_tick = session.seconds_elapsed
-
-            if self.simulation_step >= 4:  # leave this mode after 4 seconds
-                session.handlers['data_view'].activate()
+        pass
 
     def draw(self, canvas):
         if session.verbose:
-            font = pygame.font.SysFont('Arial', 20)
-            canvas.blit(font.render(str(self.simulation_step), True, (255,255,255)), (300,900))
+            font = pygame.font.SysFont('Arial', 40)
+            canvas.blit(font.render("Simulation running...", True, (255,255,255)), (session.canvas_size[0]/2, session.canvas_size[1]/2))
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings
@@ -86,8 +80,8 @@ class SimulationMode:
             )
 
     def send_data(self, stats):
-        stats.send_dataframe_as_json(pd.DataFrame(self.simulation_df))
+        stats.send_dataframe_as_json(pandas.DataFrame(self.simulation_df))
 
         # save as csv in global data folder:
-        self.simulation_df.set_index('step').to_csv('../data/simulation_df.csv')
+        # self.simulation_df.set_index('step').to_csv('../data/simulation_df.csv')
         # self.simulation_df.to_json('../data/simulation_df.json')

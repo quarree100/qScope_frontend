@@ -256,7 +256,7 @@ ModeSelector
 
 A ModeSelector is a specific cell on the grid, which, when selected via token, activates a certain Mode.
 
-``grid_1_setup.csv``, ``grid_2_setup.csv``, ``input_environment_grid_1.csv`` and ``input_environment_grid_1.csv`` are used to assign functionality to grid cells.
+``grid_1_setup.csv``, ``grid_2_setup.csv``, ``input_scenarios_grid_1.csv`` and ``input_scenarios_grid_1.csv`` are used to assign functionality to grid cells.
 
 valid handles are:
 
@@ -269,7 +269,7 @@ valid handles are:
   "alpha_scenario", "Static_mean, Dynamic_moderate, Dynamic_high, Static_high"
   carbon_price_scenario, "A - Conservative, B - Moderate, C1 - Progressive, C2 - Progressive, C3 - Progressive"
   energy_price_scenario, "Prices_Project start, Prices_2021, Prices_2022 1st half"
-  q100_price_opex_scenario, "12 ct / kWh (static), 9-15 ct / kWh (dynamic)"
+  q100_price_opex_scenario, "12 ct / kWh (static), 15-9 ct / kWh (dynamic)"
   q100_price_capex_scenario, "1 payment, 2 payments, 5 payments"
   q100_emissions_scenario, "Constant_50g / kWh, Declining_Steps, Declining_Linear, ``Constant_ Zero emissions``"
 
@@ -300,7 +300,7 @@ zusätzlich kann `environmental_engagement` eingestellt werden als Einstellung v
 
 **mode selection**:
 
-- 'start_input_environment' (starts input mode A for global parameters)
+- 'start_input_scenarios' (starts input mode A for global parameters)
 - 'start_input_households' (input mode B for individual household parameters)
 - 'start_simulation' (creates xml to start GAMA simulation)
 

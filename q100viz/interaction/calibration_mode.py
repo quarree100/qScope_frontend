@@ -41,7 +41,7 @@ class CalibrationMode:
                 session.basemap.surface.calculate(session.gis.surface.transform_mat)
                 session.basemap.warp()
 
-                for image in session.handlers['input_environment'].images:
+                for image in session.handlers['input_scenarios'].images:
                     image.surface.calculate(session.viewport.transform_mat)
                     image.warp()
 

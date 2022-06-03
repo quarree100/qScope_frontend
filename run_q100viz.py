@@ -14,10 +14,10 @@ import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
 import q100viz.stats as stats
-from q100viz.simulation_start import Simulation
-from q100viz.interaction.interface import *
-from q100viz.interaction.simulation_mode import SimulationMode
 import q100viz.session as session
+from q100viz.interaction.interface import *
+from q100viz.simulation import Simulation
+from q100viz.interaction.simulation_mode import SimulationMode
 # Set FPS
 FPS = session.FPS = 12
 
@@ -194,58 +194,22 @@ while True:
             # enter questionnaire mode:
             if event.key == K_1:
                 session.handlers['questionnaire'].activate()
-            # activate Input Environment Mode:
+            # activate Input Scenarios Mode:
             elif event.key == K_2:
-                session.handlers['input_environment'].activate()
+                session.handlers['input_scenarios'].activate()
             # activate Input Households Mode:
             elif event.key == K_3:
                 session.handlers['input_households'].activate()
             # enter simulation mode:
             elif event.key == K_4:
                 session.handlers['simulation'].activate()
-
-                # provide data:
-                outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
-                outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
-                outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
-
-                params = pandas.DataFrame(columns=['name', 'type', 'value'])
-                params.loc[len(params)] = ['alpha_scenario', 'string', 'Static_mean']
-                params.loc[len(params)] = ['carbon_price_scenario', 'string', 'A-Conservative']
-                params.loc[len(params)] = ['energy_price_scenario', 'string', 'Prices_Project start']
-                params.loc[len(params)] = ['q100_price_opex_scenario', 'string', '12 ct / kWh (static)']
-                params.loc[len(params)] = ['q100_price_capex_scenario', 'string', '1 payment']
-                params.loc[len(params)] = ['q100_emissions_scenario', 'string', 'Constant_50g / kWh']
-                params.loc[len(params)] = ['keep_seed', 'bool', 'true']
-
-                simulation = Simulation(
-                    final_step = 200,
-                    until = None
-                    )
-
-                # compose dataframe to start gama simulation
-                outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
-                outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
-                outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
-
-                params = pandas.DataFrame(columns=['name', 'type', 'value'])
-                params.loc[len(params)] = ['alpha_scenario', 'string', 'Static_mean']
-                params.loc[len(params)] = ['carbon_price_scenario', 'string', 'A-Conservative']
-                params.loc[len(params)] = ['energy_price_scenario', 'string', 'Prices_Project start']
-                params.loc[len(params)] = ['q100_price_opex_scenario', 'string', '12 ct / kWh (static)']
-                params.loc[len(params)] = ['q100_price_capex_scenario', 'string', '1 payment']
-                params.loc[len(params)] = ['q100_emissions_scenario', 'string', 'Constant_50g / kWh']
-
-                simulation.make_xml(params, outputs)
-                simulation.run_script()
-
             elif event.key == K_5:
                 session.handlers['data_view'].activate()
 
             # toggle calibration:
             elif event.key == K_c:
                 session.active_handler = handlers[
-                    'calibrate' if session.active_handler != handlers['calibrate'] else 'input_environment']
+                    'calibrate' if session.active_handler != handlers['calibrate'] else 'input_scenarios']
 
             ########## manual slider control for test purposes: #######
             elif event.key == K_PLUS:

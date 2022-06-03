@@ -6,9 +6,9 @@ import q100viz.stats as stats
 from q100viz.settings.config import config
 from q100viz.graphics.graphictools import Image
 
-class Input_Environment:
+class Input_Scenarios:
     def __init__(self):
-        self.name = 'input_environment'
+        self.name = 'input_scenarios'
         self.surface = keystone.Surface(session.canvas_size, pygame.SRCALPHA)
         self.surface.src_points = [[0,0], [0,1], [1, 1], [1, 0]]
         self.surface.dst_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
@@ -46,8 +46,8 @@ class Input_Environment:
         session.grid_2.slider.show_controls = True
 
         # setup mode selectors:
-        session.grid_1.update_cell_data(session.input_environment_grid_1)
-        session.grid_2.update_cell_data(session.input_environment_grid_2)
+        session.grid_1.update_cell_data(session.input_scenarios_grid_1)
+        session.grid_2.update_cell_data(session.input_scenarios_grid_2)
 
         # send data:
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
@@ -88,6 +88,8 @@ class Input_Environment:
                                 session.handlers['input_households'].activate()
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+
+        print(session.environment)
 
     def draw(self, canvas):
 

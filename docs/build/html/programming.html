@@ -128,6 +128,12 @@
 <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">viewport</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">viewport</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">rect_points</span><span class="p">))</span>
 </pre></div>
 </div>
+<p><strong>display image</strong>
+Pygame is able to load images onto Surface objects from PNG, JPG, GIF, and BMP image files.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">image</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;images/scenario_progressive.bmp&quot;</span><span class="p">)</span>
+<span class="n">canvas</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
 <p><strong>display sliders</strong>:
 The sliders have a bool called <code class="docutils literal notranslate"><span class="pre">show_text</span></code> that, when <code class="docutils literal notranslate"><span class="pre">True</span></code>, activates the display of the slider control texts. This variable can be used for the usage modes to define whether the slider controls shall be displayed.</p>
 </div>
@@ -250,7 +256,7 @@ Q-Scope needs to know where to find the <code class="docutils literal notranslat
 <div class="section" id="modeselector">
 <h2>ModeSelector<a class="headerlink" href="#modeselector" title="Permalink to this headline">¶</a></h2>
 <p>A ModeSelector is a specific cell on the grid, which, when selected via token, activates a certain Mode.</p>
-<p><code class="docutils literal notranslate"><span class="pre">grid_1_setup.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">grid_2_setup.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">input_environment_grid_1.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">input_environment_grid_1.csv</span></code> are used to assign functionality to grid cells.</p>
+<p><code class="docutils literal notranslate"><span class="pre">grid_1_setup.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">grid_2_setup.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">input_scenarios_grid_1.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">input_scenarios_grid_1.csv</span></code> are used to assign functionality to grid cells.</p>
 <p>valid handles are:</p>
 <p><strong>environment handles:</strong></p>
 <table class="colwidths-auto docutils align-default" id="id1">
@@ -271,7 +277,7 @@ Q-Scope needs to know where to find the <code class="docutils literal notranslat
 <td><p>Prices_Project start, Prices_2021, Prices_2022 1st half</p></td>
 </tr>
 <tr class="row-odd"><td><p>q100_price_opex_scenario</p></td>
-<td><p>12 ct / kWh (static), 9-15 ct / kWh (dynamic)</p></td>
+<td><p>12 ct / kWh (static), 15-9 ct / kWh (dynamic)</p></td>
 </tr>
 <tr class="row-even"><td><p>q100_price_capex_scenario</p></td>
 <td><p>1 payment, 2 payments, 5 payments</p></td>
@@ -344,7 +350,7 @@ Q-Scope needs to know where to find the <code class="docutils literal notranslat
 </ul>
 <p><strong>mode selection</strong>:</p>
 <ul class="simple">
-<li><p>‘start_input_environment’ (starts input mode A for global parameters)</p></li>
+<li><p>‘start_input_scenarios’ (starts input mode A for global parameters)</p></li>
 <li><p>‘start_input_households’ (input mode B for individual household parameters)</p></li>
 <li><p>‘start_simulation’ (creates xml to start GAMA simulation)</p></li>
 </ul>

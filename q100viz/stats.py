@@ -81,13 +81,6 @@ def export_json(df, outfile):
     return pandas.DataFrame(df).to_json(
         outfile, orient='records', force_ascii=False, default_handler=str)
 
-def to_xml(row):
-    xml = ['<Experiment>']
-    for field in row.index:
-        xml.append('  <Parameter name="{0}">{1}</Parameter>'.format(field, row[field]))
-    xml.append('</Experiment>')
-    return '\n'.join(xml)
-
 def print_full_df(df):
     with pandas.option_context('display.max_rows', None,
                         'display.max_columns', None,

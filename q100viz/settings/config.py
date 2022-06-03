@@ -17,8 +17,8 @@ config = {
 
     'GRID_1_SETUP_FILE': 'q100viz/settings/input_households_grid_1.csv',
     'GRID_2_SETUP_FILE': 'q100viz/settings/input_households_grid_2.csv',
-    'GRID_1_INPUT_ENVIRONMENT_FILE': 'q100viz/settings/input_environment_grid_1.csv',
-    'GRID_2_INPUT_ENVIRONMENT_FILE': 'q100viz/settings/input_environment_grid_2.csv',
+    'GRID_1_INPUT_SCENARIOS_FILE': 'q100viz/settings/input_scenarios_grid_1.csv',
+    'GRID_2_INPUT_SCENARIOS_FILE': 'q100viz/settings/input_scenarios_grid_2.csv',
 
     'GRID_2_X1' : 50,
     'GRID_2_X2' : 100,
@@ -30,6 +30,3 @@ config = {
     'GRID_1_Y1' : 0,
     'GRID_1_Y2' : 81.818
 }
-
-
-# TODO: replace grid_x_setup.csv with mode names: input_mode.csv ? so each mode is customizable by an according csv

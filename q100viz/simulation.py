@@ -2,9 +2,11 @@
 # @dunland, March 2022
 
 import subprocess
+import threading
 import pandas as pd
 import os
 from q100viz.settings.config import config
+import q100viz.session as session
 
 class Simulation:
 
@@ -39,9 +41,9 @@ class Simulation:
         # header
         xml_temp = ['<Experiment_plan>']
         if until is not None:
-            xml_temp.append('  <Simulation id="1" sourcePath="{0}" finalStep="{1}" until="{2}" experiment="{3}" >'.format(str(self.model_file), str(finalStep), str(until), str(experiment_name)))
+            xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}" until="{3}" experiment="{4}" >'.format(str(experiment_name), str(self.model_file), str(finalStep), str(until), str(experiment_name)))
         else:
-            xml_temp.append('  <Simulation id="1" sourcePath="{0}" finalStep="{1}" experiment="{2}" >'.format(str(self.model_file), str(finalStep), str(experiment_name)))
+            xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}" >'.format(str(experiment_name), str(self.model_file), str(finalStep)))
 
         # parameters
         xml_temp.append('  <Parameters>')
@@ -74,5 +76,21 @@ class Simulation:
         xml_path = self.headless_folder + 'simulation_parameters.xml'
         command = self.script + " " + xml_path + " " + self.output_folder
         subprocess.call(command, shell=True)
+        # self.open_and_call(command, session.handlers['data_view'].activate())
 
         os.chdir(self.cwd)  # return to previous cwd
+
+        # TODO: wait until GAMA delivers outputs
+        session.handlers['data_view'].activate()
+
+    def open_and_call(self, popen_args, on_exit):
+
+        def run_in_thread(on_exit, popen_args):
+            proc = subprocess.Popen(popen_args, shell=True)
+            proc.wait()
+            on_exit()
+            return
+
+        thread = threading.Thread(target=run_in_thread, args=(on_exit, popen_args))
+        thread.start()
+        return thread

@@ -1,5 +1,6 @@
 ''' Input Households Mode: Interact with building-specific parameters using the map '''
 
+from cv2 import magnitude
 import pygame
 
 import q100viz.keystone as keystone
@@ -9,6 +10,7 @@ from q100viz.settings.config import config
 class Input_Households:
     def __init__(self):
         self.name = 'input_households'
+        self.selection_mode = 'all'  # decides how to select intersected buildings. can be 'all' or 'rotation'
 
     def activate(self):
         session.show_polygons = True
@@ -26,7 +28,7 @@ class Input_Households:
         session.grid_2.update_cell_data(session.input_households_grid_2)
 
         # send data:
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        session.stats.send_dataframe(session.environment)
 
     def process_event(self, event):
             if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -46,11 +48,19 @@ class Input_Households:
                         i = get_intersection(session.buildings, grid, x, y)
 
                         # use rotation value to cycle through buildings located in cell
-                        n = len(session.buildings[i])
-                        if n > 0:
-                            selection = session.buildings[i].iloc[cell.rot % n]
-                            session.buildings.loc[selection.name,
-                                                'selected'] = True
+                        if self.selection_mode == 'rotation':
+                            n = len(session.buildings[i])
+                            if n > 0:
+                                selection = session.buildings[i].iloc[cell.rot % n]
+                                session.buildings.loc[selection.name,
+                                                    'selected'] = True
+
+                        # select all buildings within range
+                        elif self.selection_mode == 'all':
+                            for n in range(0, len(session.buildings[i])):
+                                selection = session.buildings[i].iloc[n]
+                                session.buildings.loc[selection.name,
+                                                        'selected'] = True
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
@@ -92,4 +102,4 @@ def get_intersection(df, grid, x, y):
         [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
     )
     # find elements intersecting with selected cell
-    return session.gis.get_intersection_indexer(df, cell_vertices)
+    return session.gis.get_intersection_indexer(df, grid, cell_vertices)

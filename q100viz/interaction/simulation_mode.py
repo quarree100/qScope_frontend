@@ -44,7 +44,7 @@ class SimulationMode:
         simulation.run_script()
 
         # send data
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        session.stats.send_dataframe(session.environment)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:

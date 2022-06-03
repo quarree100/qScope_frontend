@@ -34,10 +34,15 @@ class Input_Scenarios:
                 image.warp()
 
     def activate(self):
-        session.show_polygons = False
-        session.show_basemap = False
+        # mode handling
         session.active_handler = self
         session.environment['mode'] = self.name
+        session.grid_1.update_cell_data(session.input_scenarios_grid_1)
+        session.grid_2.update_cell_data(session.input_scenarios_grid_2)
+
+        # graphics
+        session.show_polygons = False
+        session.show_basemap = False
 
         # sliders:
         session.grid_1.slider.show_text = False
@@ -45,12 +50,8 @@ class Input_Scenarios:
         session.grid_2.slider.show_text = True
         session.grid_2.slider.show_controls = True
 
-        # setup mode selectors:
-        session.grid_1.update_cell_data(session.input_scenarios_grid_1)
-        session.grid_2.update_cell_data(session.input_scenarios_grid_2)
-
         # send data:
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        session.stats.send_dataframe(session.environment)
 
     def process_event(self, event):
             if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -63,27 +64,29 @@ class Input_Scenarios:
     def process_grid_change(self):
         session.buildings['selected'] = False
         self.images = [image for image in self.images_disabled]
+        session.environment['active_scenario'] = None
 
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
                     if cell.selected:
-                        # assumption: there is only one token to choose the scenario with
-                        if grid is session.grid_1 and x < len(row) / 2:
-                            self.images[0] = self.images_active[0]
-                            session.environment['active_scenario'] = 'A'
-                        elif grid is session.grid_1 and x > len(row) / 2:
-                            self.images[1] = self.images_active[1]
-                            session.environment['active_scenario'] = 'B'
-                        elif grid is session.grid_2 and x < len(row) / 2:
-                            self.images[2] = self.images_active[2]
-                            session.environment['active_scenario'] = 'C'
-                        elif grid is session.grid_2 and x > len(row) / 2:
-                            self.images[3] = self.images_active[3]
-                            session.environment['active_scenario'] = 'D'
+                        if y < len(grid.grid) - 1:  # exclude last row
+                            # assumption: there is only one token to choose the scenario with
+                            if grid is session.grid_1 and x < len(row) / 2:
+                                self.images[0] = self.images_active[0]
+                                session.environment['active_scenario'] = 'A'
+                            elif grid is session.grid_1 and x > len(row) / 2:
+                                self.images[1] = self.images_active[1]
+                                session.environment['active_scenario'] = 'B'
+                            elif grid is session.grid_2 and x < len(row) / 2:
+                                self.images[2] = self.images_active[2]
+                                session.environment['active_scenario'] = 'C'
+                            elif grid is session.grid_2 and x > len(row) / 2:
+                                self.images[3] = self.images_active[3]
+                                session.environment['active_scenario'] = 'D'
 
                         # set slider handles via selected cell in last row:
-                        if cell.handle is not None:
+                        elif cell.handle is not None:
                             if cell.handle == 'start_input_households':
                                 session.handlers['input_households'].activate()
 

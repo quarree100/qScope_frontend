@@ -38,7 +38,7 @@ verbose = True
 
 environment = {'mode': 'input_scenarios'}
 
-environment['questions'] = [  # TODO: externalize this to yet another csv
+questions = [  # TODO: externalize this to yet another csv
 
         "Die globale Erderwärmung wird durch von Menschen produzierte Emissionen verstärkt.",
         "Der Schutz der Umwelt ist ein Mittel zur Stärkung des Wirtschaftswachstums in Deutschland.",
@@ -46,7 +46,7 @@ environment['questions'] = [  # TODO: externalize this to yet another csv
         "Ich würde meinen Energieverbrauch reduzieren, wenn mein Haushalt mehr Energie verbraucht als ähnliche Haushalte.",
         "Wenn ein erneuerbarer Energietarif bei einem anderen Energieversorger verfügbar wäre, würde ich meinen Anbieter wechseln."
 ]
-environment['question'] = environment['questions'][0]
+environment['question'] = questions[0]
 
 input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
 input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
@@ -69,7 +69,7 @@ handlers = {
     'simulation': SimulationMode(),
     'data_view': DataView_Mode()
 }
-active_handler = handlers['questionnaire']
+active_handler = handlers['input_scenarios']
 flag_export_canvas = False
 
 # global functions:

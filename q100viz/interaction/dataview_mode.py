@@ -46,7 +46,7 @@ class DataView_Mode():
         # session.grid_2.slider.handle = 'next_question'
 
 
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        session.stats.send_dataframe(session.environment)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:

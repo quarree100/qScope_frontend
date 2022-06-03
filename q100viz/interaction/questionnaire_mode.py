@@ -13,7 +13,7 @@ class Questionnaire_Mode():
     def __init__(self):
         self.name = 'questionnaire'
         self.question_index = 0
-        session.environment['question'] = session.environment['questions'][self.question_index]
+        session.environment['question'] = session.questions[self.question_index]
 
     def activate(self):
         session.active_handler = session.handlers['questionnaire']
@@ -32,7 +32,7 @@ class Questionnaire_Mode():
 
         session.active_handler = session.handlers['questionnaire']
         session.environment['mode'] = self.name
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        session.stats.send_dataframe(session.environment)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -69,14 +69,18 @@ class Questionnaire_Mode():
 
     def get_next_question(self):
         print("getting next question")
-        # self.question_index = (self.question_index + 1 ) % len(session.environment['questions'])
+        # self.question_index = (self.question_index + 1 ) % len(session.questions)
         self.question_index += 1
 
         # get next question
-        if self.question_index is not len(session.environment['questions']):
-            session.environment['question'] = session.environment['questions'][self.question_index]
-            session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        if self.question_index is not len(session.questions):
+            session.environment['question'] = session.questions[self.question_index]
+            session.stats.send_dataframe(session.environment)
         else:  # leave questionnaire mode, enter input mode
+            # delete unused environment variables
+            del session.environment['question']
+            del session.environment['answer']
+
             self.question_index = 0
             session.handlers['input_scenarios'].activate()
 

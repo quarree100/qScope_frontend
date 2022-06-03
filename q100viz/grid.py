@@ -36,6 +36,8 @@ class Grid:
 
         self.slider = Slider(canvas_size, self, slider_coords)
 
+        self.magnitude = 3  # TODO: link this to ID of used token
+
     def draw(self, show_grid):
 
         font = pygame.font.SysFont('Arial', 20)
@@ -77,6 +79,11 @@ class Grid:
             cell = self.grid[int(coord[1])][int(coord[0])]
             if button == 1:  # left click
                 cell.selected = not cell.selected
+                x = cell.x
+                y = cell.y
+                for mag_x in range(-self.magnitude, self.magnitude, 1):
+                    for mag_y in range(-self.magnitude, self.magnitude, 1):
+                        self.grid[y+mag_y][x+mag_x].selected = cell.selected
             elif button == 3:  # right click
                 cell.prev_rot = cell.rot
                 cell.rot  = (cell.rot + 1) % 4
@@ -103,6 +110,10 @@ class Grid:
                     cell.id, cell.rot = msg['grid'][y * self.x_size + x]
 
                     cell.selected = cell.id != 0  # any non-white object selects cells
+
+                    for mag_x in range(-self.magnitude, self.magnitude, 1):
+                        for mag_y in range(-self.magnitude, self.magnitude, 1):
+                            self.grid[y+mag_y][x+mag_x].selected = cell.selected
 
                     # calculate relative rotation
                     # an inactive cell has a rotation value of -1
@@ -162,3 +173,9 @@ class GridCell:
         self.selected = False
         self.color = pygame.color.Color(125, 125, 125)
         self.handle = None  # used to add functionality (e.g. slider controls) to cell, managed by qScope/data/grid_X_setup.csv
+
+    def toggle_selection(self):
+        self.selected = not self.selected
+
+    def set_selection(self, selection):
+        self.selected = selection

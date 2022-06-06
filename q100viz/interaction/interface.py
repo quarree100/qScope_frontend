@@ -40,6 +40,8 @@ class Slider:
 
         self.coords_transformed = self.surface.transform(coords)
 
+        self.selection_range = 0  # TODO: link this to ID of used token
+
     def render(self, canvas=None):
         # slider controls → set slider color
         a = 100 + abs(int(numpy.sin(pygame.time.get_ticks() / 1000) * 105))  # alpha value for unselected cells

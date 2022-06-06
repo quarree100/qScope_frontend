@@ -3,6 +3,7 @@ x,y,handle,color
 2,17,electricity_supplier,bisque2
 4,17,refurbished,burlywood1
 6,17,environmental_engagement,cadetblue1
+10,17,selection_range,gray
 17,17,start_input_scenarios,blue
 19,17,start_input_households,purple
 21,17,start_simulation,yellow

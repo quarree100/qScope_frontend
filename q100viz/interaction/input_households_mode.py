@@ -72,6 +72,9 @@ class Input_Households:
                                             ("slider_handle: ", grid.slider.handle))
                                         grid.slider.previous_handle = grid.slider.handle
 
+                            elif cell.handle == 'selection_range':
+                                grid.slider.selection_range = cell.rot
+
                             elif cell.handle == 'start_input_scenarios':
                                 session.handlers['input_scenarios'].activate()
 

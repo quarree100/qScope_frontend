@@ -79,8 +79,9 @@ class Grid:
                 cell.selected = not cell.selected
                 x = cell.x
                 y = cell.y
-                for mag_x in range(-self.slider.selection_range, self.slider.selection_range, 1):
-                    for mag_y in range(-self.slider.selection_range, self.slider.selection_range, 1):
+                user = session.user[cell.id]
+                for mag_x in range(-user.selection_range, user.selection_range, 1):
+                    for mag_y in range(-user.selection_range, user.selection_range, 1):
                         self.grid[y+mag_y][x+mag_x].selected = cell.selected
             elif button == 2:  # middle click
                 cell.id = (cell.id + 1) % 4
@@ -112,8 +113,9 @@ class Grid:
 
                     cell.selected = cell.id != 0  # any non-white object selects cells
 
-                    for mag_x in range(-self.slider.selection_range, self.slider.selection_range, 1):
-                        for mag_y in range(-self.slider.selection_range, self.slider.selection_range, 1):
+                    user = session.user[cell.id]
+                    for mag_x in range(-user.selection_range, user.selection_range, 1):
+                        for mag_y in range(-user.selection_range, user.selection_range, 1):
                             self.grid[y+mag_y][x+mag_x].selected = cell.selected
 
                     # calculate relative rotation

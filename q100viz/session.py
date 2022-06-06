@@ -76,3 +76,10 @@ flag_export_canvas = False
 def print_verbose(message):
     if verbose:
         print(message)
+
+class User:
+    def __init__(self, user_id):
+        self.id = user_id
+        self.selection_range = 0
+
+user = [User(user_id) for user_id in range(0, 4)]

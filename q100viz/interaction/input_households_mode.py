@@ -45,7 +45,7 @@ class Input_Households:
                 for x, cell in enumerate(row):
                     if cell.selected:
                         # high performance impact, use sparingly
-                        i = get_intersection(session.buildings, grid, x, y)
+                        i = get_intersection(session.buildings, session.user[cell.id], grid, x, y)
 
                         # use rotation value to cycle through buildings located in cell
                         if self.selection_mode == 'rotation':
@@ -73,7 +73,7 @@ class Input_Households:
                                         grid.slider.previous_handle = grid.slider.handle
 
                             elif cell.handle == 'selection_range':
-                                grid.slider.selection_range = cell.rot
+                                session.user[cell.id].selection_range = cell.rot
 
                             elif cell.handle == 'start_input_scenarios':
                                 session.handlers['input_scenarios'].activate()
@@ -99,10 +99,10 @@ class Input_Households:
     def update(self):
         pass
 
-def get_intersection(df, grid, x, y):
+def get_intersection(df, user, grid, x, y):
     # get viewport coordinates of the cell rectangle
     cell_vertices = grid.surface.transform(
         [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
     )
     # find elements intersecting with selected cell
-    return session.gis.get_intersection_indexer(df, grid, cell_vertices)
+    return session.gis.get_intersection_indexer(df, user, cell_vertices)

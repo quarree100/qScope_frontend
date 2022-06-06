@@ -18,10 +18,10 @@ class GIS:
         self.surface.dst_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
         self.surface.calculate(viewport.transform_mat)
 
-    def get_intersection_indexer(self, df, grid, v_polygon):
+    def get_intersection_indexer(self, df, user, v_polygon):
         polygon = self.surface.inverse_transform(v_polygon)
         shape = shapely.geometry.Polygon(polygon)
-        shape = shapely.affinity.scale(shape, xfact=grid.slider.selection_range, yfact=grid.slider.selection_range)  # TODO: make this a cirlce.. maybe
+        shape = shapely.affinity.scale(shape, xfact=user.selection_range, yfact=user.selection_range)  # TODO: make this a cirlce.. maybe
 
         return df.intersects(shape)
 

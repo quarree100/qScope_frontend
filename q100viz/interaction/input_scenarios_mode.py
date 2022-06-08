@@ -68,22 +68,23 @@ class Input_Scenarios:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
                     if cell.selected:
-                        # assumption: there is only one token to choose the scenario with
-                        if grid is session.grid_1 and x < len(row) / 2:
-                            self.images[0] = self.images_active[0]
-                            session.environment['active_scenario'] = 'A'
-                        elif grid is session.grid_1 and x > len(row) / 2:
-                            self.images[1] = self.images_active[1]
-                            session.environment['active_scenario'] = 'B'
-                        elif grid is session.grid_2 and x < len(row) / 2:
-                            self.images[2] = self.images_active[2]
-                            session.environment['active_scenario'] = 'C'
-                        elif grid is session.grid_2 and x > len(row) / 2:
-                            self.images[3] = self.images_active[3]
-                            session.environment['active_scenario'] = 'D'
+                        if y < len(grid.grid) - 1:
+                            # assumption: there is only one token to choose the scenario with
+                            if grid is session.grid_1 and x < len(row) / 2:
+                                self.images[0] = self.images_active[0]
+                                session.environment['active_scenario'] = 'A'
+                            elif grid is session.grid_1 and x > len(row) / 2:
+                                self.images[1] = self.images_active[1]
+                                session.environment['active_scenario'] = 'B'
+                            elif grid is session.grid_2 and x < len(row) / 2:
+                                self.images[2] = self.images_active[2]
+                                session.environment['active_scenario'] = 'C'
+                            elif grid is session.grid_2 and x > len(row) / 2:
+                                self.images[3] = self.images_active[3]
+                                session.environment['active_scenario'] = 'D'
 
                         # set slider handles via selected cell in last row:
-                        if cell.handle is not None:
+                        elif cell.handle is not None:
                             if cell.handle == 'start_input_households':
                                 session.handlers['input_households'].activate()
 

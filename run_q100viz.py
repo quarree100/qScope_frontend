@@ -22,8 +22,8 @@ from q100viz.interaction.simulation_mode import SimulationMode
 FPS = session.FPS = 12
 
 # set window position
-# os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
-# os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,2160)  # projection to the left
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,2160)  # projection to the left
 
 # Initialize program
 pygame.init()

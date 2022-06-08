@@ -69,7 +69,7 @@ handlers = {
     'simulation': SimulationMode(),
     'data_view': DataView_Mode()
 }
-active_handler = handlers['questionnaire']
+active_handler = handlers['input_scenarios']
 flag_export_canvas = False
 
 # global functions:

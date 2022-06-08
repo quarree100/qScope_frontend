@@ -1,16 +1,30 @@
 ''' Simulation Mode fakes parameter changes for buildings later done by the ABM'''
 
-import numpy as np
+from time import strftime
 import pandas
-import json
+import os
+import subprocess
+import threading
 import pygame
+import datetime
 
 import q100viz.session as session
-import q100viz.stats as stats
-from q100viz.simulation import Simulation
+from q100viz.settings.config import config
 class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
+
+        self.cwd = os.getcwd()  # hold current working directory to return to later
+
+        # simulation setup
+        self.headless_folder = config['GAMA_HEADLESS_FOLDER']
+        self.script = self.headless_folder + 'gama-headless.sh'
+        self.model_file = os.path.normpath(os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
+        self.output_folder = ''  # will be set in activate()
+        self.xml_path = ''  # will be set in activate()
+        self.final_step = 200
+
+        self.xml = None
 
     def activate(self):
         session.environment['mode'] = self.name
@@ -21,27 +35,43 @@ class SimulationMode:
             slider.show_text = False
             slider.show_controls = False
 
-        # provide data:
-        outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
-        outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
-        outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
+        # simulation start time
+        self.sim_start = str(datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))
+        self.output_folder = os.path.normpath(os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.sim_start))
+        self.xml_path = self.output_folder + '/simulation_parameters_' + self.sim_start + '.xml'
 
-        params = pandas.DataFrame(columns=['name', 'type', 'value'])
-        params.loc[len(params)] = ['alpha_scenario', 'string', 'Static_mean']
-        params.loc[len(params)] = ['carbon_price_scenario', 'string', 'A-Conservative']
-        params.loc[len(params)] = ['energy_price_scenario', 'string', 'Prices_Project start']
-        params.loc[len(params)] = ['q100_price_opex_scenario', 'string', '12 ct / kWh (static)']
-        params.loc[len(params)] = ['q100_price_capex_scenario', 'string', '1 payment']
-        params.loc[len(params)] = ['q100_emissions_scenario', 'string', 'Constant_50g / kWh']
+        # provide parameters:
+        params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
+        params.loc[len(params)] = ['Influence of private communication', 'FLOAT', '0.25', 'private_communication']
+        params.loc[len(params)] = ['Neighboring distance', 'INT', '2', 'global_neighboring_distance']
+        params.loc[len(params)] = ['Influence-Type', 'STRING', 'one-side', 'influence_type']
+        params.loc[len(params)] = ['Memory', 'BOOLEAN', 'true', 'communication_memory']
+        params.loc[len(params)] = ['New Buildings', 'STRING', 'continuously', 'new_buildings_parameter']
+        params.loc[len(params)] = ['Random Order of new Buildings', 'BOOLEAN', 'true', 'new_buildings_order_random']
+        params.loc[len(params)] = ['Modernization Energy Saving', 'FLOAT', '0.5', 'energy_saving_rate']
+        params.loc[len(params)] = ['Shapefile for buildings:', 'UNDEFINED', str(os.path.normpath(os.path.join(self.cwd, '../q100_abm/q100/includes/Shapefiles/bestandsgebaeude_export.shp'))), 'shape_file_buildings']
+        params.loc[len(params)] = ['Building types source', 'STRING', 'Kataster_A', 'attributes_source']
+        params.loc[len(params)] = ['3D-View', 'BOOLEAN', 'false', 'view_toggle']
+        params.loc[len(params)] = ['Alpha scenario', 'STRING', 'Static_mean', 'alpha_scenario']
+        params.loc[len(params)] = ['Carbon price scenario', 'STRING', 'A-Conservative', 'carbon_price_scenario']
+        params.loc[len(params)] = ['Energy prices scenario', 'STRING', 'Prices_Project start', 'energy_price_scenario']
+        params.loc[len(params)] = ['Q100 OpEx prices scenario', 'STRING', '12 ct / kWh (static)', 'q100_price_opex_scenario']
+        params.loc[len(params)] = ['Q100 CapEx prices scenario', 'STRING', '1 payment', 'q100_price_capex_scenario']
+        params.loc[len(params)] = ['Q100 Emissions scenario', 'STRING', 'Constant_50g / kWh', 'q100_emissions_scenario']
+        params.loc[len(params)] = ['Carbon price for households?', 'BOOLEAN', 'false', 'carbon_price_on_off']
         # params.loc[len(params)] = ['keep_seed', 'bool', 'true']
 
-        simulation = Simulation(
-            final_step = 200,
-            until = None
-            )
+        # provide outputs:
+        outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
+        outputs.loc[len(outputs)] = ['0', 'neighborhood', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['1', 'households_employment_pie', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['2', 'Charts', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['3', 'Modernization', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['4', 'Emissions per year', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['5', 'Emissions cumulative', str(self.final_step - 1)]
 
-        simulation.make_xml(params, outputs, experiment_name='agent_decision_making')
-        simulation.run_script()
+        self.make_xml(params, outputs, self.xml_path, self.final_step, None, 'agent_decision_making')
+        self.run_script(self.xml_path)
 
         # send data
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
@@ -85,3 +115,67 @@ class SimulationMode:
         # save as csv in global data folder:
         # self.simulation_df.set_index('step').to_csv('../data/simulation_df.csv')
         # self.simulation_df.to_json('../data/simulation_df.json')
+
+    def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None, seed=1.0):
+
+        # header
+        xml_temp = ['<Experiment_plan>']
+        xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}"'.format(str(experiment_name), str(self.model_file), str(finalStep)))
+        if seed is not None: xml_temp.append('seed="{0}"'.format(str(seed)))
+        if until is not None: xml_temp.append('until="{0}"'.format(str(until)))
+        xml_temp.append('>')
+
+        # parameters
+        xml_temp.append('  <Parameters>')
+        for index, row in parameters.iterrows():
+            xml_temp.append('    <Parameter name="{0}" type="{1}" value="{2}" var="{3}"/>'.format(row['name'], row['type'], row['value'], row['var']))
+        xml_temp.append('  </Parameters>')
+
+        # outputs
+        xml_temp.append('  <Outputs>')
+        for index, row in outputs.iterrows():
+            xml_temp.append('    <Output id="{0}" name="{1}" framerate="{2}" />'.format(row['id'], row['name'], row['framerate']))
+        xml_temp.append('  </Outputs>')
+        xml_temp.append('</Simulation>')
+        xml_temp.append('</Experiment_plan>')
+
+        xml = '\n'.join(xml_temp)
+
+        # export xml
+        if os.path.isdir(self.output_folder) is False:
+            os.makedirs(self.output_folder)
+        os.chdir(self.headless_folder)  # change working directory temporarily
+
+        print(xml)
+        f = open(xml_output_path, 'w')
+        f.write(xml)
+        f.close()
+
+    def run_script(self, xml_path_):
+        # run script
+        if not xml_path_:
+            xml_path = self.output_folder + '/simulation_parameters_' + str(self.sim_start) + '.xml'
+        else: xml_path = xml_path_
+        command = self.script + " " + xml_path + " " + self.output_folder
+
+        sim_start = datetime.datetime.now()
+        subprocess.call(command, shell=True)
+        print("simulation finished. duration = ", datetime.datetime.now() - sim_start)
+        # self.open_and_call(command, session.handlers['data_view'].activate())
+
+        os.chdir(self.cwd)  # return to previous cwd
+
+        # TODO: wait until GAMA delivers outputs
+        session.handlers['data_view'].activate()
+
+    def open_and_call(self, popen_args, on_exit):
+
+        def run_in_thread(on_exit, popen_args):
+            proc = subprocess.Popen(popen_args, shell=True)
+            proc.wait()
+            on_exit()
+            return
+
+        thread = threading.Thread(target=run_in_thread, args=(on_exit, popen_args))
+        thread.start()
+        return thread

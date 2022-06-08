@@ -26,18 +26,18 @@ class SimulationMode:
         outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
 
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
-        params.loc[len(params)] = ['Alpha scenario', 'string', 'Static_mean', 'alpha_scenario']
-        params.loc[len(params)] = ['Carbon price scenario', 'string', 'A-Conservative', 'carbon_price_scenario']
-        params.loc[len(params)] = ['Energy prices scenario', 'string', 'Prices_Project start', 'energy_price_scenario']
-        params.loc[len(params)] = ['Q100 OpEx prices scenario', 'string', '12 ct / kWh (static)', 'q100_price_opex_scenario']
-        params.loc[len(params)] = ['Q100 CapEx prices scenario', 'string', '1 payment', 'q100_price_capex_scenario']
-        params.loc[len(params)] = ['Q100 Emissions scenario', 'string', 'Constant_50g / kWh', 'q100_emissions_scenario']
+        params.loc[len(params)] = ['Alpha scenario', 'STRING', 'Static_mean', 'alpha_scenario']
+        params.loc[len(params)] = ['Carbon price scenario', 'STRING', 'A-Conservative', 'carbon_price_scenario']
+        params.loc[len(params)] = ['Energy prices scenario', 'STRING', 'Prices_Project start', 'energy_price_scenario']
+        params.loc[len(params)] = ['Q100 OpEx prices scenario', 'STRING', '12 ct / kWh (static)', 'q100_price_opex_scenario']
+        params.loc[len(params)] = ['Q100 CapEx prices scenario', 'STRING', '1 payment', 'q100_price_capex_scenario']
+        params.loc[len(params)] = ['Q100 Emissions scenario', 'STRING', 'Constant_50g / kWh', 'q100_emissions_scenario']
         # params.loc[len(params)] = ['keep_seed', 'bool', 'true']
 
         simulation = Simulation()
 
         simulation.make_xml(params, outputs, experiment_name='agent_decision_making', finalStep=1000)
-        simulation.run_script()
+        simulation.run_script('/opt/gama-platform/headless/gama-generated-headless.xml')
 
         # send data
         session.stats.send_dataframe_with_environment_variables(None, session.environment)

@@ -78,9 +78,11 @@ class Simulation:
         f.write(xml)
         f.close()
 
-    def run_script(self):
+    def run_script(self, xml_path_):
         # run script
-        xml_path = self.headless_folder + '/simulation_parameters.xml'
+        if not xml_path_:
+            xml_path = self.headless_folder + '/simulation_parameters.xml'
+        else: xml_path = xml_path_
         command = self.script + " " + xml_path + " " + self.output_folder
         subprocess.call(command, shell=True)
         # self.open_and_call(command, session.handlers['data_view'].activate())

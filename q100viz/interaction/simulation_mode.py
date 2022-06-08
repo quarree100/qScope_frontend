@@ -49,7 +49,7 @@ class SimulationMode:
         params.loc[len(params)] = ['New Buildings', 'STRING', 'continuously', 'new_buildings_parameter']
         params.loc[len(params)] = ['Random Order of new Buildings', 'BOOLEAN', 'true', 'new_buildings_order_random']
         params.loc[len(params)] = ['Modernization Energy Saving', 'FLOAT', '0.5', 'energy_saving_rate']
-        params.loc[len(params)] = ['Shapefile for buildings:', 'UNDEFINED', '/home/dunland/github/qScope/q100_abm/q100/includes/Shapefiles/bestandsgebaeude_export.shp', 'shape_file_buildings']
+        params.loc[len(params)] = ['Shapefile for buildings:', 'UNDEFINED', str(os.path.normpath(os.path.join(self.cwd, '../q100_abm/q100/includes/Shapefiles/bestandsgebaeude_export.shp'))), 'shape_file_buildings']
         params.loc[len(params)] = ['Building types source', 'STRING', 'Kataster_A', 'attributes_source']
         params.loc[len(params)] = ['3D-View', 'BOOLEAN', 'false', 'view_toggle']
         params.loc[len(params)] = ['Alpha scenario', 'STRING', 'Static_mean', 'alpha_scenario']

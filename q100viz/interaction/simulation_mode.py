@@ -6,7 +6,6 @@ import json
 import pygame
 
 import q100viz.session as session
-import q100viz.stats as stats
 from q100viz.simulation import Simulation
 class SimulationMode:
     def __init__(self):
@@ -26,21 +25,18 @@ class SimulationMode:
         outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
         outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
 
-        params = pandas.DataFrame(columns=['name', 'type', 'value'])
-        params.loc[len(params)] = ['alpha_scenario', 'string', 'Static_mean']
-        params.loc[len(params)] = ['carbon_price_scenario', 'string', 'A-Conservative']
-        params.loc[len(params)] = ['energy_price_scenario', 'string', 'Prices_Project start']
-        params.loc[len(params)] = ['q100_price_opex_scenario', 'string', '12 ct / kWh (static)']
-        params.loc[len(params)] = ['q100_price_capex_scenario', 'string', '1 payment']
-        params.loc[len(params)] = ['q100_emissions_scenario', 'string', 'Constant_50g / kWh']
+        params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
+        params.loc[len(params)] = ['Alpha scenario', 'string', 'Static_mean', 'alpha_scenario']
+        params.loc[len(params)] = ['Carbon price scenario', 'string', 'A-Conservative', 'carbon_price_scenario']
+        params.loc[len(params)] = ['Energy prices scenario', 'string', 'Prices_Project start', 'energy_price_scenario']
+        params.loc[len(params)] = ['Q100 OpEx prices scenario', 'string', '12 ct / kWh (static)', 'q100_price_opex_scenario']
+        params.loc[len(params)] = ['Q100 CapEx prices scenario', 'string', '1 payment', 'q100_price_capex_scenario']
+        params.loc[len(params)] = ['Q100 Emissions scenario', 'string', 'Constant_50g / kWh', 'q100_emissions_scenario']
         # params.loc[len(params)] = ['keep_seed', 'bool', 'true']
 
-        simulation = Simulation(
-            final_step = 200,
-            until = None
-            )
+        simulation = Simulation()
 
-        simulation.make_xml(params, outputs, experiment_name='agent_decision_making')
+        simulation.make_xml(params, outputs, experiment_name='agent_decision_making', finalStep=1000)
         simulation.run_script()
 
         # send data

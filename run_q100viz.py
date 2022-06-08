@@ -4,7 +4,6 @@ import random
 import threading
 import json
 import pandas
-import numpy as np
 import pygame
 import datetime
 from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
@@ -16,8 +15,6 @@ import q100viz.udp as udp
 import q100viz.stats as stats
 import q100viz.session as session
 from q100viz.interaction.interface import *
-from q100viz.simulation import Simulation
-from q100viz.interaction.simulation_mode import SimulationMode
 # Set FPS
 FPS = session.FPS = 12
 
@@ -261,11 +258,11 @@ while True:
     session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
     session.gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
     session.gis.draw_polygon_layer(
-        canvas, buildings, 0, (96, 205, 21), (213, 50, 21), 'CO2')  # fill and lerp
+        canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'environmental_engagement')  # fill and lerp
     # session.gis.draw_polygon_layer(
-    #     canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'CO2')  # fill all equally
+    #     canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'environmental_engagement')  # fill all equally
     session.gis.draw_polygon_layer(
-        canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'CO2')  # stroke simple black
+        canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'environmental_engagement')  # stroke simple black
 
     # draw grid
     grid_1.draw(show_grid)

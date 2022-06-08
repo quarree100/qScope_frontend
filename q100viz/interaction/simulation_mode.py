@@ -16,13 +16,13 @@ class SimulationMode:
 
         self.cwd = os.getcwd()  # hold current working directory to return to later
 
+        # simulation setup
         self.headless_folder = config['GAMA_HEADLESS_FOLDER']
         self.script = self.headless_folder + 'gama-headless.sh'
         self.model_file = os.path.normpath(os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
-        self.output_folder = os.path.normpath(os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER']))
-        self.xml_path = self.headless_folder + '/simulation_parameters.xml'
-
-        print("headless_folder =", self.headless_folder, "\nscript = ", self.script, "\nmodel_file = ", self.model_file, "\noutput_folder = ", self.output_folder)
+        self.output_folder = ''  # will be set in activate()
+        self.xml_path = ''  # will be set in activate()
+        self.final_step = 200
 
         self.xml = None
 
@@ -34,6 +34,11 @@ class SimulationMode:
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = False
             slider.show_controls = False
+
+        # simulation start time
+        self.sim_start = str(datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))
+        self.output_folder = os.path.normpath(os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.sim_start))
+        self.xml_path = self.output_folder + '/simulation_parameters_' + self.sim_start + '.xml'
 
         # provide parameters:
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
@@ -58,14 +63,14 @@ class SimulationMode:
 
         # provide outputs:
         outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
-        outputs.loc[len(outputs)] = ['0', 'neighborhood', '100']
-        outputs.loc[len(outputs)] = ['1', 'households_employment_pie', '100']
-        outputs.loc[len(outputs)] = ['2', 'Charts', '100']
-        outputs.loc[len(outputs)] = ['3', 'Modernization', '100']
-        outputs.loc[len(outputs)] = ['4', 'Emissions per year', '100']
-        outputs.loc[len(outputs)] = ['5', 'Emissions cumulative', '100']
+        outputs.loc[len(outputs)] = ['0', 'neighborhood', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['1', 'households_employment_pie', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['2', 'Charts', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['3', 'Modernization', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['4', 'Emissions per year', str(self.final_step - 1)]
+        outputs.loc[len(outputs)] = ['5', 'Emissions cumulative', str(self.final_step - 1)]
 
-        self.make_xml(params, outputs, self.xml_path, 20, None, 'agent_decision_making')
+        self.make_xml(params, outputs, self.xml_path, self.final_step, None, 'agent_decision_making')
         self.run_script(self.xml_path)
 
         # send data
@@ -149,7 +154,7 @@ class SimulationMode:
     def run_script(self, xml_path_):
         # run script
         if not xml_path_:
-            xml_path = self.headless_folder + '/simulation_parameters.xml'
+            xml_path = self.output_folder + '/simulation_parameters_' + str(self.sim_start) + '.xml'
         else: xml_path = xml_path_
         command = self.script + " " + xml_path + " " + self.output_folder
 

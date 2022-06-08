@@ -1,10 +1,12 @@
 ''' Simulation Mode fakes parameter changes for buildings later done by the ABM'''
 
+from time import strftime
 import pandas
 import os
 import subprocess
 import threading
 import pygame
+import datetime
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -33,22 +35,38 @@ class SimulationMode:
             slider.show_text = False
             slider.show_controls = False
 
-        # provide data:
-        outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
-        outputs.loc[len(outputs)] = ['0', 'neighborhood', '1']
-        outputs.loc[len(outputs)] = ['1', 'households_income_bar', '5']
-
+        # provide parameters:
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
+        params.loc[len(params)] = ['Influence of private communication', 'FLOAT', '0.25', 'private_communication']
+        params.loc[len(params)] = ['Neighboring distance', 'INT', '2', 'global_neighboring_distance']
+        params.loc[len(params)] = ['Influence-Type', 'STRING', 'one-side', 'influence_type']
+        params.loc[len(params)] = ['Memory', 'BOOLEAN', 'true', 'communication_memory']
+        params.loc[len(params)] = ['New Buildings', 'STRING', 'continuously', 'new_buildings_parameter']
+        params.loc[len(params)] = ['Random Order of new Buildings', 'BOOLEAN', 'true', 'new_buildings_order_random']
+        params.loc[len(params)] = ['Modernization Energy Saving', 'FLOAT', '0.5', 'energy_saving_rate']
+        params.loc[len(params)] = ['Shapefile for buildings:', 'UNDEFINED', '/home/dunland/github/qScope/q100_abm/q100/includes/Shapefiles/bestandsgebaeude_export.shp', 'shape_file_buildings']
+        params.loc[len(params)] = ['Building types source', 'STRING', 'Kataster_A', 'attributes_source']
+        params.loc[len(params)] = ['3D-View', 'BOOLEAN', 'false', 'view_toggle']
         params.loc[len(params)] = ['Alpha scenario', 'STRING', 'Static_mean', 'alpha_scenario']
         params.loc[len(params)] = ['Carbon price scenario', 'STRING', 'A-Conservative', 'carbon_price_scenario']
         params.loc[len(params)] = ['Energy prices scenario', 'STRING', 'Prices_Project start', 'energy_price_scenario']
         params.loc[len(params)] = ['Q100 OpEx prices scenario', 'STRING', '12 ct / kWh (static)', 'q100_price_opex_scenario']
         params.loc[len(params)] = ['Q100 CapEx prices scenario', 'STRING', '1 payment', 'q100_price_capex_scenario']
         params.loc[len(params)] = ['Q100 Emissions scenario', 'STRING', 'Constant_50g / kWh', 'q100_emissions_scenario']
+        params.loc[len(params)] = ['Carbon price for households?', 'BOOLEAN', 'false', 'carbon_price_on_off']
         # params.loc[len(params)] = ['keep_seed', 'bool', 'true']
 
-        self.make_xml(params, outputs, self.xml_path, 1000, None, 'agent_decision_making')
-        self.run_script('/opt/gama-platform/headless/gama-generated-headless.xml')
+        # provide outputs:
+        outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
+        outputs.loc[len(outputs)] = ['0', 'neighborhood', '100']
+        outputs.loc[len(outputs)] = ['1', 'households_employment_pie', '100']
+        outputs.loc[len(outputs)] = ['2', 'Charts', '100']
+        outputs.loc[len(outputs)] = ['3', 'Modernization', '100']
+        outputs.loc[len(outputs)] = ['4', 'Emissions per year', '100']
+        outputs.loc[len(outputs)] = ['5', 'Emissions cumulative', '100']
+
+        self.make_xml(params, outputs, self.xml_path, 20, None, 'agent_decision_making')
+        self.run_script(self.xml_path)
 
         # send data
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
@@ -94,18 +112,13 @@ class SimulationMode:
         # self.simulation_df.to_json('../data/simulation_df.json')
 
     def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None, seed=1.0):
+
         # header
         xml_temp = ['<Experiment_plan>']
-        # if until is not None:
-            # xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}" until="{3}" experiment="{4}" seed="{5}">'.format(str(experiment_name), str(self.model_file), str(finalStep), str(until), str(experiment_name), str(seed)))
-
         xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}"'.format(str(experiment_name), str(self.model_file), str(finalStep)))
         if seed is not None: xml_temp.append('seed="{0}"'.format(str(seed)))
         if until is not None: xml_temp.append('until="{0}"'.format(str(until)))
         xml_temp.append('>')
-
-        # else:
-        #     xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}" >'.format(str(experiment_name), str(self.model_file), str(finalStep)))
 
         # parameters
         xml_temp.append('  <Parameters>')
@@ -139,7 +152,10 @@ class SimulationMode:
             xml_path = self.headless_folder + '/simulation_parameters.xml'
         else: xml_path = xml_path_
         command = self.script + " " + xml_path + " " + self.output_folder
+
+        sim_start = datetime.datetime.now()
         subprocess.call(command, shell=True)
+        print("simulation finished. duration = ", datetime.datetime.now() - sim_start)
         # self.open_and_call(command, session.handlers['data_view'].activate())
 
         os.chdir(self.cwd)  # return to previous cwd

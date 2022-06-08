@@ -4,7 +4,6 @@ import random
 import threading
 import json
 import pandas
-import numpy as np
 import pygame
 import datetime
 from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
@@ -16,8 +15,6 @@ import q100viz.udp as udp
 import q100viz.stats as stats
 import q100viz.session as session
 from q100viz.interaction.interface import *
-from q100viz.simulation import Simulation
-from q100viz.interaction.simulation_mode import SimulationMode
 # Set FPS
 FPS = session.FPS = 12
 

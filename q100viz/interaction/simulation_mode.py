@@ -1,15 +1,28 @@
 ''' Simulation Mode fakes parameter changes for buildings later done by the ABM'''
 
-import numpy as np
 import pandas
-import json
+import os
+import subprocess
+import threading
 import pygame
 
 import q100viz.session as session
-from q100viz.simulation import Simulation
+from q100viz.settings.config import config
 class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
+
+        self.cwd = os.getcwd()  # hold current working directory to return to later
+
+        self.headless_folder = config['GAMA_HEADLESS_FOLDER']
+        self.script = self.headless_folder + 'gama-headless.sh'
+        self.model_file = os.path.normpath(os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
+        self.output_folder = os.path.normpath(os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER']))
+        self.xml_path = self.headless_folder + '/simulation_parameters.xml'
+
+        print("headless_folder =", self.headless_folder, "\nscript = ", self.script, "\nmodel_file = ", self.model_file, "\noutput_folder = ", self.output_folder)
+
+        self.xml = None
 
     def activate(self):
         session.environment['mode'] = self.name
@@ -34,10 +47,8 @@ class SimulationMode:
         params.loc[len(params)] = ['Q100 Emissions scenario', 'STRING', 'Constant_50g / kWh', 'q100_emissions_scenario']
         # params.loc[len(params)] = ['keep_seed', 'bool', 'true']
 
-        simulation = Simulation()
-
-        simulation.make_xml(params, outputs, experiment_name='agent_decision_making', finalStep=1000)
-        simulation.run_script('/opt/gama-platform/headless/gama-generated-headless.xml')
+        self.make_xml(params, outputs, self.xml_path, 1000, None, 'agent_decision_making')
+        self.run_script('/opt/gama-platform/headless/gama-generated-headless.xml')
 
         # send data
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
@@ -81,3 +92,69 @@ class SimulationMode:
         # save as csv in global data folder:
         # self.simulation_df.set_index('step').to_csv('../data/simulation_df.csv')
         # self.simulation_df.to_json('../data/simulation_df.json')
+
+    def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None, seed=1.0):
+        # header
+        xml_temp = ['<Experiment_plan>']
+        # if until is not None:
+            # xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}" until="{3}" experiment="{4}" seed="{5}">'.format(str(experiment_name), str(self.model_file), str(finalStep), str(until), str(experiment_name), str(seed)))
+
+        xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}"'.format(str(experiment_name), str(self.model_file), str(finalStep)))
+        if seed is not None: xml_temp.append('seed="{0}"'.format(str(seed)))
+        if until is not None: xml_temp.append('until="{0}"'.format(str(until)))
+        xml_temp.append('>')
+
+        # else:
+        #     xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}" >'.format(str(experiment_name), str(self.model_file), str(finalStep)))
+
+        # parameters
+        xml_temp.append('  <Parameters>')
+        for index, row in parameters.iterrows():
+            xml_temp.append('    <Parameter name="{0}" type="{1}" value="{2}" var="{3}"/>'.format(row['name'], row['type'], row['value'], row['var']))
+        xml_temp.append('  </Parameters>')
+
+        # outputs
+        xml_temp.append('  <Outputs>')
+        for index, row in outputs.iterrows():
+            xml_temp.append('    <Output id="{0}" name="{1}" framerate="{2}" />'.format(row['id'], row['name'], row['framerate']))
+        xml_temp.append('  </Outputs>')
+        xml_temp.append('</Simulation>')
+        xml_temp.append('</Experiment_plan>')
+
+        xml = '\n'.join(xml_temp)
+
+        # export xml
+        if os.path.isdir(self.output_folder) is False:
+            os.makedirs(self.output_folder)
+        os.chdir(self.headless_folder)  # change working directory temporarily
+
+        print(xml)
+        f = open(xml_output_path, 'w')
+        f.write(xml)
+        f.close()
+
+    def run_script(self, xml_path_):
+        # run script
+        if not xml_path_:
+            xml_path = self.headless_folder + '/simulation_parameters.xml'
+        else: xml_path = xml_path_
+        command = self.script + " " + xml_path + " " + self.output_folder
+        subprocess.call(command, shell=True)
+        # self.open_and_call(command, session.handlers['data_view'].activate())
+
+        os.chdir(self.cwd)  # return to previous cwd
+
+        # TODO: wait until GAMA delivers outputs
+        session.handlers['data_view'].activate()
+
+    def open_and_call(self, popen_args, on_exit):
+
+        def run_in_thread(on_exit, popen_args):
+            proc = subprocess.Popen(popen_args, shell=True)
+            proc.wait()
+            on_exit()
+            return
+
+        thread = threading.Thread(target=run_in_thread, args=(on_exit, popen_args))
+        thread.start()
+        return thread

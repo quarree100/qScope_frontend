@@ -74,6 +74,12 @@ class SimulationMode:
         outputs.loc[len(outputs)] = ['4', 'Emissions per year', str(self.final_step - 1)]
         outputs.loc[len(outputs)] = ['5', 'Emissions cumulative', str(self.final_step - 1)]
 
+        # export buildings_clusters
+        clusters_outname = '../data/buildings_clusters_' + self.sim_start + '.csv' if self.timestamp else '../data/buildings_clusters.csv'
+        df = session.buildings[session.buildings.selected]
+        df[['spec_heat_consumption', 'spec_power_consumption','energy_source', 'electricity_supplier', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
+
+        # start simulation
         self.make_xml(params, outputs, self.xml_path, self.final_step, None, 'agent_decision_making')
         self.run_script(self.xml_path)
 

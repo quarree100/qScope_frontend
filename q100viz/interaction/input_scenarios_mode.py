@@ -86,7 +86,10 @@ class Input_Scenarios:
                         # set slider handles via selected cell in last row:
                         elif cell.handle is not None:
                             if cell.handle == 'start_input_households':
-                                session.handlers['input_households'].activate()
+                                if session.environment['active_scenario'] is not None:
+                                    session.handlers['input_households'].activate()
+                                else:
+                                    print("cannot enter next mode before picking scenario!")
 
         session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 

@@ -23,6 +23,7 @@ class SimulationMode:
         self.output_folder = ''  # will be set in activate()
         self.xml_path = ''  # will be set in activate()
         self.final_step = 200
+        self.timestamp = False
 
         self.xml = None
 
@@ -37,7 +38,10 @@ class SimulationMode:
 
         # simulation start time
         self.sim_start = str(datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))
-        self.output_folder = os.path.normpath(os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.sim_start))
+        if self.timestamp:
+            self.output_folder = os.path.normpath(os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.sim_start))
+        else:
+            self.output_folder = os.path.normpath(os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER']))
         self.xml_path = self.output_folder + '/simulation_parameters_' + self.sim_start + '.xml'
 
         # provide parameters:
@@ -155,7 +159,8 @@ class SimulationMode:
         # run script
         if not xml_path_:
             xml_path = self.output_folder + '/simulation_parameters_' + str(self.sim_start) + '.xml'
-        else: xml_path = xml_path_
+        else:
+            xml_path = xml_path_
         command = self.script + " " + xml_path + " " + self.output_folder
 
         sim_start = datetime.datetime.now()

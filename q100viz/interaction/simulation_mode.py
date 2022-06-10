@@ -22,7 +22,7 @@ class SimulationMode:
         self.model_file = os.path.normpath(os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
         self.output_folder = ''  # will be set in activate()
         self.xml_path = ''  # will be set in activate()
-        self.final_step = 200  # 9496
+        self.final_step = 9496  # 9496
         self.timestamp = False
 
         self.xml = None

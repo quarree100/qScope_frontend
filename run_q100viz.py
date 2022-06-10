@@ -199,6 +199,7 @@ while True:
                 session.handlers['input_households'].activate()
             # enter simulation mode:
             elif event.key == K_4:
+                session.environment['active_scenario'] = 'A'
                 session.handlers['simulation'].activate()
             elif event.key == K_5:
                 session.handlers['data_view'].activate()

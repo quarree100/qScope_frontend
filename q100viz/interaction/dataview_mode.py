@@ -40,11 +40,12 @@ class DataView_Mode():
         # setup sliders:
         session.grid_1.slider.show_text = False
         session.grid_1.slider.show_controls = False
-        session.grid_2.slider.show_text = False
-        session.grid_2.slider.show_controls = False
-        # session.grid_1.slider.handle = 'answer'
-        # session.grid_2.slider.handle = 'next_question'
+        session.grid_2.slider.show_text = True
+        session.grid_2.slider.show_controls = True
 
+        # setup mode selectors:
+        session.grid_1.update_cell_data(session.data_view_grid_1)
+        session.grid_2.update_cell_data(session.data_view_grid_2)
 
         session.stats.send_dataframe_with_environment_variables(None, session.environment)
 
@@ -63,7 +64,11 @@ class DataView_Mode():
             session.stats.send_dataframe_as_json(connected_buildings)
 
     def process_grid_change(self):
-        pass
+        session.buildings['selected'] = False
+        for grid in [session.grid_1, session.grid_2]:
+            for cell in grid.grid[:][len(grid.grid) - 1]:
+                if cell.selected and cell.handle == 'start_input_scenarios':
+                    session.handlers['input_scenarios'].activate()
 
     def draw(self, canvas):
         # display graphs:

@@ -53,6 +53,8 @@ input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
 input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
 input_scenarios_grid_1 = pd.read_csv(config['GRID_1_INPUT_SCENARIOS_FILE'])
 input_scenarios_grid_2 = pd.read_csv(config['GRID_2_INPUT_SCENARIOS_FILE'])
+data_view_grid_1 = pd.read_csv(config['GRID_1_DATA_VIEW_FILE'])
+data_view_grid_2 = pd.read_csv(config['GRID_2_DATA_VIEW_FILE'])
 
 # list of possible handles
 input_scenarios_variables = ['CO2-prize', 'renovation_cost']

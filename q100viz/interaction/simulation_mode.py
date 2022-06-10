@@ -46,6 +46,9 @@ class SimulationMode:
             self.output_folder = os.path.normpath(os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER']))
         self.xml_path = self.output_folder + '/simulation_parameters_' + self.sim_start + '.xml'
 
+        # load parameters from csv file:
+        scenario_df = pandas.read_csv('../data/scenario_{0}.csv'.format(session.environment['active_scenario'])).set_index('name')
+
         # provide parameters:
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
         params.loc[len(params)] = ['Influence of private communication', 'FLOAT', '0.25', 'private_communication']
@@ -58,12 +61,13 @@ class SimulationMode:
         params.loc[len(params)] = ['Shapefile for buildings:', 'UNDEFINED', str(os.path.normpath(os.path.join(self.cwd, '../q100_abm/q100/includes/Shapefiles/bestandsgebaeude_export.shp'))), 'shape_file_buildings']
         params.loc[len(params)] = ['Building types source', 'STRING', 'Kataster_A', 'attributes_source']
         params.loc[len(params)] = ['3D-View', 'BOOLEAN', 'false', 'view_toggle']
-        params.loc[len(params)] = ['Alpha scenario', 'STRING', 'Static_mean', 'alpha_scenario']
-        params.loc[len(params)] = ['Carbon price scenario', 'STRING', 'A-Conservative', 'carbon_price_scenario']
-        params.loc[len(params)] = ['Energy prices scenario', 'STRING', 'Prices_Project start', 'energy_price_scenario']
-        params.loc[len(params)] = ['Q100 OpEx prices scenario', 'STRING', '12 ct / kWh (static)', 'q100_price_opex_scenario']
-        params.loc[len(params)] = ['Q100 CapEx prices scenario', 'STRING', '1 payment', 'q100_price_capex_scenario']
-        params.loc[len(params)] = ['Q100 Emissions scenario', 'STRING', 'Constant_50g / kWh', 'q100_emissions_scenario']
+
+        params.loc[len(params)] = ['Alpha scenario', 'STRING', scenario_df.loc['alpha_scenario', 'value'], 'alpha_scenario']
+        params.loc[len(params)] = ['Carbon price scenario', 'STRING', scenario_df.loc['carbon_price_scenario', 'value'], 'carbon_price_scenario']
+        params.loc[len(params)] = ['Energy prices scenario', 'STRING', scenario_df.loc['energy_price_scenario', 'value'], 'energy_price_scenario']
+        params.loc[len(params)] = ['Q100 OpEx prices scenario', 'STRING', scenario_df.loc['q100_price_opex_scenario', 'value'], 'q100_price_opex_scenario']
+        params.loc[len(params)] = ['Q100 CapEx prices scenario', 'STRING', scenario_df.loc['q100_price_capex_scenario', 'value'], 'q100_price_capex_scenario']
+        params.loc[len(params)] = ['Q100 Emissions scenario', 'STRING', scenario_df.loc['q100_emissions_scenario', 'value'], 'q100_emissions_scenario']
         params.loc[len(params)] = ['Carbon price for households?', 'BOOLEAN', 'false', 'carbon_price_on_off']
         # params.loc[len(params)] = ['keep_seed', 'bool', 'true']
 
@@ -76,6 +80,12 @@ class SimulationMode:
         outputs.loc[len(outputs)] = ['4', 'Emissions per year', str(self.final_step - 1)]
         outputs.loc[len(outputs)] = ['5', 'Emissions cumulative', str(self.final_step - 1)]
 
+        # export buildings_clusters
+        clusters_outname = '../data/buildings_clusters_' + self.sim_start + '.csv' if self.timestamp else '../data/buildings_clusters.csv'
+        df = session.buildings[session.buildings.selected]
+        df[['spec_heat_consumption', 'spec_power_consumption','energy_source', 'electricity_supplier', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
+
+        # start simulation
         self.make_xml(params, outputs, self.xml_path, self.final_step, None, 'agent_decision_making')
         self.run_script(self.xml_path)
 

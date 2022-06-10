@@ -47,6 +47,7 @@ environment['questions'] = [  # TODO: externalize this to yet another csv
         "Wenn ein erneuerbarer Energietarif bei einem anderen Energieversorger verfügbar wäre, würde ich meinen Anbieter wechseln."
 ]
 environment['question'] = environment['questions'][0]
+environment['active_scenario'] = None
 
 input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
 input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])

@@ -1,7 +1,6 @@
 import json
 import pygame
 import pandas
-import random
 
 import q100viz.keystone as keystone
 import q100viz.session as session

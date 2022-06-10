@@ -81,7 +81,7 @@ class SimulationMode:
         outputs.loc[len(outputs)] = ['5', 'Emissions cumulative', str(self.final_step - 1)]
 
         # export buildings_clusters
-        clusters_outname = '../data/buildings_clusters_' + self.sim_start + '.csv' if self.timestamp else '../data/buildings_clusters.csv'
+        clusters_outname = '../data/includes/csv_qscope/buildings_clusters_' + self.sim_start + '.csv' if self.timestamp else '../data/includes/csv_qscope/buildings_clusters.csv'
         df = session.buildings[session.buildings.selected]
         df[['spec_heat_consumption', 'spec_power_consumption','energy_source', 'electricity_supplier', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 

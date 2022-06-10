@@ -22,7 +22,7 @@ class SimulationMode:
         self.model_file = os.path.normpath(os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
         self.output_folder = ''  # will be set in activate()
         self.xml_path = ''  # will be set in activate()
-        self.final_step = 200
+        self.final_step = 200  # 9496
         self.timestamp = False
 
         self.xml = None
@@ -35,6 +35,8 @@ class SimulationMode:
         for slider in session.grid_1.slider, session.grid_2.slider:
             slider.show_text = False
             slider.show_controls = False
+        session.show_basemap = False
+        session.show_polygons = False
 
         # simulation start time
         self.sim_start = str(datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))
@@ -104,7 +106,7 @@ class SimulationMode:
     def draw(self, canvas):
         if session.verbose:
             font = pygame.font.SysFont('Arial', 40)
-            canvas.blit(font.render("Simulation running...", True, (255,255,255)), (session.canvas_size[0]/2, session.canvas_size[1]/2))
+            canvas.blit(font.render("Simulation is running...", True, (255,255,255)), (session.canvas_size[0]/2, session.canvas_size[1]/2))
 
         if len(session.buildings[session.buildings.selected]):
             # highlight selected buildings

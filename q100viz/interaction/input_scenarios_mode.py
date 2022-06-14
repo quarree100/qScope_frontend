@@ -34,6 +34,7 @@ class Input_Scenarios:
                 image.warp()
 
     def activate(self):
+        # graphics:
         session.show_polygons = False
         session.show_basemap = False
         session.active_handler = self

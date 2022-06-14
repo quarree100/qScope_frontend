@@ -260,8 +260,6 @@ while True:
     session.gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
     session.gis.draw_polygon_layer(
         canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'environmental_engagement')  # fill and lerp
-    # session.gis.draw_polygon_layer(
-    #     canvas, buildings, 0, (96, 205, 21), (96, 205, 21), 'environmental_engagement')  # fill all equally
     session.gis.draw_polygon_layer(
         canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'environmental_engagement')  # stroke simple black
 
@@ -288,11 +286,11 @@ while True:
 
     ########################## DATA PROCESSING ########################
 
-    # export canvas every 1s:
-    if session.seconds_elapsed % 1 == 0 and session.verbose and session.flag_export_canvas:
+    # export canvas:
+    if session.flag_export_canvas:
         # create a cropped output canvas and export:
-        temp = pygame.Surface((1400, 630))
-        temp.blit(canvas, (0,0))
+        temp = pygame.Surface((1460, 630))
+        temp.blit(session.gis.surface, (0,0))
         temp = pygame.transform.rotate(temp, 270)
         pygame.image.save(temp, '../data/canvas.png')
         session.flag_export_canvas = False

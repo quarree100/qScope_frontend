@@ -111,6 +111,7 @@ class Grid:
                         cell.rel_rot = cell.rot - cell.prev_rot if cell.prev_rot > -1 else 0
                     cell.prev_rot = cell.rot
 
+            session.flag_export_canvas = True
             session.active_handler.process_grid_change()
 
             # update slider values TODO: adjust this if more than 1 slider per grid

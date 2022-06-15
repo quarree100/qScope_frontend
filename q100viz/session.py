@@ -64,6 +64,10 @@ mode_selector_handles = ['start_input_scenarios', 'start_input_households', 'sta
 seconds_elapsed = 0
 ticks_elapsed = 0
 
+num_of_rounds = 4  # max num of rounds; will repeat after this
+iteration_round = 0   # num of q-scope iterations during this workshops
+iteration_images = ['', '', '', '']
+
 handlers = {
     'calibrate': CalibrationMode(),
     'questionnaire': Questionnaire_Mode(),

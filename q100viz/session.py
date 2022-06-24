@@ -65,8 +65,8 @@ seconds_elapsed = 0
 ticks_elapsed = 0
 
 num_of_rounds = 4  # max num of rounds; will repeat after this
-iteration_round = 0   # num of q-scope iterations during this workshops
-iteration_images = ['', '', '', '']
+environment['iteration_round'] = 0   # num of q-scope iterations during this workshops
+environment['iteration_images'] = ['', '', '', '']
 
 handlers = {
     'calibrate': CalibrationMode(),

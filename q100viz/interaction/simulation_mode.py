@@ -109,38 +109,36 @@ class SimulationMode:
         outputs.loc[len(outputs)] = [
             '5', 'Emissions cumulative', str(self.final_step - 1)]
 
-        # export buildings_clusters
+        # export buildings_clusters to csv
         clusters_outname = '../data/includes/csv_qscope/buildings_clusters_' + self.sim_start + \
             '.csv' if self.timestamp else '../data/includes/csv_qscope/buildings_clusters.csv'
         df = session.buildings[session.buildings.selected]
         df[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
-        session.iteration_images[session.iteration_round % session.num_of_rounds] = [
-            os.path.normpath('{0}/snapshot/Chartsnull-{1}.png'.format(str(self.output_folder), str(self.final_step - 1))),
-            os.path.normpath('{0}/snapshot/Emissions cumulativenull-{1}.png'.format(str(self.output_folder), str(self.final_step - 1))),
-            os.path.normpath('{0}/snapshot/Emissions per yearnull-{1}.png'.format(str(self.output_folder), str(self.final_step - 1))),
-            os.path.normpath('{0}/snapshot/households_employment_pienull-{1}.png'.format(str(self.output_folder), str(self.final_step - 1))),
-            os.path.normpath('{0}/snapshot/Modernizationnull-{1}.png'.format(str(self.output_folder), str(self.final_step - 1))),
-            os.path.normpath('{0}/snapshot/neighborhoodnull-{1}.png'.format(str(self.output_folder), str(self.final_step - 1)))
+        # compose image paths as required by infoscreen
+        session.environment['iteration_images'][session.environment['iteration_round'] % session.num_of_rounds] = [
+            str(os.path.normpath('public/data/headless/output_{0}/snapshot/Chartsnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
+            str(os.path.normpath('public/data/headless/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
+            str(os.path.normpath('public/data/headless/output_{0}/snapshot/Emissions per yearnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
+            str(os.path.normpath('public/data/headless/output_{0}/snapshot/households_employment_pienull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
+            str(os.path.normpath('public/data/headless/output_{0}/snapshot/Modernizationnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
+            str(os.path.normpath('public/data/headless/output_{0}/snapshot/neighborhoodnull-{1}.png'.format(self.sim_start, str(self.final_step - 1))))
         ]
 
+        # send image paths to infoscreen
         for i in range(0, 4):
-            simulation_images_paths = str({'iteration_round': i,
-                'images' : session.iteration_images[i]
-                })
-            # print(simulation_images_paths)
-            session.stats.send_message(simulation_images_paths)
+            simulation_images_paths = {'iteration_round': [i],
+                'images' : [session.environment['iteration_images'][i]]
+                }
 
+            df = pandas.DataFrame(data=simulation_images_paths)
+            session.stats.send_dataframe_as_json(df)
 
         # start simulation
         self.make_xml(params, outputs, self.xml_path,
                       self.final_step, None, 'agent_decision_making')
         self.run_script(self.xml_path)
-
-        # send data
-        session.stats.send_dataframe_with_environment_variables(
-            None, session.environment)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:

@@ -32,7 +32,9 @@ class Stats:
         self.send_message("init\n" + "\n".join(map(str, max_values + min_values)))
 
     def send_dataframe_as_json(self, df):
-        self.send_message(export_json(df, None))
+        data = json.loads(export_json(df, None))
+        result = data[0] if len(data) > 0 else {}
+        self.send_message([json.dumps(result, ensure_ascii=False)])
 
     def send_dataframe_with_environment_variables(self, df, env):
         data = json.loads(export_json(df, None))

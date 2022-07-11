@@ -38,7 +38,10 @@ class Input_Households:
                 self.process_grid_change()
 
     def process_grid_change(self):
+
         session.buildings['selected'] = False  # reset buildings
+        session.buildings['group'] = -1  # reset group
+
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):

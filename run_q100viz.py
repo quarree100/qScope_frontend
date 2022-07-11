@@ -6,13 +6,13 @@ import json
 import pandas
 import pygame
 import datetime
-from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_e, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
 from q100viz.settings.config import config
 import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
-import q100viz.stats as stats
+import q100viz.api as api
 import q100viz.session as session
 from q100viz.interaction.interface import *
 # Set FPS
@@ -135,6 +135,7 @@ buildings['environmental_engagement'] = [random.random() for row in buildings.va
 # buildings interaction
 buildings['cell'] = ""
 buildings['selected'] = False
+buildings['group'] = -1
 
 # GIS layers
 typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])
@@ -155,7 +156,7 @@ for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
     udp_thread.start()
 
 # stats viz communication
-_stats = session.stats = stats.Stats(stats_io)
+session.api = api.API(stats_io)
 
 handlers = session.handlers
 

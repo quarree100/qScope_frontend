@@ -138,9 +138,9 @@ class Slider:
         if self.previous_value is not self.value:
             # TODO: this is a workaround! the upper functions enables questionnaire communication, the latter one does not refresh the buildings status in infoscreen constantly.. --> create better functions in stats!
             if session.active_handler == session.handlers['questionnaire']:
-                session.stats.send_message(json.dumps(session.environment))
+                session.api.send_message(json.dumps(session.environment))
             else:
-                session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+                session.api.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
             self.previous_value = self.value
 class MousePosition:
     def __init__(self, canvas_size):

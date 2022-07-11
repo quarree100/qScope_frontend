@@ -32,14 +32,14 @@ class Questionnaire_Mode():
 
         session.active_handler = session.handlers['questionnaire']
         session.environment['mode'] = self.name
-        # session.stats.send_dataframe_as_json(
-        #     pd.DataFrame(data={"question" : [session.question]}))
+
+        session.api.send_df_with_session_env(None)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
-            session.stats.send_simplified_dataframe_with_environment_variables(
+            session.api.send_simplified_dataframe_with_environment_variables(
                 session.buildings[session.buildings.selected],
                 session.environment)
 
@@ -76,7 +76,7 @@ class Questionnaire_Mode():
         # get next question
         if self.question_index is not session.num_of_questions:
             # session.question = session.questions[self.question_index]
-            session.stats.send_dataframe_as_json(
+            session.api.send_dataframe_as_json(
                 pd.DataFrame(data={"question_number" : [self.question_index]}))
         else:  # leave questionnaire mode, enter input mode
             self.question_index = 0

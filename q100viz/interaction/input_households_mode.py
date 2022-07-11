@@ -1,5 +1,6 @@
 ''' Input Households Mode: Interact with building-specific parameters using the map '''
 
+import pandas as pd
 import pygame
 
 import q100viz.session as session
@@ -26,7 +27,7 @@ class Input_Households:
         session.grid_2.update_cell_data(session.input_households_grid_2)
 
         # send data:
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        session.api.send_df_with_session_env(None)
 
     def process_event(self, event):
             if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -37,7 +38,7 @@ class Input_Households:
                 self.process_grid_change()
 
     def process_grid_change(self):
-        session.buildings['selected'] = False
+        session.buildings['selected'] = False  # reset buildings
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
@@ -50,7 +51,9 @@ class Input_Households:
                         if n > 0:
                             selection = session.buildings[i].iloc[cell.rot % n]
                             session.buildings.loc[selection.name,
-                                                'selected'] = True
+                                                'selected'] = True  # select cell
+                            session.buildings.loc[selection.name,
+                                                'group'] = cell.id  # pass cell ID to building
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
@@ -68,7 +71,15 @@ class Input_Households:
                             elif cell.handle == 'start_simulation':
                                 session.handlers['simulation'].activate()
 
-        session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+        bd = session.buildings
+        data = {
+            "group_0" : [bd[bd['group'] == 0][session.communication_relevant_keys]],
+            "group_1" : [bd[bd['group'] == 1][session.communication_relevant_keys]],
+            "group_2" : [bd[bd['group'] == 2][session.communication_relevant_keys]],
+            "group_3" : [bd[bd['group'] == 3][session.communication_relevant_keys]]
+        }
+        df = pd.DataFrame(data=data)
+        session.api.send_df_with_session_env(df)
 
     def draw(self, canvas):
 

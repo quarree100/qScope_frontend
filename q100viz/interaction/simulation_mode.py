@@ -138,7 +138,7 @@ class SimulationMode:
                 }
 
             df = pandas.DataFrame(data=simulation_images_paths)
-            session.stats.send_dataframe_as_json(df)
+            session.api.send_dataframe_as_json(df)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -155,7 +155,7 @@ class SimulationMode:
                     if cell.selected:
                         pass
 
-        session.stats.send_simplified_dataframe_with_environment_variables(
+        session.api.send_simplified_dataframe_with_environment_variables(
             session.buildings[session.buildings.selected], session.environment)
 
     def update(self):

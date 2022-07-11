@@ -5,7 +5,7 @@ import socketio
 import q100viz.session as session
 import datetime
 
-class Stats:
+class API:
     def __init__(self, socket_addr):
         # set up Socket.IO client to talk to stats viz
         self.io = socketio.Client()
@@ -36,10 +36,10 @@ class Stats:
         result = data[0] if len(data) > 0 else {}
         self.send_message([json.dumps(result, ensure_ascii=False)])
 
-    def send_dataframe_with_environment_variables(self, df, env):
+    def send_df_with_session_env(self, df):
         data = json.loads(export_json(df, None))
         result = data[0] if len(data) > 0 else {}
-        for key, value in env.items():
+        for key, value in session.environment.items():
             result[key] = value
         self.send_message([json.dumps(result, ensure_ascii=False)])
 
@@ -59,11 +59,11 @@ class Stats:
             result = data[0]
             for key, value in env.items():
                 result[key] = value
-            clusterData = json.loads(export_json(df[["address","CO2","connection_to_heat_grid","energy_source","spec_heat_consumption","spec_power_consumption", "refurbished", "environmental_engagement"]], None))
+            clusterData = json.loads(export_json(df[["address","CO2","connection_to_heat_grid", "refurbished", "environmental_engagement"]], None))
             result["clusters"] = clusterData
             self.send_message([json.dumps(result)])
 
-    def send_dataframes_as_json(self, dfs):
+    def send_dataframe(self, dfs):
         self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))
 
 def append_csv(file, df, cols):

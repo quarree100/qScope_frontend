@@ -47,13 +47,13 @@ class DataView_Mode():
         session.grid_1.update_cell_data(session.data_view_grid_1)
         session.grid_2.update_cell_data(session.data_view_grid_2)
 
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        session.api.send_df_with_session_env(None)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
-            session.stats.send_simplified_dataframe_with_environment_variables(
+            session.api.send_simplified_dataframe_with_environment_variables(
                 session.buildings[session.buildings.selected],
                 session.environment)
 
@@ -61,7 +61,7 @@ class DataView_Mode():
 
             connected_buildings = pd.DataFrame(data=[
                 {'connected_buildings' : len(session.buildings[session.buildings['connection_to_heat_grid'] == True])}])
-            session.stats.send_dataframe_as_json(connected_buildings)
+            session.api.send_dataframe_as_json(connected_buildings)
 
     def process_grid_change(self):
         session.buildings['selected'] = False

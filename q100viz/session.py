@@ -4,6 +4,7 @@ import pandas as pd
 import pygame
 
 from q100viz.settings.config import config
+import q100viz.api as api
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
 from q100viz.interaction.input_scenarios_mode import Input_Scenarios
@@ -13,6 +14,9 @@ from q100viz.interaction.dataview_mode import DataView_Mode
 import q100viz.keystone as keystone
 
 log = ""
+
+# infoscreen communication
+api = None
 
 # graphics
 canvas_size = 1920, 1080
@@ -60,6 +64,7 @@ data_view_grid_2 = pd.read_csv(config['GRID_2_DATA_VIEW_FILE'])
 # list of possible handles
 input_scenarios_variables = ['CO2-prize', 'renovation_cost']
 mode_selector_handles = ['start_input_scenarios', 'start_input_households', 'start_simulation']
+communication_relevant_keys = ['address', 'CO2', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement']
 
 # interaction
 seconds_elapsed = 0

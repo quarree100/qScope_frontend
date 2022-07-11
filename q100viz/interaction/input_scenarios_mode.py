@@ -2,7 +2,7 @@ import pygame
 
 import q100viz.keystone as keystone
 import q100viz.session as session
-import q100viz.stats as stats
+import q100viz.api as api
 from q100viz.settings.config import config
 from q100viz.graphics.graphictools import Image
 
@@ -51,7 +51,7 @@ class Input_Scenarios:
         session.grid_2.update_cell_data(session.input_scenarios_grid_2)
 
         # send data:
-        session.stats.send_dataframe_with_environment_variables(None, session.environment)
+        session.api.send_df_with_session_env(None)
 
     def process_event(self, event):
             if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -96,7 +96,7 @@ class Input_Scenarios:
                             if cell.handle == 'start_input_households':
                                 session.handlers['input_households'].activate()
 
-        session.stats.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+        session.api.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
 
         print(session.environment)
 

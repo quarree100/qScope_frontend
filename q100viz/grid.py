@@ -74,9 +74,11 @@ class Grid:
         # update cell at cursor position
         try:
             cell = self.grid[int(coord[1])][int(coord[0])]
-            if button == 1:  # left click
+            if button == 1:  # left click: (de)select
                 cell.selected = not cell.selected
-            elif button == 3:  # right click
+            elif button == 2:  # middle click: change id
+                cell.id = (cell.id + 1) % 4
+            elif button == 3:  # right click: change rotation
                 cell.prev_rot = cell.rot
                 cell.rot  = (cell.rot + 1) % 4
         except IndexError:

@@ -24,7 +24,7 @@ class SimulationMode:
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
         self.output_folder = ''  # will be set in activate()
         self.xml_path = ''  # will be set in activate()
-        self.final_step = 10  # 9496
+        self.final_step = config['SIMULATION_NUM_STEPS']
         self.timestamp = True
 
         self.xml = None

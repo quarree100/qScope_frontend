@@ -16,6 +16,7 @@ config = {
     'GAMA_HEADLESS_FOLDER' : '/opt/gama-platform/headless/',
     'GAMA_OUTPUT_FOLDER': '../data/headless/output',
     'GAMA_MODEL_FILE' : '../q100_abm/q100/models/qscope_ABM.gaml',
+    'SIMULATION_NUM_STEPS' : 9496,
 
     # grid setup
     'CSPY_SETTINGS_FILE': '../cspy/settings/cityscopy.json',

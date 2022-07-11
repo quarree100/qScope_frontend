@@ -38,15 +38,16 @@ verbose = True
 
 environment = {'mode': 'input_scenarios'}
 
-environment['questions'] = [  # TODO: externalize this to yet another csv
+# questions = [  # TODO: externalize this to yet another csv
 
-        "Die globale Erderwärmung wird durch von Menschen produzierte Emissionen verstärkt.",
-        "Der Schutz der Umwelt ist ein Mittel zur Stärkung des Wirtschaftswachstums in Deutschland.",
-        "Ich glaube, dass wir jedes Mal, wenn wir Kohle, Öl oder Gas verwenden, zum Klimawandel beitragen.",
-        "Ich würde meinen Energieverbrauch reduzieren, wenn mein Haushalt mehr Energie verbraucht als ähnliche Haushalte.",
-        "Wenn ein erneuerbarer Energietarif bei einem anderen Energieversorger verfügbar wäre, würde ich meinen Anbieter wechseln."
-]
-environment['question'] = environment['questions'][0]
+#         "Die globale Erderwärmung wird durch von Menschen produzierte Emissionen verstärkt.",
+#         "Der Schutz der Umwelt ist ein Mittel zur Stärkung des Wirtschaftswachstums in Deutschland.",
+#         "Ich glaube, dass wir jedes Mal, wenn wir Kohle, Öl oder Gas verwenden, zum Klimawandel beitragen.",
+#         "Ich würde meinen Energieverbrauch reduzieren, wenn mein Haushalt mehr Energie verbraucht als ähnliche Haushalte.",
+#         "Wenn ein erneuerbarer Energietarif bei einem anderen Energieversorger verfügbar wäre, würde ich meinen Anbieter wechseln."
+# ]
+# question = questions[0]
+num_of_questions = 5  # TODO: this equals length of csv
 environment['active_scenario'] = None
 
 input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])

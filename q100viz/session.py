@@ -38,6 +38,7 @@ basemap = None
 grid_1 = None
 grid_2 = None
 buildings = None
+buildings_groups = None
 verbose = True
 
 environment = {'mode': 'input_scenarios'}

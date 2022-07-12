@@ -2,7 +2,7 @@
 
 import pygame
 import json
-import random
+import pandas as pd
 import numpy
 
 import q100viz.keystone as keystone
@@ -15,6 +15,7 @@ class Slider:
     def __init__(self, canvas_size, grid, coords):
         self.value = 0
         self.previous_value = 0
+        self.id = 0
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
 
@@ -109,8 +110,8 @@ class Slider:
         #     # ranges from 0 to 10,000€
         #     session.environment['investment'] = self.value * 10000
         elif self.handle == 'connection_to_heat_grid':
-            session.buildings.loc[(
-                session.buildings.selected == True), 'connection_to_heat_grid'] = self.value > 0.5
+            session.buildings.loc[((
+                session.buildings.selected == True) & (session.buildings.group == self.id)), 'connection_to_heat_grid'] = self.value > 0.5
         elif self.handle == 'refurbished':
             session.buildings.loc[(
                 session.buildings.selected == True), 'refurbished'] = self.value > 0.5
@@ -140,8 +141,14 @@ class Slider:
             if session.active_handler == session.handlers['questionnaire']:
                 session.api.send_message(json.dumps(session.environment))
             else:
-                session.api.send_simplified_dataframe_with_environment_variables(session.buildings[session.buildings.selected], session.environment)
+                session.api.send_dataframe_as_json(pd.DataFrame(data={
+                    "group_0" : [session.buildings[session.buildings['group'] == 0][session.communication_relevant_keys]],
+                    "group_1" : [session.buildings[session.buildings['group'] == 1][session.communication_relevant_keys]],
+                    "group_2" : [session.buildings[session.buildings['group'] == 2][session.communication_relevant_keys]],
+                    "group_3" : [session.buildings[session.buildings['group'] == 3][session.communication_relevant_keys]]
+                }))
             self.previous_value = self.value
+
 class MousePosition:
     def __init__(self, canvas_size):
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)

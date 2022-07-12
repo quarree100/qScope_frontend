@@ -62,10 +62,11 @@ class Input_Households:
                         if cell.handle is not None:
                             if cell.handle in ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement']:
                                 if grid.slider.show_controls:
-                                    session.grid_2.slider.handle = cell.handle
+                                    grid.slider.handle = cell.handle
+                                    grid.slider.id = cell.id
                                     if grid.slider.previous_handle is not grid.slider.handle:
                                         session.print_verbose(
-                                            ("slider_handle: ", grid.slider.handle))
+                                            "slider id: {0}, handle: {1}".format(str(grid.slider.id), str(grid.slider.handle)))
                                         grid.slider.previous_handle = grid.slider.handle
 
                             elif cell.handle == 'start_input_scenarios':
@@ -75,14 +76,13 @@ class Input_Households:
                                 session.handlers['simulation'].activate()
 
         bd = session.buildings
-        data = {
+        session.buildings_groups = pd.DataFrame(data={
             "group_0" : [bd[bd['group'] == 0][session.communication_relevant_keys]],
             "group_1" : [bd[bd['group'] == 1][session.communication_relevant_keys]],
             "group_2" : [bd[bd['group'] == 2][session.communication_relevant_keys]],
             "group_3" : [bd[bd['group'] == 3][session.communication_relevant_keys]]
-        }
-        df = pd.DataFrame(data=data)
-        session.api.send_df_with_session_env(df)
+        })
+        session.api.send_dataframe_as_json(session.buildings_groups)
 
     def draw(self, canvas):
 

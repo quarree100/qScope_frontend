@@ -134,10 +134,16 @@ class SimulationMode:
                       self.final_step, None, 'agent_decision_making')
         self.run_script(self.xml_path)
 
+        # compose csv paths for infoscreen to make graphs
+        session.emissions_data_paths[session.iteration_round] = [
+            str(os.path.normpath('data/includes/csv_export/emissions_{0}/{1}'.format(self.sim_start, file_name))) for file_name in os.listdir('../data/includes/csv_export/emissions_{0}'.format(str(self.sim_start)))
+        ]
+
         # send image paths to infoscreen
-        for i in range(0, 4):
+        for i in range(session.num_of_rounds):
             simulation_images_paths = {'iteration_round': [i],
-                'iteration_images' : [session.iteration_images[i]]
+                'iteration_images' : [session.iteration_images[i]],
+                'emissions_data_paths': [session.emissions_data_paths[i]]
                 }
 
             df = pandas.DataFrame(data=simulation_images_paths)

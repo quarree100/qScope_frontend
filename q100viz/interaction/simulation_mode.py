@@ -25,7 +25,7 @@ class SimulationMode:
         self.output_folder = ''  # will be set in activate()
         self.xml_path = ''  # will be set in activate()
         self.final_step = config['SIMULATION_NUM_STEPS']
-        self.timestamp = True
+        self.using_timestamp = True
 
         self.xml = None
 
@@ -43,7 +43,7 @@ class SimulationMode:
         # simulation start time
         self.sim_start = str(
             datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))
-        if self.timestamp:
+        if self.using_timestamp:
             self.output_folder = os.path.normpath(os.path.join(
                 self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.sim_start))
         else:
@@ -58,6 +58,9 @@ class SimulationMode:
 
         # provide parameters:
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
+        params.loc[len(params)] = ['timestamp', 'STRING', self.sim_start, 'timestamp']
+
+        # values as used in trend model:
         params.loc[len(params)] = ['Influence of private communication',
                                    'FLOAT', '0.25', 'private_communication']
         params.loc[len(params)] = ['Neighboring distance',
@@ -104,14 +107,14 @@ class SimulationMode:
         outputs.loc[len(outputs)] = ['2', 'Charts', str(self.final_step - 1)]
         outputs.loc[len(outputs)] = ['3', 'Modernization',
                                      str(self.final_step - 1)]
-        outputs.loc[len(outputs)] = ['4', 'Emissions per year',
+        outputs.loc[len(outputs)] = ['4', 'Monthly Emissions',
                                      str(self.final_step - 1)]
         outputs.loc[len(outputs)] = [
             '5', 'Emissions cumulative', str(self.final_step - 1)]
 
         # export buildings_clusters to csv
         clusters_outname = '../data/includes/csv_qscope/buildings_clusters_' + self.sim_start + \
-            '.csv' if self.timestamp else '../data/includes/csv_qscope/buildings_clusters.csv'
+            '.csv' if self.using_timestamp else '../data/includes/csv_qscope/buildings_clusters.csv'
         df = session.buildings[session.buildings.selected]
         df[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)

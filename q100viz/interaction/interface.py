@@ -141,12 +141,8 @@ class Slider:
             if session.active_handler == session.handlers['questionnaire']:
                 session.api.send_message(json.dumps(session.environment))
             else:
-                session.api.send_dataframe_as_json(pd.DataFrame(data={
-                    "group_0" : [session.buildings[session.buildings['group'] == 0][session.communication_relevant_keys]],
-                    "group_1" : [session.buildings[session.buildings['group'] == 1][session.communication_relevant_keys]],
-                    "group_2" : [session.buildings[session.buildings['group'] == 2][session.communication_relevant_keys]],
-                    "group_3" : [session.buildings[session.buildings['group'] == 3][session.communication_relevant_keys]]
-                }))
+                session.api.send_grouped_buildings()
+
             self.previous_value = self.value
 
 class MousePosition:

@@ -56,7 +56,38 @@ class API:
             result = data[0]
             clusterData = json.loads(export_json(df[keys], None))
             result["clusters"] = clusterData
-            self.send_message([json.dumps(result)])
+            self.send_message(json.dumps(result))
+
+    def send_grouped_buildings(self):
+
+        bd = session.buildings
+
+        session.buildings_groups = [
+            bd[bd['group'] == 0][session.communication_relevant_keys],
+            bd[bd['group'] == 1][session.communication_relevant_keys],
+            bd[bd['group'] == 2][session.communication_relevant_keys],
+            bd[bd['group'] == 3][session.communication_relevant_keys]]
+
+        i = 0
+        message = {}
+
+        for group in session.buildings_groups:
+            connections_sum = make_clusters(group)['connection_to_heat_grid'].sum()
+            data = json.loads(export_json(connections_sum.rename('connections', inplace=True), None))
+
+            result = {}
+            if len(data) > 0:
+                result = data[0]
+                groupData = json.loads(
+                    export_json(group[session.communication_relevant_keys], None))
+                result["buildings".format(str(i))] = groupData
+                message['group_{0}'.format(str(i))] = result
+
+                print(json.dumps(message))
+
+                self.send_message(json.dumps(message))
+
+            i += 1
 
     def send_simplified_dataframe_with_environment_variables(self, df, env):
         sum = make_clusters(df).sum()
@@ -67,7 +98,7 @@ class API:
                 result[key] = value
             clusterData = json.loads(export_json(df[["address","CO2","connection_to_heat_grid", "refurbished", "environmental_engagement"]], None))
             result["clusters"] = clusterData
-            self.send_message([json.dumps(result)])
+            self.send_message(json.dumps(result))
 
     def send_dataframe(self, dfs):
         self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))

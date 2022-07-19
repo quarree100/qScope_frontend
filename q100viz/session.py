@@ -65,7 +65,7 @@ data_view_grid_2 = pd.read_csv(config['GRID_2_DATA_VIEW_FILE'])
 # list of possible handles
 input_scenarios_variables = ['CO2-prize', 'renovation_cost']
 mode_selector_handles = ['start_input_scenarios', 'start_input_households', 'start_simulation']
-communication_relevant_keys = ['address', 'CO2', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement']
+communication_relevant_keys = ['address', 'CO2', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement', 'cell']
 
 # interaction
 seconds_elapsed = 0

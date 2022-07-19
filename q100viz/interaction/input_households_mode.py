@@ -30,12 +30,12 @@ class Input_Households:
         session.api.send_df_with_session_env(None)
 
     def process_event(self, event):
-            if event.type == pygame.locals.MOUSEBUTTONDOWN:
-                session.grid_1.mouse_pressed(event.button)
-                session.grid_2.mouse_pressed(event.button)
+        if event.type == pygame.locals.MOUSEBUTTONDOWN:
+            session.grid_1.mouse_pressed(event.button)
+            session.grid_2.mouse_pressed(event.button)
 
-                session.flag_export_canvas = True
-                self.process_grid_change()
+            session.flag_export_canvas = True
+            self.process_grid_change()
 
     def process_grid_change(self):
 
@@ -54,9 +54,9 @@ class Input_Households:
                         if n > 0:
                             selection = session.buildings[i].iloc[cell.rot % n]
                             session.buildings.loc[selection.name,
-                                                'selected'] = True  # select cell
+                                                  'selected'] = True  # select cell
                             session.buildings.loc[selection.name,
-                                                'group'] = cell.id  # pass cell ID to building
+                                                  'group'] = cell.id  # pass cell ID to building
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
@@ -75,14 +75,7 @@ class Input_Households:
                             elif cell.handle == 'start_simulation':
                                 session.handlers['simulation'].activate()
 
-        bd = session.buildings
-        session.buildings_groups = pd.DataFrame(data={
-            "group_0" : [bd[bd['group'] == 0][session.communication_relevant_keys]],
-            "group_1" : [bd[bd['group'] == 1][session.communication_relevant_keys]],
-            "group_2" : [bd[bd['group'] == 2][session.communication_relevant_keys]],
-            "group_3" : [bd[bd['group'] == 3][session.communication_relevant_keys]]
-        })
-        session.api.send_dataframe_as_json(session.buildings_groups)
+        session.api.send_grouped_buildings()
 
     def draw(self, canvas):
 

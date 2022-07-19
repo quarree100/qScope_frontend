@@ -60,28 +60,7 @@ class SimulationMode:
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
         params.loc[len(params)] = ['timestamp', 'STRING', self.sim_start, 'timestamp']
 
-        # values as used in trend model:
-        params.loc[len(params)] = ['Influence of private communication',
-                                   'FLOAT', '0.25', 'private_communication']
-        params.loc[len(params)] = ['Neighboring distance',
-                                   'INT', '2', 'global_neighboring_distance']
-        params.loc[len(params)] = ['Influence-Type',
-                                   'STRING', 'one-side', 'influence_type']
-        params.loc[len(params)] = ['Memory', 'BOOLEAN',
-                                   'true', 'communication_memory']
-        params.loc[len(params)] = ['New Buildings', 'STRING',
-                                   'continuously', 'new_buildings_parameter']
-        params.loc[len(params)] = ['Random Order of new Buildings',
-                                   'BOOLEAN', 'true', 'new_buildings_order_random']
-        params.loc[len(params)] = ['Modernization Energy Saving',
-                                   'FLOAT', '0.5', 'energy_saving_rate']
-        params.loc[len(params)] = ['Shapefile for buildings:', 'UNDEFINED', str(os.path.normpath(os.path.join(
-            self.cwd, '../q100_abm/q100/includes/Shapefiles/bestandsgebaeude_export.shp'))), 'shape_file_buildings']
-        params.loc[len(params)] = ['Building types source',
-                                   'STRING', 'Kataster_A', 'attributes_source']
-        params.loc[len(params)] = ['3D-View', 'BOOLEAN',
-                                   'false', 'view_toggle']
-
+        # values to be used in trend model:
         params.loc[len(params)] = ['Alpha scenario', 'STRING',
                                    scenario_df.loc['alpha_scenario', 'value'], 'alpha_scenario']
         params.loc[len(params)] = ['Carbon price scenario', 'STRING',
@@ -96,6 +75,7 @@ class SimulationMode:
                                    scenario_df.loc['q100_emissions_scenario', 'value'], 'q100_emissions_scenario']
         params.loc[len(params)] = ['Carbon price for households?',
                                    'BOOLEAN', 'false', 'carbon_price_on_off']
+        # TODO:
         # params.loc[len(params)] = ['keep_seed', 'bool', 'true']
 
         # provide outputs:

@@ -79,16 +79,21 @@ class Input_Households:
 
     def draw(self, canvas):
 
-        if len(session.buildings[session.buildings.selected]):
-            # highlight selected buildings
-            session.gis.draw_polygon_layer(
-                canvas,
-                session.buildings[session.buildings.selected], 2, (255, 0, 127)
-            )
+        try:
+            if len(session.buildings[session.buildings.selected]):
+                # highlight selected buildings
+                session.gis.draw_polygon_layer(
+                    canvas,
+                    session.buildings[session.buildings.selected], 2, (255, 0, 127)
+                )
 
-        # coloring slider area:
-        for slider in session.grid_1.slider, session.grid_2.slider:
-            slider.draw_area()
+            # coloring slider area:
+            for slider in session.grid_1.slider, session.grid_2.slider:
+                slider.draw_area()
+
+        except Exception as e:
+                session.log += "\n%s" % e
+
 
     def update(self):
         pass

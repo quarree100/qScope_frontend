@@ -37,8 +37,10 @@ python run_q100viz.py
 
 ```
 project qScope
-└───cspy
-│   └───CityScoPy LEGO Decoder
+└───cspy_L
+│   └───CityScoPy LEGO Decoder for left table
+└───cspy_R
+│   └───CityScoPy LEGO Decoder for right table
 └───data
 │       contains LINKS to GIS data from Seafile and api.json for SOFTWARE COMMUNICATION
 └───q100_abm

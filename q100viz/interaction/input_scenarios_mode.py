@@ -64,7 +64,7 @@ class Input_Scenarios:
     def process_grid_change(self):
         session.buildings['selected'] = False
         session.environment['active_scenario'] = None
-        session.grid_2.grid[17][19].handle = None
+        session.grid_2.grid[18][19].handle = None
         self.images = [image for image in self.images_disabled]
 
         for grid in [session.grid_1, session.grid_2]:
@@ -88,8 +88,8 @@ class Input_Scenarios:
 
                             # create mode selector when a scenario is selected
                             if session.environment['active_scenario'] is not None:
-                                session.grid_2.grid[17][19].handle = 'start_input_households'
-                                session.grid_2.grid[17][19].color = pygame.color.Color('purple')
+                                session.grid_2.grid[18][19].handle = 'start_input_households'
+                                session.grid_2.grid[18][19].color = pygame.color.Color('purple')
 
                         # set slider handles via selected cell in last row:
                         elif cell.handle is not None:

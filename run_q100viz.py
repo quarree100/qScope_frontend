@@ -144,7 +144,7 @@ waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Waermespeich
     gis.read_shapefile(config['HEIZZENTRALE_FILE']))
 
 # mask viewport with black surface
-mask_points = [[0, 0], [100, 0], [100, 82], [0, 82], [0, -50],
+mask_points = [[0, 0], [100, 0], [100, 86], [0, 86], [0, -50],
                [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
 # UDP server for incoming cspy messages

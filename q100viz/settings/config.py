@@ -19,7 +19,7 @@ config = {
     'SIMULATION_NUM_STEPS' : 9496,
 
     # grid setup
-    'CSPY_SETTINGS_FILE': '../cspy/settings/cityscopy.json',
+    'CSPY_SETTINGS_FILE': '../data/cityscopy.json',
     'GRID_1_SETUP_FILE': 'q100viz/settings/input_households_grid_1.csv',
     'GRID_2_SETUP_FILE': 'q100viz/settings/input_households_grid_2.csv',
     'GRID_1_INPUT_SCENARIOS_FILE': 'q100viz/settings/input_scenarios_grid_1.csv',
@@ -30,10 +30,10 @@ config = {
     'GRID_2_X1' : 50,
     'GRID_2_X2' : 100,
     'GRID_2_Y1' : 0,
-    'GRID_2_Y2' : 81.818,
+    'GRID_2_Y2' : 86.27,
 
     'GRID_1_X1' : 0,
     'GRID_1_X2' : 50,
     'GRID_1_Y1' : 0,
-    'GRID_1_Y2' : 81.818
+    'GRID_1_Y2' : 86.27
 }

@@ -16,7 +16,8 @@ import q100viz.keystone as keystone
 log = ""
 
 # infoscreen communication
-api = None
+io = 'http://localhost:8081'  # Socket.io
+api = api.API(io)
 
 # graphics
 canvas_size = 1920, 1080

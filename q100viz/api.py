@@ -34,20 +34,20 @@ class API:
     def send_dataframe_as_json(self, df):
         data = json.loads(export_json(df, None))
         result = data[0] if len(data) > 0 else {}
-        self.send_message([json.dumps(result, ensure_ascii=False)])
+        self.send_message(json.dumps(result, ensure_ascii=False))
 
     def send_df_with_session_env(self, df):
         data = json.loads(export_json(df, None))
         result = data[0] if len(data) > 0 else {}
         for key, value in session.environment.items():
             result[key] = value
-        self.send_message([json.dumps(result, ensure_ascii=False)])
+        self.send_message(json.dumps(result, ensure_ascii=False))
 
     def send_session_env(self):
         result = {}
         for key, value in session.environment.items():
             result[key] = value
-        self.send_message([json.dumps(result, ensure_ascii=False)])
+        self.send_message(json.dumps(result, ensure_ascii=False))
 
     def send_dataframe_using_keys(self, df, keys):
         sum = make_clusters(df).sum()

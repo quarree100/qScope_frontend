@@ -12,7 +12,6 @@ from q100viz.settings.config import config
 import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
-import q100viz.api as api
 import q100viz.session as session
 from q100viz.interaction.interface import *
 # Set FPS
@@ -30,9 +29,6 @@ clock = pygame.time.Clock()
 # UDP receive
 grid_udp_1 = ('localhost', 5001)
 grid_udp_2 = ('localhost', 5000)
-
-# Socket.io
-stats_io = 'http://localhost:8081'
 
 # Set up display
 canvas_size = session.canvas_size
@@ -154,9 +150,6 @@ for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
                                   args=(grid_.read_scanner_data,),
                                   daemon=True)
     udp_thread.start()
-
-# stats viz communication
-session.api = api.API(stats_io)
 
 handlers = session.handlers
 

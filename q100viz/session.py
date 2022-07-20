@@ -73,6 +73,7 @@ seconds_elapsed = 0
 ticks_elapsed = 0
 
 num_of_rounds = 4  # max num of rounds; will repeat after this
+num_of_users = 4 # num of valid users # TODO: combine with num of valid tags!
 iteration_round = 0   # num of q-scope iterations during this workshops
 iteration_images = ['' for n in range(num_of_rounds)]
 emissions_data_paths = ['' for n in range(num_of_rounds)]

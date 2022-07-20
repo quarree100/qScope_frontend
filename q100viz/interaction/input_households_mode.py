@@ -41,6 +41,7 @@ class Input_Households:
 
         session.buildings['selected'] = False  # reset buildings
         session.buildings['group'] = -1  # reset group
+        session.buildings_groups = ['' for i in range(session.num_of_users)] # reset groups
 
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):

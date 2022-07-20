@@ -123,8 +123,8 @@ class SimulationMode:
         dataview_wrapper = ['' for i in range(session.num_of_rounds)]
         for i in range(session.num_of_rounds):
             images_and_data = {'iteration_round': i,
-                'iteration_images' : [session.iteration_images[i]],
-                'emissions_data_paths': [session.emissions_data_paths[i]]
+                'iteration_images' : session.iteration_images[i],
+                'emissions_data_paths': session.emissions_data_paths[i]
                 }
 
             dataview_wrapper[i] = images_and_data

@@ -120,14 +120,20 @@ class SimulationMode:
         ]
 
         # send image paths to infoscreen
+        dataview_wrapper = ['' for i in range(session.num_of_rounds)]
         for i in range(session.num_of_rounds):
-            simulation_images_paths = {'iteration_round': [i],
+            images_and_data = {'iteration_round': i,
                 'iteration_images' : [session.iteration_images[i]],
                 'emissions_data_paths': [session.emissions_data_paths[i]]
                 }
 
-            df = pandas.DataFrame(data=simulation_images_paths)
-            session.api.send_dataframe_as_json(df)
+            dataview_wrapper[i] = images_and_data
+        dataview_wrapper = {
+            'data_view_data' : [dataview_wrapper]
+        }
+
+        df = pandas.DataFrame(data=dataview_wrapper)
+        session.api.send_dataframe_as_json(df)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:

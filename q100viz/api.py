@@ -68,10 +68,12 @@ class API:
             bd[bd['group'] == 2][session.communication_relevant_keys],
             bd[bd['group'] == 3][session.communication_relevant_keys]]
 
+        wrapper = ['' for i in range(session.num_of_users)]
         i = 0
         message = {}
 
         for group in session.buildings_groups:
+            # aggregated data:
             connections_sum = make_clusters(group)['connection_to_heat_grid'].sum()
             data = json.loads(export_json(connections_sum.rename('connections', inplace=True), None))
 
@@ -82,10 +84,14 @@ class API:
                     export_json(group[session.communication_relevant_keys], None))
                 result["buildings".format(str(i))] = groupData
                 message['group_{0}'.format(str(i))] = result
+            else:  # create empty elements for empty groups (infoscreen reset)
+                message['group_{0}'.format(str(i))] = ['']
 
-                print(json.dumps(message))
+            wrapper = {
+                'buildings_groups' : message
+            }
 
-                self.send_message(json.dumps(message))
+            self.send_message(json.dumps(wrapper))
 
             i += 1
 

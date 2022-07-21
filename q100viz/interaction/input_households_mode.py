@@ -4,7 +4,7 @@ import pandas as pd
 import pygame
 
 import q100viz.session as session
-import q100viz.settings.config as config
+from q100viz.settings.config import config
 class Input_Households:
     def __init__(self):
         self.name = 'input_households'
@@ -68,6 +68,8 @@ class Input_Households:
                                 selection = session.buildings[i].iloc[n]
                                 session.buildings.loc[selection.name,
                                                         'selected'] = True
+                                session.buildings.loc[selection.name,
+                                                    'group'] = cell.id  # pass cell ID to building
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:

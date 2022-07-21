@@ -289,6 +289,10 @@ while True:
         pygame.image.save(temp, '../data/canvas.png')
         session.flag_export_canvas = False
 
+    # send timed messages:
+    if session.flag_check_timed_messages:
+        session.api.send_timed_messages()
+
     # slider
     for grid in grid_1, grid_2:
         grid_1.slider.render(session.viewport)

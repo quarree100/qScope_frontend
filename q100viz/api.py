@@ -18,6 +18,9 @@ class API:
         thread.start()
 
         self.previous_message = None
+        self.timed_message_buffer_time = datetime.timedelta(milliseconds=250) # buffer time for timed messages
+        self.last_timed_message_start = 0
+        self.timed_message = None
 
     def send_message(self, msg):
         if msg != self.previous_message:
@@ -27,6 +30,27 @@ class API:
                 self.previous_message = msg
             except Exception:
                 pass
+
+    # overwrite timed message:
+    def setup_timed_message(self, msg, interval):
+        self.timed_message_buffer_time = datetime.timedelta(milliseconds=interval)
+        self.timed_message = msg
+        session.flag_check_timed_messages = True
+        self.last_timed_message_start = datetime.datetime.now()
+        print("timed message set to send:", msg)
+
+    # send timed message if no change:
+    def send_timed_messages(self):
+        if datetime.datetime.now() - self.last_timed_message_start > self.timed_message_buffer_time:
+        # if msg != self.previous_message:
+            session.print_verbose(datetime.datetime.now().strftime(" %H:%M:%S ") + "sending data:\n" + str(self.timed_message))
+            try:
+                self.io.emit('message', self.timed_message)
+                self.previous_message = self.timed_message
+            except Exception:
+                pass
+
+        session.flag_check_timed_messages = False
 
     def send_max_values(self, max_values, min_values):
         self.send_message("init\n" + "\n".join(map(str, max_values + min_values)))
@@ -91,7 +115,7 @@ class API:
                 'buildings_groups' : message
             }
 
-            self.send_message(json.dumps(wrapper))
+            self.setup_timed_message(json.dumps(wrapper), 0)
 
             i += 1
 

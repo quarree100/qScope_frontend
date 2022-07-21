@@ -88,6 +88,7 @@ handlers = {
 }
 active_handler = handlers['input_scenarios']
 flag_export_canvas = False
+flag_check_timed_messages = False
 
 # global functions:
 def print_verbose(message):

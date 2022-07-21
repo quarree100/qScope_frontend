@@ -4,9 +4,11 @@ import pandas as pd
 import pygame
 
 import q100viz.session as session
+import q100viz.settings.config as config
 class Input_Households:
     def __init__(self):
         self.name = 'input_households'
+        self.selection_mode = config['buildings_selection_mode'] # decides how to select intersected buildings. can be 'all' or 'rotation'
 
     def activate(self):
         session.active_handler = session.handlers['input_households']
@@ -51,13 +53,21 @@ class Input_Households:
                         i = get_intersection(session.buildings, grid, x, y)
 
                         # use rotation value to cycle through buildings located in cell
-                        n = len(session.buildings[i])
-                        if n > 0:
-                            selection = session.buildings[i].iloc[cell.rot % n]
-                            session.buildings.loc[selection.name,
-                                                  'selected'] = True  # select cell
-                            session.buildings.loc[selection.name,
-                                                  'group'] = cell.id  # pass cell ID to building
+                        if self.selection_mode == 'rotation':
+                            n = len(session.buildings[i])
+                            if n > 0:
+                                selection = session.buildings[i].iloc[cell.rot % n]
+                                session.buildings.loc[selection.name,
+                                                    'selected'] = True  # select cell
+                                session.buildings.loc[selection.name,
+                                                    'group'] = cell.id  # pass cell ID to building
+
+                        # select all buildings within range
+                        elif self.selection_mode == 'all':
+                            for n in range(0, len(session.buildings[i])):
+                                selection = session.buildings[i].iloc[n]
+                                session.buildings.loc[selection.name,
+                                                        'selected'] = True
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:

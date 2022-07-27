@@ -103,7 +103,7 @@ class SimulationMode:
         session.iteration_images[session.iteration_round] = [
             str(os.path.normpath('data/headless/output_{0}/snapshot/Chartsnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
             str(os.path.normpath('data/headless/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/Emissions per yearnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
+            str(os.path.normpath('data/headless/output_{0}/snapshot/Monthly Emissionsnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
             str(os.path.normpath('data/headless/output_{0}/snapshot/households_employment_pienull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
             str(os.path.normpath('data/headless/output_{0}/snapshot/Modernizationnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
             str(os.path.normpath('data/headless/output_{0}/snapshot/neighborhoodnull-{1}.png'.format(self.sim_start, str(self.final_step - 1))))

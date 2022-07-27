@@ -41,16 +41,16 @@ class SimulationMode:
         session.show_polygons = False
 
         # simulation start time
-        self.sim_start = str(
+        self.timestamp = str(
             datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))
         if self.using_timestamp:
             self.output_folder = os.path.normpath(os.path.join(
-                self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.sim_start))
+                self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.timestamp))
         else:
             self.output_folder = os.path.normpath(
                 os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER']))
         self.xml_path = self.output_folder + \
-            '/simulation_parameters_' + self.sim_start + '.xml'
+            '/simulation_parameters_' + self.timestamp + '.xml'
 
         # load parameters from csv file:
         scenario_df = pandas.read_csv(
@@ -58,7 +58,7 @@ class SimulationMode:
 
         # provide parameters:
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
-        params.loc[len(params)] = ['timestamp', 'STRING', self.sim_start, 'timestamp']
+        params.loc[len(params)] = ['timestamp', 'STRING', self.timestamp, 'timestamp']
 
         # values to be used in trend model:
         params.loc[len(params)] = ['Alpha scenario', 'STRING',
@@ -93,20 +93,25 @@ class SimulationMode:
             '5', 'Emissions cumulative', str(self.final_step - 1)]
 
         # export buildings_clusters to csv
-        clusters_outname = '../data/includes/csv_qscope/buildings_clusters_' + self.sim_start + \
-            '.csv' if self.using_timestamp else '../data/includes/csv_qscope/buildings_clusters.csv'
+        clusters_outname = self.output_folder + '/buildings_clusters_{0}.csv'.format(str(self.timestamp)) if self.using_timestamp else '../data/output/buildings_clusters_{0}.csv'.format(str(self.timestamp))
+
+        print(clusters_outname)
+
+        if not os.path.isdir(self.output_folder):
+            os.makedirs(self.output_folder)
+
         df = session.buildings[session.buildings.selected]
         df[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
         session.iteration_images[session.iteration_round] = [
-            str(os.path.normpath('data/headless/output_{0}/snapshot/Chartsnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/Monthly Emissionsnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/households_employment_pienull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/Modernizationnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/neighborhoodnull-{1}.png'.format(self.sim_start, str(self.final_step - 1))))
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/Chartsnull-{1}.png'.format(self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/Monthly Emissionsnull-{1}.png'.format(self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/households_employment_pienull-{1}.png'.format(self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/Modernizationnull-{1}.png'.format(self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/neighborhoodnull-{1}.png'.format(self.timestamp, str(self.final_step - 1))))
         ]
 
         # start simulation
@@ -116,7 +121,7 @@ class SimulationMode:
 
         # compose csv paths for infoscreen to make graphs
         session.emissions_data_paths[session.iteration_round] = [
-            str(os.path.normpath('data/includes/csv_export/emissions_{0}/{1}'.format(self.sim_start, file_name))) for file_name in os.listdir('../data/includes/csv_export/emissions_{0}'.format(str(self.sim_start)))
+            str(os.path.normpath('data/outputs/output_{0}/emissions/{1}'.format(self.timestamp, file_name))) for file_name in os.listdir('../data/outputs/output_{0}/emissions'.format(str(self.timestamp)))
         ]
 
         # send image paths to infoscreen
@@ -221,7 +226,7 @@ class SimulationMode:
         # run script
         if not xml_path_:
             xml_path = self.output_folder + \
-                '/simulation_parameters_' + str(self.sim_start) + '.xml'
+                '/simulation_parameters_' + str(self.timestamp) + '.xml'
         else:
             xml_path = xml_path_
         command = self.script + " " + xml_path + " " + self.output_folder

@@ -14,7 +14,7 @@ config = {
 
     # simulation files
     'GAMA_HEADLESS_FOLDER' : '/opt/gama-platform/headless/',
-    'GAMA_OUTPUT_FOLDER': '../data/headless/output',
+    'GAMA_OUTPUT_FOLDER': '../data/outputs/output',
     'GAMA_MODEL_FILE' : '../q100_abm/q100/models/qscope_ABM.gaml',
     'SIMULATION_NUM_STEPS' : 9496,
 

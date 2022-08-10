@@ -6,6 +6,7 @@ import json
 import pandas
 import pygame
 import datetime
+import argparse
 from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
 from q100viz.settings.config import config
@@ -14,6 +15,25 @@ import q100viz.grid as grid
 import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.interaction.interface import *
+
+##################### parse command line arguments ####################
+parser = argparse.ArgumentParser()
+parser.add_argument('--debug', action='store_true')
+parser.add_argument('--sim', help="number of steps for simulation", type=int)
+args = parser.parse_args()
+session.DEBUG_MODE = args.debug
+config['SIMULATION_NUM_STEPS'] = args.sim
+
+if session.DEBUG_MODE: print(
+    """
+    STARTING SCRIPT IN DEBUG MODE!
+    - random 10 to 100 buildings will be selected
+    - simulation will run {0} steps
+    """\
+        .format(str(config['SIMULATION_NUM_STEPS']))
+    )
+
+############################## PYGAME SETUP ###########################
 # Set FPS
 FPS = session.FPS = 12
 
@@ -225,7 +245,7 @@ while True:
 
             # verbose mode:
             elif event.key == K_v:
-                session.verbose = not session.verbose
+                session.VERBOSE_MODE = not session.VERBOSE_MODE
 
         elif event.type == QUIT:
             if session.log != "":
@@ -304,7 +324,7 @@ while True:
     ############ render everything beyond/on top of canvas: ###########
 
     # mouse position
-    if session.verbose:
+    if session.VERBOSE_MODE:
         font = pygame.font.SysFont('Arial', 20)
         mouse_pos = pygame.mouse.get_pos()
         canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))

@@ -14,12 +14,14 @@ from q100viz.interaction.dataview_mode import DataView_Mode
 import q100viz.keystone as keystone
 
 log = ""
+DEBUG_MODE = False
+VERBOSE_MODE = True
 
-# infoscreen communication
+# ################# infoscreen communication ################
 io = 'http://localhost:8081'  # Socket.io
 api = api.API(io)
 
-# graphics
+########################## graphics #########################
 canvas_size = 1920, 1080
 # create the main surface, projected to corner points
 # the viewport's coordinates are between 0 and 100 on each axis
@@ -34,13 +36,13 @@ except Exception:
     viewport.dst_points = [[0, 0], [0, canvas_size[1]], [canvas_size[0], canvas_size[1]], [canvas_size[0], 0]]
 viewport.calculate()
 
+##################### global variables: #####################
 gis = None
 basemap = None
 grid_1 = None
 grid_2 = None
 buildings = None
 buildings_groups = None
-verbose = True
 
 environment = {'mode': 'input_scenarios'}
 
@@ -54,7 +56,7 @@ environment = {'mode': 'input_scenarios'}
 # ]
 # question = questions[0]
 num_of_questions = 5  # TODO: this equals length of csv
-environment['active_scenario'] = None
+environment['active_scenario'] = 'Ref'
 
 input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
 input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
@@ -86,10 +88,17 @@ handlers = {
     'simulation': SimulationMode(),
     'data_view': DataView_Mode()
 }
-active_handler = handlers['input_scenarios']
+active_handler = handlers['simulation']
 flag_export_canvas = False
 
 # global functions:
 def print_verbose(message):
-    if verbose:
+    if VERBOSE_MODE:
         print(message)
+
+def print_full_df(df):
+    with pd.option_context('display.max_rows', None,
+                        'display.max_columns', None,
+                        'display.precision', 3,
+                        ):
+        print(df)

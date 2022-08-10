@@ -2,33 +2,29 @@
 
 import pygame
 import pandas as pd
-import json
-import numpy
 
-import q100viz.keystone as keystone
 import q100viz.session as session
-from q100viz.settings.config import config
 from q100viz.graphics.graphictools import Image
 
 class DataView_Mode():
     def __init__(self):
         self.name = 'data_view'
 
-        self.images_active = [
-            Image("images/piechart.tif"),
-            Image("images/predator-prey.tif"),
-            Image("images/sankey.tif")
-            ]
-        self.images_disabled = [
-            Image("images/piechart_disabled.tif"),
-            Image("images/predator-prey_disabled.tif"),
-            Image("images/sankey_disabled.tif")
-            ]
-        self.images = [image for image in self.images_disabled]
+        # self.images_active = [
+        #     Image("images/piechart.tif"),
+        #     Image("images/predator-prey.tif"),
+        #     Image("images/sankey.tif")
+        #     ]
+        # self.images_disabled = [
+        #     Image("images/piechart_disabled.tif"),
+        #     Image("images/predator-prey_disabled.tif"),
+        #     Image("images/sankey_disabled.tif")
+        #     ]
+        # self.images = [image for image in self.images_disabled]
 
-        for lst in [self.images_active, self.images_disabled]:
-            for image in lst:
-                image.warp()
+        # for lst in [self.images_active, self.images_disabled]:
+        #     for image in lst:
+        #         image.warp()
 
     def activate(self):
         session.active_handler = self
@@ -72,13 +68,13 @@ class DataView_Mode():
                     session.iteration_round = (session.iteration_round + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
 
     def draw(self, canvas):
-        # display graphs:
-        x_displace = 65
-        for image in self.images:
-            canvas.blit(image.image,
-                (x_displace,
-                (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 3))
-            x_displace += session.viewport.dst_points[2][0] / 4
+        # # display graphs:
+        # x_displace = 65
+        # for image in self.images:
+        #     canvas.blit(image.image,
+        #         (x_displace,
+        #         (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 3))
+        #     x_displace += session.viewport.dst_points[2][0] / 4
         pass
 
     def update(self):

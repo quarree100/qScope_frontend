@@ -18,19 +18,28 @@ from q100viz.interaction.interface import *
 
 ##################### parse command line arguments ####################
 parser = argparse.ArgumentParser()
-parser.add_argument('--debug', action='store_true')
-parser.add_argument('--sim', help="number of steps for simulation", type=int)
+parser.add_argument('--debug', help="run in Debug mode", action='store_true')
+parser.add_argument(
+    '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_NUM_STEPS'])
+parser.add_argument('--conn', help="connect all buildings to Q100",
+    action='store_true')
 args = parser.parse_args()
+
 session.DEBUG_MODE = args.debug
-config['SIMULATION_NUM_STEPS'] = args.sim
+config['SIMULATION_NUM_STEPS'] = args.sim_steps
+session.debug_connect = args.conn
+if args.debug: session.active_handler = session.handlers['simulation']  # directly start off with simulation mode
 
 if session.DEBUG_MODE: print(
     """
     STARTING SCRIPT IN DEBUG MODE!
-    - random 10 to 100 buildings will be selected
+    --> random 10 to 100 buildings will be selected
     - simulation will run {0} steps
+    - force selected buildings to connect? {1}
     """\
-        .format(str(config['SIMULATION_NUM_STEPS']))
+        .format(
+            str(config['SIMULATION_NUM_STEPS']),
+            str(session.debug_connect))
     )
 
 ############################## PYGAME SETUP ###########################

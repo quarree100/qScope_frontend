@@ -46,15 +46,6 @@ buildings_groups = None
 
 environment = {'mode': 'input_scenarios'}
 
-# questions = [  # TODO: externalize this to yet another csv
-
-#         "Die globale Erderwärmung wird durch von Menschen produzierte Emissionen verstärkt.",
-#         "Der Schutz der Umwelt ist ein Mittel zur Stärkung des Wirtschaftswachstums in Deutschland.",
-#         "Ich glaube, dass wir jedes Mal, wenn wir Kohle, Öl oder Gas verwenden, zum Klimawandel beitragen.",
-#         "Ich würde meinen Energieverbrauch reduzieren, wenn mein Haushalt mehr Energie verbraucht als ähnliche Haushalte.",
-#         "Wenn ein erneuerbarer Energietarif bei einem anderen Energieversorger verfügbar wäre, würde ich meinen Anbieter wechseln."
-# ]
-# question = questions[0]
 num_of_questions = 5  # TODO: this equals length of csv
 environment['active_scenario'] = 'Ref'
 
@@ -88,7 +79,7 @@ handlers = {
     'simulation': SimulationMode(),
     'data_view': DataView_Mode()
 }
-active_handler = handlers['simulation']
+active_handler = handlers['input_scenarios']
 flag_export_canvas = False
 
 # global functions:

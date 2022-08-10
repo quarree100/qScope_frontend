@@ -106,12 +106,18 @@ class SimulationMode:
 
         # debug: select random of 100 buildings:
         if session.DEBUG_MODE:
-            session.buildings.sample(n=random.randint(10,100))['selected'] = True
-            session.buildings[session.buildings['selected']]['group'] = random.randint(0,4)
+            df = session.buildings.sample(n=random.randint(10,100))
+            df['selected'] = True
+            df['group'] = [random.randint(0,3) for x in df.values]
+            if session.debug_connect:
+                df['connected'] = True
+            session.buildings.update(df)
+            session.print_full_df(session.buildings)
 
         df = session.buildings[session.buildings.selected]
         df[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
+
 
         # compose image paths as required by infoscreen
         session.iteration_images[session.iteration_round] = [
@@ -128,7 +134,7 @@ class SimulationMode:
                       self.final_step, None, 'agent_decision_making')
         self.run_script(self.xml_path)
 
-        self.export_graphs("CO2_emissions_neighborhood.csv")
+        self.export_graphs("CO2_emissions_neighborhood.csv", 'emissions_neighborhood_accu')
 
         # compose csv paths for infoscreen to make graphs
         session.emissions_data_paths[session.iteration_round] = [
@@ -266,22 +272,27 @@ class SimulationMode:
         thread.start()
         return thread
 
-    def export_graphs(self, csv_name):
+    def export_graphs(self, csv_name, column):
         print("exporting ", csv_name)
         # read exported results:
         results = []
 
-        # walk through folders, find files with net data:
+        # looks for all files with specified csv_name:
         for root, dirs, files in sorted(os.walk(self.output_folder)):
             for name in files:
                 if name.__eq__(csv_name):
                     print(root, name)
                     results.append(pandas.read_csv(os.path.join(os.getcwd(), root, name)))
 
+        plt.figure(figsize=(10, 7.5))
         i = 0
         for df in results:
-            df.plot(kind='line', x='current_date', y='emissions_neighborhood_total', label='asd', ax=plt.gca())
+            df.plot(kind='line', x='current_date', y=column, label='Rüsdorfer Kamp', ax=plt.gca())
             i += 1
 
-        plt.show()
-        # plt.savefig(self.output_folder + "/graph_{0}.png".format(str(data_type)))
+        plt.title("akkumulierte Gesamtemissionen des Quartiers")
+        plt.xlabel("Datum")
+        plt.ylabel("Gesamte Emissionen [gCO2]")
+        plt.xticks(rotation=270, fontsize=8)
+
+        plt.savefig(self.output_folder + "/{0}.png".format(str(column)))

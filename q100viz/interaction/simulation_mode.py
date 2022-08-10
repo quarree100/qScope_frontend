@@ -6,8 +6,10 @@ import pandas
 import os
 import subprocess
 import threading
+from matplotlib import pyplot as plt
 import pygame
 import datetime
+import random
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -102,6 +104,11 @@ class SimulationMode:
         if not os.path.isdir(self.output_folder):
             os.makedirs(self.output_folder)
 
+        # debug: select random of 100 buildings:
+        if session.DEBUG_MODE:
+            session.buildings.sample(n=random.randint(10,100))['selected'] = True
+            session.buildings[session.buildings['selected']]['group'] = random.randint(0,4)
+
         df = session.buildings[session.buildings.selected]
         df[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
@@ -120,6 +127,8 @@ class SimulationMode:
         self.make_xml(params, outputs, self.xml_path,
                       self.final_step, None, 'agent_decision_making')
         self.run_script(self.xml_path)
+
+        self.export_graphs("CO2_emissions_neighborhood.csv")
 
         # compose csv paths for infoscreen to make graphs
         session.emissions_data_paths[session.iteration_round] = [
@@ -165,7 +174,7 @@ class SimulationMode:
         pass
 
     def draw(self, canvas):
-        if session.verbose:
+        if session.VERBOSE_MODE:
             font = pygame.font.SysFont('Arial', 40)
             canvas.blit(font.render("Simulation is running...", True, (255, 255, 255)),
                         (session.canvas_size[0]/2, session.canvas_size[1]/2))
@@ -256,3 +265,23 @@ class SimulationMode:
             target=run_in_thread, args=(on_exit, popen_args))
         thread.start()
         return thread
+
+    def export_graphs(self, csv_name):
+        print("exporting ", csv_name)
+        # read exported results:
+        results = []
+
+        # walk through folders, find files with net data:
+        for root, dirs, files in sorted(os.walk(self.output_folder)):
+            for name in files:
+                if name.__eq__(csv_name):
+                    print(root, name)
+                    results.append(pandas.read_csv(os.path.join(os.getcwd(), root, name)))
+
+        i = 0
+        for df in results:
+            df.plot(kind='line', x='current_date', y='emissions_neighborhood_total', label='asd', ax=plt.gca())
+            i += 1
+
+        plt.show()
+        # plt.savefig(self.output_folder + "/graph_{0}.png".format(str(data_type)))

@@ -22,6 +22,20 @@ io = 'http://localhost:8081'  # Socket.io
 api = api.API(io)
 
 ########################## graphics #########################
+quarree_colors_8bit = [   # corporate design of QUARREE100
+    (0, 117, 180),   # Quarree-blue
+    (253, 193, 19),  # Quarree-yellow
+    (0, 168, 78),    # Quarree-dark-green
+    (186, 212, 50),  # Quarree-light-green
+    (103, 102, 104)  # Quarree-gray
+    ]
+quarree_colors_float = [   # corporate design of QUARREE100
+    (0/255, 117/255, 180/255),   # Quarree-blue
+    (253/255, 193/255, 19/255),  # Quarree-yellow
+    (0/255, 168/255, 78/255),    # Quarree-dark-green
+    (186/255, 212/255, 50/255),  # Quarree-light-green
+    (103/255, 102/255, 104/255)  # Quarree-gray
+    ]
 canvas_size = 1920, 1080
 # create the main surface, projected to corner points
 # the viewport's coordinates are between 0 and 100 on each axis

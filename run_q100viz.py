@@ -23,14 +23,16 @@ parser.add_argument(
     '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_NUM_STEPS'])
 parser.add_argument('--conn', help="connect all buildings to Q100",
     action='store_true')
+parser.add_argument('--start_at', help="start at specific game mode", type=str, default='input_scenarios')
 args = parser.parse_args()
 
 session.DEBUG_MODE = args.debug
 config['SIMULATION_NUM_STEPS'] = args.sim_steps
 session.debug_connect = args.conn
-if args.debug: session.active_handler = session.handlers['simulation']  # directly start off with simulation mode
+session.active_handler = session.handlers[args.start_at]
 
-if session.DEBUG_MODE: print(
+if session.DEBUG_MODE:
+    print(
     """
     STARTING SCRIPT IN DEBUG MODE!
     --> random 10 to 100 buildings will be selected

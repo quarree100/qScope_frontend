@@ -6,7 +6,7 @@ import pandas as pd
 import q100viz.session as session
 from q100viz.graphics.graphictools import Image
 
-class DataView_Mode():
+class DataViewTotal_Mode():
     def __init__(self):
         self.name = 'data_view'
 

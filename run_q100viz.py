@@ -225,7 +225,7 @@ while True:
                 session.environment['active_scenario'] = 'A'
                 session.handlers['simulation'].activate()
             elif event.key == K_5:
-                session.handlers['data_view'].activate()
+                session.handlers['data_view_individual'].activate()
 
             # toggle calibration:
             elif event.key == K_c:

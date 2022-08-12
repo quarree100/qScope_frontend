@@ -158,7 +158,7 @@ class SimulationMode:
         )
 
         self.export_graphs(
-            csv_name="/energy_prices/energy_prices_export.csv",
+            csv_name="/energy_prices/energy_prices_total.csv",
             columns=['power_price', 'oil_price', 'gas_price'],
             labels_=['Energiepreis', 'Ölpreis', 'Gaspreis'],
             title_="Energiekosten",
@@ -282,12 +282,12 @@ class SimulationMode:
         subprocess.call(command, shell=True)
         print("simulation finished. duration = ",
               datetime.datetime.now() - sim_start)
-        # self.open_and_call(command, session.handlers['data_view'].activate())
+        # self.open_and_call(command, session.handlers['data_view_individual'].activate())
 
         os.chdir(self.cwd)  # return to previous cwd
 
         # TODO: wait until GAMA delivers outputs
-        session.handlers['data_view'].activate()
+        session.handlers['data_view_individual'].activate()
 
     def open_and_call(self, popen_args, on_exit):
 
@@ -348,5 +348,4 @@ class SimulationMode:
         plt.ylabel(ylabel_)
         plt.xticks(rotation=270, fontsize=8)
 
-        plt.savefig(self.current_output_folder +
-                    "/{0}.png".format(str(column)))
+        plt.savefig(self.current_output_folder + "/{0}.png".format(title_))

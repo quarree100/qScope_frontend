@@ -10,7 +10,8 @@ from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
 from q100viz.interaction.input_scenarios_mode import Input_Scenarios
 from q100viz.interaction.input_households_mode import Input_Households
 from q100viz.interaction.simulation_mode import SimulationMode
-from q100viz.interaction.dataview_mode import DataView_Mode
+from q100viz.interaction.dataview_individual_mode import DataViewIndividual_Mode
+from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode
 import q100viz.keystone as keystone
 
 log = ""
@@ -91,7 +92,8 @@ handlers = {
     'input_scenarios': Input_Scenarios(),
     'input_households': Input_Households(),
     'simulation': SimulationMode(),
-    'data_view': DataView_Mode()
+    'data_view_individual': DataViewIndividual_Mode(),
+    'data_view_total' : DataViewTotal_Mode()
 }
 active_handler = handlers['input_scenarios']
 flag_export_canvas = False

@@ -32,6 +32,8 @@ class SimulationMode:
         self.output_folders = []         # list of output folders of all game rounds
         self.using_timestamp = True
 
+        self.matplotlib_images_locations = {}
+
         self.xml = None
 
     def activate(self):
@@ -128,7 +130,7 @@ class SimulationMode:
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
-        session.iteration_images[session.iteration_round] = [
+        session.gama_iteration_images[session.iteration_round] = [
             str(os.path.normpath('data/outputs/output_{0}/snapshot/Chartsnull-{1}.png'.format(
                 self.timestamp, str(self.final_step - 1)))),
             str(os.path.normpath('data/outputs/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(
@@ -148,6 +150,14 @@ class SimulationMode:
                       self.final_step, None, 'agent_decision_making')
         self.run_script(self.xml_path)
 
+        ####################### export matplotlib graphs #######################
+
+        # define titles for images and their location
+        self.matplotlib_images_locations = {
+            "emissions_neighborhood_accu" : "data/outputs/output_{0}/akkumulierte Gesamtemissionen des Quartiers.png".format(str(self.timestamp)),
+            "energy_prices" : "data/outputs/output_{0}/Energiekosten.png".format(str(self.timestamp))
+        }
+
         self.export_graphs(
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
             columns=['emissions_neighborhood_accu'],
@@ -166,26 +176,37 @@ class SimulationMode:
             ylabel_="Kosten [€]",
             x_='current_date'
         )
+
+        # send matplotlib created images to infoscreen
+        data_wrapper = {
+            'matplotlib_images' : [self.matplotlib_images_locations]
+        }
+        df = pandas.DataFrame(data=data_wrapper)
+        session.api.send_dataframe_as_json(df)
+
+        ############################### csv export #############################
+
         # compose csv paths for infoscreen to make graphs
         session.emissions_data_paths[session.iteration_round] = [
             str(os.path.normpath('data/outputs/output_{0}/emissions/{1}'.format(self.timestamp, file_name))) for file_name in os.listdir('../data/outputs/output_{0}/emissions'.format(str(self.timestamp)))
         ]
 
-        # send image paths to infoscreen
+        ###### send GAMA image paths to infoscreen (per iteration round!) ######
         dataview_wrapper = ['' for i in range(session.num_of_rounds)]
         for i in range(session.num_of_rounds):
             images_and_data = {'iteration_round': i,
-                               'iteration_images': session.iteration_images[i],
+                               'gama_iteration_images': session.gama_iteration_images[i],
                                'emissions_data_paths': session.emissions_data_paths[i]
                                }
 
             dataview_wrapper[i] = images_and_data
         dataview_wrapper = {
-            'data_view_data': [dataview_wrapper]
+            'data_view_individual_data': [dataview_wrapper]
         }
 
         df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(df)
+
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:

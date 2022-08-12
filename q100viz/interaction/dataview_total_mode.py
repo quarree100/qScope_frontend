@@ -8,7 +8,7 @@ from q100viz.graphics.graphictools import Image
 
 class DataViewTotal_Mode():
     def __init__(self):
-        self.name = 'data_view'
+        self.name = 'data_view_total'
 
         # self.images_active = [
         #     Image("images/piechart.tif"),

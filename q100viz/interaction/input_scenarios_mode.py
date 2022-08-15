@@ -65,7 +65,7 @@ class Input_Scenarios:
 
     def process_grid_change(self):
         session.buildings['selected'] = False
-        session.environment['active_scenario'] = None
+        session.environment['active_scenario_handle'] = None
         session.grid_2.grid[18][19].handle = None
         self.images = [image for image in self.images_disabled]
 
@@ -77,19 +77,19 @@ class Input_Scenarios:
                             # assumption: there is only one token to choose the scenario with
                             if grid is session.grid_1 and x < len(row) / 2:
                                 self.images[0] = self.images_active[0]
-                                session.environment['active_scenario'] = 'A'
+                                session.environment['active_scenario_handle'] = 'A'
                             elif grid is session.grid_1 and x > len(row) / 2:
                                 self.images[1] = self.images_active[1]
-                                session.environment['active_scenario'] = 'B'
+                                session.environment['active_scenario_handle'] = 'B'
                             elif grid is session.grid_2 and x < len(row) / 2:
                                 self.images[2] = self.images_active[2]
-                                session.environment['active_scenario'] = 'C'
+                                session.environment['active_scenario_handle'] = 'C'
                             elif grid is session.grid_2 and x > len(row) / 2:
                                 self.images[3] = self.images_active[3]
-                                session.environment['active_scenario'] = 'D'
+                                session.environment['active_scenario_handle'] = 'D'
 
                             # create mode selector when a scenario is selected
-                            if session.environment['active_scenario'] is not None:
+                            if session.environment['active_scenario_handle'] is not None:
                                 session.grid_2.grid[18][19].handle = 'start_input_households'
                                 session.grid_2.grid[18][19].color = pygame.color.Color(
                                     'purple')
@@ -99,38 +99,40 @@ class Input_Scenarios:
                             if cell.handle == 'start_input_households':
                                 session.handlers['input_households'].activate()
 
-        # session.api.send_session_env()
+        session.api.send_session_env()
 
         ############## send scenario parameters to infoscreen #########
         # data_wrapper = ['' for i in range(session.num_of_rounds)]
         # for i in range(session.num_of_rounds):
-        scenario_data = {
-            'active_scenario': session.environment['active_scenario'],
+        if session.environment['active_scenario_handle'] is not None:
 
-            'carbon_price_scenario':
-            [session.scenario_data.loc['carbon_price_scenario', 'name_human_readable'],
-                session.scenario_data.loc['carbon_price_scenario', 'value_human_readable']],
+            scenario_data = {
+                'active_scenario_handle': session.environment['active_scenario_handle'],
 
-            'energy_prices_scenario':
-                [session.scenario_data.loc['energy_price_scenario', 'name_human_readable'], session.scenario_data.loc['energy_price_scenario', 'value_human_readable']],
+                'carbon_price_scenario':
+                [session.scenario_data[session.environment['active_scenario_handle']].loc['carbon_price_scenario', 'name_human_readable'],
+                    session.scenario_data[session.environment['active_scenario_handle']].loc['carbon_price_scenario', 'value_human_readable']],
 
-            'q100_price_opex_scenario':
-                [session.scenario_data.loc['q100_price_opex_scenario', 'name_human_readable'], session.scenario_data.loc['q100_price_opex_scenario', 'value_human_readable']],
+                'energy_prices_scenario':
+                    [session.scenario_data[session.environment['active_scenario_handle']].loc['energy_price_scenario', 'name_human_readable'], session.scenario_data[session.environment['active_scenario_handle']].loc['energy_price_scenario', 'value_human_readable']],
 
-            'q100_price_capex_scenario':
-                [session.scenario_data.loc['q100_price_capex_scenario', 'name_human_readable'], session.scenario_data.loc['q100_price_capex_scenario', 'value_human_readable']],
+                'q100_price_opex_scenario':
+                    [session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_opex_scenario', 'name_human_readable'], session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_opex_scenario', 'value_human_readable']],
 
-            'q100_emissions_scenario':
-                [session.scenario_data.loc['q100_emissions_scenario', 'name_human_readable'], session.scenario_data.loc['q100_emissions_scenario', 'value_human_readable']]
-        }
+                'q100_price_capex_scenario':
+                    [session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_capex_scenario', 'name_human_readable'], session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_capex_scenario', 'value_human_readable']],
 
-            # data_wrapper[i] = scenario_data
-        data_wrapper = {
-            'scenario_data': [scenario_data]
-        }
+                'q100_emissions_scenario':
+                    [session.scenario_data[session.environment['active_scenario_handle']].loc['q100_emissions_scenario', 'name_human_readable'], session.scenario_data[session.environment['active_scenario_handle']].loc['q100_emissions_scenario', 'value_human_readable']]
+            }
 
-        df = pandas.DataFrame(data=data_wrapper)
-        session.api.send_dataframe_as_json(df)
+                # data_wrapper[i] = scenario_data
+            data_wrapper = {
+                'scenario_data': [scenario_data]
+            }
+
+            df = pandas.DataFrame(data=data_wrapper)
+            session.api.send_dataframe_as_json(df)
 
     def draw(self, canvas):
 

@@ -66,8 +66,8 @@ class SimulationMode:
         self.output_folders.append(self.current_output_folder)
 
         # load parameters from csv file:
-        # session.scenario_data = pandas.read_csv(
-        #     '../data/scenario_{0}.csv'.format(session.environment['active_scenario'])).set_index('name')
+        # session.scenario_data[session.environment['active_scenario_handle']] = pandas.read_csv(
+        #     '../data/scenario_{0}.csv'.format(session.environment['active_scenario_handle'])).set_index('name')
 
         # provide parameters:
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
@@ -76,17 +76,17 @@ class SimulationMode:
 
         # values to be used in trend model:
         params.loc[len(params)] = ['Alpha scenario', 'STRING',
-                                   session.scenario_data.loc['alpha_scenario', 'value'], 'alpha_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['alpha_scenario', 'value'], 'alpha_scenario']
         params.loc[len(params)] = ['Carbon price scenario', 'STRING',
-                                   session.scenario_data.loc['carbon_price_scenario', 'value'], 'carbon_price_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['carbon_price_scenario', 'value'], 'carbon_price_scenario']
         params.loc[len(params)] = ['Energy prices scenario', 'STRING',
-                                   session.scenario_data.loc['energy_price_scenario', 'value'], 'energy_price_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['energy_price_scenario', 'value'], 'energy_price_scenario']
         params.loc[len(params)] = ['Q100 OpEx prices scenario', 'STRING',
-                                   session.scenario_data.loc['q100_price_opex_scenario', 'value'], 'q100_price_opex_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_opex_scenario', 'value'], 'q100_price_opex_scenario']
         params.loc[len(params)] = ['Q100 CapEx prices scenario', 'STRING',
-                                   session.scenario_data.loc['q100_price_capex_scenario', 'value'], 'q100_price_capex_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_capex_scenario', 'value'], 'q100_price_capex_scenario']
         params.loc[len(params)] = ['Q100 Emissions scenario', 'STRING',
-                                   session.scenario_data.loc['q100_emissions_scenario', 'value'], 'q100_emissions_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['q100_emissions_scenario', 'value'], 'q100_emissions_scenario']
         params.loc[len(params)] = ['Carbon price for households?',
                                    'BOOLEAN', 'false', 'carbon_price_on_off']
         # TODO:

@@ -1,7 +1,3 @@
-''' Simulation Mode fakes parameter changes for buildings later done by the ABM'''
-
-from operator import index
-from time import strftime
 import pandas
 import os
 import subprocess
@@ -308,7 +304,7 @@ class SimulationMode:
         os.chdir(self.cwd)  # return to previous cwd
 
         # TODO: wait until GAMA delivers outputs
-        session.handlers['data_view_individual'].activate()
+        session.handlers['data_view_total'].activate()
 
     def open_and_call(self, popen_args, on_exit):
 
@@ -331,7 +327,9 @@ class SimulationMode:
 
         # looks for all files with specified csv_name:
         for output_folder in self.output_folders:
-            rounds_data.append(pandas.read_csv(output_folder + csv_name))
+            csv_data = (pandas.read_csv(output_folder + csv_name))
+            csv_data['current_date'] = csv_data['current_date'].apply(self.GAMA_time_to_datetime)
+            rounds_data.append(csv_data)
 
         plt.figure(figsize=(16, 9))  # inches
         it_round = 0
@@ -368,5 +366,13 @@ class SimulationMode:
         plt.xlabel(xlabel_)
         plt.ylabel(ylabel_)
         plt.xticks(rotation=270, fontsize=8)
+        plt.legend(loc='upper left')
 
+        if session.TEST_MODE == "matplotlib":
+            plt.show()
+            quit()
         plt.savefig(self.current_output_folder + "/{0}.png".format(title_))
+
+    def GAMA_time_to_datetime(self, input):
+        dt_object = datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year
+        return(dt_object)

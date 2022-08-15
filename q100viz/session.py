@@ -16,6 +16,7 @@ import q100viz.keystone as keystone
 
 log = ""
 DEBUG_MODE = False
+TEST_MODE = ""
 VERBOSE_MODE = True
 
 # ################# infoscreen communication ################

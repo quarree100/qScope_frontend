@@ -24,12 +24,14 @@ parser.add_argument(
 parser.add_argument('--conn', help="connect all buildings to Q100",
     action='store_true')
 parser.add_argument('--start_at', help="start at specific game mode", type=str, default='input_scenarios')
+parser.add_argument('--test', help="pre-set of functions to test different elements...", type=str)
 args = parser.parse_args()
 
 session.DEBUG_MODE = args.debug
 config['SIMULATION_NUM_STEPS'] = args.sim_steps
 session.debug_connect = args.conn
 session.active_handler = session.handlers[args.start_at]
+session.TEST_MODE = args.test
 
 if session.DEBUG_MODE:
     print(

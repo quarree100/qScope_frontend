@@ -63,6 +63,8 @@ environment = {'mode': 'input_scenarios'}
 
 num_of_questions = 5  # TODO: this equals length of csv
 environment['active_scenario'] = 'Ref'
+scenario_data = pd.read_csv(
+            '../data/scenario_{0}.csv'.format(environment['active_scenario'])).set_index('name')
 
 input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
 input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])

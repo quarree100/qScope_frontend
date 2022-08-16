@@ -1,16 +1,16 @@
-''' Simulation Mode fakes parameter changes for buildings later done by the ABM'''
-
-from operator import index
-from time import strftime
 import pandas
 import os
 import subprocess
 import threading
+from matplotlib import pyplot as plt
 import pygame
 import datetime
+import random
 
 import q100viz.session as session
 from q100viz.settings.config import config
+
+
 class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
@@ -22,10 +22,13 @@ class SimulationMode:
         self.script = self.headless_folder + 'gama-headless.sh'
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
-        self.output_folder = ''  # will be set in activate()
-        self.xml_path = ''       # will be set in activate()
-        self.final_step = None   # will be set in activate()
+        self.current_output_folder = ''  # will be set in activate()
+        self.xml_path = ''               # will be set in activate()
+        self.final_step = None           # will be set in activate()
+        self.output_folders = []         # list of output folders of all game rounds
         self.using_timestamp = True
+
+        self.matplotlib_images_locations = {}
 
         self.xml = None
 
@@ -43,38 +46,43 @@ class SimulationMode:
         session.show_polygons = False
 
         # simulation start time
-        self.sim_start = str(
+        self.timestamp = str(
             datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))
+
+        # set output folder:
         if self.using_timestamp:
-            self.output_folder = os.path.normpath(os.path.join(
-                self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.sim_start))
+            self.current_output_folder = os.path.normpath(os.path.join(
+                self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.timestamp))
         else:
-            self.output_folder = os.path.normpath(
+            self.current_output_folder = os.path.normpath(
                 os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER']))
-        self.xml_path = self.output_folder + \
-            '/simulation_parameters_' + self.sim_start + '.xml'
+        self.xml_path = self.current_output_folder + \
+            '/simulation_parameters_' + self.timestamp + '.xml'
+
+        self.output_folders.append(self.current_output_folder)
 
         # load parameters from csv file:
-        scenario_df = pandas.read_csv(
-            '../data/scenario_{0}.csv'.format(session.environment['active_scenario'])).set_index('name')
+        # session.scenario_data[session.environment['active_scenario_handle']] = pandas.read_csv(
+        #     '../data/scenario_{0}.csv'.format(session.environment['active_scenario_handle'])).set_index('name')
 
         # provide parameters:
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
-        params.loc[len(params)] = ['timestamp', 'STRING', self.sim_start, 'timestamp']
+        params.loc[len(params)] = ['timestamp', 'STRING',
+                                   self.timestamp, 'timestamp']
 
         # values to be used in trend model:
         params.loc[len(params)] = ['Alpha scenario', 'STRING',
-                                   scenario_df.loc['alpha_scenario', 'value'], 'alpha_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['alpha_scenario', 'value'], 'alpha_scenario']
         params.loc[len(params)] = ['Carbon price scenario', 'STRING',
-                                   scenario_df.loc['carbon_price_scenario', 'value'], 'carbon_price_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['carbon_price_scenario', 'value'], 'carbon_price_scenario']
         params.loc[len(params)] = ['Energy prices scenario', 'STRING',
-                                   scenario_df.loc['energy_price_scenario', 'value'], 'energy_price_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['energy_price_scenario', 'value'], 'energy_price_scenario']
         params.loc[len(params)] = ['Q100 OpEx prices scenario', 'STRING',
-                                   scenario_df.loc['q100_price_opex_scenario', 'value'], 'q100_price_opex_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_opex_scenario', 'value'], 'q100_price_opex_scenario']
         params.loc[len(params)] = ['Q100 CapEx prices scenario', 'STRING',
-                                   scenario_df.loc['q100_price_capex_scenario', 'value'], 'q100_price_capex_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_capex_scenario', 'value'], 'q100_price_capex_scenario']
         params.loc[len(params)] = ['Q100 Emissions scenario', 'STRING',
-                                   scenario_df.loc['q100_emissions_scenario', 'value'], 'q100_emissions_scenario']
+                                   session.scenario_data[session.environment['active_scenario_handle']].loc['q100_emissions_scenario', 'value'], 'q100_emissions_scenario']
         params.loc[len(params)] = ['Carbon price for households?',
                                    'BOOLEAN', 'false', 'carbon_price_on_off']
         # TODO:
@@ -95,20 +103,42 @@ class SimulationMode:
             '5', 'Emissions cumulative', str(self.final_step - 1)]
 
         # export buildings_clusters to csv
-        clusters_outname = '../data/includes/csv_qscope/buildings_clusters_' + self.sim_start + \
-            '.csv' if self.using_timestamp else '../data/includes/csv_qscope/buildings_clusters.csv'
+        clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(
+            self.timestamp)) if self.using_timestamp else '../data/output/buildings_clusters_{0}.csv'.format(str(self.timestamp))
+
+        print(clusters_outname)
+
+        if not os.path.isdir(self.current_output_folder):
+            os.makedirs(self.current_output_folder)
+
+        # debug: select random of 100 buildings:
+        if session.DEBUG_MODE:
+            df = session.buildings.sample(n=random.randint(10, 100))
+            df['selected'] = True
+            df['group'] = [random.randint(0, 3) for x in df.values]
+            if session.debug_connect:
+                df['connected'] = True
+            session.buildings.update(df)
+            session.print_full_df(session.buildings)
+
         df = session.buildings[session.buildings.selected]
         df[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
-        session.iteration_images[session.iteration_round] = [
-            str(os.path.normpath('data/headless/output_{0}/snapshot/Chartsnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/Monthly Emissionsnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/households_employment_pienull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/Modernizationnull-{1}.png'.format(self.sim_start, str(self.final_step - 1)))),
-            str(os.path.normpath('data/headless/output_{0}/snapshot/neighborhoodnull-{1}.png'.format(self.sim_start, str(self.final_step - 1))))
+        session.gama_iteration_images[session.iteration_round] = [
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/Chartsnull-{1}.png'.format(
+                self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(
+                self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/Monthly Emissionsnull-{1}.png'.format(
+                self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/households_employment_pienull-{1}.png'.format(
+                self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/Modernizationnull-{1}.png'.format(
+                self.timestamp, str(self.final_step - 1)))),
+            str(os.path.normpath('data/outputs/output_{0}/snapshot/neighborhoodnull-{1}.png'.format(
+                self.timestamp, str(self.final_step - 1))))
         ]
 
         # start simulation
@@ -116,26 +146,63 @@ class SimulationMode:
                       self.final_step, None, 'agent_decision_making')
         self.run_script(self.xml_path)
 
+        ####################### export matplotlib graphs #######################
+
+        # define titles for images and their location
+        self.matplotlib_images_locations = {
+            "emissions_neighborhood_accu" : "data/outputs/output_{0}/akkumulierte Gesamtemissionen des Quartiers.png".format(str(self.timestamp)),
+            "energy_prices" : "data/outputs/output_{0}/Energiekosten.png".format(str(self.timestamp))
+        }
+
+        self.export_graphs(
+            csv_name="/emissions/CO2_emissions_neighborhood.csv",
+            columns=['emissions_neighborhood_accu'],
+            title_="akkumulierte Gesamtemissionen des Quartiers",
+            xlabel_="Datum",
+            ylabel_="Gesamte Emissionen [gCO2]",
+            x_='current_date'
+        )
+
+        self.export_graphs(
+            csv_name="/energy_prices/energy_prices_total.csv",
+            columns=['power_price', 'oil_price', 'gas_price'],
+            labels_=['Energiepreis', 'Ölpreis', 'Gaspreis'],
+            title_="Energiekosten",
+            xlabel_="Datum",
+            ylabel_="Kosten [€]",
+            x_='current_date'
+        )
+
+        # send matplotlib created images to infoscreen
+        data_wrapper = {
+            'matplotlib_images' : [self.matplotlib_images_locations]
+        }
+        df = pandas.DataFrame(data=data_wrapper)
+        session.api.send_dataframe_as_json(df)
+
+        ############################### csv export #############################
+
         # compose csv paths for infoscreen to make graphs
         session.emissions_data_paths[session.iteration_round] = [
-            str(os.path.normpath('data/includes/csv_export/emissions_{0}/{1}'.format(self.sim_start, file_name))) for file_name in os.listdir('../data/includes/csv_export/emissions_{0}'.format(str(self.sim_start)))
+            str(os.path.normpath('data/outputs/output_{0}/emissions/{1}'.format(self.timestamp, file_name))) for file_name in os.listdir('../data/outputs/output_{0}/emissions'.format(str(self.timestamp)))
         ]
 
-        # send image paths to infoscreen
+        ###### send GAMA image paths to infoscreen (per iteration round!) ######
         dataview_wrapper = ['' for i in range(session.num_of_rounds)]
         for i in range(session.num_of_rounds):
             images_and_data = {'iteration_round': i,
-                'iteration_images' : session.iteration_images[i],
-                'emissions_data_paths': session.emissions_data_paths[i]
-                }
+                               'gama_iteration_images': session.gama_iteration_images[i],
+                               'emissions_data_paths': session.emissions_data_paths[i]
+                               }
 
             dataview_wrapper[i] = images_and_data
         dataview_wrapper = {
-            'data_view_data' : [dataview_wrapper]
+            'data_view_individual_data': [dataview_wrapper]
         }
 
         df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(df)
+
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -160,7 +227,7 @@ class SimulationMode:
         pass
 
     def draw(self, canvas):
-        if session.verbose:
+        if session.VERBOSE_MODE:
             font = pygame.font.SysFont('Arial', 40)
             canvas.blit(font.render("Simulation is running...", True, (255, 255, 255)),
                         (session.canvas_size[0]/2, session.canvas_size[1]/2))
@@ -210,8 +277,8 @@ class SimulationMode:
         xml = '\n'.join(xml_temp)
 
         # export xml
-        if os.path.isdir(self.output_folder) is False:
-            os.makedirs(self.output_folder)
+        if os.path.isdir(self.current_output_folder) is False:
+            os.makedirs(self.current_output_folder)
         os.chdir(self.headless_folder)  # change working directory temporarily
 
         # print(xml)
@@ -222,22 +289,22 @@ class SimulationMode:
     def run_script(self, xml_path_):
         # run script
         if not xml_path_:
-            xml_path = self.output_folder + \
-                '/simulation_parameters_' + str(self.sim_start) + '.xml'
+            xml_path = self.current_output_folder + \
+                '/simulation_parameters_' + str(self.timestamp) + '.xml'
         else:
             xml_path = xml_path_
-        command = self.script + " " + xml_path + " " + self.output_folder
+        command = self.script + " " + xml_path + " " + self.current_output_folder
 
         sim_start = datetime.datetime.now()
         subprocess.call(command, shell=True)
         print("simulation finished. duration = ",
               datetime.datetime.now() - sim_start)
-        # self.open_and_call(command, session.handlers['data_view'].activate())
+        # self.open_and_call(command, session.handlers['data_view_individual'].activate())
 
         os.chdir(self.cwd)  # return to previous cwd
 
         # TODO: wait until GAMA delivers outputs
-        session.handlers['data_view'].activate()
+        session.handlers['data_view_total'].activate()
 
     def open_and_call(self, popen_args, on_exit):
 
@@ -251,3 +318,61 @@ class SimulationMode:
             target=run_in_thread, args=(on_exit, popen_args))
         thread.start()
         return thread
+
+    def export_graphs(self, csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None):
+        '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
+
+        # read exported results:
+        rounds_data = []
+
+        # looks for all files with specified csv_name:
+        for output_folder in self.output_folders:
+            csv_data = (pandas.read_csv(output_folder + csv_name))
+            csv_data['current_date'] = csv_data['current_date'].apply(self.GAMA_time_to_datetime)
+            rounds_data.append(csv_data)
+
+        plt.figure(figsize=(16, 9))  # inches
+        it_round = 0
+        for df in rounds_data:
+            col_num = 0
+            for column in columns:
+                label_ = 'Durchlauf {0}'.format(
+                    it_round+1) if labels_ == None else '{0} (Durchlauf {1})'.format(labels_[col_num], it_round+1)
+
+                # lower brightness for each round:
+                color_ = (
+                    session.quarree_colors_float[col_num % len(
+                        columns)][0]/(1+it_round*0.33),  # r, float
+                    session.quarree_colors_float[col_num % len(
+                        columns)][1]/(1+it_round*0.33),  # g, float
+                    session.quarree_colors_float[col_num % len(
+                        columns)][2]/(1+it_round*0.33),  # b, float
+                )
+
+                # plot:
+                df.plot(
+                    kind='line',
+                    x=x_,
+                    y=column,
+                    label=label_,
+                    color=color_,
+                    ax=plt.gca())
+
+                col_num += 1
+
+            it_round += 1
+
+        plt.title(title_)
+        plt.xlabel(xlabel_)
+        plt.ylabel(ylabel_)
+        plt.xticks(rotation=270, fontsize=8)
+        plt.legend(loc='upper left')
+
+        if session.TEST_MODE == "matplotlib":
+            plt.show()
+            quit()
+        plt.savefig(self.current_output_folder + "/{0}.png".format(title_))
+
+    def GAMA_time_to_datetime(self, input):
+        dt_object = datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year
+        return(dt_object)

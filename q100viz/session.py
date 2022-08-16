@@ -17,7 +17,7 @@ import q100viz.keystone as keystone
 log = ""
 DEBUG_MODE = False
 TEST_MODE = ""
-VERBOSE_MODE = True
+VERBOSE_MODE = False
 
 # ################# infoscreen communication ################
 io = 'http://localhost:8081'  # Socket.io

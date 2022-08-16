@@ -19,6 +19,7 @@ from q100viz.interaction.interface import *
 ##################### parse command line arguments ####################
 parser = argparse.ArgumentParser()
 parser.add_argument('--debug', help="run in Debug mode", action='store_true')
+parser.add_argument('--verbose', '-v', help="start in verbose mode", action='store_true')
 parser.add_argument(
     '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_NUM_STEPS'])
 parser.add_argument('--conn', help="connect all buildings to Q100",
@@ -32,6 +33,7 @@ config['SIMULATION_NUM_STEPS'] = args.sim_steps
 session.debug_connect = args.conn
 session.active_handler = session.handlers[args.start_at]
 session.TEST_MODE = args.test
+session.VERBOSE_MODE = args.verbose
 
 if session.DEBUG_MODE:
     print(

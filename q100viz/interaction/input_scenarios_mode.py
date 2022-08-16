@@ -65,7 +65,7 @@ class Input_Scenarios:
 
     def process_grid_change(self):
         session.buildings['selected'] = False
-        session.environment['active_scenario_handle'] = None
+        session.environment['active_scenario_handle'] = 'Ref'
         session.grid_2.grid[18][19].handle = None
         self.images = [image for image in self.images_disabled]
 
@@ -114,19 +114,23 @@ class Input_Scenarios:
                     session.scenario_data[session.environment['active_scenario_handle']].loc['carbon_price_scenario', 'value_human_readable']],
 
                 'energy_prices_scenario':
-                    [session.scenario_data[session.environment['active_scenario_handle']].loc['energy_price_scenario', 'name_human_readable'], session.scenario_data[session.environment['active_scenario_handle']].loc['energy_price_scenario', 'value_human_readable']],
+                    [session.scenario_data[session.environment['active_scenario_handle']].loc['energy_price_scenario', 'name_human_readable'],
+                        session.scenario_data[session.environment['active_scenario_handle']].loc['energy_price_scenario', 'value_human_readable']],
 
                 'q100_price_opex_scenario':
-                    [session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_opex_scenario', 'name_human_readable'], session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_opex_scenario', 'value_human_readable']],
+                    [session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_opex_scenario', 'name_human_readable'],
+                        session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_opex_scenario', 'value_human_readable']],
 
                 'q100_price_capex_scenario':
-                    [session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_capex_scenario', 'name_human_readable'], session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_capex_scenario', 'value_human_readable']],
+                    [session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_capex_scenario', 'name_human_readable'],
+                        session.scenario_data[session.environment['active_scenario_handle']].loc['q100_price_capex_scenario', 'value_human_readable']],
 
                 'q100_emissions_scenario':
-                    [session.scenario_data[session.environment['active_scenario_handle']].loc['q100_emissions_scenario', 'name_human_readable'], session.scenario_data[session.environment['active_scenario_handle']].loc['q100_emissions_scenario', 'value_human_readable']]
+                    [session.scenario_data[session.environment['active_scenario_handle']].loc['q100_emissions_scenario', 'name_human_readable'],
+                        session.scenario_data[session.environment['active_scenario_handle']].loc['q100_emissions_scenario', 'value_human_readable']]
             }
 
-                # data_wrapper[i] = scenario_data
+            # data_wrapper[i] = scenario_data
             data_wrapper = {
                 'scenario_data': [scenario_data]
             }
@@ -150,6 +154,15 @@ class Input_Scenarios:
                         (x_displace,
                          (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 2))
             x_displace += session.viewport.dst_points[2][0] / 5
+
+
+        x_displace = 260
+        font = pygame.font.SysFont('Arial', 20)
+        for identifier, title in session.scenario_titles.items():
+            canvas.blit(font.render(title, True, (255, 255, 255)),
+                        (x_displace, (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 2))
+            x_displace += session.viewport.dst_points[2][0] / 5
+
 
     def update(self):
         pass

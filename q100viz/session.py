@@ -78,6 +78,10 @@ scenario_data = {
         '../data/scenario_Ref.csv').set_index('name')
 }
 
+scenario_titles = {
+    identifier : pd.read_csv('../data/scenario_titles.csv').set_index('scenario').at[identifier, 'name'] for identifier in scenario_data.keys()
+}
+
 input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
 input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
 input_scenarios_grid_1 = pd.read_csv(config['GRID_1_INPUT_SCENARIOS_FILE'])

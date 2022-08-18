@@ -1,3 +1,4 @@
+from cmath import inf
 import sys
 import os
 import random
@@ -168,11 +169,39 @@ buildings['cell'] = ""
 buildings['selected'] = False
 buildings['group'] = -1
 
-# mask viewport with black surface
+import shapely
+buildings['target_point'] = None
+
+for idx, row in buildings.iterrows():
+    polygon = row['geometry']
+    print(idx, row, polygon)
+    points = session.gis.surface.transform(polygon.exterior.coords)
+    pygame.draw.polygon(session.gis.surface, pygame.Color(255,123,222), points)
+
+    poly = shapely.geometry.Polygon(points)
+    centroid = poly.centroid
+
+    shortest_dist = 9999999
+    target_point = None
+
+    for linestring in session.gis.nahwaermenetz.to_dict('records'):
+        line_points = session.gis.surface.transform(linestring['geometry'].coords)
+        line = shapely.geometry.LineString(line_points)
+
+        interpol = line.interpolate(line.project(centroid))
+
+        this_dist = interpol.distance(centroid)
+        if this_dist < shortest_dist:
+            shortest_dist = this_dist
+            buildings.at[idx, 'target_point'] = interpol
+
+session.print_full_df(buildings)
+
+################### mask viewport with black surface ##################
 mask_points = [[0, 0], [100, 0], [100, 86], [0, 86], [0, -50],
                [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
-# UDP server for incoming cspy messages
+################# UDP server for incoming cspy messages ###############
 for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
     udp_server = udp.UDPServer(*grid_udp, 4096)
     udp_thread = threading.Thread(target=udp_server.listen,
@@ -281,10 +310,11 @@ while True:
         session.gis.draw_polygon_layer(canvas, session.gis.typologiezonen, 0, (123, 201, 230, 50))
     session.gis.draw_linestring_layer(canvas, session.gis.nahwaermenetz, (217, 9, 9), 3)
     session.gis.draw_polygon_layer(canvas, session.gis.waermezentrale, 0, (252, 137, 0))
-    # session.gis.draw_polygon_layer(
-    #     canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'environmental_engagement')  # fill and lerp
+    session.gis.draw_polygon_layer(
+        canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'environmental_engagement')  # fill and lerp
     session.gis.draw_polygon_layer(
         canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'environmental_engagement')  # stroke simple black
+    session.gis.draw_buildings_connections(session.buildings)  # draw lines to closest heat grid
 
     # draw grid
     grid_1.draw(show_grid)

@@ -60,10 +60,8 @@ class GIS:
             for linestring in self.nahwaermenetz.to_dict('records'):
                 line_points = self.surface.transform(linestring['geometry'].coords)
                 line = shapely.geometry.LineString(line_points)
-                # .project(shapely.geometry.Point(points))
 
                 interpol = line.interpolate(line.project(centroid))
-                # print(shapely.ops.nearest_points(line))
 
                 pygame.draw.line(
                     self.surface, color=pygame.Color(255, 255, 0),
@@ -75,7 +73,20 @@ class GIS:
         # except Exception as e:
         #     session.log += "\n%s" % e
 
-        # quit()
+
+    def draw_buildings_connections(self, df):
+        for polygon in df.to_dict('records'):
+
+            points = self.surface.transform(polygon['geometry'].exterior.coords)
+            centroid = shapely.geometry.Polygon(points).centroid
+
+            target = polygon['target_point']
+
+            pygame.draw.line(
+                self.surface, color=pygame.Color(255, 255, 0),
+                start_pos=((centroid.x, centroid.y)),
+                end_pos=((target.x, target.y))
+                )
 
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):

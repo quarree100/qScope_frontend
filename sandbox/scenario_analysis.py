@@ -13,7 +13,7 @@ print(os.getcwd())
 
 def main():
     '''choose which of the plots to display'''
-    plot_energy_prices_scenario_sorted()
+    # plot_energy_prices_scenario_sorted()
     # plot_energy_prices_separated()
     # plot_carbon_prices()
     # plot_carbon_prices_separated()
@@ -206,13 +206,13 @@ def plot_q100_prices():
     ############################## capex: ##############################
     plt.figure("Q100 Capex")
     df.plot(
-        kind='line',
+        kind='bar',
         y=['q100_capex_scenario1-2', 'q100_capex_scenario2', 'q100_capex_scenario3'],
         ax=plt.gca())
 
-    plt.ylabel("Zahlungen")
+    plt.ylabel("[€]")
     plt.xlabel("Jahr")
-    plt.legend(["1 payment", "2 payments", "5 payments"])
+    plt.legend(["1 Zahlung", "2 Zahlungen", "5 Zahlungen"])
     plt.title("Q100-Wärmeversorgung: Investitionskosten")
 
     ############################## emissions: ##############################
@@ -222,10 +222,10 @@ def plot_q100_prices():
         y=['q100_emissions_scenario1', 'q100_emissions_scenario2', 'q100_emissions_scenario3', 'q100_emissions_scenario4'],
         ax=plt.gca())
 
-    plt.ylabel("[g/kWh]")
+    plt.ylabel("[g/kWh CO2_eq]")
     plt.xlabel("Jahr")
     plt.legend(["Constant_50 g / kWh", "Declining_Steps", "Declining_Linear", "Constant_Zero emissions"])
-    plt.title("Q100-Wärmeversorgung: Investitionskosten")
+    plt.title("Q100-Wärmeversorgung: Emissionen")
 
     plt.show()
 

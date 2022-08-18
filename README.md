@@ -37,34 +37,43 @@ python run_q100viz.py
 
 ```
 project qScope
-└───cspy_L
-│   └───CityScoPy LEGO Decoder for left table
-└───cspy_R
-│   └───CityScoPy LEGO Decoder for right table
+└───cspy
+│   └───MIT CityScoPy Token Tag Decoder (modified by dunland)
 └───data
-│       contains LINKS to GIS data from Seafile and api.json for SOFTWARE COMMUNICATION
+|   └───outputs
+|      └───output_[timestamp]
+|         (simulation-specific output)
+|         └───buildings_clusters_[timestamp].csv
+|         (exportierte Gebäudeliste von Frontend)
+|         └───simulation_parameters_[timestamp].xml
+|         (xml-Datei mit allen Simulationsparametern zum Starten des headless modes)
+|         └───connections
+|         |       Export der Anschlussquoten
+|         └───emissions
+|         |      gebäudespezifische und aggregierte Quartiersemissionen
+|         └───snapshot
+|               von GAMA produzierte Grafiken
 └───q100_abm
 │   │   GAMA workspace folder
-│   └───Project_RuesdorferKamp_Network
-│   │   │   Project 1: Social Agents Communication Network
-│   │	  └───RuesdorferKamp_Network_Model-01.gaml
-│   └───Project_RuesdorferKamp_Restoration
-│      	└───Restoration_Model_01.gaml
+│   └───q100
+│       │   Trend Model
+│    	└───models
+|       │    └───qscope_ABM.gaml
+|       └───__data__ symlink zu data-Ordner (unten))
 └───qScope_infoscreen
-│       infoscreen (NodeJS/JavaScript)
+│       infoscreen (NodeJS/ JavaScript)
 └───qScope_frontend
-│       projection (Python)
-└───settings
-        initial setup data to initialize ALL SOFTWARE COMPONENTS centrally
+        projection (Python)
 
 ```
+
 where:
-- cspy_L and cspy_R: https://github.com/dunland/cspy (we are using two decoders to control two webcam streams with specific light settings)
-- data: has to be linked from server
-- q100_abm: https://github.com/quarree100/q100_abm
+- cspy: https://github.com/dunland/cspy
+- data: has to be linked from Seafile server
+- GAMA: https://github.com/quarree100/q100_abm
 - qScope_infoscreen: https://github.com/quarree100/qScope_infoscreen
 - qScope_frontend: https://github.com/quarree100/qScope_frontend
-- settings: t.b.a (currently from cspy/settings)
+
 
 ## further requirements:
 - GAMA has to be installed and the path to its headless folder has to be provided in config.py

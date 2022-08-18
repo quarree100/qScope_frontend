@@ -5,38 +5,51 @@ and displayed on the Q-Scope-Infoscreen
 
 import os
 from matplotlib import pyplot as plt
+import matplotlib as mpl
+from cycler import cycler
 import pandas
 
 print(os.getcwd())
 
 def main():
     '''choose which of the plots to display'''
+    plot_energy_prices_scenario_sorted()
     # plot_energy_prices_separated()
     # plot_carbon_prices()
-    plot_carbon_prices_separated()
-    # plot_q100_prices()
+    # plot_carbon_prices_separated()
+    plot_q100_prices()
 
 ######################### carbon prices ###############################
 def plot_carbon_prices():
     '''display carbon price scenarios in a single line plot'''
+
     file = "../data/includes/csv-data_technical/carbon-prices.csv"
+
+    # set color scheme:
+    # https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html
+    plt.style.use('default')
 
     df = pandas.read_csv(file).set_index('year')
 
-    plt.figure("Carbon Prices")
+    plt.figure("CO2-Preis")
     for col in df.columns:
         df.plot(
             kind='line',
             y=col,
             ax=plt.gca())
 
-    plt.title("Carbon Prices")
+    plt.title("CO2-Preis")
     plt.ylabel("[€/g]")
+    plt.xlabel("Jahr")
     plt.show()
 
 # separate plots:
 def plot_carbon_prices_separated():
     '''display carbon price plots in separate windows'''
+
+    # set color scheme:
+    # https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html
+    plt.style.use('default')
 
     file = "../data/includes/csv-data_technical/carbon-prices.csv"
 
@@ -44,7 +57,7 @@ def plot_carbon_prices_separated():
 
     for col in df.columns:
 
-        plt.figure("Carbon Prices {0}".format(col))
+        plt.figure("CO2-Preis {0}".format(col))
         df.plot(
             kind='area',
             y=col,
@@ -53,14 +66,22 @@ def plot_carbon_prices_separated():
         )
 
         plt.gca().get_legend().remove()
+        plt.gca().set_ylim((0, 0.001))
 
-    plt.ylabel("[€/g]")
+        plt.ylabel("[€/g]")
+        plt.title("CO2-Preis {0}".format(col))
+
     plt.show()
 
 ############################# energy prices ###########################
 # sorted by type:
 def plot_energy_prices_type_sorted():
     '''display energy prices in subplots, sorted by energy carrier'''
+
+    # set color scheme:
+    # https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html
+    plt.style.use('default')
+
     file = "../data/includes/csv-data_technical/energy_prices-emissions.csv"
 
     df = pandas.read_csv(file)
@@ -84,13 +105,17 @@ def plot_energy_prices_type_sorted():
     for ax in [ax1, ax2, ax3]:
         ax.legend(['scenario_old', 'scenario_2021', 'scenario_2022'])
 
-    fig.canvas.set_window_title('Energy Prices (type sorted)')
-    ax1.set_ylabel("[ct/kWh]??????????")
+    fig.canvas.set_window_title('Energiepreis (nach Energieträger)')
+    ax1.set_ylabel("[ct/kWh]")
     plt.show()
 
 # sorted by scenario:
 def plot_energy_prices_scenario_sorted():
     '''display energy prices in subplots, sorted by scenario'''
+
+    # set color scheme:
+    mpl.rcParams['axes.prop_cycle'] = cycler(color=['#EAD41E', '#1E6FEA', '#604741'])
+
     file = "../data/includes/csv-data_technical/energy_prices-emissions.csv"
 
     df = pandas.read_csv(file)
@@ -107,20 +132,26 @@ def plot_energy_prices_scenario_sorted():
              df['year'], df['gas_prices_scenario_2022'],
              df['year'], df['oil_prices_scenario_2022'])
 
+    ax1.setcolor=['#EAD41E', '#1E6FEA', '#604741']
+
     ax1.set_title('scenario_old')
     ax2.set_title('scenario_2021')
     ax3.set_title('scenario_2022')
 
     for ax in [ax1, ax2, ax3]:
-        ax.legend(['power', 'gas', 'oil'])
+        ax.legend(['Strom', 'Gas', 'Öl'])
 
-    fig.canvas.set_window_title('Energy Price (scenario sorted)')
-    ax1.set_ylabel("[ct/kWh]??????????")
+    fig.canvas.set_window_title('Energiepreis (nach Szenario)')
+    ax1.set_ylabel("[ct/kWh]")
     plt.show()
 
 # no subplots:
 def plot_energy_prices_separated():
     '''export separate images for each scenario containing power price, gas price, oil price'''
+
+    # set color scheme:
+    # https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html
+    plt.style.use('default')
 
     file = "../data/includes/csv-data_technical/energy_prices-emissions.csv"
 
@@ -150,6 +181,10 @@ def plot_energy_prices_separated():
 ############################### q100 prices ###########################
 def plot_q100_prices():
     '''plot quarree100 opex and capex'''
+
+    # set color scheme:
+    # https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html
+    plt.style.use('default')
 
     file = "../data/includes/csv-data_technical/q100_prices_emissions-dummy.csv"
 

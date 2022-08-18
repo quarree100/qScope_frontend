@@ -4,6 +4,7 @@ import shapely
 import pygame
 
 import q100viz.keystone as keystone
+from q100viz.settings.config import config
 import q100viz.session as session
 
 crs = "EPSG:3857"
@@ -17,6 +18,12 @@ class GIS:
         self.surface.src_points = src_points
         self.surface.dst_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
         self.surface.calculate(viewport.transform_mat)
+
+        # GIS layers
+        self.typologiezonen = read_shapefile(config['TYPOLOGIEZONEN_FILE'])
+        self.nahwaermenetz = read_shapefile(config['NAHWAERMENETZ_FILE'])
+        self.waermezentrale = read_shapefile(config['WAERMESPEICHER_FILE'], 'Waermespeicher').append(
+            read_shapefile(config['HEIZZENTRALE_FILE']))
 
     def get_intersection_indexer(self, df, v_polygon):
         polygon = self.surface.inverse_transform(v_polygon)
@@ -44,7 +51,24 @@ class GIS:
 
         except Exception as e:
             session.log += "\n%s" % e
+            print(e)
 
+    def draw_buildings_connections(self, df):
+        for row in df.to_dict('records'):
+
+            points = self.surface.transform(row['geometry'].exterior.coords)
+            centroid = shapely.geometry.Polygon(points).centroid
+
+            target = row['target_point']
+
+            if row['connection_to_heat_grid']:
+                pygame.draw.line(
+                    self.surface,
+                    color=pygame.Color(0, 168, 78),
+                    start_pos=((centroid.x, centroid.y)),
+                    end_pos=((target.x, target.y)),
+                    width=4
+                    )
 
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):

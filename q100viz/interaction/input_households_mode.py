@@ -93,8 +93,8 @@ class Input_Households:
     def draw(self, canvas):
 
         try:
+            # highlight selected buildings (draws colored stroke on top)
             if len(session.buildings[session.buildings.selected]):
-                # highlight selected buildings
                 session.gis.draw_polygon_layer(
                     canvas,
                     session.buildings[session.buildings.selected], 2, (255, 0, 127)

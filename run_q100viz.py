@@ -8,6 +8,7 @@ import pandas
 import pygame
 import datetime
 import argparse
+import shapely
 from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
 from q100viz.settings.config import config
@@ -160,7 +161,6 @@ buildings['CO2'] = (buildings['spec_heat_consumption'] + buildings['spec_power_c
 electricity_supply_types = ['green', 'gray', 'mix']
 buildings['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings.values]
 buildings['connection_to_heat_grid'] = buildings['energy_source'].isna().to_numpy()
-# buildings['connection_to_heat_grid'] = buildings['']
 buildings['refurbished'] = buildings['connection_to_heat_grid']
 buildings['environmental_engagement'] = [random.random() for row in buildings.values]
 
@@ -169,12 +169,12 @@ buildings['cell'] = ""
 buildings['selected'] = False
 buildings['group'] = -1
 
-import shapely
+# buildings geometry: find closest heat grid line
+# TODO: move this somewhere else.
 buildings['target_point'] = None
 
 for idx, row in buildings.iterrows():
     polygon = row['geometry']
-    print(idx, row, polygon)
     points = session.gis.surface.transform(polygon.exterior.coords)
     pygame.draw.polygon(session.gis.surface, pygame.Color(255,123,222), points)
 
@@ -194,8 +194,6 @@ for idx, row in buildings.iterrows():
         if this_dist < shortest_dist:
             shortest_dist = this_dist
             buildings.at[idx, 'target_point'] = interpol
-
-session.print_full_df(buildings)
 
 ################### mask viewport with black surface ##################
 mask_points = [[0, 0], [100, 0], [100, 86], [0, 86], [0, -50],
@@ -308,13 +306,16 @@ while True:
     # draw GIS layers:
     if show_typologiezonen:
         session.gis.draw_polygon_layer(canvas, session.gis.typologiezonen, 0, (123, 201, 230, 50))
-    session.gis.draw_linestring_layer(canvas, session.gis.nahwaermenetz, (217, 9, 9), 3)
-    session.gis.draw_polygon_layer(canvas, session.gis.waermezentrale, 0, (252, 137, 0))
-    session.gis.draw_polygon_layer(
-        canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'environmental_engagement')  # fill and lerp
-    session.gis.draw_polygon_layer(
-        canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'environmental_engagement')  # stroke simple black
-    session.gis.draw_buildings_connections(session.buildings)  # draw lines to closest heat grid
+    if session.show_polygons:
+        session.gis.draw_linestring_layer(canvas, session.gis.nahwaermenetz, (217, 9, 9), 3)
+        session.gis.draw_polygon_layer(canvas, session.gis.waermezentrale, 0, (252, 137, 0))
+        session.gis.draw_buildings_connections(session.buildings)  # draw lines to closest heat grid
+        session.gis.draw_polygon_layer(
+            canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'environmental_engagement')  # fill and lerp
+        session.gis.draw_polygon_layer(
+            canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'environmental_engagement')  # stroke simple black
+        session.gis.draw_polygon_layer(
+            canvas, buildings[buildings['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
 
     # draw grid
     grid_1.draw(show_grid)

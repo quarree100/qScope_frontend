@@ -168,12 +168,6 @@ buildings['cell'] = ""
 buildings['selected'] = False
 buildings['group'] = -1
 
-# GIS layers
-typologiezonen = gis.read_shapefile(config['TYPOLOGIEZONEN_FILE'])
-nahwaermenetz = gis.read_shapefile(config['NAHWAERMENETZ_FILE'])
-waermezentrale = gis.read_shapefile(config['WAERMESPEICHER_FILE'], 'Waermespeicher').append(
-    gis.read_shapefile(config['HEIZZENTRALE_FILE']))
-
 # mask viewport with black surface
 mask_points = [[0, 0], [100, 0], [100, 86], [0, 86], [0, -50],
                [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
@@ -284,11 +278,11 @@ while True:
 
     # draw GIS layers:
     if show_typologiezonen:
-        session.gis.draw_polygon_layer(canvas, typologiezonen, 0, (123, 201, 230, 50))
-    session.gis.draw_linestring_layer(canvas, nahwaermenetz, (217, 9, 9), 3)
-    session.gis.draw_polygon_layer(canvas, waermezentrale, 0, (252, 137, 0))
-    session.gis.draw_polygon_layer(
-        canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'environmental_engagement')  # fill and lerp
+        session.gis.draw_polygon_layer(canvas, session.gis.typologiezonen, 0, (123, 201, 230, 50))
+    session.gis.draw_linestring_layer(canvas, session.gis.nahwaermenetz, (217, 9, 9), 3)
+    session.gis.draw_polygon_layer(canvas, session.gis.waermezentrale, 0, (252, 137, 0))
+    # session.gis.draw_polygon_layer(
+    #     canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'environmental_engagement')  # fill and lerp
     session.gis.draw_polygon_layer(
         canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'environmental_engagement')  # stroke simple black
 

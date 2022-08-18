@@ -4,7 +4,7 @@ import shapely
 import pygame
 
 import q100viz.keystone as keystone
-import q100viz.session as session
+from q100viz.settings.config import config
 
 crs = "EPSG:3857"
 
@@ -18,6 +18,12 @@ class GIS:
         self.surface.dst_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
         self.surface.calculate(viewport.transform_mat)
 
+        # GIS layers
+        self.typologiezonen = read_shapefile(config['TYPOLOGIEZONEN_FILE'])
+        self.nahwaermenetz = read_shapefile(config['NAHWAERMENETZ_FILE'])
+        self.waermezentrale = read_shapefile(config['WAERMESPEICHER_FILE'], 'Waermespeicher').append(
+            read_shapefile(config['HEIZZENTRALE_FILE']))
+
     def get_intersection_indexer(self, df, v_polygon):
         polygon = self.surface.inverse_transform(v_polygon)
         shape = shapely.geometry.Polygon(polygon)
@@ -30,21 +36,46 @@ class GIS:
             pygame.draw.lines(self.surface, pygame.Color(color), False, points, stroke)
 
     def draw_polygon_layer(self, surface, df, stroke, fill, lerp_target=None, lerp_attr=None):
-        try:
-            for polygon in df.to_dict('records'):
-                if fill:
-                    fill_color = pygame.Color(*fill)
+        # try:
+        for polygon in df.to_dict('records'):
+            if fill:
+                fill_color = pygame.Color(*fill)
 
-                    if lerp_target:
-                        target_color = pygame.Color(lerp_target)
-                        fill_color = fill_color.lerp(target_color, polygon[lerp_attr])
+                if lerp_target:
+                    target_color = pygame.Color(lerp_target)
+                    fill_color = fill_color.lerp(target_color, polygon[lerp_attr])
 
-                points = self.surface.transform(polygon['geometry'].exterior.coords)
-                pygame.draw.polygon(self.surface, fill_color, points, stroke)
+            points = self.surface.transform(polygon['geometry'].exterior.coords)
+            pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
-        except Exception as e:
-            session.log += "\n%s" % e
+            poly = shapely.geometry.Polygon(points)
+            centroid = poly.centroid
 
+            pygame.draw.line(
+                self.surface, color=pygame.Color(255, 0, 0),
+                start_pos=(0,0),
+                end_pos=(centroid.x, centroid.y)
+                )
+
+            for linestring in self.nahwaermenetz.to_dict('records'):
+                line_points = self.surface.transform(linestring['geometry'].coords)
+                line = shapely.geometry.LineString(line_points)
+                # .project(shapely.geometry.Point(points))
+
+                interpol = line.interpolate(line.project(centroid))
+                # print(shapely.ops.nearest_points(line))
+
+                pygame.draw.line(
+                    self.surface, color=pygame.Color(255, 255, 0),
+                    start_pos=((centroid.x, centroid.y)),
+                    end_pos=((interpol.x, interpol.y))
+                    )
+
+
+        # except Exception as e:
+        #     session.log += "\n%s" % e
+
+        # quit()
 
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):

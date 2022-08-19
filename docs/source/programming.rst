@@ -186,7 +186,7 @@ frontend representation
   [1228.917724609375, 622.6510009765625],
   [1226.5196533203125, 923.7374267578125]]
 
-with ``[[???[x], ???[y]], [upper-left[x], upper-left[y]], [upper-right[x], upper-right[y]], [???[x], ???[y]]]``
+with ``[[bottom-left[x], bottom-left[y]], [upper-left[x], upper-left[y]], [upper-right[x], upper-right[y]], [bottom-right[x], bottom-right[y]]]``
 
 
 Modes

@@ -10,6 +10,9 @@ class CalibrationMode:
         self.active_anchor = 0
         self.magnitude = 1
 
+    def activate(self):
+        pass
+
     def process_event(self, event):
         keystone_file = config['SAVED_KEYSTONE_FILE']
 

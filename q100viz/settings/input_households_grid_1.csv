@@ -1,7 +1,6 @@
 x,y,handle,color
-1,18,connection_to_heat_grid,aquamarine
-3,18,refurbished,burlywood1
-5,18,environmental_engagement,cadetblue1
+1,18,game_stage,blueviolet
+3,18,buildings_multiplicator,chartreuse3
 11,18,connection_to_heat_grid,aquamarine
 13,18,refurbished,burlywood1
 15,18,environmental_engagement,cadetblue1

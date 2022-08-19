@@ -95,6 +95,7 @@ mode_selector_handles = ['start_input_scenarios',
                          'start_input_households', 'start_simulation']
 communication_relevant_keys = [
     'address', 'CO2', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement', 'cell']
+valid_grid_handles = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage']
 
 # interaction
 seconds_elapsed = 0

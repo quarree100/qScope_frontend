@@ -74,7 +74,7 @@ class Input_Households:
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
-                            if cell.handle in ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement']:
+                            if cell.handle in session.valid_grid_handles:
                                 for slider in grid.sliders.values():
                                     if slider.show_controls:
                                         slider.handle = cell.handle

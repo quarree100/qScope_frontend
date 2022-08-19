@@ -39,7 +39,9 @@ class SimulationMode:
         session.active_handler = self
 
         # display setup:
-        for slider in session.grid_1.slider, session.grid_2.slider:
+        session.grid_1.sliders['slider0'].show_text = True
+        session.grid_1.sliders['slider0'].show_controls = True
+        for slider in session.grid_2.sliders.values():
             slider.show_text = False
             slider.show_controls = False
         session.show_basemap = False

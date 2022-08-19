@@ -1,4 +1,5 @@
 import socket
+import q100viz.session as session
 
 
 class UDPServer:
@@ -28,6 +29,7 @@ class UDPServer:
                 callback(message.decode())
 
                 print("receiving message at", self.port)
+                # session.print_verbose(message)
 
         except KeyboardInterrupt:
             exit()

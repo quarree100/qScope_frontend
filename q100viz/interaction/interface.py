@@ -39,7 +39,7 @@ class Slider:
 
         self.surface.calculate(session.viewport.transform_mat)  # get matrix to transform by
 
-        self.coords_transformed = self.surface.transform(coords)
+        self.coords_transformed = self.surface.transform(coords)  # stores coordinates as [[bottom-left.x, bottom-left.y], [top-left.x, top-left.y] [top-right.x, top-right.y], [bottom-right.x, bottom-right.y]]
 
     def render(self, canvas=None):
         # slider controls → set slider color

@@ -35,8 +35,9 @@ class CalibrationMode:
                 for grid in (session.grid_1, session.grid_2):
                     grid.surface.calculate(session.viewport.transform_mat)
                     grid.transform()
-                    grid.slider.surface.calculate(session.viewport.transform_mat)
-                    grid.slider.transform()
+                    for slider in grid.sliders.values():
+                        slider.surface.calculate(session.viewport.transform_mat)
+                        slider.transform()
 
                 session.basemap.surface.calculate(session.gis.surface.transform_mat)
                 session.basemap.warp()

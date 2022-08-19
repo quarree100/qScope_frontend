@@ -43,10 +43,10 @@ class Input_Scenarios:
         session.environment['mode'] = self.name
 
         # sliders:
-        session.grid_1.slider.show_text = False
-        session.grid_1.slider.show_controls = False
-        session.grid_2.slider.show_text = True
-        session.grid_2.slider.show_controls = True
+        session.grid_1.sliders['slider1'].show_text = False
+        session.grid_1.sliders['slider1'].show_controls = False
+        session.grid_2.sliders['slider0'].show_text = True
+        session.grid_2.sliders['slider0'].show_controls = True
 
         # setup mode selectors:
         session.grid_1.update_cell_data(session.input_scenarios_grid_1)

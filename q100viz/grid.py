@@ -7,7 +7,7 @@ import q100viz.session as session
 from q100viz.interaction.interface import Slider
 
 class Grid:
-    def __init__(self, canvas_size, x_size, y_size, dst_points, viewport, setup_data, slider_ids=[], slider_coords=[[0, 100], [0, 0], [100, 0], [100, 100]]):
+    def __init__(self, canvas_size, x_size, y_size, dst_points, viewport, setup_data, sliders):
         self.x_size = x_size
         self.y_size = y_size
 
@@ -30,10 +30,7 @@ class Grid:
             (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
             for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
-        # set up sliders
-        self.sliders = {slider_id: None for slider_id in slider_ids}
-
-        self.slider = Slider(canvas_size, self, slider_coords)
+        self.sliders = {slider_id : Slider(canvas_size, self, sliders[slider_id]) for slider_id in sliders.keys()}
 
     def draw(self, show_grid):
 
@@ -119,8 +116,8 @@ class Grid:
             # update slider values TODO: adjust this if more than 1 slider per grid
             # TODO: this causes type error when no slider value provided in cspy → provide 0 by default?
             for slider_id in self.sliders.keys():
-                if msg['sliders'][slider_id] is not None: self.slider.value = msg['sliders'][slider_id]
-                self.slider.update()
+                if msg['sliders'][slider_id] is not None: self.sliders[slider_id].value = msg['sliders'][slider_id]
+                self.sliders[slider_id].update()
 
         except TypeError as t:
             # pass

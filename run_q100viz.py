@@ -18,19 +18,21 @@ from q100viz.interaction.interface import *
 
 ##################### parse command line arguments ####################
 parser = argparse.ArgumentParser()
-parser.add_argument('--debug', help="run in Debug mode", action='store_true')
+parser.add_argument('--debug', help="run in Debug mode", action='store_true')  # TODO: remake as --random X to select random X buildings
 parser.add_argument('--verbose', '-v', help="start in verbose mode", action='store_true')
 parser.add_argument(
     '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_NUM_STEPS'])
-parser.add_argument('--conn', help="connect all buildings to Q100",
+parser.add_argument('--force_connect', help="connect all buildings to Q100",
     action='store_true')
 parser.add_argument('--start_at', help="start at specific game mode", type=str, default='input_scenarios')
 parser.add_argument('--test', help="pre-set of functions to test different elements...", type=str)
+parser.add_argument('--main_window', help="runs program in main window", action='store_true')
+
 args = parser.parse_args()
 
 session.DEBUG_MODE = args.debug
 config['SIMULATION_NUM_STEPS'] = args.sim_steps
-session.debug_connect = args.conn
+session.debug_force_connect = args.force_connect
 session.active_handler = session.handlers[args.start_at]
 session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
@@ -45,7 +47,7 @@ if session.DEBUG_MODE:
     """\
         .format(
             str(config['SIMULATION_NUM_STEPS']),
-            str(session.debug_connect))
+            str(session.debug_force_connect))
     )
 
 ############################## PYGAME SETUP ###########################
@@ -53,8 +55,9 @@ if session.DEBUG_MODE:
 FPS = session.FPS = 12
 
 # set window position
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,2160)  # projection to the left
+if not args.main_window:
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,2160)  # projection to the left
 
 # Initialize program
 pygame.init()
@@ -96,7 +99,8 @@ grid_1 = session.grid_1 = grid.Grid(
         [config['GRID_1_X2'], config['GRID_1_Y2']],
         [config['GRID_1_X2'], config['GRID_1_Y1']]],
         session.viewport, config['GRID_1_SETUP_FILE'],
-        ['slider0'], [[50, 130], [50, 100], [100, 100], [100, 130]])  # TODO: rename sliders
+        {'slider0' : [[50, 130], [50, 100], [100, 100], [100, 130]],
+        'slider1' : [[0, 130], [0, 100], [50, 100], [50, 130]]})  # TODO: rename sliders
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, ncols, nrows, [
         [config['GRID_2_X1'], config['GRID_2_Y1']],
@@ -104,7 +108,7 @@ grid_2 = session.grid_2 = grid.Grid(
         [config['GRID_2_X2'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
         session.viewport, config['GRID_2_SETUP_FILE'],
-        ['slider0'], [[0, 130], [0, 100], [50, 100], [50, 130]])
+        {'slider0' : [[0, 130], [0, 100], [50, 100], [50, 130]]})
 
 session.show_polygons = False
 session.show_basemap = False
@@ -241,21 +245,22 @@ while True:
             ########## manual slider control for test purposes: #######
             elif event.key == K_PLUS:
                 for grid in grid_1, grid_2:
-                    if grid.slider.value is not None:
-                        grid.slider.value += 0.1
-                        # grid.slider.value = round(grid.slider.value + 0.1, 3)
-                        session.print_verbose(("slider0 =", grid.slider.value))
-                    else:
-                        grid.slider.value = 0.1
-                    grid.slider.update()
+                    for key, val in grid.sliders.items():
+                        if grid.sliders[key].value is not None:
+                            grid.sliders[key].value += 0.1
+                            session.print_verbose("{0} = {1}". format(key, val))
+                        else:
+                            grid.sliders[key].value = 0.1
+                        grid.sliders[key].update()
             elif event.key == K_MINUS:
                 for grid in grid_1, grid_2:
-                    if grid.slider.value is not None:
-                        grid.slider.value = round(grid.slider.value - 0.1, 3)
-                        session.print_verbose(("slider0 =", grid.slider.value))
-                    else:
-                        grid.slider.value = 0.1
-                    grid.slider.update()
+                    for key, val in grid.sliders.items():
+                        if grid.sliders[key].value is not None:
+                            grid.sliders[key].value = round(slider.value - 0.1, 3)
+                            session.print_verbose("{0} = {1}". format(key, val))
+                        else:
+                            grid.sliders[key].value = 0.1
+                        grid.sliders[key].update()
 
 
             # verbose mode:
@@ -280,7 +285,8 @@ while True:
     _gis.surface.fill(0)
     for grid in (grid_1, grid_2):
         grid.surface.fill(0)
-        grid.slider.surface.fill(0)
+        for slider in grid.sliders.values():
+            slider.surface.fill(0)
 
     # draw GIS layers:
     if show_typologiezonen:
@@ -326,8 +332,9 @@ while True:
 
     # slider
     for grid in grid_1, grid_2:
-        grid_1.slider.render(session.viewport)
-        grid_2.slider.render(session.viewport)
+        for slider in grid.sliders.values():
+            slider.render(session.viewport)
+            slider.render(session.viewport)
 
     # draw grid
     canvas.blit(grid_1.surface, (0, 0))
@@ -343,8 +350,11 @@ while True:
         font = pygame.font.SysFont('Arial', 20)
         mouse_pos = pygame.mouse.get_pos()
         canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
-        canvas.blit(font.render(str(grid_1.slider.value), True, (255,255,255)), (800,670))
-        canvas.blit(font.render(str(grid_2.slider.value), True, (255,255,255)), (1150,670))
+
+        for grid in session.grid_1, session.grid_2:
+            for slider in grid.sliders.values():
+                canvas.blit(font.render(str(slider.value), True, (255,255,255)), slider.coords_transformed[3])
+                # canvas.blit(font.render(str(grid_2.sliders.value), True, (255,255,255)), (1150,670))
 
     ############################# pygame time #########################
 

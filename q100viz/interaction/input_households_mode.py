@@ -20,9 +20,10 @@ class Input_Households:
         session.flag_export_canvas = True  # export "empty" polygon layer once
 
         # sliders:
-        for slider in session.grid_1.slider, session.grid_2.slider:
-            slider.show_text = True
-            slider.show_controls = True
+        for grid in session.grid_1, session.grid_2:
+            for slider in grid.sliders.values():
+                slider.show_text = True
+                slider.show_controls = True
 
         # setup mode selectors:
         session.grid_1.update_cell_data(session.input_households_grid_1)
@@ -74,13 +75,14 @@ class Input_Households:
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
                             if cell.handle in ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement']:
-                                if grid.slider.show_controls:
-                                    grid.slider.handle = cell.handle
-                                    grid.slider.id = cell.id
-                                    if grid.slider.previous_handle is not grid.slider.handle:
-                                        session.print_verbose(
-                                            "slider id: {0}, handle: {1}".format(str(grid.slider.id), str(grid.slider.handle)))
-                                        grid.slider.previous_handle = grid.slider.handle
+                                for slider in grid.sliders.values():
+                                    if slider.show_controls:
+                                        slider.handle = cell.handle
+                                        slider.id = cell.id
+                                        if slider.previous_handle is not slider.handle:
+                                            session.print_verbose(
+                                                "slider id: {0}, handle: {1}".format(str(slider.id), str(slider.handle)))
+                                            slider.previous_handle = slider.handle
 
                             elif cell.handle == 'start_input_scenarios':
                                 session.handlers['input_scenarios'].activate()

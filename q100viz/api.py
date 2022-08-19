@@ -91,9 +91,9 @@ class API:
                 'buildings_groups' : message
             }
 
-            self.send_message(json.dumps(wrapper))
-
             i += 1
+
+        self.send_message(json.dumps(wrapper))
 
     def send_simplified_dataframe_with_environment_variables(self, df, env):
         sum = make_clusters(df).sum()

@@ -248,7 +248,7 @@ while True:
                     for key, val in grid.sliders.items():
                         if grid.sliders[key].value is not None:
                             grid.sliders[key].value += 0.1
-                            session.print_verbose("{0} = {1}". format(key, val))
+                            session.print_verbose("{0}.{1} = {2}". format(grid, key, val.value))
                         else:
                             grid.sliders[key].value = 0.1
                         grid.sliders[key].update()
@@ -257,7 +257,7 @@ while True:
                     for key, val in grid.sliders.items():
                         if grid.sliders[key].value is not None:
                             grid.sliders[key].value = round(slider.value - 0.1, 3)
-                            session.print_verbose("{0} = {1}". format(key, val))
+                            session.print_verbose("{0}.{1} = {2}". format(grid, key, val.value))
                         else:
                             grid.sliders[key].value = 0.1
                         grid.sliders[key].update()

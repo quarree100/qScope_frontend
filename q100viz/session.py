@@ -14,10 +14,13 @@ from q100viz.interaction.dataview_individual_mode import DataViewIndividual_Mode
 from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode
 import q100viz.keystone as keystone
 
+################### dev and debug variables #################
 log = ""
-DEBUG_MODE = False
 TEST_MODE = ""
 VERBOSE_MODE = False
+
+debug_num_of_random_buildings = 0
+debug_force_connect = False
 
 # ################# infoscreen communication ################
 io = 'http://localhost:8081'  # Socket.io
@@ -119,9 +122,7 @@ handlers = {
 active_handler = handlers['input_scenarios']
 flag_export_canvas = False
 
-# global functions:
-
-
+######################## dev tools ##########################
 def print_verbose(message):
     if VERBOSE_MODE:
         print(message)

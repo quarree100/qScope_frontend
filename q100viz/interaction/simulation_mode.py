@@ -114,14 +114,15 @@ class SimulationMode:
             os.makedirs(self.current_output_folder)
 
         # debug: select random of 100 buildings:
-        if session.DEBUG_MODE:
-            df = session.buildings.sample(n=random.randint(10, 100))
+        if session.debug_num_of_random_buildings > 0:
+            df = session.buildings.sample(n=session.debug_num_of_random_buildings)
             df['selected'] = True
             df['group'] = [random.randint(0, 3) for x in df.values]
-            if session.debug_connect:
+            if session.debug_force_connect:
                 df['connected'] = True
             session.buildings.update(df)
-            session.print_full_df(session.buildings)
+            print("selecting random {0} buildings:".format(session.debug_num_of_random_buildings))
+            session.print_full_df(df)
 
         df = session.buildings[session.buildings.selected]
         df[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
@@ -204,6 +205,7 @@ class SimulationMode:
 
         df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(df)
+        session.iteration_round = (session.iteration_round + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
 
 
     def process_event(self, event):

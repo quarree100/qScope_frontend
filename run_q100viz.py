@@ -20,7 +20,7 @@ from q100viz.interaction.interface import *
 
 ##################### parse command line arguments ####################
 parser = argparse.ArgumentParser()
-parser.add_argument('--debug', help="run in Debug mode", action='store_true')  # TODO: remake as --random X to select random X buildings
+parser.add_argument('--random', help="select n random buildings", type=int)
 parser.add_argument('--verbose', '-v', help="start in verbose mode", action='store_true')
 parser.add_argument(
     '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_NUM_STEPS'])
@@ -32,25 +32,25 @@ parser.add_argument('--main_window', help="runs program in main window", action=
 
 args = parser.parse_args()
 
-session.DEBUG_MODE = args.debug
+session.debug_num_of_random_buildings = args.random
 config['SIMULATION_NUM_STEPS'] = args.sim_steps
 session.debug_force_connect = args.force_connect
 session.active_handler = session.handlers[args.start_at]
 session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
 
-if session.DEBUG_MODE:
-    print(
-    """
-    STARTING SCRIPT IN DEBUG MODE!
-    --> random 10 to 100 buildings will be selected
-    - simulation will run {0} steps
-    - force selected buildings to connect? {1}
-    """\
-        .format(
-            str(config['SIMULATION_NUM_STEPS']),
-            str(session.debug_force_connect))
+print(
+"""
+- random {0} buildings will be selected
+- force selected buildings to connect? {1}
+- simulation will run {2} steps
+"""\
+    .format(
+        session.debug_num_of_random_buildings,
+        str(session.debug_force_connect),
+        str(config['SIMULATION_NUM_STEPS'])
     )
+)
 
 ############################## PYGAME SETUP ###########################
 # Set FPS

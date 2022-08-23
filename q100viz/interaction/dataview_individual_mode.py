@@ -67,7 +67,6 @@ class DataViewIndividual_Mode():
             for cell in grid.grid[:][len(grid.grid) - 1]:
                 if cell.selected and cell.handle == 'start_input_scenarios':
                     session.handlers['input_scenarios'].activate()
-                    session.iteration_round = (session.iteration_round + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
 
     def draw(self, canvas):
         # # display graphs:

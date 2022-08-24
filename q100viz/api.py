@@ -50,7 +50,7 @@ class API:
         self.send_message(json.dumps(result, ensure_ascii=False))
 
     def send_dataframe_using_keys(self, df, keys):
-        sum = make_clusters(df).sum()
+        sum = df.groupby(by='cell').sum()
         data = json.loads(export_json(sum, None))
         if len(data) > 0:
             result = data[0]
@@ -63,10 +63,10 @@ class API:
         bd = session.buildings
 
         session.buildings_groups = [
-            bd[bd['group'] == 0][session.communication_relevant_keys],
-            bd[bd['group'] == 1][session.communication_relevant_keys],
-            bd[bd['group'] == 2][session.communication_relevant_keys],
-            bd[bd['group'] == 3][session.communication_relevant_keys]]
+            bd[bd['group'] == 0][session.COMMUNICATION_RELEVANT_KEYS],
+            bd[bd['group'] == 1][session.COMMUNICATION_RELEVANT_KEYS],
+            bd[bd['group'] == 2][session.COMMUNICATION_RELEVANT_KEYS],
+            bd[bd['group'] == 3][session.COMMUNICATION_RELEVANT_KEYS]]
 
         wrapper = ['' for i in range(session.num_of_users)]
         i = 0
@@ -74,16 +74,20 @@ class API:
 
         for group in session.buildings_groups:
             # aggregated data:
-            connections_sum = make_clusters(group)['connection_to_heat_grid'].sum()
+            connections_sum = group.groupby(by='cell')['connection_to_heat_grid'].sum()
             data = json.loads(export_json(connections_sum.rename('connections', inplace=True), None))
 
-            result = {}
+            group_data = {}
             if len(data) > 0:
-                result = data[0]
-                groupData = json.loads(
-                    export_json(group[session.communication_relevant_keys], None))
-                result["buildings".format(str(i))] = groupData
-                message['group_{0}'.format(str(i))] = result
+                group_data = data[0]
+                user_selected_buildings = json.loads(
+                    export_json(group[session.COMMUNICATION_RELEVANT_KEYS], None))
+                group_data['buildings'] = user_selected_buildings
+
+                # get all buildings with similar stats
+                buildings_cluster = make_clusters(group)
+                group_data['clusters'] = json.loads(export_json(buildings_cluster))  # make JSON serializable object from GeoDataFrame
+                message['group_{0}'.format(str(i))] = group_data
             else:  # create empty elements for empty groups (infoscreen reset)
                 message['group_{0}'.format(str(i))] = ['']
 
@@ -96,7 +100,7 @@ class API:
         self.send_message(json.dumps(wrapper))
 
     def send_simplified_dataframe_with_environment_variables(self, df, env):
-        sum = make_clusters(df).sum()
+        sum = df.groupby(by='cell').sum()
         data = json.loads(export_json(sum, None))
         if len(data) > 0:
             result = data[0]
@@ -115,14 +119,14 @@ def append_csv(file, df, cols):
         file, usecols=['osm_id', *cols.keys()], dtype=cols, error_bad_lines=False, delimiter=';').set_index('osm_id')
     return df.join(values, on='osm_id')
 
+def make_clusters(group):
+    '''make groups from one (!!) selected building. always only returns a cluster of the first building in group!'''
+    return session.buildings[
+            session.buildings['energy_source'] == group.loc[
+                group.index[0], 'energy_source']]
 
-def make_clusters(buildings):
-    # group the buildings by cell ID
-    return buildings.groupby(by='cell')
-
-
-def export_json(df, outfile):
-    """Export a dataframe to JSON file."""
+def export_json(df, outfile=None):
+    """Export a dataframe to JSON file. This is necessary to transform GeoDataFrames into a JSON serializable format"""
     return pandas.DataFrame(df).to_json(
         outfile, orient='records', force_ascii=False, default_handler=str)
 

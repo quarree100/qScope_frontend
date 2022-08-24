@@ -38,6 +38,6 @@ config = {
     'GRID_1_Y2' : 86.27,
 
     # interaction tuning
-    'buildings_selection_mode': 'all' # select 'all' intersected buildings or choose by 'rotation'
+    'buildings_selection_mode': 'rotation' # select 'all' intersected buildings or choose by 'rotation'
 
 }

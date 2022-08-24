@@ -243,13 +243,6 @@ class SimulationMode:
                 session.buildings[session.buildings.selected], 2, (255, 0, 127)
             )
 
-    def send_data(self, stats):
-        stats.send_dataframe_as_json(pandas.DataFrame(self.simulation_df))
-
-        # save as csv in global data folder:
-        # self.simulation_df.set_index('step').to_csv('../data/simulation_df.csv')
-        # self.simulation_df.to_json('../data/simulation_df.json')
-
     def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None, seed=1.0):
 
         # header

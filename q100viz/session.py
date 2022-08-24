@@ -97,7 +97,7 @@ input_scenarios_variables = ['CO2-prize', 'renovation_cost']
 mode_selector_handles = ['start_input_scenarios',
                          'start_input_households', 'start_simulation']
 COMMUNICATION_RELEVANT_KEYS = [
-    'address', 'CO2', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement', 'energy_source', 'cell']
+    'address', 'CO2', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement', 'energy_source', 'year', 'area', 'cell']
 valid_grid_handles = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage']
 
 # interaction

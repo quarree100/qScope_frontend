@@ -126,12 +126,15 @@ session.buildings['energy_source'] = None
 # Bestand:
 bestand = gis.read_shapefile(
     config['GEBAEUDE_BESTAND_FILE'], columns={
-        'Kataster_C': 'string',
-        'Kataster_S': 'string',
-        'Kataster_H': 'string',
-        'Kataster13': 'float',
-        'Kataster15': 'float',
-        'Kataster_E': 'string'}).set_index('Kataster_C')
+        'Kataster_C': 'string',  # Code
+        'Kataster_S': 'string',  # Straße
+        'Kataster_H': 'string',  # Hausnummer
+        'Kataster_B': 'float',  # Baujahr
+        'Kataster_6': 'float',  # Nettogrundfläche
+        'Kataster13': 'float',  # spez. Wärmeverbrauch
+        'Kataster15': 'float',  # spez. Stromverbrauch
+        'Kataster_E': 'string'  # Energieträger
+        }).set_index('Kataster_C')
 
 bestand.index.names = ['id']
 
@@ -139,6 +142,13 @@ bestand['address'] = bestand['Kataster_S'] + ' ' + bestand['Kataster_H']
 bestand = bestand.drop('Kataster_S', 1)
 bestand = bestand.drop('Kataster_H', 1)
 bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source'})
+
+bestand['area'] = bestand['Kataster_6'].fillna(0).to_numpy()
+bestand = bestand.drop('Kataster_6', 1)
+
+bestand['year'] = bestand['Kataster_B']
+bestand['year'] = bestand['year'].fillna(0).to_numpy().astype(int)
+bestand = bestand.drop('Kataster_B', 1)
 
 # Neubau:
 neubau = gis.read_shapefile(
@@ -198,6 +208,8 @@ for idx, row in buildings.iterrows():
         if this_dist < shortest_dist:
             shortest_dist = this_dist
             buildings.at[idx, 'target_point'] = interpol
+
+session.print_full_df(buildings)
 
 ################### mask viewport with black surface ##################
 mask_points = [[0, 0], [100, 0], [100, 86], [0, 86], [0, -50],

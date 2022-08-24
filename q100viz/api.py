@@ -5,6 +5,7 @@ import socketio
 import q100viz.session as session
 import datetime
 
+
 class API:
     def __init__(self, socket_addr):
         # set up Socket.IO client to talk to stats viz
@@ -21,7 +22,8 @@ class API:
 
     def send_message(self, msg):
         if msg != self.previous_message:
-            session.print_verbose(datetime.datetime.now().strftime(" %H:%M:%S ") + "sending data:\n" + str(msg))
+            session.print_verbose(datetime.datetime.now().strftime(
+                " %H:%M:%S ") + "sending data:\n" + str(msg))
             try:
                 self.io.emit('message', msg)
                 self.previous_message = msg
@@ -29,7 +31,8 @@ class API:
                 pass
 
     def send_max_values(self, max_values, min_values):
-        self.send_message("init\n" + "\n".join(map(str, max_values + min_values)))
+        self.send_message(
+            "init\n" + "\n".join(map(str, max_values + min_values)))
 
     def send_dataframe_as_json(self, df):
         data = json.loads(export_json(df, None))
@@ -74,8 +77,10 @@ class API:
 
         for group in session.buildings_groups:
             # aggregated data:
-            connections_sum = group.groupby(by='cell')['connection_to_heat_grid'].sum()
-            data = json.loads(export_json(connections_sum.rename('connections', inplace=True), None))
+            connections_sum = group.groupby(
+                by='cell')['connection_to_heat_grid'].sum()
+            data = json.loads(export_json(
+                connections_sum.rename('connections', inplace=True), None))
 
             group_data = {}
             if len(data) > 0:
@@ -86,13 +91,15 @@ class API:
 
                 # get all buildings with similar stats
                 buildings_cluster = make_clusters(group)
-                group_data['clusters'] = json.loads(export_json(buildings_cluster))  # make JSON serializable object from GeoDataFrame
+                # make JSON serializable object from GeoDataFrame
+                group_data['clusters'] = json.loads(
+                    export_json(buildings_cluster))
                 message['group_{0}'.format(str(i))] = group_data
             else:  # create empty elements for empty groups (infoscreen reset)
                 message['group_{0}'.format(str(i))] = ['']
 
             wrapper = {
-                'buildings_groups' : message
+                'buildings_groups': message
             }
 
             i += 1
@@ -106,12 +113,15 @@ class API:
             result = data[0]
             for key, value in env.items():
                 result[key] = value
-            clusterData = json.loads(export_json(df[["address","CO2","connection_to_heat_grid", "refurbished", "environmental_engagement"]], None))
+            clusterData = json.loads(export_json(
+                df[["address", "CO2", "connection_to_heat_grid", "refurbished", "environmental_engagement"]], None))
             result["clusters"] = clusterData
             self.send_message(json.dumps(result))
 
     def send_dataframe(self, dfs):
-        self.send_message(json.dumps([json.loads(export_json(df, None)) for df in dfs]))
+        self.send_message(json.dumps(
+            [json.loads(export_json(df, None)) for df in dfs]))
+
 
 def append_csv(file, df, cols):
     """Open data from CSV and join them with a GeoDataFrame based on osm_id."""
@@ -119,20 +129,34 @@ def append_csv(file, df, cols):
         file, usecols=['osm_id', *cols.keys()], dtype=cols, error_bad_lines=False, delimiter=';').set_index('osm_id')
     return df.join(values, on='osm_id')
 
+
 def make_clusters(group):
     '''make groups from one (!!) selected building. always only returns a cluster of the first building in group!'''
-    return session.buildings[
-            session.buildings['energy_source'] == group.loc[
-                group.index[0], 'energy_source']]
+    cluster = session.buildings.loc[(
+        (session.buildings['energy_source'] == group.loc[
+            group.index[0], 'energy_source'])
+        &
+        (session.buildings['year'] <= group.loc[group.index[0], 'year'] + 10)
+        &
+        (session.buildings['year'] >= group.loc[group.index[0], 'year'] - 10)
+        &
+        (session.buildings['area'] <= group.loc[group.index[0], 'area'] + 5)
+        &
+        (session.buildings['area'] >= group.loc[group.index[0], 'area'] - 5)
+        )]
+    print("building {0} is linked to {1} other buildings with similar specs".format(group.index[0], len(cluster)))
+    return cluster
+
 
 def export_json(df, outfile=None):
     """Export a dataframe to JSON file. This is necessary to transform GeoDataFrames into a JSON serializable format"""
     return pandas.DataFrame(df).to_json(
         outfile, orient='records', force_ascii=False, default_handler=str)
 
+
 def print_full_df(df):
     with pandas.option_context('display.max_rows', None,
-                        'display.max_columns', None,
-                        'display.precision', 3,
-                        ):
+                               'display.max_columns', None,
+                               'display.precision', 3,
+                               ):
         print(df)

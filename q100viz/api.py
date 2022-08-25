@@ -58,6 +58,10 @@ class API:
             result["clusters"] = clusterData
             self.send_message(json.dumps(result))
 
+    def forward_gama_message(self, msg):
+        msg = msg.replace("'", "\"")
+        self.send_message(json.dumps(json.loads(msg)))
+
     def send_grouped_buildings(self):
 
         bd = session.buildings

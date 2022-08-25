@@ -45,6 +45,8 @@ class SimulationMode:
         session.show_basemap = False
         session.show_polygons = False
 
+        session.api.send_session_env()
+
         # simulation start time
         self.timestamp = str(
             datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))

@@ -66,6 +66,7 @@ clock = pygame.time.Clock()
 # UDP receive
 grid_udp_1 = ('localhost', 5001)
 grid_udp_2 = ('localhost', 5000)
+udp_gama = ('localhost', 8081)
 
 # Set up display
 canvas_size = session.canvas_size
@@ -206,6 +207,13 @@ for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
                                   args=(grid_.read_scanner_data,),
                                   daemon=True)
     udp_thread.start()
+
+# receive and forward GAMA messages during simulation:
+udp_server = udp.UDPServer('localhost', 8081, 4096)
+udp_thread = threading.Thread(target=udp_server.listen,
+                                args=(session.api.forward_gama_message,),
+                                daemon=True)
+udp_thread.start()
 
 handlers = session.handlers
 

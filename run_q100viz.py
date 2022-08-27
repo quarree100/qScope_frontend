@@ -16,11 +16,12 @@ import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
 import q100viz.session as session
+import q100viz.api as api
 from q100viz.interaction.interface import *
 
 ##################### parse command line arguments ####################
 parser = argparse.ArgumentParser()
-parser.add_argument('--random', help="select n random buildings", type=int)
+parser.add_argument('--random', help="select n random buildings", type=int, default=0)
 parser.add_argument('--verbose', '-v', help="start in verbose mode", action='store_true')
 parser.add_argument(
     '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_NUM_STEPS'])
@@ -151,16 +152,16 @@ bestand['year'] = bestand['year'].fillna(0).to_numpy().astype(int)
 bestand = bestand.drop('Kataster_B', 1)
 
 # Neubau:
-neubau = gis.read_shapefile(
-    config['GEBAEUDE_NEUBAU_FILE'], columns={
-        'Kataster_C': 'string',
-        'Kataster_S': 'string',
-        'Kataster13': 'float',
-        'Kataster15': 'float'}).set_index('Kataster_C')
+# neubau = gis.read_shapefile(
+#     config['GEBAEUDE_NEUBAU_FILE'], columns={
+#         'Kataster_C': 'string',
+#         'Kataster_S': 'string',
+#         'Kataster13': 'float',
+#         'Kataster15': 'float'}).set_index('Kataster_C')
 
-neubau.index.names = ['id']
+# neubau.index.names = ['id']
 
-neubau = neubau.rename(columns={'Kataster_S': 'address', 'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption'})
+# neubau = neubau.rename(columns={'Kataster_S': 'address', 'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption'})
 
 # merge:
 # buildings = session.buildings = pandas.concat([bestand, neubau])
@@ -208,8 +209,6 @@ for idx, row in buildings.iterrows():
         if this_dist < shortest_dist:
             shortest_dist = this_dist
             buildings.at[idx, 'target_point'] = interpol
-
-session.print_full_df(buildings)
 
 ################### mask viewport with black surface ##################
 mask_points = [[0, 0], [100, 0], [100, 86], [0, 86], [0, -50],

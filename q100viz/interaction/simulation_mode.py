@@ -200,7 +200,7 @@ class SimulationMode:
 
             dataview_wrapper[i] = images_and_data
         dataview_wrapper = {
-            'data_view_individual_data': [dataview_wrapper]
+            'data_view_neighborhood_data': [dataview_wrapper]
         }
 
         df = pandas.DataFrame(data=dataview_wrapper)

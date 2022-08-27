@@ -62,6 +62,7 @@ class API:
             self.send_message(json.dumps(result))
 
     def send_grouped_buildings(self):
+        '''compose a json struct for selected buildings if each user can handle multiple buildings'''
 
         bd = session.buildings
 
@@ -91,6 +92,15 @@ class API:
 
                 # get all buildings with similar stats
                 buildings_cluster = make_clusters(group)
+                # # get average building from this:
+                # average_building = pandas.DataFrame()
+                # for key in ['CO2', 'spec_heat_consumption', 'spec_power_consumption']:
+                #     average_building[key] = [buildings_cluster[key].mean()]
+
+                # group[0].update()
+                # group_data['average_building'] = json.loads(export_json(average_building))
+
+                # print(average_building)
                 # make JSON serializable object from GeoDataFrame
                 group_data['clusters'] = json.loads(
                     export_json(buildings_cluster))
@@ -136,13 +146,13 @@ def make_clusters(group):
         (session.buildings['energy_source'] == group.loc[
             group.index[0], 'energy_source'])
         &
-        (session.buildings['year'] <= group.loc[group.index[0], 'year'] + 10)
+        (session.buildings['spec_heat_consumption'] >= session.buildings.loc[session.buildings.index[0], 'spec_heat_consumption'] - session.buildings['spec_heat_consumption'].std()/2)
         &
-        (session.buildings['year'] >= group.loc[group.index[0], 'year'] - 10)
+        (session.buildings['spec_heat_consumption'] <= session.buildings.loc[session.buildings.index[0], 'spec_heat_consumption'] + session.buildings['spec_heat_consumption'].std()/2)
         &
-        (session.buildings['area'] <= group.loc[group.index[0], 'area'] + 5)
+        (session.buildings['spec_power_consumption'] >= session.buildings.loc[session.buildings.index[0], 'spec_power_consumption'] - session.buildings['spec_power_consumption'].std()/2)
         &
-        (session.buildings['area'] >= group.loc[group.index[0], 'area'] - 5)
+        (session.buildings['spec_power_consumption'] <= session.buildings.loc[session.buildings.index[0], 'spec_power_consumption'] + session.buildings['spec_power_consumption'].std()/2)
         )]
     print("building {0} is linked to {1} other buildings with similar specs".format(group.index[0], len(cluster)))
     return cluster

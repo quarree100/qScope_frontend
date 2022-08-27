@@ -11,15 +11,20 @@ import pandas
 
 print(os.getcwd())
 
+global_figsize = (9,7)  # size of graph windows in inches (width, height)
+
 def main():
     '''choose which of the plots to display'''
-    # plot_energy_prices_scenario_sorted()
-    # plot_energy_prices_separated()
-    # plot_carbon_prices()
-    # plot_carbon_prices_separated()
+    plot_energy_prices_scenario_sorted()
+    plot_energy_prices_separated()
+    plot_carbon_prices()
+    plot_carbon_prices_separated()
     plot_q100_prices()
 
 ######################### carbon prices ###############################
+def grams_to_tons(val):
+    return val * 1000000
+
 def plot_carbon_prices():
     '''display carbon price scenarios in a single line plot'''
 
@@ -30,8 +35,9 @@ def plot_carbon_prices():
     plt.style.use('default')
 
     df = pandas.read_csv(file).set_index('year')
+    df = df.apply(grams_to_tons)
 
-    plt.figure("CO2-Preis")
+    plt.figure("CO2-Preis", figsize=global_figsize)
     for col in df.columns:
         df.plot(
             kind='line',
@@ -39,7 +45,7 @@ def plot_carbon_prices():
             ax=plt.gca())
 
     plt.title("CO2-Preis")
-    plt.ylabel("[€/g]")
+    plt.ylabel("[€/t]")
     plt.xlabel("Jahr")
     plt.show()
 
@@ -54,10 +60,11 @@ def plot_carbon_prices_separated():
     file = "../data/includes/csv-data_technical/carbon-prices.csv"
 
     df = pandas.read_csv(file).set_index('year')
+    df = df.apply(grams_to_tons)
 
     for col in df.columns:
 
-        plt.figure("CO2-Preis {0}".format(col))
+        plt.figure("CO2-Preis {0}".format(col), figsize=global_figsize)
         df.plot(
             kind='area',
             y=col,
@@ -66,9 +73,9 @@ def plot_carbon_prices_separated():
         )
 
         plt.gca().get_legend().remove()
-        plt.gca().set_ylim((0, 0.001))
+        plt.gca().set_ylim((0, 1000))
 
-        plt.ylabel("[€/g]")
+        plt.ylabel("[€/t]")
         plt.title("CO2-Preis {0}".format(col))
 
     plt.show()
@@ -87,7 +94,7 @@ def plot_energy_prices_type_sorted():
     df = pandas.read_csv(file)
     print(df)
 
-    fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True)
+    fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True, figsize=global_figsize)
     ax1.plot(df['year'], df['power_prices_scenario_old'],
              df['year'], df['power_prices_scenario_2021'],
              df['year'], df['power_prices_scenario_2022'])
@@ -103,7 +110,7 @@ def plot_energy_prices_type_sorted():
     ax3.set_title('oil')
 
     for ax in [ax1, ax2, ax3]:
-        ax.legend(['scenario_old', 'scenario_2021', 'scenario_2022'])
+        ax.legend(['Preisentwicklung bei Projektstart (2018)', 'Preisentwicklung auf Grundlage 2021', 'Preisentwicklung auf Grundlage 2022'])
 
     fig.canvas.set_window_title('Energiepreis (nach Energieträger)')
     ax1.set_ylabel("[ct/kWh]")
@@ -121,7 +128,7 @@ def plot_energy_prices_scenario_sorted():
     df = pandas.read_csv(file)
     print(df)
 
-    fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True)
+    fig, (ax1, ax2, ax3) = plt.subplots(1,3, sharey=True, figsize=global_figsize)
     ax1.plot(df['year'], df['power_prices_scenario_old'],
              df['year'], df['gas_prices_scenario_old'],
              df['year'], df['oil_prices_scenario_old'])
@@ -134,9 +141,9 @@ def plot_energy_prices_scenario_sorted():
 
     ax1.setcolor=['#EAD41E', '#1E6FEA', '#604741']
 
-    ax1.set_title('scenario_old')
-    ax2.set_title('scenario_2021')
-    ax3.set_title('scenario_2022')
+    ax1.set_title('Preisentwicklung bei Projektstart (2018)')
+    ax2.set_title('Preisentwicklung auf Grundlage 2021')
+    ax3.set_title('Preisentwicklung auf Grundlage 2022')
 
     for ax in [ax1, ax2, ax3]:
         ax.legend(['Strom', 'Gas', 'Öl'])
@@ -157,8 +164,8 @@ def plot_energy_prices_separated():
 
     df = pandas.read_csv(file).set_index("year")
 
-    for scenario in ['old', '2021', '2022']:
-        plt.figure("Prices Scenario '{0}'".format(scenario))
+    for idx, scenario in enumerate(['old', '2021', '2022']):
+        plt.figure("Prices Scenario '{0}'".format(scenario), figsize=global_figsize)
 
         df.plot(
             kind='line',
@@ -173,7 +180,7 @@ def plot_energy_prices_separated():
         plt.ylabel("ct/kWh")
         plt.xlabel("Jahr")
         plt.legend(['Strom', 'Gas', 'Öl'])
-        plt.title("Energiekosten Szenario '{0}'".format(scenario))
+        plt.title(['Preisentwicklung bei Projektstart (2018)', 'Preisentwicklung auf Grundlage 2021', 'Preisentwicklung auf Grundlage 2022'][idx])
 
     plt.show()
 
@@ -191,7 +198,7 @@ def plot_q100_prices():
     df = pandas.read_csv(file).set_index("year")
 
     ############################## opex: ##############################
-    plt.figure("Q100 Opex")
+    plt.figure("Q100 Opex", figsize=global_figsize)
     for col in ['q100_opex_scenario1-2-3', 'q100_opex_scenario2']:
         df.plot(
             kind='line',
@@ -204,7 +211,7 @@ def plot_q100_prices():
     plt.title("Q100-Wärmeversorgung: Betriebskosten")
 
     ############################## capex: ##############################
-    plt.figure("Q100 Capex")
+    plt.figure("Q100 Capex", figsize=global_figsize)
     df.plot(
         kind='bar',
         y=['q100_capex_scenario1-2', 'q100_capex_scenario2', 'q100_capex_scenario3'],
@@ -216,7 +223,7 @@ def plot_q100_prices():
     plt.title("Q100-Wärmeversorgung: Investitionskosten")
 
     ############################## emissions: ##############################
-    plt.figure("Q100 Emissions")
+    plt.figure("Q100 Emissions", figsize=global_figsize)
     df.plot(
         kind='line',
         y=['q100_emissions_scenario1', 'q100_emissions_scenario2', 'q100_emissions_scenario3', 'q100_emissions_scenario4'],

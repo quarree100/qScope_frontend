@@ -177,7 +177,7 @@ electricity_supply_types = ['green', 'gray', 'mix']
 buildings['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings.values]
 buildings['connection_to_heat_grid'] = buildings['energy_source'].isna().to_numpy()
 buildings['refurbished'] = buildings['connection_to_heat_grid']
-buildings['environmental_engagement'] = [random.random() for row in buildings.values]
+buildings['environmental_engagement'] = [True if random.random() > 0.5 else False for row in buildings.values]
 
 # buildings interaction
 buildings['cell'] = ""
@@ -327,10 +327,10 @@ while True:
         session.gis.draw_linestring_layer(canvas, session.gis.nahwaermenetz, (217, 9, 9), 3)
         session.gis.draw_polygon_layer(canvas, session.gis.waermezentrale, 0, (252, 137, 0))
         session.gis.draw_buildings_connections(session.buildings)  # draw lines to closest heat grid
-        session.gis.draw_polygon_layer(
-            canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'environmental_engagement')  # fill and lerp
-        session.gis.draw_polygon_layer(
-            canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'environmental_engagement')  # stroke simple black
+        session.gis.draw_polygon_layer_bool(
+            canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
+        session.gis.draw_polygon_layer_bool(
+            canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
         session.gis.draw_polygon_layer(
             canvas, buildings[buildings['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
 

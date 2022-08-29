@@ -36,7 +36,40 @@ class GIS:
             points = self.surface.transform(linestring['geometry'].coords)
             pygame.draw.lines(self.surface, pygame.Color(color), False, points, stroke)
 
-    def draw_polygon_layer(self, surface, df, stroke, fill, lerp_target=None, lerp_attr=None):
+
+    def draw_polygon_layer(self, surface, df, stroke, fill):
+        '''draw polygon layer, do not lerp'''
+        try:
+            for polygon in df.to_dict('records'):
+                if fill:
+                    fill_color = pygame.Color(*fill)
+
+                points = self.surface.transform(polygon['geometry'].exterior.coords)
+                pygame.draw.polygon(self.surface, fill_color, points, stroke)
+
+        except Exception as e:
+            session.log += "\n%s" % e
+            print("cannot draw polygon layer: ", e)
+
+    def draw_polygon_layer_bool(self, surface, df, stroke, fill, lerp_target=None, lerp_attr=None):
+        '''draw polygon layer, lerp using bool value'''
+        try:
+            for polygon in df.to_dict('records'):
+                if fill:
+                    fill_color = pygame.Color(*fill)
+
+                    if lerp_target:
+                        fill_color = pygame.Color(lerp_target) if polygon[lerp_attr] else fill_color
+
+                points = self.surface.transform(polygon['geometry'].exterior.coords)
+                pygame.draw.polygon(self.surface, fill_color, points, stroke)
+
+        except Exception as e:
+            session.log += "\n%s" % e
+            print("cannot draw polygon layer: ", e)
+
+    def draw_polygon_layer_float(self, surface, df, stroke, fill, lerp_target=None, lerp_attr=None):
+        '''draw polygon layer and lerp using float'''
         try:
             for polygon in df.to_dict('records'):
                 if fill:
@@ -44,14 +77,14 @@ class GIS:
 
                     if lerp_target:
                         target_color = pygame.Color(lerp_target)
-                        fill_color = fill_color.lerp(target_color, polygon[lerp_attr])
+                        fill_color = fill_color.lerp(target_color, polygon[lerp_attr] / df[lerp_attr].max())
 
                 points = self.surface.transform(polygon['geometry'].exterior.coords)
                 pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
         except Exception as e:
             session.log += "\n%s" % e
-            print(e)
+            print("cannot draw polygon layer: ", e)
 
     def draw_buildings_connections(self, df):
         for row in df.to_dict('records'):

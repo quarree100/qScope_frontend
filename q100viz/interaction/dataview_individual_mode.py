@@ -47,7 +47,9 @@ class DataViewIndividual_Mode():
 
         session.api.send_session_env()
 
-        session.api.send_grouped_buildings()
+        data_view_individual_data = pd.DataFrame(data={
+            "data_view_individual_data" : [session.api.make_buildings_groups_json()]})
+        session.api.send_dataframe_as_json(data_view_individual_data)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:

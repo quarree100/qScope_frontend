@@ -45,7 +45,7 @@ class DataViewTotal_Mode():
         session.grid_1.update_cell_data(session.data_view_grid_1)
         session.grid_2.update_cell_data(session.data_view_grid_2)
 
-        session.api.send_df_with_session_env(None)
+        session.api.send_session_env()
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:

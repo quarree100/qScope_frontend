@@ -61,7 +61,7 @@ class API:
             result["clusters"] = clusterData
             self.send_message(json.dumps(result))
 
-    def send_grouped_buildings(self):
+    def make_buildings_groups_json(self):
         '''compose a json struct for selected buildings if each user can handle multiple buildings'''
 
         bd = session.buildings
@@ -77,34 +77,41 @@ class API:
         message = {}
 
         for group in session.buildings_groups:
+            print("group:", group)
             # aggregated data:
-            connections_sum = group.groupby(
-                by='cell')['connection_to_heat_grid'].sum()
-            data = json.loads(export_json(
-                connections_sum.rename('connections', inplace=True), None))
+            # connections_sum = group.groupby(
+            #     by='cell')['connection_to_heat_grid'].sum()
+            # print("connections_sum:", connections_sum)
+            # data = json.loads(export_json(
+            #     connections_sum.rename('connections', inplace=True), None))
+            # print("data:", data)
 
-            group_data = {}
-            if len(data) > 0:
-                group_data = data[0]
+            group_wrapper = {}
+            if len(group) > 0:
+                # group_data = data[0]
                 user_selected_buildings = json.loads(
                     export_json(group[session.COMMUNICATION_RELEVANT_KEYS], None))
-                group_data['buildings'] = user_selected_buildings
+                group_wrapper['buildings'] = user_selected_buildings
+                print("group_wrapper:", group_wrapper)
 
                 # get all buildings with similar stats
                 buildings_cluster = make_clusters(group)
-                # # get average building from this:
-                # average_building = pandas.DataFrame()
-                # for key in ['CO2', 'spec_heat_consumption', 'spec_power_consumption']:
-                #     average_building[key] = [buildings_cluster[key].mean()]
+                # get average building from this:
+                average_generic_buildings = []
+                for idx, average_building in enumerate(buildings_cluster):
+                    average_building = pandas.DataFrame()
+                    for key in ['spec_heat_consumption', 'spec_power_consumption']:
+                        average_building[key] = [
+                            buildings_cluster[idx][key].mean()]
+                    average_building['address'] = group.loc[group.index[idx],'address']
+                    average_generic_buildings.append(json.loads(export_json(average_building)))
 
-                # group[0].update()
-                # group_data['average_building'] = json.loads(export_json(average_building))
+                group_wrapper['average_generic_buildings'] = average_generic_buildings
 
-                # print(average_building)
                 # make JSON serializable object from GeoDataFrame
                 # group_data['clusters'] = json.loads(
-                #     export_json(buildings_cluster))
-                message['group_{0}'.format(str(i))] = group_data
+                # export_json(buildings_cluster))
+                message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)
                 message['group_{0}'.format(str(i))] = ['']
 
@@ -114,7 +121,7 @@ class API:
 
             i += 1
 
-        self.send_message(json.dumps(wrapper))
+        return wrapper
 
     def send_simplified_dataframe_with_environment_variables(self, df, env):
         sum = df.groupby(by='cell').sum()
@@ -142,19 +149,28 @@ def append_csv(file, df, cols):
 
 def make_clusters(group):
     '''make groups from one (!!) selected building. always only returns a cluster of the first building in group!'''
-    cluster = session.buildings.loc[(
-        (session.buildings['energy_source'] == group.loc[
-            group.index[0], 'energy_source'])
-        &
-        (session.buildings['spec_heat_consumption'] >= session.buildings.loc[session.buildings.index[0], 'spec_heat_consumption'] - session.buildings['spec_heat_consumption'].std()/2)
-        &
-        (session.buildings['spec_heat_consumption'] <= session.buildings.loc[session.buildings.index[0], 'spec_heat_consumption'] + session.buildings['spec_heat_consumption'].std()/2)
-        &
-        (session.buildings['spec_power_consumption'] >= session.buildings.loc[session.buildings.index[0], 'spec_power_consumption'] - session.buildings['spec_power_consumption'].std()/2)
-        &
-        (session.buildings['spec_power_consumption'] <= session.buildings.loc[session.buildings.index[0], 'spec_power_consumption'] + session.buildings['spec_power_consumption'].std()/2)
-        )]
-    print("building {0} is linked to {1} other buildings with similar specs".format(group.index[0], len(cluster)))
+    cluster = []
+    for idx in range(len(group.index)):
+        cluster.append(
+            session.buildings.loc[(
+                # (session.buildings['energy_source'] == group.loc[
+                #     group.index[idx], 'energy_source'])
+                # &
+                (session.buildings['spec_heat_consumption'] >= session.buildings.loc[session.buildings.index[idx],
+                 'spec_heat_consumption'] - session.buildings['spec_heat_consumption'].std()/2)
+                &
+                (session.buildings['spec_heat_consumption'] <= session.buildings.loc[session.buildings.index[idx],
+                 'spec_heat_consumption'] + session.buildings['spec_heat_consumption'].std()/2)
+                &
+                (session.buildings['spec_power_consumption'] >= session.buildings.loc[session.buildings.index[idx],
+                 'spec_power_consumption'] - session.buildings['spec_power_consumption'].std()/2)
+                &
+                (session.buildings['spec_power_consumption'] <= session.buildings.loc[session.buildings.index[idx],
+                 'spec_power_consumption'] + session.buildings['spec_power_consumption'].std()/2)
+            )]
+        )
+        session.print_verbose("building {0} is linked to {1} other buildings with similar specs:\n{2}".format(
+            group.index[idx], len(cluster[idx]), cluster[idx][['spec_heat_consumption', 'spec_power_consumption']].describe()))
     return cluster
 
 

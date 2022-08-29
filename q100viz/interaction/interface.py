@@ -126,7 +126,7 @@ class Slider:
             # if session.active_handler == session.handlers['questionnaire']:
             # else:
             session.api.send_message(json.dumps(session.environment))
-            session.api.send_grouped_buildings()
+            session.api.send_message(session.api.make_buildings_groups_json())
 
             self.previous_value = self.value
 

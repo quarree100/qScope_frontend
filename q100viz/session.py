@@ -64,7 +64,10 @@ grid_2 = None
 buildings = None
 buildings_groups = None
 
-environment = {'mode': 'input_scenarios'}
+environment = {
+    'mode': 'input_scenarios',
+    'scenario_energy_prices' : 2018
+    }
 
 num_of_questions = 5  # TODO: this equals length of csv
 environment['active_scenario_handle'] = 'Ref'
@@ -98,7 +101,7 @@ mode_selector_handles = ['start_input_scenarios',
                          'start_input_households', 'start_simulation']
 COMMUNICATION_RELEVANT_KEYS = [
     'address', 'CO2', 'connection_to_heat_grid', 'refurbished', 'environmental_engagement', 'energy_source', 'year', 'area', 'cell']
-valid_grid_handles = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage']
+VALID_GRID_HANDLES = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage', 'buildings_multiplicator', 'scenario_energy_prices']
 
 # interaction
 seconds_elapsed = 0

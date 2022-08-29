@@ -30,9 +30,9 @@ class Questionnaire_Mode():
         session.grid_1.sliders['slider1'].show_text = False
         session.grid_1.sliders['slider1'].show_controls = False
 
-        session.grid_2.sliders['slider0'].show_text = False
-        session.grid_2.sliders['slider0'].show_controls = False
-        session.grid_2.sliders['slider0'].handle = 'next_question'
+        session.grid_2.sliders['slider2'].show_text = False
+        session.grid_2.sliders['slider2'].show_controls = False
+        session.grid_2.sliders['slider2'].handle = 'next_question'
 
         session.active_handler = session.handlers['questionnaire']
         session.environment['mode'] = self.name
@@ -66,10 +66,10 @@ class Questionnaire_Mode():
         pygame.draw.polygon(session.grid_1.sliders['slider0'].surface, pygame.Color(20,200,55), points_transformed)
 
         # right slider:
-        points = [[25, 120], [25, 100], [50, 100], [50, 120]] if session.grid_2.sliders['slider0'].toggle_question else [[0, 120], [0, 100], [25, 100], [25, 120]]
-        points_transformed = session.grid_2.sliders['slider0'].surface.transform(points)
+        points = [[25, 120], [25, 100], [50, 100], [50, 120]] if session.grid_2.sliders['slider2'].toggle_question else [[0, 120], [0, 100], [25, 100], [25, 120]]
+        points_transformed = session.grid_2.sliders['slider2'].surface.transform(points)
         a = 100 + abs(int(numpy.sin(pygame.time.get_ticks() / 1000) * 105))
-        pygame.draw.polygon(session.grid_2.sliders['slider0'].surface, pygame.Color(230, 249, 255, a), points_transformed)
+        pygame.draw.polygon(session.grid_2.sliders['slider2'].surface, pygame.Color(230, 249, 255, a), points_transformed)
 
 
     def get_next_question(self):

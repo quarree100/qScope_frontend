@@ -102,8 +102,8 @@ class API:
 
                 # print(average_building)
                 # make JSON serializable object from GeoDataFrame
-                group_data['clusters'] = json.loads(
-                    export_json(buildings_cluster))
+                # group_data['clusters'] = json.loads(
+                #     export_json(buildings_cluster))
                 message['group_{0}'.format(str(i))] = group_data
             else:  # create empty elements for empty groups (infoscreen reset)
                 message['group_{0}'.format(str(i))] = ['']

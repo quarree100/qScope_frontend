@@ -207,6 +207,9 @@ class SimulationMode:
         session.api.send_dataframe_as_json(df)
         session.iteration_round = (session.iteration_round + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
 
+        # TODO: wait until GAMA delivers outputs
+        session.handlers['data_view_individual'].activate()
+
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -299,9 +302,6 @@ class SimulationMode:
         # self.open_and_call(command, session.handlers['data_view_individual'].activate())
 
         os.chdir(self.cwd)  # return to previous cwd
-
-        # TODO: wait until GAMA delivers outputs
-        session.handlers['data_view_total'].activate()
 
     def open_and_call(self, popen_args, on_exit):
 

@@ -12,10 +12,11 @@ from q100viz.settings.config import config
 
 ############################ SLIDER ###################################
 class Slider:
-    def __init__(self, canvas_size, grid, coords):
+    def __init__(self, canvas_size, grid, id, coords):
         self.value = 0
         self.previous_value = 0
-        self.id = 0
+        self.group = -1
+        self.id = id  # unique identifier for slider
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
 
@@ -89,16 +90,19 @@ class Slider:
             session.active_handler = session.handlers[handler]
             session.active_handler.activate()  # TODO: add confidence delay!
 
+        elif self.handle == 'scenario_energy_prices':
+            session.environment['scenario_energy_prices'] = ['2018', '2021', '2022'][int(self.value * 2)]
+
         # household-specific:
         if self.handle == 'connection_to_heat_grid':
             session.buildings.loc[((
-                session.buildings.selected == True) & (session.buildings.group == self.id)), 'connection_to_heat_grid'] = self.value > 0.5
+                session.buildings.selected == True) & (session.buildings.group == self.group)), 'connection_to_heat_grid'] = self.value > 0.5
         elif self.handle == 'refurbished':
             session.buildings.loc[(
-                session.buildings.selected == True) & (session.buildings.group == self.id), 'refurbished'] = self.value > 0.5
+                session.buildings.selected == True) & (session.buildings.group == self.group), 'refurbished'] = self.value > 0.5
         elif self.handle == 'environmental_engagement':
             session.buildings.loc[(
-                session.buildings.selected == True)  & (session.buildings.group == self.id), 'environmental_engagement'] = self.value
+                session.buildings.selected == True)  & (session.buildings.group == self.group), 'environmental_engagement'] = self.value > 0.5
 
         # questionnaire:
         elif self.handle == 'answer':
@@ -119,12 +123,20 @@ class Slider:
 
         if self.previous_value is not self.value:
             # TODO: this is a workaround! the upper functions enables questionnaire communication, the latter one does not refresh the buildings status in infoscreen constantly.. --> create better functions in stats!
-            if session.active_handler == session.handlers['questionnaire']:
-                session.api.send_message(json.dumps(session.environment))
-            else:
-                session.api.send_grouped_buildings()
+            # if session.active_handler == session.handlers['questionnaire']:
+            # else:
+            session.api.send_message(json.dumps(session.environment))
+            session.api.send_grouped_buildings()
 
             self.previous_value = self.value
+
+    def update_handle(self, cell_handle, cell_id):
+        if self.show_controls:
+            self.handle = cell_handle
+            self.group = cell_id
+            if self.previous_handle is not self.handle:
+                session.api.send_message(json.dumps({'sliders' : {self.id : self.handle}}))
+                self.previous_handle = self.handle
 
 class MousePosition:
     def __init__(self, canvas_size):

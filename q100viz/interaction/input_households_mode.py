@@ -1,6 +1,6 @@
 ''' Input Households Mode: Interact with building-specific parameters using the map '''
 
-import pandas as pd
+import json
 import pygame
 
 import q100viz.session as session
@@ -74,15 +74,12 @@ class Input_Households:
 
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
-                            if cell.handle in session.valid_grid_handles:
-                                for slider in grid.sliders.values():
-                                    if slider.show_controls:
-                                        slider.handle = cell.handle
-                                        slider.id = cell.id
-                                        if slider.previous_handle is not slider.handle:
-                                            session.print_verbose(
-                                                "slider id: {0}, handle: {1}".format(str(slider.id), str(slider.handle)))
-                                            slider.previous_handle = slider.handle
+                            if cell.handle in session.VALID_GRID_HANDLES:
+                                if grid == session.grid_1:
+                                    slider = grid.sliders['slider0'] if cell.x < (grid.x_size - 1) / 2 else grid.sliders['slider1']
+                                elif grid == session.grid_2:
+                                    slider = grid.sliders['slider2']
+                                slider.update_handle(cell.handle, cell.id)
 
                             elif cell.handle == 'start_input_scenarios':
                                 session.handlers['input_scenarios'].activate()

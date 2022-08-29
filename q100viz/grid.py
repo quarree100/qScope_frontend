@@ -30,7 +30,7 @@ class Grid:
             (cell, self.surface.transform([[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y]]))
             for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
-        self.sliders = {slider_id : Slider(canvas_size, self, sliders[slider_id]) for slider_id in sliders.keys()}
+        self.sliders = {slider_id : Slider(canvas_size, self, slider_id, sliders[slider_id]) for slider_id in sliders.keys()}
 
     def draw(self, show_grid):
 

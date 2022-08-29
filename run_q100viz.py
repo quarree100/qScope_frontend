@@ -1,4 +1,3 @@
-from cmath import inf
 import sys
 import os
 import random
@@ -111,7 +110,7 @@ grid_2 = session.grid_2 = grid.Grid(
         [config['GRID_2_X2'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
         session.viewport, config['GRID_2_SETUP_FILE'],
-        {'slider0' : [[0, 130], [0, 100], [50, 100], [50, 130]]})
+        {'slider2' : [[0, 130], [0, 100], [50, 100], [50, 130]]})
 
 session.show_polygons = False
 session.show_basemap = False
@@ -280,7 +279,6 @@ while True:
                     for key, val in grid.sliders.items():
                         if grid.sliders[key].value is not None:
                             grid.sliders[key].value += 0.1
-                            session.print_verbose("{0}.{1} = {2}". format(grid, key, val.value))
                         else:
                             grid.sliders[key].value = 0.1
                         grid.sliders[key].update()
@@ -289,7 +287,6 @@ while True:
                     for key, val in grid.sliders.items():
                         if grid.sliders[key].value is not None:
                             grid.sliders[key].value = round(slider.value - 0.1, 3)
-                            session.print_verbose("{0}.{1} = {2}". format(grid, key, val.value))
                         else:
                             grid.sliders[key].value = 0.1
                         grid.sliders[key].update()

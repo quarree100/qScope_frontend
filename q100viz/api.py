@@ -73,29 +73,18 @@ class API:
             bd[bd['group'] == 3][session.COMMUNICATION_RELEVANT_KEYS]]
 
         wrapper = ['' for i in range(session.num_of_users)]
-        i = 0
         message = {}
 
-        for group in session.buildings_groups:
-            print("group:", group)
-            # aggregated data:
-            # connections_sum = group.groupby(
-            #     by='cell')['connection_to_heat_grid'].sum()
-            # print("connections_sum:", connections_sum)
-            # data = json.loads(export_json(
-            #     connections_sum.rename('connections', inplace=True), None))
-            # print("data:", data)
-
+        for i, group in enumerate(session.buildings_groups):
             group_wrapper = {}
             if len(group) > 0:
-                # group_data = data[0]
                 user_selected_buildings = json.loads(
                     export_json(group[session.COMMUNICATION_RELEVANT_KEYS], None))
                 group_wrapper['buildings'] = user_selected_buildings
-                print("group_wrapper:", group_wrapper)
 
                 # get all buildings with similar stats
                 buildings_cluster = make_clusters(group)
+
                 # get average building from this:
                 average_generic_buildings = []
                 for idx, average_building in enumerate(buildings_cluster):
@@ -108,9 +97,6 @@ class API:
 
                 group_wrapper['average_generic_buildings'] = average_generic_buildings
 
-                # make JSON serializable object from GeoDataFrame
-                # group_data['clusters'] = json.loads(
-                # export_json(buildings_cluster))
                 message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)
                 message['group_{0}'.format(str(i))] = ['']
@@ -118,8 +104,6 @@ class API:
             wrapper = {
                 'buildings_groups': message
             }
-
-            i += 1
 
         return wrapper
 

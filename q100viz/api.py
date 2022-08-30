@@ -64,9 +64,9 @@ class API:
     def make_buildings_groups_dict(self):
         '''compose a json struct for selected buildings if each user can handle multiple buildings'''
 
-        bd = session.buildings
+        bd = session.buildings_df
 
-        session.buildings_groups = [
+        session.buildings_groups_list = [
             bd[bd['group'] == 0][session.COMMUNICATION_RELEVANT_KEYS],
             bd[bd['group'] == 1][session.COMMUNICATION_RELEVANT_KEYS],
             bd[bd['group'] == 2][session.COMMUNICATION_RELEVANT_KEYS],
@@ -75,12 +75,9 @@ class API:
         wrapper = ['' for i in range(session.num_of_users)]
         message = {}
 
-        for i, group_df in enumerate(session.buildings_groups):
+        for i, group_df in enumerate(session.buildings_groups_list):
             group_wrapper = {}
             if len(group_df) > 0:
-                group_wrapper['emissions_graph'] = session.handlers['data_view_individual'].emissions_graphs[i]
-                group_wrapper['energy_cost_graph'] = session.handlers['data_view_individual'].energy_cost_graphs[i]
-
                 user_selected_buildings = json.loads(
                     export_json(group_df[session.COMMUNICATION_RELEVANT_KEYS], None))
                 group_wrapper['buildings'] = user_selected_buildings
@@ -94,7 +91,7 @@ class API:
                     group_df.at[group_df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
                     group_df.at[group_df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
 
-                session.buildings.update(group_df)
+                session.buildings_df.update(group_df)
 
                 message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)
@@ -135,21 +132,21 @@ def make_clusters(group_selection):
     cluster_list = []
     for idx in range(len(group_selection.index)):
         cluster_list.append(
-            session.buildings.loc[(
+            session.buildings_df.loc[(
                 # (session.buildings['energy_source'] == group.loc[
                 #     group.index[idx], 'energy_source'])
                 # &
-                (session.buildings['spec_heat_consumption'] >= session.buildings.loc[session.buildings.index[idx],
-                 'spec_heat_consumption'] - session.buildings['spec_heat_consumption'].std()/2)
+                (session.buildings_df['spec_heat_consumption'] >= session.buildings_df.loc[session.buildings_df.index[idx],
+                 'spec_heat_consumption'] - session.buildings_df['spec_heat_consumption'].std()/2)
                 &
-                (session.buildings['spec_heat_consumption'] <= session.buildings.loc[session.buildings.index[idx],
-                 'spec_heat_consumption'] + session.buildings['spec_heat_consumption'].std()/2)
+                (session.buildings_df['spec_heat_consumption'] <= session.buildings_df.loc[session.buildings_df.index[idx],
+                 'spec_heat_consumption'] + session.buildings_df['spec_heat_consumption'].std()/2)
                 &
-                (session.buildings['spec_power_consumption'] >= session.buildings.loc[session.buildings.index[idx],
-                 'spec_power_consumption'] - session.buildings['spec_power_consumption'].std()/2)
+                (session.buildings_df['spec_power_consumption'] >= session.buildings_df.loc[session.buildings_df.index[idx],
+                 'spec_power_consumption'] - session.buildings_df['spec_power_consumption'].std()/2)
                 &
-                (session.buildings['spec_power_consumption'] <= session.buildings.loc[session.buildings.index[idx],
-                 'spec_power_consumption'] + session.buildings['spec_power_consumption'].std()/2)
+                (session.buildings_df['spec_power_consumption'] <= session.buildings_df.loc[session.buildings_df.index[idx],
+                 'spec_power_consumption'] + session.buildings_df['spec_power_consumption'].std()/2)
             )]
         )
         session.print_verbose("building {0} is linked to {1} other buildings with similar specs:\n{2}".format(

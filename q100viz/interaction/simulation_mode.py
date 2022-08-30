@@ -1,3 +1,4 @@
+from tokenize import group
 import pandas
 import os
 import subprocess
@@ -6,6 +7,7 @@ from matplotlib import pyplot as plt
 import pygame
 import datetime
 import random
+from q100viz.api import print_full_df
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -28,7 +30,7 @@ class SimulationMode:
         self.output_folders = []         # list of output folders of all game rounds
         self.using_timestamp = True
 
-        self.matplotlib_images_locations = {}
+        self.matplotlib_neighborhood_images = {}
 
         self.xml = None
 
@@ -115,16 +117,16 @@ class SimulationMode:
 
         # debug: select random of 100 buildings:
         if session.debug_num_of_random_buildings > 0:
-            df = session.buildings.sample(n=session.debug_num_of_random_buildings)
+            df = session.buildings_df.sample(n=session.debug_num_of_random_buildings)
             df['selected'] = True
             df['group'] = [random.randint(0, 3) for x in df.values]
             if session.debug_force_connect:
                 df['connected'] = True
-            session.buildings.update(df)
+            session.buildings_df.update(df)
             print("selecting random {0} buildings:".format(session.debug_num_of_random_buildings))
             session.print_full_df(df)
 
-        df = session.buildings[session.buildings.selected]
+        df = session.buildings_df[session.buildings_df.selected]
         df[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
@@ -151,8 +153,23 @@ class SimulationMode:
 
         ####################### export matplotlib graphs #######################
 
+        ##### individual buildings data ####
+
+        # get csv path, load data
+
+        # export image
+
+        # pass path to buildings
+        for group_df in session.buildings_groups_list:
+            for idx in group_df.index:
+                group_df.at[idx, 'emissions_graphs'] = self.current_output_folder + 'emissions/CO2_emissions_{0}.png'.format(idx)
+                # group_df.at[idx, 'energy_cost_graphs'] = [self.current_output_folder + 'emissions/energy_prices_{0}.png'.format(building['id'])]
+                print_full_df(group_df)
+            session.buildings_df.update(group_df)
+
+        ######### neighborhood data ########
         # define titles for images and their location
-        self.matplotlib_images_locations = {
+        self.matplotlib_neighborhood_images = {
             "emissions_neighborhood_accu" : "data/outputs/output_{0}/akkumulierte Gesamtemissionen des Quartiers.png".format(str(self.timestamp)),
             "energy_prices" : "data/outputs/output_{0}/Energiekosten.png".format(str(self.timestamp))
         }
@@ -178,7 +195,7 @@ class SimulationMode:
 
         # send matplotlib created images to infoscreen
         data_wrapper = {
-            'matplotlib_images' : [self.matplotlib_images_locations]
+            'matplotlib_images' : [self.matplotlib_neighborhood_images]
         }
         df = pandas.DataFrame(data=data_wrapper)
         session.api.send_dataframe_as_json(df)
@@ -227,7 +244,7 @@ class SimulationMode:
                         pass
 
         session.api.send_simplified_dataframe_with_environment_variables(
-            session.buildings[session.buildings.selected], session.environment)
+            session.buildings_df[session.buildings_df.selected], session.environment)
 
     def update(self):
 
@@ -239,11 +256,11 @@ class SimulationMode:
             canvas.blit(font.render("Simulation is running...", True, (255, 255, 255)),
                         (session.canvas_size[0]/2, session.canvas_size[1]/2))
 
-        if len(session.buildings[session.buildings.selected]):
+        if len(session.buildings_df[session.buildings_df.selected]):
             # highlight selected buildings
             session.gis.draw_polygon_layer(
                 canvas,
-                session.buildings[session.buildings.selected], 2, (255, 0, 127)
+                session.buildings_df[session.buildings_df.selected], 2, (255, 0, 127)
             )
 
     def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None, seed=1.0):

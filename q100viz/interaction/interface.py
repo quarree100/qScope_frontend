@@ -95,14 +95,14 @@ class Slider:
 
         # household-specific:
         if self.handle == 'connection_to_heat_grid':
-            session.buildings.loc[((
-                session.buildings.selected == True) & (session.buildings.group == self.group)), 'connection_to_heat_grid'] = self.value > 0.5
+            session.buildings_df.loc[((
+                session.buildings_df.selected == True) & (session.buildings_df.group == self.group)), 'connection_to_heat_grid'] = self.value > 0.5
         elif self.handle == 'refurbished':
-            session.buildings.loc[(
-                session.buildings.selected == True) & (session.buildings.group == self.group), 'refurbished'] = self.value > 0.5
+            session.buildings_df.loc[(
+                session.buildings_df.selected == True) & (session.buildings_df.group == self.group), 'refurbished'] = self.value > 0.5
         elif self.handle == 'environmental_engagement':
-            session.buildings.loc[(
-                session.buildings.selected == True)  & (session.buildings.group == self.group), 'environmental_engagement'] = self.value > 0.5
+            session.buildings_df.loc[(
+                session.buildings_df.selected == True)  & (session.buildings_df.group == self.group), 'environmental_engagement'] = self.value > 0.5
 
         # questionnaire:
         elif self.handle == 'answer':

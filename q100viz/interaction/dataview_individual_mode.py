@@ -10,9 +10,6 @@ class DataViewIndividual_Mode():
     def __init__(self):
         self.name = 'data_view_individual'
 
-        self.emissions_graphs = ['path/to/file1.png' for n in range(session.num_of_users)]
-        self.energy_cost_graphs = ['path/to/file2.png' for n in range(session.num_of_users)]
-
         # self.images_active = [
         #     Image("images/piechart.tif"),
         #     Image("images/predator-prey.tif"),
@@ -59,7 +56,7 @@ class DataViewIndividual_Mode():
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
             session.api.send_simplified_dataframe_with_environment_variables(
-                session.buildings[session.buildings.selected],
+                session.buildings_df[session.buildings_df.selected],
                 session.environment)
 
             self.process_grid_change()
@@ -69,7 +66,7 @@ class DataViewIndividual_Mode():
             # session.api.send_dataframe_as_json(connected_buildings)
 
     def process_grid_change(self):
-        session.buildings['selected'] = False
+        session.buildings_df['selected'] = False
         for grid in [session.grid_1, session.grid_2]:
             for cell in grid.grid[:][len(grid.grid) - 1]:
                 if cell.selected and cell.handle == 'start_input_scenarios':

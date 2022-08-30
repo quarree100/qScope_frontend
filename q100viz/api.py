@@ -87,7 +87,7 @@ class API:
 
                 # get all buildings with similar stats
                 buildings_cluster = make_clusters(group_df)
-                # group_wrapper['cluster_size'] = len(buildings_cluster)
+                group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] == True])
 
                 # update building with average data:
                 for j in range(len(group_df)):

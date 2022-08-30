@@ -5,13 +5,13 @@ import pygame
 
 import q100viz.session as session
 from q100viz.settings.config import config
-class Input_Households:
+class Buildings_Interaction:
     def __init__(self):
-        self.name = 'input_households'
+        self.name = 'buildings_interaction'
         self.selection_mode = config['buildings_selection_mode'] # decides how to select intersected buildings. can be 'all' or 'rotation'
 
     def activate(self):
-        session.active_handler = session.handlers['input_households']
+        session.active_handler = session.handlers['buildings_interaction']
         session.environment['mode'] = self.name
 
         # graphics:
@@ -26,8 +26,8 @@ class Input_Households:
                 slider.show_controls = True
 
         # setup mode selectors:
-        session.grid_1.update_cell_data(session.input_households_grid_1)
-        session.grid_2.update_cell_data(session.input_households_grid_2)
+        session.grid_1.update_cell_data(session.buildings_interaction_grid_1)
+        session.grid_2.update_cell_data(session.buildings_interaction_grid_2)
 
         # send data:
         session.api.send_df_with_session_env(None)

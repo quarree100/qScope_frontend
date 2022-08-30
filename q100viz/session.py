@@ -7,8 +7,8 @@ from q100viz.settings.config import config
 import q100viz.api as api
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
-from q100viz.interaction.input_scenarios_mode import Input_Scenarios
-from q100viz.interaction.input_households_mode import Input_Households
+# from q100viz.interaction.input_scenarios_mode import Input_Scenarios
+from q100viz.interaction.interaction_mode import Buildings_Interaction
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.dataview_individual_mode import DataViewIndividual_Mode
 from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode
@@ -88,8 +88,8 @@ scenario_titles = {
     identifier : pd.read_csv('../data/scenario_titles.csv').set_index('scenario').at[identifier, 'name'] for identifier in scenario_data.keys()
 }
 
-input_households_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
-input_households_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
+buildings_interaction_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
+buildings_interaction_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
 input_scenarios_grid_1 = pd.read_csv(config['GRID_1_INPUT_SCENARIOS_FILE'])
 input_scenarios_grid_2 = pd.read_csv(config['GRID_2_INPUT_SCENARIOS_FILE'])
 data_view_grid_1 = pd.read_csv(config['GRID_1_DATA_VIEW_FILE'])
@@ -98,7 +98,7 @@ data_view_grid_2 = pd.read_csv(config['GRID_2_DATA_VIEW_FILE'])
 # list of possible handles
 input_scenarios_variables = ['CO2-prize', 'renovation_cost']
 mode_selector_handles = ['start_input_scenarios',
-                         'start_input_households', 'start_simulation']
+                         'start_buildings_interaction', 'start_simulation']
 COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'cluster_size', 'CO2', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'environmental_engagement', 'environmental_engagement_prior', 'energy_source', 'cell']
 VALID_GRID_HANDLES = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage', 'buildings_multiplicator', 'scenario_energy_prices']
 
@@ -115,13 +115,13 @@ emissions_data_paths = ['' for n in range(num_of_rounds)]
 handlers = {
     'calibrate': CalibrationMode(),
     'questionnaire': Questionnaire_Mode(),
-    'input_scenarios': Input_Scenarios(),
-    'input_households': Input_Households(),
+    # 'input_scenarios': Input_Scenarios(),
+    'buildings_interaction': Buildings_Interaction(),
     'simulation': SimulationMode(),
     'data_view_individual': DataViewIndividual_Mode(),
     'data_view_total': DataViewTotal_Mode()
 }
-active_handler = handlers['input_scenarios']
+active_handler = handlers['buildings_interaction']
 flag_export_canvas = False
 
 ######################## dev tools ##########################

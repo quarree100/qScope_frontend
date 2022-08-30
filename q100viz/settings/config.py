@@ -20,8 +20,8 @@ config = {
 
     # grid setup
     'CSPY_SETTINGS_FILE': '../data/cityscopy.json',
-    'GRID_1_SETUP_FILE': 'q100viz/settings/input_households_grid_1.csv',
-    'GRID_2_SETUP_FILE': 'q100viz/settings/input_households_grid_2.csv',
+    'GRID_1_SETUP_FILE': 'q100viz/settings/buildings_interaction_grid_1.csv',
+    'GRID_2_SETUP_FILE': 'q100viz/settings/buildings_interaction_grid_2.csv',
     'GRID_1_INPUT_SCENARIOS_FILE': 'q100viz/settings/input_scenarios_grid_1.csv',
     'GRID_2_INPUT_SCENARIOS_FILE': 'q100viz/settings/input_scenarios_grid_2.csv',
     'GRID_1_DATA_VIEW_FILE': 'q100viz/settings/data_view_grid_1.csv',

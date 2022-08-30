@@ -266,7 +266,7 @@ while True:
                 session.handlers['input_scenarios'].activate()
             # activate Input Households Mode:
             elif event.key == K_3:
-                session.handlers['input_households'].activate()
+                session.handlers['buildings_interaction'].activate()
             # enter simulation mode:
             elif event.key == K_4:
                 session.environment['active_scenario_handle'] = 'A'

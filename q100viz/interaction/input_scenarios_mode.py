@@ -90,14 +90,14 @@ class Input_Scenarios:
 
                             # create mode selector when a scenario is selected
                             if session.environment['active_scenario_handle'] is not None:
-                                session.grid_2.grid[18][19].handle = 'start_input_households'
+                                session.grid_2.grid[18][19].handle = 'start_buildings_interaction'
                                 session.grid_2.grid[18][19].color = pygame.color.Color(
                                     'purple')
 
                         # set slider handles via selected cell in last row:
                         elif cell.handle is not None:
-                            if cell.handle == 'start_input_households':
-                                session.handlers['input_households'].activate()
+                            if cell.handle == 'start_buildings_interaction':
+                                session.handlers['buildings_interaction'].activate()
 
         session.api.send_session_env()
 

@@ -129,8 +129,8 @@ bestand = gis.read_shapefile(
         'Kataster_C': 'string',  # Code
         'Kataster_S': 'string',  # Straße
         'Kataster_H': 'string',  # Hausnummer
-        'Kataster_B': 'float',  # Baujahr
-        'Kataster_6': 'float',  # Nettogrundfläche
+        # 'Kataster_B': 'float',  # Baujahr
+        # 'Kataster_6': 'float',  # Nettogrundfläche
         'Kataster13': 'float',  # spez. Wärmeverbrauch
         'Kataster15': 'float',  # spez. Stromverbrauch
         'Kataster_E': 'string'  # Energieträger
@@ -143,12 +143,12 @@ bestand = bestand.drop('Kataster_S', 1)
 bestand = bestand.drop('Kataster_H', 1)
 bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source'})
 
-bestand['area'] = bestand['Kataster_6'].fillna(0).to_numpy()
-bestand = bestand.drop('Kataster_6', 1)
+# bestand['area'] = bestand['Kataster_6'].fillna(0).to_numpy()
+# bestand = bestand.drop('Kataster_6', 1)
 
-bestand['year'] = bestand['Kataster_B']
-bestand['year'] = bestand['year'].fillna(0).to_numpy().astype(int)
-bestand = bestand.drop('Kataster_B', 1)
+# bestand['year'] = bestand['Kataster_B']
+# bestand['year'] = bestand['year'].fillna(0).to_numpy().astype(int)
+# bestand = bestand.drop('Kataster_B', 1)
 
 # Neubau:
 # neubau = gis.read_shapefile(
@@ -168,15 +168,21 @@ buildings = session.buildings = bestand
 
 # adjust data
 buildings['spec_heat_consumption'] = buildings['spec_heat_consumption'].fillna(0).to_numpy()
+buildings['avg_spec_heat_consumption'] = 0
 buildings['spec_power_consumption'] = buildings['spec_power_consumption'].fillna(0).to_numpy()
+buildings['avg_spec_power_consumption'] = 0
+buildings['cluster_size'] = 0
 
 # generic data
 buildings['CO2'] = (buildings['spec_heat_consumption'] + buildings['spec_power_consumption']) / 20000
 electricity_supply_types = ['green', 'gray', 'mix']
 buildings['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings.values]
 buildings['connection_to_heat_grid'] = buildings['energy_source'].isna().to_numpy()
+buildings['connection_to_heat_grid_prior'] = buildings['connection_to_heat_grid']
 buildings['refurbished'] = buildings['connection_to_heat_grid']
+buildings['refurbished_prior'] = buildings['refurbished']
 buildings['environmental_engagement'] = [True if random.random() > 0.5 else False for row in buildings.values]
+buildings['environmental_engagement_prior'] = buildings['environmental_engagement']
 
 # buildings interaction
 buildings['cell'] = ""

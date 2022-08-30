@@ -122,11 +122,8 @@ class Slider:
                         self.last_change = session.seconds_elapsed
 
         if self.previous_value is not self.value:
-            # TODO: this is a workaround! the upper functions enables questionnaire communication, the latter one does not refresh the buildings status in infoscreen constantly.. --> create better functions in stats!
-            # if session.active_handler == session.handlers['questionnaire']:
-            # else:
             session.api.send_message(json.dumps(session.environment))
-            session.api.send_message(session.api.make_buildings_groups_json())
+            session.api.send_message(json.dumps(session.api.make_buildings_groups_dict()))
 
             self.previous_value = self.value
 

@@ -61,7 +61,7 @@ class API:
             result["clusters"] = clusterData
             self.send_message(json.dumps(result))
 
-    def make_buildings_groups_json(self):
+    def make_buildings_groups_dict(self):
         '''compose a json struct for selected buildings if each user can handle multiple buildings'''
 
         bd = session.buildings
@@ -75,27 +75,26 @@ class API:
         wrapper = ['' for i in range(session.num_of_users)]
         message = {}
 
-        for i, group in enumerate(session.buildings_groups):
+        for i, group_df in enumerate(session.buildings_groups):
             group_wrapper = {}
-            if len(group) > 0:
+            if len(group_df) > 0:
+                group_wrapper['emissions_graph'] = session.handlers['data_view_individual'].emissions_graphs[i]
+                group_wrapper['energy_cost_graph'] = session.handlers['data_view_individual'].energy_cost_graphs[i]
+
                 user_selected_buildings = json.loads(
-                    export_json(group[session.COMMUNICATION_RELEVANT_KEYS], None))
+                    export_json(group_df[session.COMMUNICATION_RELEVANT_KEYS], None))
                 group_wrapper['buildings'] = user_selected_buildings
 
                 # get all buildings with similar stats
-                buildings_cluster = make_clusters(group)
+                buildings_cluster = make_clusters(group_df)
+                # group_wrapper['cluster_size'] = len(buildings_cluster)
 
-                # get average building from this:
-                average_generic_buildings = []
-                for idx, average_building in enumerate(buildings_cluster):
-                    average_building = pandas.DataFrame()
-                    for key in ['spec_heat_consumption', 'spec_power_consumption']:
-                        average_building[key] = [
-                            buildings_cluster[idx][key].mean()]
-                    average_building['address'] = group.loc[group.index[idx],'address']
-                    average_generic_buildings.append(json.loads(export_json(average_building)))
+                # update building with average data:
+                for j in range(len(group_df)):
+                    group_df.at[group_df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
+                    group_df.at[group_df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
 
-                group_wrapper['average_generic_buildings'] = average_generic_buildings
+                session.buildings.update(group_df)
 
                 message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)
@@ -131,11 +130,11 @@ def append_csv(file, df, cols):
     return df.join(values, on='osm_id')
 
 
-def make_clusters(group):
+def make_clusters(group_selection):
     '''make groups from one (!!) selected building. always only returns a cluster of the first building in group!'''
-    cluster = []
-    for idx in range(len(group.index)):
-        cluster.append(
+    cluster_list = []
+    for idx in range(len(group_selection.index)):
+        cluster_list.append(
             session.buildings.loc[(
                 # (session.buildings['energy_source'] == group.loc[
                 #     group.index[idx], 'energy_source'])
@@ -154,8 +153,8 @@ def make_clusters(group):
             )]
         )
         session.print_verbose("building {0} is linked to {1} other buildings with similar specs:\n{2}".format(
-            group.index[idx], len(cluster[idx]), cluster[idx][['spec_heat_consumption', 'spec_power_consumption']].describe()))
-    return cluster
+            group_selection.index[idx], len(cluster_list[idx]), cluster_list[idx][['spec_heat_consumption', 'spec_power_consumption']].describe()))
+    return cluster_list
 
 
 def export_json(df, outfile=None):

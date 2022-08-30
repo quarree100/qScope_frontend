@@ -10,6 +10,9 @@ class DataViewIndividual_Mode():
     def __init__(self):
         self.name = 'data_view_individual'
 
+        self.emissions_graphs = ['path/to/file1.png' for n in range(session.num_of_users)]
+        self.energy_cost_graphs = ['path/to/file2.png' for n in range(session.num_of_users)]
+
         # self.images_active = [
         #     Image("images/piechart.tif"),
         #     Image("images/predator-prey.tif"),
@@ -48,7 +51,7 @@ class DataViewIndividual_Mode():
         session.api.send_session_env()
 
         data_view_individual_data = pd.DataFrame(data={
-            "data_view_individual_data" : [session.api.make_buildings_groups_json()]})
+            "data_view_individual_data" : [session.api.make_buildings_groups_dict()]})
         session.api.send_dataframe_as_json(data_view_individual_data)
 
     def process_event(self, event):
@@ -61,9 +64,9 @@ class DataViewIndividual_Mode():
 
             self.process_grid_change()
 
-            connected_buildings = pd.DataFrame(data=[
-                {'connected_buildings' : len(session.buildings[session.buildings['connection_to_heat_grid'] == True])}])
-            session.api.send_dataframe_as_json(connected_buildings)
+            # connected_buildings = pd.DataFrame(data=[
+            #     {'connected_buildings' : len(session.buildings[session.buildings['connection_to_heat_grid'] == True])}])
+            # session.api.send_dataframe_as_json(connected_buildings)
 
     def process_grid_change(self):
         session.buildings['selected'] = False

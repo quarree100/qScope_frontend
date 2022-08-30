@@ -87,7 +87,7 @@ class Input_Households:
                             elif cell.handle == 'start_simulation':
                                 session.handlers['simulation'].activate()
 
-        session.api.send_message(json.dumps(session.api.make_buildings_groups_json()))
+        session.api.send_message(json.dumps(session.api.make_buildings_groups_dict()))
 
     def draw(self, canvas):
 

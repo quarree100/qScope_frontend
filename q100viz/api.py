@@ -61,8 +61,11 @@ class API:
             result["clusters"] = clusterData
             self.send_message(json.dumps(result))
 
-    def make_buildings_groups_dict(self):
-        '''compose a json struct for selected buildings if each user can handle multiple buildings'''
+    def forward_gama_message(self, msg):
+        msg = msg.replace("'", "\"")
+        self.send_message(json.dumps(json.loads(msg)))
+
+    def send_grouped_buildings(self):
 
         bd = session.buildings_df
 

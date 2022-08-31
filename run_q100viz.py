@@ -102,7 +102,9 @@ grid_1 = session.grid_1 = grid.Grid(
         [config['GRID_1_X2'], config['GRID_1_Y1']]],
         session.viewport, config['GRID_1_SETUP_FILE'],
         {'slider0' : [[50, 130], [50, 100], [100, 100], [100, 130]],
-        'slider1' : [[0, 130], [0, 100], [50, 100], [50, 130]]})  # TODO: rename sliders
+        'slider1' : [[0, 130], [0, 100], [50, 100], [50, 130]]},
+        {'slider1' : (0, int(nrows/2)),
+        'slider0' : (int(nrows/2), nrows)})
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, ncols, nrows, [
         [config['GRID_2_X1'], config['GRID_2_Y1']],
@@ -110,7 +112,8 @@ grid_2 = session.grid_2 = grid.Grid(
         [config['GRID_2_X2'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
         session.viewport, config['GRID_2_SETUP_FILE'],
-        {'slider2' : [[0, 130], [0, 100], [50, 100], [50, 130]]})
+        {'slider2' : [[0, 130], [0, 100], [50, 100], [50, 130]]},
+        {'slider2' : (0, nrows)})
 
 session.show_polygons = False
 session.show_basemap = False

@@ -100,11 +100,13 @@ class Buildings_Interaction:
                 )
 
             # coloring slider area:
-            for slider in session.grid_1.slider, session.grid_2.slider:
-                slider.draw_area()
+            for slider_dict in session.grid_1.sliders, session.grid_2.sliders:
+                for slider in slider_dict.values():
+                    slider.draw_area()
 
         except Exception as e:
-                session.log += "\n%s" % e
+                print(e)
+                session.log += "\nCannot draw slider: %s" % e
 
 
     def update(self):

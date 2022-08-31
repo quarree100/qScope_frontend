@@ -12,13 +12,14 @@ from q100viz.settings.config import config
 
 ############################ SLIDER ###################################
 class Slider:
-    def __init__(self, canvas_size, grid, id, coords):
+    def __init__(self, canvas_size, grid, id, coords, x_cell_range):
         self.value = 0
         self.previous_value = 0
         self.group = -1
         self.id = id  # unique identifier for slider
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
+        self.x_cell_range = x_cell_range  # {slider : (x_min, x_max)}  # which cells to react to
 
         self.color = pygame.Color(125, 125, 125)  # slider area
 
@@ -47,7 +48,7 @@ class Slider:
         a = 100 + abs(int(numpy.sin(pygame.time.get_ticks() / 1000) * 105))  # alpha value for unselected cells
 
         for cell, rect_points in self.grid.rects_transformed:
-            if cell.handle is not None: # cells have handles if set in csv
+            if cell.handle is not None and cell.x in range(self.x_cell_range[0], self.x_cell_range[1]): # cells have handles if set in csv
                 if self.show_controls:
                     stroke = 4 if cell.selected else 0
 

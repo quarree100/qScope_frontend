@@ -84,17 +84,7 @@ class API:
                 user_selected_buildings = json.loads(
                     export_json(group_df[session.COMMUNICATION_RELEVANT_KEYS], None))
                 group_wrapper['buildings'] = user_selected_buildings
-
-                # get all buildings with similar stats
-                buildings_cluster = make_clusters(group_df)
                 group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] == True])
-
-                # update building with average data:
-                for j in range(len(group_df)):
-                    group_df.at[group_df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
-                    group_df.at[group_df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
-
-                session.buildings_df.update(group_df)
 
                 message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)
@@ -131,29 +121,35 @@ def append_csv(file, df, cols):
 
 
 def make_clusters(group_selection):
-    '''make groups from one (!!) selected building. always only returns a cluster of the first building in group!'''
+    '''make groups of the selected buildings. group by standard deviation of energy consumption'''
     cluster_list = []
     for idx in range(len(group_selection.index)):
-        cluster_list.append(
-            session.buildings_df.loc[(
-                # (session.buildings['energy_source'] == group.loc[
-                #     group.index[idx], 'energy_source'])
-                # &
-                (session.buildings_df['spec_heat_consumption'] >= session.buildings_df.loc[session.buildings_df.index[idx],
-                 'spec_heat_consumption'] - session.buildings_df['spec_heat_consumption'].std()/2)
-                &
-                (session.buildings_df['spec_heat_consumption'] <= session.buildings_df.loc[session.buildings_df.index[idx],
-                 'spec_heat_consumption'] + session.buildings_df['spec_heat_consumption'].std()/2)
-                &
-                (session.buildings_df['spec_power_consumption'] >= session.buildings_df.loc[session.buildings_df.index[idx],
-                 'spec_power_consumption'] - session.buildings_df['spec_power_consumption'].std()/2)
-                &
-                (session.buildings_df['spec_power_consumption'] <= session.buildings_df.loc[session.buildings_df.index[idx],
-                 'spec_power_consumption'] + session.buildings_df['spec_power_consumption'].std()/2)
-            )]
-        )
-        session.print_verbose("building {0} is linked to {1} other buildings with similar specs:\n{2}".format(
-            group_selection.index[idx], len(cluster_list[idx]), cluster_list[idx][['spec_heat_consumption', 'spec_power_consumption']].describe()))
+        interval = 0.5  # standard deviation
+        cluster = pandas.DataFrame()
+        while len(cluster) < 2:  # make sure no building is alone
+            cluster = session.buildings_df.loc[(
+                    (session.buildings_df['energy_source'] == session.buildings_df.loc[
+                        session.buildings_df.index[idx], 'energy_source'])
+                    &
+                    (session.buildings_df['spec_heat_consumption'] >= session.buildings_df.loc[session.buildings_df.index[idx],
+                    'spec_heat_consumption'] - session.buildings_df['spec_heat_consumption'].std() * interval)
+                    &
+                    (session.buildings_df['spec_heat_consumption'] <= session.buildings_df.loc[session.buildings_df.index[idx],
+                    'spec_heat_consumption'] + session.buildings_df['spec_heat_consumption'].std() * interval)
+                    &
+                    (session.buildings_df['spec_power_consumption'] >= session.buildings_df.loc[session.buildings_df.index[idx],
+                    'spec_power_consumption'] - session.buildings_df['spec_power_consumption'].std() * interval)
+                    &
+                    (session.buildings_df['spec_power_consumption'] <= session.buildings_df.loc[session.buildings_df.index[idx],
+                    'spec_power_consumption'] + session.buildings_df['spec_power_consumption'].std() * interval)
+                )]
+            interval += 0.1  # increase range, try again if necessary
+
+        cluster_list.append(cluster)
+        session.print_verbose(
+            "building {0} is in a group of to {1} buildings with similar specs:".format(group_selection.index[idx], len(cluster)))
+        # session.print_verbose(cluster[['spec_heat_consumption', 'spec_power_consumption']].describe())
+
     return cluster_list
 
 

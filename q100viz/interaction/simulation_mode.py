@@ -183,9 +183,10 @@ class SimulationMode:
                 #     x_='current_date'
                 # )
 
-                # pass path to buildings
-                group_df.at[idx, 'emissions_graphs'] = self.current_output_folder + 'emissions/CO2_emissions_{0}.png'.format(idx)
-                # group_df.at[idx, 'energy_cost_graphs'] = [self.current_output_folder + 'emissions/energy_prices_{0}.png'.format(building['id'])]
+                # pass path to buildings in infoscreen-compatible format
+                group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath('data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
+                group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath('data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
+                # group_df.at[idx, 'energy_prices_graphs'] = [self.current_output_folder + 'emissions/energy_prices_{0}.png'.format(building['id'])]
                 print_full_df(group_df)
             session.buildings_df.update(group_df)
 

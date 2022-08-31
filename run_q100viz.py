@@ -176,8 +176,16 @@ buildings_df['avg_spec_heat_consumption'] = 0
 buildings_df['spec_power_consumption'] = buildings_df['spec_power_consumption'].fillna(0).to_numpy()
 buildings_df['avg_spec_power_consumption'] = 0
 buildings_df['cluster_size'] = 0
+
+buildings_cluster = api.make_clusters(buildings_df)
+# update building with average data:
+for j in range(len(buildings_df)):
+    buildings_df.at[buildings_df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
+    buildings_df.at[buildings_df.index[j], 'avg_spec_power_consumption'] = buildings_cluster[j]['spec_power_consumption'].mean()
+    buildings_df.at[buildings_df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
+
 buildings_df['emissions_graphs'] = ''
-buildings_df['energy_cost_graphs'] = ''
+buildings_df['energy_prices_graphs'] = ''
 
 # generic data
 buildings_df['CO2'] = (buildings_df['spec_heat_consumption'] + buildings_df['spec_power_consumption']) / 20000

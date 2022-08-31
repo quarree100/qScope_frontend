@@ -157,11 +157,31 @@ class SimulationMode:
 
         # get csv path, load data
 
-        # export image
-
-        # pass path to buildings
         for group_df in session.buildings_groups_list:
             for idx in group_df.index:
+
+                # export emissions graph:
+                self.export_graphs(
+                    csv_name="/emissions/CO2_emissions_{0}.csv".format(idx),
+                    columns=['building_emissions'],
+                    title_="CO2-Emissionen {0}".format(idx),
+                    output=self.current_output_folder + "/emissions/CO2_emissions_{0}.png".format(idx),
+                    xlabel_="Datum",
+                    ylabel_="ø-Emissionen [gCO2]",
+                    x_='current_date'
+                )
+
+                # export energy cost graph:
+                # self.export_graphs(
+                #     csv_name="/energy_prices/energy_prices_{0}.csv".format(idx),
+                #     columns=['building_emissions'],
+                #     title_="akkumulierte Gesamtemissionen des Quartiers",
+                #     xlabel_="Datum",
+                #     ylabel_="Gesamte Emissionen [gCO2]",
+                #     x_='current_date'
+                # )
+
+                # pass path to buildings
                 group_df.at[idx, 'emissions_graphs'] = self.current_output_folder + 'emissions/CO2_emissions_{0}.png'.format(idx)
                 # group_df.at[idx, 'energy_cost_graphs'] = [self.current_output_folder + 'emissions/energy_prices_{0}.png'.format(building['id'])]
                 print_full_df(group_df)
@@ -333,7 +353,7 @@ class SimulationMode:
         thread.start()
         return thread
 
-    def export_graphs(self, csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None):
+    def export_graphs(self, csv_name, columns, x_, title_="", output=None, xlabel_="", ylabel_="", labels_=None):
         '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
         # read exported results:
@@ -385,7 +405,8 @@ class SimulationMode:
         if session.TEST_MODE == "matplotlib":
             plt.show()
             quit()
-        plt.savefig(self.current_output_folder + "/{0}.png".format(title_))
+        outfile = output if output is not None else self.current_output_folder + "/{0}.png".format(title_)
+        plt.savefig(outfile)
 
     def GAMA_time_to_datetime(self, input):
         dt_object = datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year

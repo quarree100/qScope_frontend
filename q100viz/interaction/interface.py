@@ -47,6 +47,7 @@ class Slider:
         # slider controls → set slider color
         a = 100 + abs(int(numpy.sin(pygame.time.get_ticks() / 1000) * 105))  # alpha value for unselected cells
 
+        self.color = pygame.Color(0, 0, 0, 0)
         for cell, rect_points in self.grid.rects_transformed:
             if cell.handle is not None and cell.x in range(self.x_cell_range[0], self.x_cell_range[1]): # cells have handles if set in csv
                 if self.show_controls:

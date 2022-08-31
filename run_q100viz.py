@@ -26,7 +26,7 @@ parser.add_argument(
     '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_NUM_STEPS'])
 parser.add_argument('--force_connect', help="connect all buildings to Q100",
     action='store_true')
-parser.add_argument('--start_at', help="start at specific game mode", type=str, default='input_scenarios')
+parser.add_argument('--start_at', help="start at specific game mode", type=str, default=session.environment['mode'])
 parser.add_argument('--test', help="pre-set of functions to test different elements...", type=str)
 parser.add_argument('--main_window', help="runs program in main window", action='store_true')
 

@@ -65,7 +65,7 @@ buildings_df = None
 buildings_groups_list = None
 
 environment = {
-    'mode': 'input_scenarios',
+    'mode': 'buildings_interaction',
     'scenario_energy_prices' : 2018
     }
 
@@ -121,7 +121,7 @@ handlers = {
     'data_view_individual': DataViewIndividual_Mode(),
     'data_view_total': DataViewTotal_Mode()
 }
-active_handler = handlers['buildings_interaction']
+active_handler = handlers[environment['mode']]
 flag_export_canvas = False
 
 ######################## dev tools ##########################

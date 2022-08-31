@@ -41,11 +41,10 @@ class SimulationMode:
         session.active_handler = self
 
         # display setup:
-        session.grid_1.sliders['slider0'].show_text = True
-        session.grid_1.sliders['slider0'].show_controls = True
-        for slider in session.grid_2.sliders.values():
-            slider.show_text = False
-            slider.show_controls = False
+        for grid in session.grid_1, session.grid_2:
+            for slider in grid.sliders.values():
+                slider.show_text = False
+                slider.show_controls = False
         session.show_basemap = False
         session.show_polygons = False
 

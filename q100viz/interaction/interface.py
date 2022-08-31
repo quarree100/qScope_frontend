@@ -60,7 +60,7 @@ class Slider:
                     else:
                         cell.color = pygame.Color(cell.color.r, cell.color.g, cell.color.b, a)
 
-                    if self.show_controls: pygame.draw.polygon(self.grid.surface, cell.color, rect_points, stroke)
+                    if self.show_controls: pygame.draw.polygon(self.surface, cell.color, rect_points, stroke)
 
                 # slider control texts:
                 if self.show_text and cell.y == len(self.grid.grid) - 1:
@@ -70,23 +70,28 @@ class Slider:
                     [rect_points[0][0], rect_points[0][1] + 30]
                     )
 
-        font = pygame.font.SysFont('Arial', 18)        
-        current_slider_function = ''
-        if self.handle == 'connection_to_heat_grid':
-            current_slider_function = "Wärmenetzanschluss"
-        elif self.handle == 'refurbished':
-            current_slider_function = "Sanierung"
-        elif self.handle == 'environmental_engagement':
-            current_slider_function = "Energiebewusstsein"
-        elif self.handle == 'game_stage':
-            current_slider_function = "Spielmodus"
-        elif self.handle == 'buildings_multiplicator':
-            current_slider_function = "Skalierung der Entscheidungen"
-        elif self.handle == 'scenario_energy_prices':
-            current_slider_function = "Energiekostenszenario"
+        font = pygame.font.SysFont('Arial', 18)     
+        
+        if self.show_text:   
+            current_slider_function = ''
+            if self.handle == 'connection_to_heat_grid':
+                current_slider_function = "Wärmenetzanschluss"
+            elif self.handle == 'refurbished':
+                current_slider_function = "Sanierung"
+            elif self.handle == 'environmental_engagement':
+                current_slider_function = "Energiebewusstsein"
+            elif self.handle == 'game_stage':
+                current_slider_function = "Spielmodus"
+            elif self.handle == 'buildings_multiplicator':
+                current_slider_function = "Skalierung der Entscheidungen"
+            elif self.handle == 'scenario_energy_prices':
+                current_slider_function = "Energiekostenszenario"
+            else:
+                current_slider_function = "↑↑↑Slider-Funktion auswählen"
 
-        # display human readable slider name:
-        self.surface.blit(font.render(str(current_slider_function), True, (255, 255, 255)), [self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
+
+            # display human readable slider name:
+            self.surface.blit(font.render(str(current_slider_function), True, (255, 255, 255)), [self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
 
         # display slider value:        
         self.surface.blit(font.render(str(self.value), True, (255,255,255)), (self.coords_transformed[3][0] - 35, self.coords_transformed[3][1]-20))

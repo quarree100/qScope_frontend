@@ -87,7 +87,7 @@ class Slider:
 
         # globals:
         if self.handle == 'game_stage':
-            handler = [key for key in session.handlers.keys()][int(self.value * len(session.handlers)) % len(session.handlers)]
+            handler = [key for key in ['buildings_interaction', 'simulation', 'individual_data_view', 'total_data_view']][int(self.value * 4)]
             print(handler)
             session.active_handler = session.handlers[handler]
             session.active_handler.activate()  # TODO: add confidence delay!

@@ -102,8 +102,8 @@ grid_1 = session.grid_1 = grid.Grid(
         [config['GRID_1_X2'], config['GRID_1_Y2']],
         [config['GRID_1_X2'], config['GRID_1_Y1']]],
         session.viewport, config['GRID_1_SETUP_FILE'],
-        {'slider0' : [[0, 130], [0, 100], [50, 100], [50, 130]],
-            'slider1' : [[50, 130], [50, 100], [100, 100], [100, 130]]},
+        {'slider0' : [[0, 115], [0, 100], [50, 100], [50, 115]],
+            'slider1' : [[50, 115], [50, 100], [100, 100], [100, 115]]},
         {'slider0' : (0, int(ncols/2)),
         'slider1' : (int(ncols/2), ncols)})
 grid_2 = session.grid_2 = grid.Grid(
@@ -113,7 +113,7 @@ grid_2 = session.grid_2 = grid.Grid(
         [config['GRID_2_X2'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
         session.viewport, config['GRID_2_SETUP_FILE'],
-        {'slider2' : [[0, 130], [0, 100], [50, 100], [50, 130]]},
+        {'slider2' : [[0, 115], [0, 100], [50, 100], [50, 115]]},
         {'slider2' : (0, ncols)})
 
 session.show_polygons = False
@@ -242,7 +242,7 @@ udp_thread.start()
 
 handlers = session.handlers
 
-mouse_position = MousePosition(canvas_size)
+# mouse_position = MousePosition(canvas_size)
 
 session.active_handler.activate()
 
@@ -275,8 +275,8 @@ while True:
             if event.key == K_1:
                 session.handlers['questionnaire'].activate()
             # activate Input Scenarios Mode:
-            elif event.key == K_2:
-                session.handlers['input_scenarios'].activate()
+            # elif event.key == K_2:
+            #     session.handlers['input_scenarios'].activate()
             # activate Input Households Mode:
             elif event.key == K_3:
                 session.handlers['buildings_interaction'].activate()
@@ -290,7 +290,7 @@ while True:
             # toggle calibration:
             elif event.key == K_c:
                 session.active_handler = handlers[
-                    'calibrate' if session.active_handler != handlers['calibrate'] else 'input_scenarios']
+                    'calibrate' if session.active_handler != handlers['calibrate'] else 'buildings_interaction']
 
             ########## manual slider control for test purposes: #######
             elif event.key == K_PLUS:
@@ -347,12 +347,12 @@ while True:
             canvas, buildings_df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
         session.gis.draw_polygon_layer_bool(
             canvas, buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
-        try:
-            session.gis.draw_polygon_layer(
-                canvas, buildings_df[buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
-        except Exception as e:
-            session.log += "\n%e" % e
-            print("cannot draw polygon layer: ", e)
+        # try:
+        #     session.gis.draw_polygon_layer(
+        #         canvas, buildings_df[buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
+        # except Exception as e:
+        #     session.log += "\n%s" % e
+        #     print("cannot draw polygon layer: ", e)
 
     # draw grid
     grid_1.draw(show_grid)
@@ -401,16 +401,15 @@ while True:
 
     ############ render everything beyond/on top of canvas: ###########
 
+    font = pygame.font.SysFont('Arial', 20)
     # mouse position
-    if session.VERBOSE_MODE:
-        font = pygame.font.SysFont('Arial', 20)
-        mouse_pos = pygame.mouse.get_pos()
-        canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
+    # if session.VERBOSE_MODE:
+        # mouse_pos = pygame.mouse.get_pos()
+        # canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
 
-        for grid in session.grid_1, session.grid_2:
-            for slider in grid.sliders.values():
-                canvas.blit(font.render(str(slider.value), True, (255,255,255)), slider.coords_transformed[3])
-                # canvas.blit(font.render(str(grid_2.sliders.value), True, (255,255,255)), (1150,670))
+    for grid in session.grid_1, session.grid_2:
+        for slider in grid.sliders.values():
+            canvas.blit(font.render(str(slider.value), True, (255,255,255)), (slider.coords_transformed[0][0] + 200, slider.coords_transformed[0][1]-50))
 
     ############################# pygame time #########################
 

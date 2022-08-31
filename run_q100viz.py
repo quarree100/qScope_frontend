@@ -120,8 +120,8 @@ show_nahwaermenetz = True
 display_viewport = True
 
 ##################### Load data #####################
-session.buildings = pandas.DataFrame()
-session.buildings['energy_source'] = None
+session.buildings_df = pandas.DataFrame()
+session.buildings_df['energy_source'] = None
 
 # Bestand:
 bestand = gis.read_shapefile(
@@ -164,36 +164,38 @@ bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kata
 
 # merge:
 # buildings = session.buildings = pandas.concat([bestand, neubau])
-buildings = session.buildings = bestand
+buildings_df = session.buildings_df = bestand
 
 # adjust data
-buildings['spec_heat_consumption'] = buildings['spec_heat_consumption'].fillna(0).to_numpy()
-buildings['avg_spec_heat_consumption'] = 0
-buildings['spec_power_consumption'] = buildings['spec_power_consumption'].fillna(0).to_numpy()
-buildings['avg_spec_power_consumption'] = 0
-buildings['cluster_size'] = 0
+buildings_df['spec_heat_consumption'] = buildings_df['spec_heat_consumption'].fillna(0).to_numpy()
+buildings_df['avg_spec_heat_consumption'] = 0
+buildings_df['spec_power_consumption'] = buildings_df['spec_power_consumption'].fillna(0).to_numpy()
+buildings_df['avg_spec_power_consumption'] = 0
+buildings_df['cluster_size'] = 0
+buildings_df['emissions_graphs'] = ''
+buildings_df['energy_cost_graphs'] = ''
 
 # generic data
-buildings['CO2'] = (buildings['spec_heat_consumption'] + buildings['spec_power_consumption']) / 20000
+buildings_df['CO2'] = (buildings_df['spec_heat_consumption'] + buildings_df['spec_power_consumption']) / 20000
 electricity_supply_types = ['green', 'gray', 'mix']
-buildings['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings.values]
-buildings['connection_to_heat_grid'] = buildings['energy_source'].isna().to_numpy()
-buildings['connection_to_heat_grid_prior'] = buildings['connection_to_heat_grid']
-buildings['refurbished'] = buildings['connection_to_heat_grid']
-buildings['refurbished_prior'] = buildings['refurbished']
-buildings['environmental_engagement'] = [True if random.random() > 0.5 else False for row in buildings.values]
-buildings['environmental_engagement_prior'] = buildings['environmental_engagement']
+buildings_df['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings_df.values]
+buildings_df['connection_to_heat_grid'] = buildings_df['energy_source'].isna().to_numpy()
+buildings_df['connection_to_heat_grid_prior'] = buildings_df['connection_to_heat_grid']
+buildings_df['refurbished'] = buildings_df['connection_to_heat_grid']
+buildings_df['refurbished_prior'] = buildings_df['refurbished']
+buildings_df['environmental_engagement'] = [True if random.random() > 0.5 else False for row in buildings_df.values]
+buildings_df['environmental_engagement_prior'] = buildings_df['environmental_engagement']
 
 # buildings interaction
-buildings['cell'] = ""
-buildings['selected'] = False
-buildings['group'] = -1
+buildings_df['cell'] = ""
+buildings_df['selected'] = False
+buildings_df['group'] = -1
 
 # buildings geometry: find closest heat grid line
 # TODO: move this somewhere else.
-buildings['target_point'] = None
+buildings_df['target_point'] = None
 
-for idx, row in buildings.iterrows():
+for idx, row in buildings_df.iterrows():
     polygon = row['geometry']
     points = session.gis.surface.transform(polygon.exterior.coords)
     pygame.draw.polygon(session.gis.surface, pygame.Color(255,123,222), points)
@@ -213,7 +215,7 @@ for idx, row in buildings.iterrows():
         this_dist = interpol.distance(centroid)
         if this_dist < shortest_dist:
             shortest_dist = this_dist
-            buildings.at[idx, 'target_point'] = interpol
+            buildings_df.at[idx, 'target_point'] = interpol
 
 ################### mask viewport with black surface ##################
 mask_points = [[0, 0], [100, 0], [100, 86], [0, 86], [0, -50],
@@ -329,13 +331,13 @@ while True:
     if session.show_polygons:
         session.gis.draw_linestring_layer(canvas, session.gis.nahwaermenetz, (217, 9, 9), 3)
         session.gis.draw_polygon_layer(canvas, session.gis.waermezentrale, 0, (252, 137, 0))
-        session.gis.draw_buildings_connections(session.buildings)  # draw lines to closest heat grid
+        session.gis.draw_buildings_connections(session.buildings_df)  # draw lines to closest heat grid
         session.gis.draw_polygon_layer_bool(
-            canvas, buildings, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
+            canvas, buildings_df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
         session.gis.draw_polygon_layer_bool(
-            canvas, buildings, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
+            canvas, buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
         session.gis.draw_polygon_layer(
-            canvas, buildings[buildings['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
+            canvas, buildings_df[buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
 
     # draw grid
     grid_1.draw(show_grid)

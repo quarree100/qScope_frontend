@@ -61,8 +61,8 @@ gis = None
 basemap = None
 grid_1 = None
 grid_2 = None
-buildings = None
-buildings_groups = None
+buildings_df = None
+buildings_groups_list = None
 
 environment = {
     'mode': 'input_scenarios',
@@ -99,7 +99,7 @@ data_view_grid_2 = pd.read_csv(config['GRID_2_DATA_VIEW_FILE'])
 input_scenarios_variables = ['CO2-prize', 'renovation_cost']
 mode_selector_handles = ['start_input_scenarios',
                          'start_buildings_interaction', 'start_simulation']
-COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'cluster_size', 'CO2', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'environmental_engagement', 'environmental_engagement_prior', 'energy_source', 'cell']
+COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'cluster_size', 'emissions_graphs', 'energy_cost_graphs', 'CO2', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'environmental_engagement', 'environmental_engagement_prior', 'energy_source', 'cell']
 VALID_GRID_HANDLES = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage', 'buildings_multiplicator', 'scenario_energy_prices']
 
 # interaction

@@ -44,7 +44,7 @@ class Questionnaire_Mode():
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
             session.api.send_simplified_dataframe_with_environment_variables(
-                session.buildings[session.buildings.selected],
+                session.buildings_df[session.buildings_df.selected],
                 session.environment)
 
             self.process_grid_change()

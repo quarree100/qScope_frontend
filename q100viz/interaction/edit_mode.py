@@ -19,31 +19,31 @@ class EditMode:
     def process_event(self, event, config):
         buildings_file = config['SAVED_BUILDINGS_FILE']
 
-        session.buildings.iloc[self.polygon_selector, 7] = True  # mark building as selected
+        session.buildings_df.iloc[self.polygon_selector, 7] = True  # mark building as selected
 
         if event.type == KEYDOWN:
             if event.key == K_PLUS:
-                self.polygon_selector = (self.polygon_selector + 1) % (len(session.buildings))
-                session.buildings.iloc[self.polygon_selector, 7] = True  # mark as selected
-                session.buildings.iloc[self.polygon_selector - 1, 7] = False  # unselect previous
-                print(session.buildings)
+                self.polygon_selector = (self.polygon_selector + 1) % (len(session.buildings_df))
+                session.buildings_df.iloc[self.polygon_selector, 7] = True  # mark as selected
+                session.buildings_df.iloc[self.polygon_selector - 1, 7] = False  # unselect previous
+                print(session.buildings_df)
 
             elif event.key == K_MINUS:
-                self.polygon_selector = (self.polygon_selector - 1) % (len(session.buildings))
-                session.buildings.iloc[self.polygon_selector, 7] = True  # mark as selected
-                session.buildings.iloc[
-                    (self.polygon_selector + 1) % (len(session.buildings)), 7
+                self.polygon_selector = (self.polygon_selector - 1) % (len(session.buildings_df))
+                session.buildings_df.iloc[self.polygon_selector, 7] = True  # mark as selected
+                session.buildings_df.iloc[
+                    (self.polygon_selector + 1) % (len(session.buildings_df)), 7
                 ] = False  # unselect previous
-                if self.polygon_selector == len(session.buildings) - 1:
-                    session.buildings.iloc[0, 7] = False  # unselect first when at going to last
-                print(session.buildings)
+                if self.polygon_selector == len(session.buildings_df) - 1:
+                    session.buildings_df.iloc[0, 7] = False  # unselect first when at going to last
+                print(session.buildings_df)
 
             elif event.key == K_SPACE:
                 self.relevant_polygons.append(
-                    session.buildings.index.values[self.polygon_selector])
+                    session.buildings_df.index.values[self.polygon_selector])
 
             elif event.key in [K_UP, K_DOWN, K_LEFT, K_RIGHT]:
-                polygon = session.buildings.iloc[self.polygon_selector, 0].exterior.coords
+                polygon = session.buildings_df.iloc[self.polygon_selector, 0].exterior.coords
                 points = []
                 for pt in list(polygon):
                     # move all points in geometry towards desired direction:
@@ -57,10 +57,10 @@ class EditMode:
                     elif event.key == K_RIGHT:
                         points.append((point.x + 2, point.y))
 
-                session.buildings.iloc[self.polygon_selector, 0] = shapely.geometry.Polygon(points)
+                session.buildings_df.iloc[self.polygon_selector, 0] = shapely.geometry.Polygon(points)
 
             elif event.key == K_s:
-                session.buildings['geometry'].to_file(buildings_file)
+                session.buildings_df['geometry'].to_file(buildings_file)
                 print('saved buildings.shp to', buildings_file)
                 with open('export/relevant_polygons.txt', "w") as txt_file:
                     for osm_id in self.relevant_polygons:
@@ -70,11 +70,11 @@ class EditMode:
         pass
 
     def draw(self, canvas):
-        if len(session.buildings[session.buildings.selected]):
+        if len(session.buildings_df[session.buildings_df.selected]):
             # highlight selected buildings
             session.gis.draw_polygon_layer(
                 canvas,
-                session.buildings[session.buildings.selected], 3, (255, 255, 255)
+                session.buildings_df[session.buildings_df.selected], 3, (255, 255, 255)
             )
 
         myFont = font.SysFont('Arial', 11, True, False)
@@ -82,7 +82,7 @@ class EditMode:
         # mouse_y = pygame.mouse.get_pos()[1]
         # text = font.render(str(mouse_x)+","+str(mouse_y), True, (255, 255, 255))
         text = myFont.render(
-            str(session.buildings.index.values[self.polygon_selector]), True, (255, 255, 255))
+            str(session.buildings_df.index.values[self.polygon_selector]), True, (255, 255, 255))
         session.viewport.blit(text, (1500, 800))
 
         relevant_polygons_string = ""
@@ -93,7 +93,7 @@ class EditMode:
 
         # display num of buildings:
         text = myFont.render(
-            str(self.polygon_selector % (len(session.buildings) - 1)) + "/" +
-            str(len(session.buildings)),
+            str(self.polygon_selector % (len(session.buildings_df) - 1)) + "/" +
+            str(len(session.buildings_df)),
             True, (255, 255, 255))
         session.viewport.blit(text, (1500, 830))

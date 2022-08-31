@@ -415,10 +415,6 @@ while True:
         # mouse_pos = pygame.mouse.get_pos()
         # canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
 
-    for grid in session.grid_1, session.grid_2:
-        for slider in grid.sliders.values():
-            canvas.blit(font.render(str(slider.value), True, (255,255,255)), (slider.coords_transformed[0][0] + 200, slider.coords_transformed[0][1]-50))
-
     ############################# pygame time #########################
 
     pygame.display.update()

@@ -102,10 +102,10 @@ grid_1 = session.grid_1 = grid.Grid(
         [config['GRID_1_X2'], config['GRID_1_Y2']],
         [config['GRID_1_X2'], config['GRID_1_Y1']]],
         session.viewport, config['GRID_1_SETUP_FILE'],
-        {'slider0' : [[50, 130], [50, 100], [100, 100], [100, 130]],
-        'slider1' : [[0, 130], [0, 100], [50, 100], [50, 130]]},
-        {'slider1' : (0, int(ncols/2)),
-        'slider0' : (int(ncols/2), ncols)})
+        {'slider0' : [[0, 130], [0, 100], [50, 100], [50, 130]],
+            'slider1' : [[50, 130], [50, 100], [100, 100], [100, 130]]},
+        {'slider0' : (0, int(ncols/2)),
+        'slider1' : (int(ncols/2), ncols)})
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, ncols, nrows, [
         [config['GRID_2_X1'], config['GRID_2_Y1']],

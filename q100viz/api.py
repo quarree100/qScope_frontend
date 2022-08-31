@@ -65,7 +65,7 @@ class API:
         msg = msg.replace("'", "\"")
         self.send_message(json.dumps(json.loads(msg)))
 
-    def send_grouped_buildings(self):
+    def make_buildings_groups_dict(self):
 
         bd = session.buildings_df
 

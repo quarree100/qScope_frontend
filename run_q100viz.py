@@ -103,8 +103,8 @@ grid_1 = session.grid_1 = grid.Grid(
         session.viewport, config['GRID_1_SETUP_FILE'],
         {'slider0' : [[50, 130], [50, 100], [100, 100], [100, 130]],
         'slider1' : [[0, 130], [0, 100], [50, 100], [50, 130]]},
-        {'slider1' : (0, int(nrows/2)),
-        'slider0' : (int(nrows/2), nrows)})
+        {'slider1' : (0, int(ncols/2)),
+        'slider0' : (int(ncols/2), ncols)})
 grid_2 = session.grid_2 = grid.Grid(
     canvas_size, ncols, nrows, [
         [config['GRID_2_X1'], config['GRID_2_Y1']],
@@ -113,7 +113,7 @@ grid_2 = session.grid_2 = grid.Grid(
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
         session.viewport, config['GRID_2_SETUP_FILE'],
         {'slider2' : [[0, 130], [0, 100], [50, 100], [50, 130]]},
-        {'slider2' : (0, nrows)})
+        {'slider2' : (0, ncols)})
 
 session.show_polygons = False
 session.show_basemap = False
@@ -339,8 +339,12 @@ while True:
             canvas, buildings_df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
         session.gis.draw_polygon_layer_bool(
             canvas, buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
-        session.gis.draw_polygon_layer(
-            canvas, buildings_df[buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
+        try:
+            session.gis.draw_polygon_layer(
+                canvas, buildings_df[buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
+        except Exception as e:
+            session.log += "\n%e" % e
+            print("cannot draw polygon layer: ", e)
 
     # draw grid
     grid_1.draw(show_grid)

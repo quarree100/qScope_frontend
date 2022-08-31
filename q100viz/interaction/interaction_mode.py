@@ -75,11 +75,9 @@ class Buildings_Interaction:
                         # set slider handles via selected cell in last row:
                         if cell.handle is not None:
                             if cell.handle in session.VALID_GRID_HANDLES:
-                                if grid == session.grid_1:
-                                    slider = grid.sliders['slider0'] if cell.x < (grid.x_size - 1) / 2 else grid.sliders['slider1']
-                                elif grid == session.grid_2:
-                                    slider = grid.sliders['slider2']
-                                slider.update_handle(cell.handle, cell.id)
+                                for slider in grid.sliders.values():
+                                    if cell.x in range(slider.x_cell_range[0], slider.x_cell_range[1]):
+                                        slider.update_handle(cell.handle, cell.id)
 
                             elif cell.handle == 'start_input_scenarios':
                                 session.handlers['input_scenarios'].activate()

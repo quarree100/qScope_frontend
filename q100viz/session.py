@@ -100,7 +100,7 @@ input_scenarios_variables = ['CO2-prize', 'renovation_cost']
 mode_selector_handles = ['start_input_scenarios',
                          'start_buildings_interaction', 'start_simulation']
 COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'CO2', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'environmental_engagement', 'environmental_engagement_prior', 'energy_source', 'cell']
-VALID_GRID_HANDLES = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage', 'buildings_multiplicator', 'scenario_energy_prices']
+VALID_GRID_HANDLES = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage', 'num_connections', 'scenario_energy_prices']
 
 # interaction
 seconds_elapsed = 0

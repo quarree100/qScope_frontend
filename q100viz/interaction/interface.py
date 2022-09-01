@@ -82,7 +82,7 @@ class Slider:
                 current_slider_function = "Energiebewusstsein"
             elif self.handle == 'game_stage':
                 current_slider_function = "Spielmodus"
-            elif self.handle == 'buildings_multiplicator':
+            elif self.handle == 'num_connections':
                 current_slider_function = "Skalierung der Entscheidungen"
             elif self.handle == 'scenario_energy_prices':
                 current_slider_function = "Energiekostenszenario"
@@ -122,6 +122,9 @@ class Slider:
             print(handler)
             session.active_handler = session.handlers[handler]
             session.active_handler.activate()  # TODO: add confidence delay!
+
+        elif self.handle == 'num_connections':
+            session.environment['scenario_num_connections'] = int(self.value * len(session.buildings_df.index))
 
         elif self.handle == 'scenario_energy_prices':
             session.environment['scenario_energy_prices'] = ['2018', '2021', '2022'][int(self.value * 2)]

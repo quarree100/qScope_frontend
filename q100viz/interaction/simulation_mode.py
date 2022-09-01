@@ -218,9 +218,10 @@ class SimulationMode:
 
         # send matplotlib created images to infoscreen
         data_wrapper = {
-            'matplotlib_images' : [self.matplotlib_neighborhood_images]
+            'neighborhood_images' : [self.matplotlib_neighborhood_images]
         }
         df = pandas.DataFrame(data=data_wrapper)
+        session.environment['neighborhood_images'] = data_wrapper
         session.api.send_dataframe_as_json(df)
 
         ############################### csv export #############################
@@ -248,7 +249,7 @@ class SimulationMode:
         session.iteration_round = (session.iteration_round + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
 
         # TODO: wait until GAMA delivers outputs
-        session.handlers['data_view_individual'].activate()
+        session.handlers['individual_data_view'].activate()
 
 
     def process_event(self, event):
@@ -339,7 +340,7 @@ class SimulationMode:
         subprocess.call(command, shell=True)
         print("simulation finished. duration = ",
               datetime.datetime.now() - sim_start)
-        # self.open_and_call(command, session.handlers['data_view_individual'].activate())
+        # self.open_and_call(command, session.handlers['individual_data_view'].activate())
 
         os.chdir(self.cwd)  # return to previous cwd
 

@@ -24,8 +24,10 @@ config = {
     'GRID_2_SETUP_FILE': 'q100viz/settings/buildings_interaction_grid_2.csv',
     'GRID_1_INPUT_SCENARIOS_FILE': 'q100viz/settings/buildings_interaction_grid_1.csv',
     'GRID_2_INPUT_SCENARIOS_FILE': 'q100viz/settings/buildings_interaction_grid_2.csv',
-    'GRID_1_DATA_VIEW_FILE': 'q100viz/settings/data_view_grid_1.csv',
-    'GRID_2_DATA_VIEW_FILE': 'q100viz/settings/data_view_grid_2.csv',
+    'GRID_1_INDIVIDUAL_DATA_VIEW_FILE': 'q100viz/settings/individual_data_view_grid_1.csv',
+    'GRID_2_INDIVIDUAL_DATA_VIEW_FILE': 'q100viz/settings/individual_data_view_grid_2.csv',
+    'GRID_1_TOTAL_DATA_VIEW_FILE': 'q100viz/settings/total_data_view_grid_1.csv',
+    'GRID_2_TOTAL_DATA_VIEW_FILE': 'q100viz/settings/total_data_view_grid_2.csv',
 
     'GRID_2_X1' : 50,
     'GRID_2_X2' : 100,

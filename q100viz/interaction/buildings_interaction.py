@@ -44,7 +44,7 @@ class Buildings_Interaction:
 
         session.buildings_df['selected'] = False  # reset buildings
         session.buildings_df['group'] = -1  # reset group
-        session.buildings_groups_list = [None for i in range(session.num_of_users)] # reset groups
+        # session.buildings_groups_list = [None for i in range(session.num_of_users)] # reset groups
 
         # reset sliders:
         for grid in session.grid_1, session.grid_2:

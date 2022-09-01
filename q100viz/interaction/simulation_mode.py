@@ -159,6 +159,7 @@ class SimulationMode:
         # get csv path, load data
 
         for group_df in session.buildings_groups_list:
+            print(group_df)
             if group_df is not None:
                 for idx in group_df.index:
 
@@ -187,7 +188,6 @@ class SimulationMode:
                     group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath('data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
                     group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath('data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
                     # group_df.at[idx, 'energy_prices_graphs'] = [self.current_output_folder + 'emissions/energy_prices_{0}.png'.format(building['id'])]
-                    print_full_df(group_df)
                 session.buildings_df.update(group_df)
 
         ######### neighborhood data ########

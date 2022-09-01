@@ -36,8 +36,8 @@ class DataViewIndividual_Mode():
         # setup sliders:
         session.grid_1.sliders['slider0'].show_text = False
         session.grid_1.sliders['slider0'].show_controls = False
-        session.grid_1.sliders['slider1'].show_text = True
-        session.grid_1.sliders['slider1'].show_controls = True
+        session.grid_1.sliders['slider1'].show_text = False
+        session.grid_1.sliders['slider1'].show_controls = False
         session.grid_2.sliders['slider2'].show_text = True
         session.grid_2.sliders['slider2'].show_controls = True
 
@@ -69,8 +69,13 @@ class DataViewIndividual_Mode():
         session.buildings_df['selected'] = False
         for grid in [session.grid_1, session.grid_2]:
             for cell in grid.grid[:][len(grid.grid) - 1]:
-                if cell.selected and cell.handle == 'start_input_scenarios':
-                    session.handlers['input_scenarios'].activate()
+                if cell.selected and cell.handle == 'start_buildings_interaction':
+                    session.handlers['buildings_interaction'].activate()
+
+        data_view_individual_data = pd.DataFrame(data={
+            "data_view_individual_data" : [session.api.make_buildings_groups_dict()]})
+        session.api.send_dataframe_as_json(data_view_individual_data)
+
 
     def draw(self, canvas):
         # # display graphs:

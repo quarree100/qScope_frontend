@@ -34,8 +34,8 @@ class DataViewTotal_Mode():
         session.show_basemap = False
 
         # setup sliders:
-        session.grid_1.sliders['slider0'].show_text = True
-        session.grid_1.sliders['slider0'].show_controls = True
+        session.grid_1.sliders['slider0'].show_text = False
+        session.grid_1.sliders['slider0'].show_controls = False
         session.grid_1.sliders['slider1'].show_text = False
         session.grid_1.sliders['slider1'].show_controls = False
         session.grid_2.sliders['slider2'].show_text = True

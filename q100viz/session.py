@@ -8,7 +8,7 @@ import q100viz.api as api
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
 # from q100viz.interaction.input_scenarios_mode import Input_Scenarios
-from q100viz.interaction.interaction_mode import Buildings_Interaction
+from q100viz.interaction.buildings_interaction import Buildings_Interaction
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.dataview_individual_mode import DataViewIndividual_Mode
 from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode

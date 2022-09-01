@@ -101,8 +101,10 @@ class Slider:
     def draw_area(self):
         pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
 
-        pygame.draw.line(self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1]),
-        (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[1][1]), width=3)
+        if self.handle in ['connection_to_heat_grid', 'refurbished']:
+            pygame.draw.line(self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1] + 2),
+            (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[1][1] + 2 ), width=2)
+
 
     def transform(self):
         self.coords_transformed = self.surface.transform(self.coords)

@@ -44,7 +44,7 @@ class Buildings_Interaction:
 
         session.buildings_df['selected'] = False  # reset buildings
         session.buildings_df['group'] = -1  # reset group
-        session.buildings_groups_list = ['' for i in range(session.num_of_users)] # reset groups
+        session.buildings_groups_list = [None for i in range(session.num_of_users)] # reset groups
 
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
@@ -86,6 +86,8 @@ class Buildings_Interaction:
                                 session.handlers['simulation'].activate()
 
         session.api.send_message(json.dumps(session.api.make_buildings_groups_dict()))
+
+        print(session.buildings_groups_list)
 
     def draw(self, canvas):
 

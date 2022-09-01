@@ -355,12 +355,12 @@ while True:
             canvas, buildings_df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
         session.gis.draw_polygon_layer_bool(
             canvas, buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
-        # try:
-        #     session.gis.draw_polygon_layer(
-        #         canvas, buildings_df[buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
-        # except Exception as e:
-        #     session.log += "\n%s" % e
-        #     print("cannot draw polygon layer: ", e)
+        try:
+            session.gis.draw_polygon_layer_bool(
+                canvas, buildings_df[buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
+        except Exception as e:
+            session.log += "\n%s" % e
+            print("cannot draw polygon layer: ", e)
 
     # draw grid
     grid_1.draw(show_grid)

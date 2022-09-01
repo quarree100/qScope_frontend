@@ -70,9 +70,9 @@ class Slider:
                     [rect_points[0][0], rect_points[0][1] + 30]
                     )
 
-        font = pygame.font.SysFont('Arial', 18)     
-        
-        if self.show_text:   
+        font = pygame.font.SysFont('Arial', 18)
+
+        if self.show_text:
             current_slider_function = ''
             if self.handle == 'connection_to_heat_grid':
                 current_slider_function = "Wärmenetzanschluss"
@@ -93,13 +93,16 @@ class Slider:
             # display human readable slider name:
             self.surface.blit(font.render(str(current_slider_function), True, (255, 255, 255)), [self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
 
-        # display slider value:        
+        # display slider value:
         self.surface.blit(font.render(str(self.value), True, (255,255,255)), (self.coords_transformed[3][0] - 35, self.coords_transformed[3][1]-20))
 
         canvas.blit(self.surface, (0,0))
 
     def draw_area(self):
         pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
+
+        pygame.draw.line(self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1]),
+        (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[1][1]), width=3)
 
     def transform(self):
         self.coords_transformed = self.surface.transform(self.coords)

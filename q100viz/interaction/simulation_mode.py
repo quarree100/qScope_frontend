@@ -170,19 +170,21 @@ class SimulationMode:
                         title_="CO2-Emissionen {0}".format(idx),
                         output=self.current_output_folder + "/emissions/CO2_emissions_{0}.png".format(idx),
                         xlabel_="Datum",
-                        ylabel_="ø-Emissionen [gCO2]",
+                        ylabel_="ø-Emissionen [gCO2]???????",
                         x_='current_date'
                     )
 
-                    # export energy cost graph:
-                    # self.export_graphs(
-                    #     csv_name="/energy_prices/energy_prices_{0}.csv".format(idx),
-                    #     columns=['building_emissions'],
-                    #     title_="akkumulierte Gesamtemissionen des Quartiers",
-                    #     xlabel_="Datum",
-                    #     ylabel_="Gesamte Emissionen [gCO2]",
-                    #     x_='current_date'
-                    # )
+                    # export energy prices graph:
+                    self.export_graphs(
+                        csv_name="/energy_prices/energy_prices_{0}.csv".format(idx),
+                        columns=['building_expenses_heat', 'building_expenses_power'],
+                        labels_=['Wärmekosten', 'Stromkosten'],
+                        output=self.current_output_folder + "/energy_prices/energy_prices_{0}.png".format(idx),
+                        title_="Energiekosten",
+                        xlabel_="Datum",
+                        ylabel_="[€/kWh]???????",
+                        x_='current_date'
+                    )
 
                     # pass path to buildings in infoscreen-compatible format
                     group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath('data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))

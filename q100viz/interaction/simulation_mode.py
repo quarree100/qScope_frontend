@@ -219,11 +219,7 @@ class SimulationMode:
         )
 
         # send matplotlib created images to infoscreen
-        data_wrapper = {
-            'neighborhood_images' : [self.matplotlib_neighborhood_images]
-        }
-        df = pandas.DataFrame(data=data_wrapper)
-        session.environment['neighborhood_images'] = data_wrapper
+        session.environment['neighborhood_images'] = self.matplotlib_neighborhood_images
         session.api.send_dataframe_as_json(df)
 
         ############################### csv export #############################

@@ -275,8 +275,8 @@ class SimulationMode:
     def draw(self, canvas):
         if session.VERBOSE_MODE:
             font = pygame.font.SysFont('Arial', 40)
-            canvas.blit(font.render("Simulation is running...", True, (255, 255, 255)),
-                        (session.canvas_size[0]/2, session.canvas_size[1]/2))
+            canvas.blit(font.render("Berechne Energiekosten und Emissionen...", True, (255, 255, 255)),
+                        (session.canvas_size[0]/3, session.canvas_size[1]/2))
 
         if len(session.buildings_df[session.buildings_df.selected]):
             # highlight selected buildings

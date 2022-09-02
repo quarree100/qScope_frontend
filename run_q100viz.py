@@ -230,7 +230,7 @@ for idx, row in buildings_df.iterrows():
             buildings_df.at[idx, 'target_point'] = interpol
 
 ################### mask viewport with black surface ##################
-mask_points = [[0, 0], [100, 0], [100, 82], [0, 82], [0, -50],
+mask_points = [[0, 0], [85.5, 0], [85.5, 82], [0, 82], [0, -50],
                [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
 ################# UDP server for incoming cspy messages ###############
@@ -293,7 +293,7 @@ while True:
                 session.environment['active_scenario_handle'] = 'A'
                 session.handlers['simulation'].activate()
             elif event.key == K_5:
-                session.handlers['data_view_individual'].activate()
+                session.handlers['individual_data_view'].activate()
 
             # toggle calibration:
             elif event.key == K_c:

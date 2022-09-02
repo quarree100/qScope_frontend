@@ -8,7 +8,7 @@ from q100viz.graphics.graphictools import Image
 
 class DataViewIndividual_Mode():
     def __init__(self):
-        self.name = 'data_view_individual'
+        self.name = 'individual_data_view'
 
         # self.images_active = [
         #     Image("images/piechart.tif"),
@@ -38,12 +38,12 @@ class DataViewIndividual_Mode():
         session.grid_1.sliders['slider0'].show_controls = False
         session.grid_1.sliders['slider1'].show_text = False
         session.grid_1.sliders['slider1'].show_controls = False
-        session.grid_2.sliders['slider2'].show_text = True
+        session.grid_2.sliders['slider2'].show_text = False
         session.grid_2.sliders['slider2'].show_controls = True
 
         # setup mode selectors:
-        session.grid_1.update_cell_data(session.data_view_grid_1)
-        session.grid_2.update_cell_data(session.data_view_grid_2)
+        session.grid_1.update_cell_data(session.individual_data_view_grid_1)
+        session.grid_2.update_cell_data(session.individual_data_view_grid_2)
 
         session.api.send_session_env()
 
@@ -68,9 +68,13 @@ class DataViewIndividual_Mode():
     def process_grid_change(self):
         session.buildings_df['selected'] = False
         for grid in [session.grid_1, session.grid_2]:
-            for cell in grid.grid[:][len(grid.grid) - 1]:
-                if cell.selected and cell.handle == 'start_buildings_interaction':
-                    session.handlers['buildings_interaction'].activate()
+            for y, row in enumerate(grid.grid):
+                for x, cell in enumerate(row):
+                    if cell.selected:
+                        if cell.handle == 'start_total_data_view':
+                            session.handlers['total_data_view'].activate()
+                        elif cell.handle == 'start_buildings_interaction':
+                            session.handlers['buildings_interaction'].activate()
 
         data_view_individual_data = pd.DataFrame(data={
             "data_view_individual_data" : [session.api.make_buildings_groups_dict()]})
@@ -85,7 +89,12 @@ class DataViewIndividual_Mode():
         #         (x_displace,
         #         (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 3))
         #     x_displace += session.viewport.dst_points[2][0] / 4
-        pass
+
+        # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
+        font = pygame.font.SysFont('Arial', 18)
+        canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
+        # canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
+        canvas.blit(font.render("Interaktion", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+133][1][0])
 
     def update(self):
         pass

@@ -93,14 +93,15 @@ class Slider:
             # display human readable slider name:
             self.surface.blit(font.render(str(current_slider_function), True, (255, 255, 255)), [self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
 
-        # display slider value:
-        self.surface.blit(font.render(str(self.value), True, (255,255,255)), (self.coords_transformed[3][0] - 35, self.coords_transformed[3][1]-20))
+            # display slider value:
+            self.surface.blit(font.render(str(self.value), True, (255,255,255)), (self.coords_transformed[3][0] - 35, self.coords_transformed[3][1]-20))
 
         canvas.blit(self.surface, (0,0))
 
     def draw_area(self):
         pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
 
+        # draw vertical middle line for some handles:
         if self.handle in ['connection_to_heat_grid', 'refurbished']:
             pygame.draw.line(self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1] + 2),
             (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[1][1] + 2 ), width=2)

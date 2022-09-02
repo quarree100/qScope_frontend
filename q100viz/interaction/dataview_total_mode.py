@@ -8,7 +8,7 @@ from q100viz.graphics.graphictools import Image
 
 class DataViewTotal_Mode():
     def __init__(self):
-        self.name = 'data_view_total'
+        self.name = 'total_data_view'
 
         # self.images_active = [
         #     Image("images/piechart.tif"),
@@ -38,12 +38,12 @@ class DataViewTotal_Mode():
         session.grid_1.sliders['slider0'].show_controls = False
         session.grid_1.sliders['slider1'].show_text = False
         session.grid_1.sliders['slider1'].show_controls = False
-        session.grid_2.sliders['slider2'].show_text = True
+        session.grid_2.sliders['slider2'].show_text = False
         session.grid_2.sliders['slider2'].show_controls = True
 
         # setup mode selectors:
-        session.grid_1.update_cell_data(session.data_view_grid_1)
-        session.grid_2.update_cell_data(session.data_view_grid_2)
+        session.grid_1.update_cell_data(session.total_data_view_grid_1)
+        session.grid_2.update_cell_data(session.total_data_view_grid_2)
 
         session.api.send_session_env()
 
@@ -64,10 +64,15 @@ class DataViewTotal_Mode():
     def process_grid_change(self):
         session.buildings_df['selected'] = False
         for grid in [session.grid_1, session.grid_2]:
-            for cell in grid.grid[:][len(grid.grid) - 1]:
-                if cell.selected and cell.handle == 'start_input_scenarios':
-                    session.handlers['input_scenarios'].activate()
-                    session.iteration_round = (session.iteration_round + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
+            for y, row in enumerate(grid.grid):
+                for x, cell in enumerate(row):
+                    if cell.selected:
+                        if cell.handle == 'start_individual_data_view':
+                            session.handlers['individual_data_view'].activate()
+                        elif cell.handle == 'start_buildings_interaction':
+                            session.handlers['buildings_interaction'].activate()
+
+
 
     def draw(self, canvas):
         # # display graphs:
@@ -77,7 +82,13 @@ class DataViewTotal_Mode():
         #         (x_displace,
         #         (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 3))
         #     x_displace += session.viewport.dst_points[2][0] / 4
-        pass
+
+        # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
+        font = pygame.font.SysFont('Arial', 18)
+        # canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
+        canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
+        # canvas.blit(font.render("Simulation", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])
+        canvas.blit(font.render("Interaktion", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+133][1][0])
 
     def update(self):
         pass

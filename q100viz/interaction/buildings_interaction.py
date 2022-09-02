@@ -78,15 +78,18 @@ class Buildings_Interaction:
                                 session.buildings_df.loc[selection.name,
                                                     'group'] = cell.id  # pass cell ID to building
 
-                        # set slider handles via selected cell in last row:
+                        # set slider handles via selected cell:
                         if cell.handle is not None:
                             if cell.handle in session.VALID_GRID_HANDLES:
                                 for slider in grid.sliders.values():
                                     if cell.x in range(slider.x_cell_range[0], slider.x_cell_range[1]):
                                         slider.update_handle(cell.handle, cell.id)
 
-                            elif cell.handle == 'start_input_scenarios':
-                                session.handlers['input_scenarios'].activate()
+                            elif cell.handle == 'start_individual_data_view':
+                                session.handlers['individual_data_view'].activate()
+
+                            elif cell.handle == 'start_total_data_view':
+                                session.handlers['total_data_view'].activate()
 
                             elif cell.handle == 'start_simulation':
                                 session.handlers['simulation'].activate()
@@ -111,6 +114,12 @@ class Buildings_Interaction:
         except Exception as e:
                 print(e)
                 session.log += "\nCannot draw slider: %s" % e
+
+        # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
+        font = pygame.font.SysFont('Arial', 18)
+        canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
+        canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
+        canvas.blit(font.render("Simulation", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])
 
 
     def update(self):

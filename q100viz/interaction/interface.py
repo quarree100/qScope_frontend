@@ -87,7 +87,7 @@ class Slider:
             elif self.handle == 'scenario_energy_prices':
                 current_slider_function = "Energiekostenszenario"
             else:
-                current_slider_function = "↑↑↑Slider-Funktion auswählen"
+                current_slider_function = "Slider-Funktion auswählen"
 
 
             # display human readable slider name:

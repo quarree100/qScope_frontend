@@ -22,8 +22,6 @@ class SimulationMode:
         # simulation setup
         self.headless_folder = config['GAMA_HEADLESS_FOLDER']
         self.script = self.headless_folder + 'gama-headless.sh'
-        self.model_file = os.path.normpath(
-            os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
         self.current_output_folder = ''  # will be set in activate()
         self.xml_path = ''               # will be set in activate()
         self.final_step = None           # will be set in activate()
@@ -36,6 +34,8 @@ class SimulationMode:
 
     def activate(self):
         self.final_step = config['SIMULATION_NUM_STEPS']
+        self.model_file = os.path.normpath(
+            os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
 
         session.environment['mode'] = self.name
         session.active_handler = self

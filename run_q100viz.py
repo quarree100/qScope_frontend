@@ -29,6 +29,7 @@ parser.add_argument('--force_connect', help="connect all buildings to Q100",
 parser.add_argument('--start_at', help="start at specific game mode", type=str, default=session.environment['mode'])
 parser.add_argument('--test', help="pre-set of functions to test different elements...", type=str)
 parser.add_argument('--main_window', help="runs program in main window", action='store_true')
+parser.add_argument('--research_model', help="use research model instead of q-Scope-interaction model", action='store_true')
 
 args = parser.parse_args()
 
@@ -38,17 +39,20 @@ session.debug_force_connect = args.force_connect
 session.active_handler = session.handlers[args.start_at]
 session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
+config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
 
 print(
 """
 - random {0} buildings will be selected
 - force selected buildings to connect? {1}
 - simulation will run {2} steps
+- using simulation model file {3}
 """\
     .format(
         session.debug_num_of_random_buildings,
         str(session.debug_force_connect),
-        str(config['SIMULATION_NUM_STEPS'])
+        str(config['SIMULATION_NUM_STEPS']),
+        str(config['GAMA_MODEL_FILE'])
     )
 )
 

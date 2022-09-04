@@ -127,6 +127,39 @@ class Slider:
         elif self.handle == 'num_connections':
             session.environment['scenario_num_connections'] = int(self.value * len(session.buildings_df.index))
 
+            # connect additional buildings as set in scenario:
+            if session.environment['scenario_num_connections'] > 0:
+                # reset:
+                if not session.scenario_selected_buildings.empty:
+                    session.scenario_selected_buildings['selected'] = False
+                    session.scenario_selected_buildings['connection_to_heat_grid'] = False
+                    session.buildings_df.update(session.scenario_selected_buildings)
+
+                # sample data:
+                try:
+                    session.scenario_selected_buildings = session.buildings_df.sample(n=session.environment['scenario_num_connections'])
+                except Exception as e:
+                    print("max number of possible samples reached. " + str(e))
+                    session.log += "\n%s" % e
+
+                # drop already selected buildings from list:
+                for buildings_group in session.buildings_groups_list:
+                    for idx in buildings_group.index:
+                        if idx in session.scenario_selected_buildings.index:
+                            session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
+
+                # select and connect sampled buildings:
+                session.scenario_selected_buildings['selected'] = True
+                session.scenario_selected_buildings['connection_to_heat_grid'] = True
+                session.buildings_df.update(session.scenario_selected_buildings)
+                print("selecting random {0} buildings:".format(session.environment['scenario_num_connections']))
+
+            else:  # value is 0: deselect all
+                session.scenario_selected_buildings['selected'] = False
+                session.scenario_selected_buildings['connection_to_heat_grid'] = False
+                session.buildings_df.update(session.scenario_selected_buildings)
+
+
         elif self.handle == 'scenario_energy_prices':
             session.environment['scenario_energy_prices'] = ['2018', '2021', '2022'][int(self.value * 2)]
 

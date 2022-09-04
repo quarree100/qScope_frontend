@@ -132,7 +132,7 @@ class SimulationMode:
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
-        session.gama_iteration_images[session.iteration_round] = [
+        session.gama_iteration_images[session.environment['iteration_round']] = [
             str(os.path.normpath('data/outputs/output_{0}/snapshot/Chartsnull-{1}.png'.format(
                 self.timestamp, str(self.final_step - 1)))),
             str(os.path.normpath('data/outputs/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(
@@ -225,7 +225,7 @@ class SimulationMode:
         ############################### csv export #############################
 
         # compose csv paths for infoscreen to make graphs
-        session.emissions_data_paths[session.iteration_round] = [
+        session.emissions_data_paths[session.environment['iteration_round']] = [
             str(os.path.normpath('data/outputs/output_{0}/emissions/{1}'.format(self.timestamp, file_name))) for file_name in os.listdir('../data/outputs/output_{0}/emissions'.format(str(self.timestamp)))
         ]
 
@@ -244,7 +244,7 @@ class SimulationMode:
 
         df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(df)
-        session.iteration_round = (session.iteration_round + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
+        session.environment['iteration_round'] = (session.environment['iteration_round'] + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
 
         # TODO: wait until GAMA delivers outputs
         session.handlers['individual_data_view'].activate()

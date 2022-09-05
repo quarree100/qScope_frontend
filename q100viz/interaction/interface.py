@@ -169,7 +169,10 @@ class Slider:
             self.handle = cell_handle
             self.group = cell_id
             if self.previous_handle is not self.handle:
-                session.api.send_message(json.dumps({'sliders' : {self.id : self.handle}}))
+                session.api.send_message(json.dumps({'sliders' : {
+                    "id": self.id,
+                    "handle" : self.handle,
+                    "group" : self.group}}))
                 self.previous_handle = self.handle
 
 class MousePosition:

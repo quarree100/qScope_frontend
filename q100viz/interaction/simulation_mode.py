@@ -369,7 +369,7 @@ class SimulationMode:
                 csv_data['current_date'] = csv_data['current_date'].apply(self.GAMA_time_to_datetime)
                 rounds_data.append(csv_data)
             except Exception as e:
-                print(e + "... probably the selected buildings have changed between the rounds")
+                print(e, "... probably the selected buildings have changed between the rounds")
                 session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
         plt.figure(figsize=(16, 9))  # inches

@@ -63,10 +63,12 @@ grid_1 = None
 grid_2 = None
 buildings_df = None
 buildings_groups_list = pd.DataFrame()
+scenario_selected_buildings = pd.DataFrame()
 
 environment = {
     'mode': 'buildings_interaction',
     'scenario_energy_prices' : 2018,
+    'scenario_num_connections' : 0,  # how many more buildings to connect?
     'iteration_round' : 0 # num of q-scope iterations during this workshops
     }
 

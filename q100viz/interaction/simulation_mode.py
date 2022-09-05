@@ -122,13 +122,12 @@ class SimulationMode:
             df['selected'] = True
             df['group'] = [random.randint(0, 3) for x in df.values]
             if session.debug_force_connect:
-                df['connected'] = True
+                df['connection_to_heat_grid'] = True
             session.buildings_df.update(df)
             print("selecting random {0} buildings:".format(session.debug_num_of_random_buildings))
-            session.print_full_df(df)
 
-        df = session.buildings_df[session.buildings_df.selected]
-        df[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
+        selected_buildings = session.buildings_df[session.buildings_df.selected]
+        selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
@@ -219,7 +218,7 @@ class SimulationMode:
 
         # send matplotlib created images to infoscreen
         session.environment['neighborhood_images'] = self.matplotlib_neighborhood_images
-        session.api.send_dataframe_as_json(df)
+        # session.api.send_dataframe_as_json(selected_buildings)
 
         ############################### csv export #############################
 
@@ -241,8 +240,8 @@ class SimulationMode:
             'data_view_neighborhood_data': [dataview_wrapper]
         }
 
-        df = pandas.DataFrame(data=dataview_wrapper)
-        session.api.send_dataframe_as_json(df)
+        data_view_neighborhood_df = pandas.DataFrame(data=dataview_wrapper)
+        session.api.send_dataframe_as_json(data_view_neighborhood_df)
         session.environment['iteration_round'] = (session.environment['iteration_round'] + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
 
         # TODO: wait until GAMA delivers outputs

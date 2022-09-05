@@ -359,6 +359,7 @@ class SimulationMode:
     def export_graphs(self, csv_name, columns, x_, title_="", output=None, xlabel_="", ylabel_="", labels_=None):
         '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
+        plt.rc('font', size=18)
         # read exported results:
         rounds_data = []
 
@@ -397,7 +398,8 @@ class SimulationMode:
                     y=column,
                     label=label_,
                     color=color_,
-                    ax=plt.gca())
+                    ax=plt.gca(),
+                    linewidth=3)
 
                 col_num += 1
 
@@ -406,7 +408,7 @@ class SimulationMode:
         plt.title(title_)
         plt.xlabel(xlabel_)
         plt.ylabel(ylabel_)
-        plt.xticks(rotation=270, fontsize=8)
+        plt.xticks(rotation=270, fontsize=18)
         plt.legend(loc='upper left')
 
         if session.TEST_MODE == "matplotlib":
@@ -416,5 +418,5 @@ class SimulationMode:
         plt.savefig(outfile)
 
     def GAMA_time_to_datetime(self, input):
-        dt_object = datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year
+        dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)
         return(dt_object)

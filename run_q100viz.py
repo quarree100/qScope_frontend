@@ -390,13 +390,13 @@ while True:
     ########################## DATA PROCESSING ########################
 
     # export canvas:
-    if session.flag_export_canvas:
-        # create a cropped output canvas and export:
-        temp = pygame.Surface((1460, 630))
-        temp.blit(session.gis.surface, (0,0))
-        temp = pygame.transform.rotate(temp, 270)
-        pygame.image.save(temp, '../data/canvas.png')
-        session.flag_export_canvas = False
+    # if session.flag_export_canvas:
+    #     # create a cropped output canvas and export:
+    #     temp = pygame.Surface((1460, 630))
+    #     temp.blit(session.gis.surface, (0,0))
+    #     temp = pygame.transform.rotate(temp, 270)
+    #     pygame.image.save(temp, '../data/canvas.png')
+    #     session.flag_export_canvas = False
 
     # slider
     for grid in grid_1, grid_2:

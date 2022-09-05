@@ -167,7 +167,7 @@ class SimulationMode:
                     self.export_graphs(
                         csv_name="/emissions/CO2_emissions_{0}.csv".format(idx),
                         columns=['building_emissions'],
-                        title_="CO2-Emissionen {0}".format(idx),
+                        title_="CO2-Emissionen",
                         output=self.current_output_folder + "/emissions/CO2_emissions_{0}.png".format(idx),
                         xlabel_="Datum",
                         ylabel_="ø-Emissionen [gCO2]???????",
@@ -189,7 +189,6 @@ class SimulationMode:
                     # pass path to buildings in infoscreen-compatible format
                     group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath('data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
                     group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath('data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
-                    # group_df.at[idx, 'energy_prices_graphs'] = [self.current_output_folder + 'emissions/energy_prices_{0}.png'.format(building['id'])]
                 session.buildings_df.update(group_df)
 
         ######### neighborhood data ########
@@ -285,6 +284,7 @@ class SimulationMode:
                 session.buildings_df[session.buildings_df.selected], 2, (255, 0, 127)
             )
 
+    ########################### script: prepare #######################
     def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None, seed=1.0):
 
         # header
@@ -325,6 +325,7 @@ class SimulationMode:
         f.write(xml)
         f.close()
 
+    ########################### script: run ###########################
     def run_script(self, xml_path_):
         # run script
         if not xml_path_:
@@ -355,6 +356,7 @@ class SimulationMode:
         thread.start()
         return thread
 
+    ############################### export graphs #####################
     def export_graphs(self, csv_name, columns, x_, title_="", output=None, xlabel_="", ylabel_="", labels_=None):
         '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
@@ -363,9 +365,13 @@ class SimulationMode:
 
         # looks for all files with specified csv_name:
         for output_folder in self.output_folders:
-            csv_data = (pandas.read_csv(output_folder + csv_name))
-            csv_data['current_date'] = csv_data['current_date'].apply(self.GAMA_time_to_datetime)
-            rounds_data.append(csv_data)
+            try:
+                csv_data = (pandas.read_csv(output_folder + csv_name))
+                csv_data['current_date'] = csv_data['current_date'].apply(self.GAMA_time_to_datetime)
+                rounds_data.append(csv_data)
+            except Exception as e:
+                print(e + "... probably the selected buildings have changed between the rounds")
+                session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
         plt.figure(figsize=(16, 9))  # inches
         it_round = 0

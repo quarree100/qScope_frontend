@@ -83,7 +83,7 @@ class Slider:
             elif self.handle == 'game_stage':
                 current_slider_function = "Spielmodus"
             elif self.handle == 'num_connections':
-                current_slider_function = "Skalierung der Entscheidungen"
+                current_slider_function = "zusätzliche Anschlüsse"
             elif self.handle == 'scenario_energy_prices':
                 current_slider_function = "Energiekostenszenario"
             else:

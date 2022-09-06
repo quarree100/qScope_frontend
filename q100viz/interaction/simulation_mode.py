@@ -153,8 +153,6 @@ class SimulationMode:
 
         ####################### export matplotlib graphs #######################
 
-        self.export_combined_emissions_graph()
-
         ##### individual buildings data ####
 
         # get csv path, load data
@@ -169,7 +167,7 @@ class SimulationMode:
                         columns=['building_emissions'],
                         title_="CO2-Emissionen",
                         output=self.current_output_folder + "/emissions/CO2_emissions_{0}.png".format(idx),
-                        xlabel_="Datum",
+                        xlabel_="Jahr",
                         ylabel_="ø-Emissionen [gCO2]???????",
                         x_='current_date'
                     )
@@ -181,7 +179,7 @@ class SimulationMode:
                         labels_=['Wärmekosten', 'Stromkosten'],
                         output=self.current_output_folder + "/energy_prices/energy_prices_{0}.png".format(idx),
                         title_="Energiekosten",
-                        xlabel_="Datum",
+                        xlabel_="Jahr",
                         ylabel_="[€/kWh]???????",
                         x_='current_date'
                     )
@@ -192,11 +190,16 @@ class SimulationMode:
                 session.buildings_df.update(group_df)
 
         ######### neighborhood data ########
+
+        self.export_combined_emissions_graph()
+        self.export_combined_energy_prices_graph()
+
         # define titles for images and their location
         self.matplotlib_neighborhood_images = {
             "emissions_neighborhood_accu" : "data/outputs/output_{0}/akkumulierte Gesamtemissionen des Quartiers.png".format(str(self.timestamp)),
             "energy_prices" : "data/outputs/output_{0}/Energiekosten.png".format(str(self.timestamp)),
-            "emissions_groups" : "data/outputs/output_{0}/emissions/CO2_emissions_groups.png".format(str(self.timestamp))
+            "emissions_groups" : "data/outputs/output_{0}/emissions/CO2_emissions_groups.png".format(str(self.timestamp)),
+            "energy_prices_groups" : "data/outputs/output_{0}/energy_prices/energy_prices_groups.png".format(str(self.timestamp))
         }
 
         self.export_graphs(
@@ -447,12 +450,49 @@ class SimulationMode:
         # graphics:
         plt.title("Emissionen")
         plt.xlabel("Jahr")
-        plt.ylabel("[kg/kWh]")
+        plt.ylabel(r'$CO_{2}$ [kg/kWh]')
         plt.xticks(rotation=270, fontsize=18)
         plt.legend(labels, loc='upper left')
         # plt.annotate date of connection
 
         plt.savefig(self.current_output_folder + "/emissions/CO2_emissions_groups.png")
+
+    def export_combined_energy_prices_graph(self):
+        '''exports all data for selected group buildings into one graph for total data view'''
+
+        plt.rc('font', size=18)
+
+        # get csv for each building in each group
+        data = []
+        labels = []
+        for group_df in session.buildings_groups_list:
+            if group_df is not None:
+                for idx in group_df.index:
+                    # load from csv:
+                    new_df = pandas.read_csv(self.current_output_folder + "/energy_prices/energy_prices_{0}.csv".format(idx))
+                    new_df['current_date'] = new_df['current_date'].apply(self.GAMA_time_to_datetime)
+                    data.append(new_df)
+
+                    labels.append(group_df.loc[idx, 'address'] + ' - Wärme')  # TODO: add decisions
+                    labels.append(group_df.loc[idx, 'address'] + ' - Strom')  # TODO: add decisions
+
+        # make graph
+        plt.figure(figsize=(16,9))  # inches
+
+        for df in data:
+            plt.plot(df['current_date'], df['building_expenses_heat'])
+            plt.plot(df['current_date'], df['building_expenses_power'])
+
+        # graphics:
+        # TODO: specify colors
+        plt.title("Energiekosten")
+        plt.xlabel("Jahr")
+        plt.ylabel("[ct/kWh]")
+        plt.xticks(rotation=270, fontsize=18)
+        plt.legend(labels, loc='upper left')
+        # plt.annotate date of connection
+
+        plt.savefig(self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
     def GAMA_time_to_datetime(self, input):
         dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)

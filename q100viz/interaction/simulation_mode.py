@@ -448,6 +448,7 @@ class SimulationMode:
         plt.legend(loc='upper left')
         # plt.annotate date of connection
 
+        plt.savefig(self.current_output_folder + "/emissions/CO2_emissions_combined.png")
         # plt.show()
         # quit()
 
@@ -455,5 +456,5 @@ class SimulationMode:
         dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)
         return(dt_object)
 
-    def grams_to_kg(val):
+    def grams_to_kg(self, val):
         return val / 1000

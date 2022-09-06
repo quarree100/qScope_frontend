@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import pandas
 
+from buildings import buildings_df
+
 '''exports all data for selected group buildings into one graph for total data view'''
 
 plt.rc('font', size=18)
@@ -24,12 +26,9 @@ x = data[0]['current_date']
 for df in data:
     plt.plot(df['current_date'], df['building_emissions'])
 
+
+df = buildings_df.sample(n=4)
+
 plt.xticks(rotation=270, fontsize=8)
-# plt.plot(
-#     kind='line',
-#     x='current_date',
-#     columns=[df['buildings_emissions'] for df in data],
-#     ax=plt.gca(),
-#     linewidth=3
-# )
+plt.legend(df['address'], loc="upper right")
 plt.show()

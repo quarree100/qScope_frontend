@@ -195,7 +195,8 @@ class SimulationMode:
         # define titles for images and their location
         self.matplotlib_neighborhood_images = {
             "emissions_neighborhood_accu" : "data/outputs/output_{0}/akkumulierte Gesamtemissionen des Quartiers.png".format(str(self.timestamp)),
-            "energy_prices" : "data/outputs/output_{0}/Energiekosten.png".format(str(self.timestamp))
+            "energy_prices" : "data/outputs/output_{0}/Energiekosten.png".format(str(self.timestamp)),
+            "emissions_groups" : "data/outputs/output_{0}/emissions/CO2_emissions_groups.png".format(str(self.timestamp))
         }
 
         self.export_graphs(
@@ -425,6 +426,7 @@ class SimulationMode:
 
         # get csv for each building in each group
         data = []
+        labels = []
         for group_df in session.buildings_groups_list:
             if group_df is not None:
                 for idx in group_df.index:
@@ -433,6 +435,8 @@ class SimulationMode:
                     new_df['current_date'] = new_df['current_date'].apply(self.GAMA_time_to_datetime)
                     new_df['building_emissions'] = new_df['building_emissions'].apply(self.grams_to_kg)
                     data.append(new_df)
+
+                    labels.append(group_df.loc[idx, 'address'])  # TODO: add decisions
 
         # make graph
         plt.figure(figsize=(16,9))  # inches
@@ -445,12 +449,10 @@ class SimulationMode:
         plt.xlabel("Jahr")
         plt.ylabel("[kg/kWh]")
         plt.xticks(rotation=270, fontsize=18)
-        plt.legend(loc='upper left')
+        plt.legend(labels, loc='upper left')
         # plt.annotate date of connection
 
-        plt.savefig(self.current_output_folder + "/emissions/CO2_emissions_combined.png")
-        # plt.show()
-        # quit()
+        plt.savefig(self.current_output_folder + "/emissions/CO2_emissions_groups.png")
 
     def GAMA_time_to_datetime(self, input):
         dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)

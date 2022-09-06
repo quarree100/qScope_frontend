@@ -49,7 +49,7 @@ def make_clusters(group):
     print("clustering end")
     return cluster
 
-def send_grouped_buildings(buildings):
+def make_groups(buildings):
 
     buildings
 
@@ -172,6 +172,6 @@ with pandas.option_context('display.max_rows', None,
                         ):
     print(buildings)
 
-send_grouped_buildings(buildings)
+make_groups(buildings)
 
 print("end")

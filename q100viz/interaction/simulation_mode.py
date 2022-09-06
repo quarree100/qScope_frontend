@@ -7,7 +7,6 @@ from matplotlib import pyplot as plt
 import pygame
 import datetime
 import random
-from q100viz.api import print_full_df
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -33,6 +32,7 @@ class SimulationMode:
         self.xml = None
 
     def activate(self):
+
         self.final_step = config['SIMULATION_NUM_STEPS']
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
@@ -153,12 +153,13 @@ class SimulationMode:
 
         ####################### export matplotlib graphs #######################
 
+        self.export_combined_emissions_graph()
+
         ##### individual buildings data ####
 
         # get csv path, load data
 
         for group_df in session.buildings_groups_list:
-            print(group_df)
             if group_df is not None:
                 for idx in group_df.index:
 
@@ -274,7 +275,7 @@ class SimulationMode:
         if session.VERBOSE_MODE:
             font = pygame.font.SysFont('Arial', 40)
             canvas.blit(font.render("Berechne Energiekosten und Emissionen...", True, (255, 255, 255)),
-                        (session.canvas_size[0]/3, session.canvas_size[1]/2))
+                        (session.canvas_size[0]/4, session.canvas_size[1]/2))
 
         if len(session.buildings_df[session.buildings_df.selected]):
             # highlight selected buildings
@@ -417,6 +418,42 @@ class SimulationMode:
         outfile = output if output is not None else self.current_output_folder + "/{0}.png".format(title_)
         plt.savefig(outfile)
 
+    def export_combined_emissions_graph(self):
+        '''exports all data for selected group buildings into one graph for total data view'''
+
+        plt.rc('font', size=18)
+
+        # get csv for each building in each group
+        data = []
+        for group_df in session.buildings_groups_list:
+            if group_df is not None:
+                for idx in group_df.index:
+                    # load from csv:
+                    new_df = pandas.read_csv(self.current_output_folder + "/emissions/CO2_emissions_{0}.csv".format(idx))
+                    new_df['current_date'] = new_df['current_date'].apply(self.GAMA_time_to_datetime)
+                    new_df['building_emissions'] = new_df['building_emissions'].apply(self.grams_to_kg)
+                    data.append(new_df)
+
+        # make graph
+        plt.figure(figsize=(16,9))  # inches
+
+        for df in data:
+            plt.plot(df['current_date'], df['building_emissions'])
+
+        # graphics:
+        plt.title("Emissionen")
+        plt.xlabel("Jahr")
+        plt.ylabel("[kg/kWh]")
+        plt.xticks(rotation=270, fontsize=18)
+        plt.legend(loc='upper left')
+        # plt.annotate date of connection
+
+        # plt.show()
+        # quit()
+
     def GAMA_time_to_datetime(self, input):
         dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)
         return(dt_object)
+
+    def grams_to_kg(val):
+        return val / 1000

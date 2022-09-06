@@ -22,7 +22,7 @@ def main():
     plot_q100_prices()
 
 ######################### carbon prices ###############################
-def grams_to_tons(val):
+def euro_per_grams_to_tons(val):
     return val * 1000000
 
 def plot_carbon_prices():
@@ -35,7 +35,7 @@ def plot_carbon_prices():
     plt.style.use('default')
 
     df = pandas.read_csv(file).set_index('year')
-    df = df.apply(grams_to_tons)
+    df = df.apply(euro_per_grams_to_tons)
 
     plt.figure("CO2-Preis", figsize=global_figsize)
     for col in df.columns:
@@ -60,7 +60,7 @@ def plot_carbon_prices_separated():
     file = "../data/includes/csv-data_technical/carbon-prices.csv"
 
     df = pandas.read_csv(file).set_index('year')
-    df = df.apply(grams_to_tons)
+    df = df.apply(euro_per_grams_to_tons)
 
     for col in df.columns:
 

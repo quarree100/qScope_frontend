@@ -168,7 +168,7 @@ class SimulationMode:
                         title_="CO2-Emissionen",
                         output=self.current_output_folder + "/emissions/CO2_emissions_{0}.png".format(idx),
                         xlabel_="Jahr",
-                        ylabel_="ø-Emissionen [gCO2]???????",
+                        ylabel_="$ø-Emissionen [g CO2 eq]",
                         x_='current_date'
                     )
 
@@ -420,12 +420,17 @@ class SimulationMode:
             plt.show()
             quit()
         outfile = output if output is not None else self.current_output_folder + "/{0}.png".format(title_)
-        plt.savefig(outfile)
+        plt.savefig(outfile, transparent=True)
 
     def export_combined_emissions_graph(self):
         '''exports all data for selected group buildings into one graph for total data view'''
 
         plt.rc('font', size=18)
+        colors = [
+            ('seagreen', 'limegreen'),
+            ('darkgoldenrod', 'gold'),
+            ('steelblue', 'lightskyblue'),
+            ('black', 'gray')]
 
         # get csv for each building in each group
         data = []
@@ -444,23 +449,37 @@ class SimulationMode:
         # make graph
         plt.figure(figsize=(16,9))  # inches
 
-        for df in data:
-            plt.plot(df['current_date'], df['building_emissions'])
+        for label_idx, df in enumerate(data):
+            plt.plot(df['current_date'], df['building_emissions'], color=colors[label_idx%len(colors)][0])
+            plt.gca().annotate(
+                labels[label_idx],
+                xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                    df.loc[df.index[len(df.index)-1], 'building_emissions']),
+                xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                        df.loc[df.index[len(df.index)-1], 'building_emissions'] * 1.02),
+                fontsize=12,
+                horizontalalignment='right',
+                color=colors[label_idx%len(colors)][0]
+            )
 
         # graphics:
         plt.title("Emissionen")
         plt.xlabel("Jahr")
         plt.ylabel(r'$CO_{2}$ [kg/kWh]')
         plt.xticks(rotation=270, fontsize=18)
-        plt.legend(labels, loc='upper left')
         # plt.annotate date of connection
 
-        plt.savefig(self.current_output_folder + "/emissions/CO2_emissions_groups.png")
+        plt.savefig(self.current_output_folder + "/emissions/CO2_emissions_groups.png", transparent=True)
 
     def export_combined_energy_prices_graph(self):
         '''exports all data for selected group buildings into one graph for total data view'''
 
         plt.rc('font', size=18)
+        colors = [
+            ('seagreen', 'limegreen'),
+            ('darkgoldenrod', 'gold'),
+            ('steelblue', 'lightskyblue'),
+            ('saddlebrown', 'sandybrown')]
 
         # get csv for each building in each group
         data = []
@@ -479,9 +498,43 @@ class SimulationMode:
         # make graph
         plt.figure(figsize=(16,9))  # inches
 
-        for df in data:
-            plt.plot(df['current_date'], df['building_expenses_heat'])
-            plt.plot(df['current_date'], df['building_expenses_power'])
+        label_idx = 0
+        for i, df in enumerate(data):
+            # plot heat expenses:
+            plt.plot(df['current_date'],
+                    df['building_expenses_heat'], color=colors[i%len(colors)][0])
+
+            # annotate graph:
+            plt.gca().annotate(
+                labels[label_idx],
+                xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                    df.loc[df.index[len(df.index)-1], 'building_expenses_heat']),
+                xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                        df.loc[df.index[len(df.index)-1], 'building_expenses_heat'] * 1.02),
+                color=colors[i%len(colors)][0],
+                fontsize=12,
+                horizontalalignment='right'
+            )
+
+            label_idx += 1
+
+            # plot power expenses:
+            plt.plot(df['current_date'],
+                    df['building_expenses_power'], color=colors[i%len(colors)][1])
+
+            # annotate graph
+            plt.gca().annotate(
+                labels[label_idx],
+                xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                    df.loc[df.index[len(df.index)-1], 'building_expenses_power']),
+                xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                        df.loc[df.index[len(df.index)-1], 'building_expenses_power'] * 1.02),
+                color=colors[i%len(colors)][1],
+                fontsize=12,
+                horizontalalignment='right'
+            )
+
+            label_idx += 1
 
         # graphics:
         # TODO: specify colors
@@ -489,10 +542,9 @@ class SimulationMode:
         plt.xlabel("Jahr")
         plt.ylabel("[ct/kWh]")
         plt.xticks(rotation=270, fontsize=18)
-        plt.legend(labels, loc='upper left')
         # plt.annotate date of connection
 
-        plt.savefig(self.current_output_folder + "/energy_prices/energy_prices_groups.png")
+        plt.savefig(self.current_output_folder + "/energy_prices/energy_prices_groups.png", transparent=True)
 
     def GAMA_time_to_datetime(self, input):
         dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)

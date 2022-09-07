@@ -7,7 +7,6 @@ from matplotlib import pyplot as plt
 import pygame
 import datetime
 import random
-from q100viz.api import print_full_df
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -33,6 +32,7 @@ class SimulationMode:
         self.xml = None
 
     def activate(self):
+
         self.final_step = config['SIMULATION_NUM_STEPS']
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
@@ -158,7 +158,6 @@ class SimulationMode:
         # get csv path, load data
 
         for group_df in session.buildings_groups_list:
-            print(group_df)
             if group_df is not None:
                 for idx in group_df.index:
 
@@ -168,8 +167,8 @@ class SimulationMode:
                         columns=['building_emissions'],
                         title_="CO2-Emissionen",
                         output=self.current_output_folder + "/emissions/CO2_emissions_{0}.png".format(idx),
-                        xlabel_="Datum",
-                        ylabel_="ø-Emissionen [gCO2]???????",
+                        xlabel_="Jahr",
+                        ylabel_="$ø-Emissionen [g CO2 eq]",
                         x_='current_date'
                     )
 
@@ -180,7 +179,7 @@ class SimulationMode:
                         labels_=['Wärmekosten', 'Stromkosten'],
                         output=self.current_output_folder + "/energy_prices/energy_prices_{0}.png".format(idx),
                         title_="Energiekosten",
-                        xlabel_="Datum",
+                        xlabel_="Jahr",
                         ylabel_="[€/kWh]???????",
                         x_='current_date'
                     )
@@ -191,10 +190,16 @@ class SimulationMode:
                 session.buildings_df.update(group_df)
 
         ######### neighborhood data ########
+
+        self.export_combined_emissions_graph()
+        self.export_combined_energy_prices_graph()
+
         # define titles for images and their location
         self.matplotlib_neighborhood_images = {
             "emissions_neighborhood_accu" : "data/outputs/output_{0}/akkumulierte Gesamtemissionen des Quartiers.png".format(str(self.timestamp)),
-            "energy_prices" : "data/outputs/output_{0}/Energiekosten.png".format(str(self.timestamp))
+            "energy_prices" : "data/outputs/output_{0}/Energiekosten.png".format(str(self.timestamp)),
+            "emissions_groups" : "data/outputs/output_{0}/emissions/CO2_emissions_groups.png".format(str(self.timestamp)),
+            "energy_prices_groups" : "data/outputs/output_{0}/energy_prices/energy_prices_groups.png".format(str(self.timestamp))
         }
 
         self.export_graphs(
@@ -274,7 +279,7 @@ class SimulationMode:
         if session.VERBOSE_MODE:
             font = pygame.font.SysFont('Arial', 40)
             canvas.blit(font.render("Berechne Energiekosten und Emissionen...", True, (255, 255, 255)),
-                        (session.canvas_size[0]/3, session.canvas_size[1]/2))
+                        (session.canvas_size[0]/4, session.canvas_size[1]/2))
 
         if len(session.buildings_df[session.buildings_df.selected]):
             # highlight selected buildings
@@ -415,8 +420,135 @@ class SimulationMode:
             plt.show()
             quit()
         outfile = output if output is not None else self.current_output_folder + "/{0}.png".format(title_)
-        plt.savefig(outfile)
+        plt.savefig(outfile, transparent=True)
+
+    def export_combined_emissions_graph(self):
+        '''exports all data for selected group buildings into one graph for total data view'''
+
+        plt.rc('font', size=18)
+        colors = [
+            ('seagreen', 'limegreen'),
+            ('darkgoldenrod', 'gold'),
+            ('steelblue', 'lightskyblue'),
+            ('black', 'gray')]
+
+        # get csv for each building in each group
+        data = []
+        labels = []
+        for group_df in session.buildings_groups_list:
+            if group_df is not None:
+                for idx in group_df.index:
+                    # load from csv:
+                    new_df = pandas.read_csv(self.current_output_folder + "/emissions/CO2_emissions_{0}.csv".format(idx))
+                    new_df['current_date'] = new_df['current_date'].apply(self.GAMA_time_to_datetime)
+                    new_df['building_emissions'] = new_df['building_emissions'].apply(self.grams_to_kg)
+                    data.append(new_df)
+
+                    labels.append(group_df.loc[idx, 'address'])  # TODO: add decisions
+
+        # make graph
+        plt.figure(figsize=(16,9))  # inches
+
+        for label_idx, df in enumerate(data):
+            plt.plot(df['current_date'], df['building_emissions'], color=colors[label_idx%len(colors)][0])
+            plt.gca().annotate(
+                labels[label_idx],
+                xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                    df.loc[df.index[len(df.index)-1], 'building_emissions']),
+                xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                        df.loc[df.index[len(df.index)-1], 'building_emissions'] * 1.02),
+                fontsize=12,
+                horizontalalignment='right',
+                color=colors[label_idx%len(colors)][0]
+            )
+
+        # graphics:
+        plt.title("Emissionen")
+        plt.xlabel("Jahr")
+        plt.ylabel(r'$CO_{2}$ [kg/kWh]')
+        plt.xticks(rotation=270, fontsize=18)
+        # plt.annotate date of connection
+
+        plt.savefig(self.current_output_folder + "/emissions/CO2_emissions_groups.png", transparent=True)
+
+    def export_combined_energy_prices_graph(self):
+        '''exports all data for selected group buildings into one graph for total data view'''
+
+        plt.rc('font', size=18)
+        colors = [
+            ('seagreen', 'limegreen'),
+            ('darkgoldenrod', 'gold'),
+            ('steelblue', 'lightskyblue'),
+            ('saddlebrown', 'sandybrown')]
+
+        # get csv for each building in each group
+        data = []
+        labels = []
+        for group_df in session.buildings_groups_list:
+            if group_df is not None:
+                for idx in group_df.index:
+                    # load from csv:
+                    new_df = pandas.read_csv(self.current_output_folder + "/energy_prices/energy_prices_{0}.csv".format(idx))
+                    new_df['current_date'] = new_df['current_date'].apply(self.GAMA_time_to_datetime)
+                    data.append(new_df)
+
+                    labels.append(group_df.loc[idx, 'address'] + ' - Wärme')  # TODO: add decisions
+                    labels.append(group_df.loc[idx, 'address'] + ' - Strom')  # TODO: add decisions
+
+        # make graph
+        plt.figure(figsize=(16,9))  # inches
+
+        label_idx = 0
+        for i, df in enumerate(data):
+            # plot heat expenses:
+            plt.plot(df['current_date'],
+                    df['building_expenses_heat'], color=colors[i%len(colors)][0])
+
+            # annotate graph:
+            plt.gca().annotate(
+                labels[label_idx],
+                xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                    df.loc[df.index[len(df.index)-1], 'building_expenses_heat']),
+                xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                        df.loc[df.index[len(df.index)-1], 'building_expenses_heat'] * 1.02),
+                color=colors[i%len(colors)][0],
+                fontsize=12,
+                horizontalalignment='right'
+            )
+
+            label_idx += 1
+
+            # plot power expenses:
+            plt.plot(df['current_date'],
+                    df['building_expenses_power'], color=colors[i%len(colors)][1])
+
+            # annotate graph
+            plt.gca().annotate(
+                labels[label_idx],
+                xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                    df.loc[df.index[len(df.index)-1], 'building_expenses_power']),
+                xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
+                        df.loc[df.index[len(df.index)-1], 'building_expenses_power'] * 1.02),
+                color=colors[i%len(colors)][1],
+                fontsize=12,
+                horizontalalignment='right'
+            )
+
+            label_idx += 1
+
+        # graphics:
+        # TODO: specify colors
+        plt.title("Energiekosten")
+        plt.xlabel("Jahr")
+        plt.ylabel("[ct/kWh]")
+        plt.xticks(rotation=270, fontsize=18)
+        # plt.annotate date of connection
+
+        plt.savefig(self.current_output_folder + "/energy_prices/energy_prices_groups.png", transparent=True)
 
     def GAMA_time_to_datetime(self, input):
         dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)
         return(dt_object)
+
+    def grams_to_kg(self, val):
+        return val / 1000

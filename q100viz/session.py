@@ -42,6 +42,7 @@ quarree_colors_float = [   # corporate design of QUARREE100
     (103/255, 102/255, 104/255)  # Quarree-gray
 ]
 canvas_size = 1920, 1080
+
 # create the main surface, projected to corner points
 # the viewport's coordinates are between 0 and 100 on each axis
 viewport = keystone.Surface(canvas_size, pygame.SRCALPHA)
@@ -56,14 +57,21 @@ except Exception:
         canvas_size[0], canvas_size[1]], [canvas_size[0], 0]]
 viewport.calculate()
 
+####################### interaction #########################
+num_of_rounds = 4  # max num of rounds; will repeat after this
+num_of_users = 4  # num of valid users # TODO: combine with num of valid tags!
+gama_iteration_images = ['' for n in range(num_of_rounds)]
+emissions_data_paths = ['' for n in range(num_of_rounds)]
 ##################### global variables: #####################
 gis = None
 basemap = None
 grid_1 = None
 grid_2 = None
 buildings_df = None
-buildings_groups_list = pd.DataFrame()
+buildings_groups_list = [None for n in range(num_of_users)]
 scenario_selected_buildings = pd.DataFrame()
+seconds_elapsed = 0
+ticks_elapsed = 0
 
 environment = {
     'mode': 'buildings_interaction',
@@ -105,15 +113,6 @@ mode_selector_handles = ['start_individual_data_view', 'start_total_data_view'
                          'start_buildings_interaction', 'start_simulation']
 COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'CO2', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'environmental_engagement', 'environmental_engagement_prior', 'energy_source', 'cell']
 VALID_GRID_HANDLES = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage', 'num_connections', 'scenario_energy_prices']
-
-# interaction
-seconds_elapsed = 0
-ticks_elapsed = 0
-
-num_of_rounds = 4  # max num of rounds; will repeat after this
-num_of_users = 4  # num of valid users # TODO: combine with num of valid tags!
-gama_iteration_images = ['' for n in range(num_of_rounds)]
-emissions_data_paths = ['' for n in range(num_of_rounds)]
 
 handlers = {
     'calibrate': CalibrationMode(),

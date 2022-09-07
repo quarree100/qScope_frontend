@@ -1,13 +1,10 @@
 import sys
 import os
-import random
 import threading
 import json
-import pandas
 import pygame
 import datetime
 import argparse
-import shapely
 from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
 from q100viz.settings.config import config
@@ -15,7 +12,6 @@ import q100viz.gis as gis
 import q100viz.grid as grid
 import q100viz.udp as udp
 import q100viz.session as session
-import q100viz.api as api
 from q100viz.interaction.interface import *
 
 ##################### parse command line arguments ####################
@@ -127,111 +123,7 @@ show_typologiezonen = False
 show_nahwaermenetz = True
 display_viewport = True
 
-##################### Load data #####################
-session.buildings_df = pandas.DataFrame()
-session.buildings_df['energy_source'] = None
-
-# Bestand:
-bestand = gis.read_shapefile(
-    config['GEBAEUDE_BESTAND_FILE'], columns={
-        'Kataster_C': 'string',  # Code
-        'Kataster_S': 'string',  # Straße
-        'Kataster_H': 'string',  # Hausnummer
-        # 'Kataster_B': 'float',  # Baujahr
-        # 'Kataster_6': 'float',  # Nettogrundfläche
-        'Kataster13': 'float',  # spez. Wärmeverbrauch
-        'Kataster15': 'float',  # spez. Stromverbrauch
-        'Kataster_E': 'string'  # Energieträger
-        }).set_index('Kataster_C')
-
-bestand.index.names = ['id']
-
-bestand['address'] = bestand['Kataster_S'] + ' ' + bestand['Kataster_H']
-bestand = bestand.drop('Kataster_S', 1)
-bestand = bestand.drop('Kataster_H', 1)
-bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source'})
-
-# bestand['area'] = bestand['Kataster_6'].fillna(0).to_numpy()
-# bestand = bestand.drop('Kataster_6', 1)
-
-# bestand['year'] = bestand['Kataster_B']
-# bestand['year'] = bestand['year'].fillna(0).to_numpy().astype(int)
-# bestand = bestand.drop('Kataster_B', 1)
-
-# Neubau:
-# neubau = gis.read_shapefile(
-#     config['GEBAEUDE_NEUBAU_FILE'], columns={
-#         'Kataster_C': 'string',
-#         'Kataster_S': 'string',
-#         'Kataster13': 'float',
-#         'Kataster15': 'float'}).set_index('Kataster_C')
-
-# neubau.index.names = ['id']
-
-# neubau = neubau.rename(columns={'Kataster_S': 'address', 'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption'})
-
-# merge:
-# buildings = session.buildings = pandas.concat([bestand, neubau])
-buildings_df = session.buildings_df = bestand
-
-# adjust data
-buildings_df['spec_heat_consumption'] = buildings_df['spec_heat_consumption'].fillna(0).to_numpy()
-buildings_df['avg_spec_heat_consumption'] = 0
-buildings_df['spec_power_consumption'] = buildings_df['spec_power_consumption'].fillna(0).to_numpy()
-buildings_df['avg_spec_power_consumption'] = 0
-buildings_df['cluster_size'] = 0
-
-buildings_cluster = api.make_clusters(buildings_df)
-# update building with average data:
-for j in range(len(buildings_df)):
-    buildings_df.at[buildings_df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
-    buildings_df.at[buildings_df.index[j], 'avg_spec_power_consumption'] = buildings_cluster[j]['spec_power_consumption'].mean()
-    buildings_df.at[buildings_df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
-
-buildings_df['emissions_graphs'] = ''
-buildings_df['energy_prices_graphs'] = ''
-
-# generic data
-buildings_df['CO2'] = (buildings_df['spec_heat_consumption'] + buildings_df['spec_power_consumption']) / 20000
-electricity_supply_types = ['green', 'gray', 'mix']
-buildings_df['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings_df.values]
-buildings_df['connection_to_heat_grid'] = buildings_df['energy_source'].isna().to_numpy()
-buildings_df['connection_to_heat_grid_prior'] = buildings_df['connection_to_heat_grid']
-buildings_df['refurbished'] = buildings_df['connection_to_heat_grid']
-buildings_df['refurbished_prior'] = buildings_df['refurbished']
-buildings_df['environmental_engagement'] = [True if random.random() > 0.5 else False for row in buildings_df.values]
-buildings_df['environmental_engagement_prior'] = buildings_df['environmental_engagement']
-
-# buildings interaction
-buildings_df['cell'] = ""
-buildings_df['selected'] = False
-buildings_df['group'] = -1
-
-# buildings geometry: find closest heat grid line
-# TODO: move this somewhere else.
-buildings_df['target_point'] = None
-
-for idx, row in buildings_df.iterrows():
-    polygon = row['geometry']
-    points = session.gis.surface.transform(polygon.exterior.coords)
-    pygame.draw.polygon(session.gis.surface, pygame.Color(255,123,222), points)
-
-    poly = shapely.geometry.Polygon(points)
-    centroid = poly.centroid
-
-    shortest_dist = 9999999
-    target_point = None
-
-    for linestring in session.gis.nahwaermenetz.to_dict('records'):
-        line_points = session.gis.surface.transform(linestring['geometry'].coords)
-        line = shapely.geometry.LineString(line_points)
-
-        interpol = line.interpolate(line.project(centroid))
-
-        this_dist = interpol.distance(centroid)
-        if this_dist < shortest_dist:
-            shortest_dist = this_dist
-            buildings_df.at[idx, 'target_point'] = interpol
+session.buildings_df = session.buildings.load_data()
 
 ################### mask viewport with black surface ##################
 mask_points = [[0, 0], [85.5, 0], [85.5, 82], [0, 82], [0, -50],
@@ -356,12 +248,12 @@ while True:
         session.gis.draw_polygon_layer(canvas, session.gis.waermezentrale, 0, (252, 137, 0))
         session.gis.draw_buildings_connections(session.buildings_df)  # draw lines to closest heat grid
         session.gis.draw_polygon_layer_bool(
-            canvas, buildings_df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
+            canvas, session.buildings_df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
         session.gis.draw_polygon_layer_bool(
-            canvas, buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
+            canvas, session.buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
         try:
             session.gis.draw_polygon_layer_bool(
-                canvas, buildings_df[buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
+                canvas, session.buildings_df[session.buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
         except Exception as e:
             session.log += "\n%s" % e
             print("cannot draw polygon layer: ", e)

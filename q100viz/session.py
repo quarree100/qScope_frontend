@@ -13,6 +13,7 @@ from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.dataview_individual_mode import DataViewIndividual_Mode
 from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode
 import q100viz.keystone as keystone
+import q100viz.buildings
 
 ################### dev and debug variables #################
 log = ""
@@ -67,7 +68,7 @@ gis = None
 basemap = None
 grid_1 = None
 grid_2 = None
-buildings_df = None
+buildings = q100viz.buildings.Buildings()
 buildings_groups_list = [None for n in range(num_of_users)]
 scenario_selected_buildings = pd.DataFrame()
 seconds_elapsed = 0

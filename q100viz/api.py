@@ -65,37 +65,6 @@ class API:
         msg = msg.replace("'", "\"")
         self.send_message(json.dumps(json.loads(msg)))
 
-    def make_buildings_groups_dict(self):
-
-        bd = session.buildings_df
-
-        session.buildings_groups_list = [
-            bd[bd['group'] == 0][session.COMMUNICATION_RELEVANT_KEYS],
-            bd[bd['group'] == 1][session.COMMUNICATION_RELEVANT_KEYS],
-            bd[bd['group'] == 2][session.COMMUNICATION_RELEVANT_KEYS],
-            bd[bd['group'] == 3][session.COMMUNICATION_RELEVANT_KEYS]]
-
-        wrapper = ['' for i in range(session.num_of_users)]
-        message = {}
-
-        for i, group_df in enumerate(session.buildings_groups_list):
-            group_wrapper = {}
-            if len(group_df) > 0:
-                user_selected_buildings = json.loads(
-                    export_json(group_df[session.COMMUNICATION_RELEVANT_KEYS], None))
-                group_wrapper['buildings'] = user_selected_buildings
-                group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] == True])
-
-                message['group_{0}'.format(str(i))] = group_wrapper
-            else:  # create empty elements for empty groups (infoscreen reset)
-                message['group_{0}'.format(str(i))] = ['']
-
-            wrapper = {
-                'buildings_groups': message
-            }
-
-        return wrapper
-
     def send_simplified_dataframe_with_environment_variables(self, df, env):
         sum = df.groupby(by='cell').sum()
         data = json.loads(export_json(sum, None))
@@ -118,40 +87,6 @@ def append_csv(file, df, cols):
     values = pandas.read_csv(
         file, usecols=['osm_id', *cols.keys()], dtype=cols, error_bad_lines=False, delimiter=';').set_index('osm_id')
     return df.join(values, on='osm_id')
-
-
-def make_clusters(group_selection):
-    '''make groups of the selected buildings. group by standard deviation of energy consumption'''
-    cluster_list = []
-    for idx in range(len(group_selection.index)):
-        interval = 0.5  # standard deviation
-        cluster = pandas.DataFrame()
-        while len(cluster) < 2:  # make sure no building is alone
-            cluster = session.buildings_df.loc[(
-                    (session.buildings_df['energy_source'] == session.buildings_df.loc[
-                        session.buildings_df.index[idx], 'energy_source'])
-                    &
-                    (session.buildings_df['spec_heat_consumption'] >= session.buildings_df.loc[session.buildings_df.index[idx],
-                    'spec_heat_consumption'] - session.buildings_df['spec_heat_consumption'].std() * interval)
-                    &
-                    (session.buildings_df['spec_heat_consumption'] <= session.buildings_df.loc[session.buildings_df.index[idx],
-                    'spec_heat_consumption'] + session.buildings_df['spec_heat_consumption'].std() * interval)
-                    &
-                    (session.buildings_df['spec_power_consumption'] >= session.buildings_df.loc[session.buildings_df.index[idx],
-                    'spec_power_consumption'] - session.buildings_df['spec_power_consumption'].std() * interval)
-                    &
-                    (session.buildings_df['spec_power_consumption'] <= session.buildings_df.loc[session.buildings_df.index[idx],
-                    'spec_power_consumption'] + session.buildings_df['spec_power_consumption'].std() * interval)
-                )]
-            interval += 0.1  # increase range, try again if necessary
-
-        cluster_list.append(cluster)
-        session.print_verbose(
-            "building {0} is in a group of to {1} buildings with similar specs:".format(group_selection.index[idx], len(cluster)))
-        # session.print_verbose(cluster[['spec_heat_consumption', 'spec_power_consumption']].describe())
-
-    return cluster_list
-
 
 def export_json(df, outfile=None):
     """Export a dataframe to JSON file. This is necessary to transform GeoDataFrames into a JSON serializable format"""

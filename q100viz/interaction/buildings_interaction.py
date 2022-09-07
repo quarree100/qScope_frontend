@@ -42,8 +42,8 @@ class Buildings_Interaction:
 
     def process_grid_change(self):
 
-        session.buildings_df['selected'] = False  # reset buildings
-        session.buildings_df['group'] = -1  # reset group
+        session.buildings.df['selected'] = False  # reset buildings
+        session.buildings.df['group'] = -1  # reset group
         # session.buildings_groups_list = [None for i in range(session.num_of_users)] # reset groups
 
         # reset sliders:
@@ -57,25 +57,25 @@ class Buildings_Interaction:
                 for x, cell in enumerate(row):
                     if cell.selected:
                         # high performance impact, use sparingly
-                        i = get_intersection(session.buildings_df, grid, x, y)
+                        i = get_intersection(session.buildings.df, grid, x, y)
 
                         # use rotation value to cycle through buildings located in cell
                         if self.selection_mode == 'rotation':
-                            n = len(session.buildings_df[i])
+                            n = len(session.buildings.df[i])
                             if n > 0:
-                                selection = session.buildings_df[i].iloc[cell.rot % n]
-                                session.buildings_df.loc[selection.name,
+                                selection = session.buildings.df[i].iloc[cell.rot % n]
+                                session.buildings.df.loc[selection.name,
                                                     'selected'] = True  # select cell
-                                session.buildings_df.loc[selection.name,
+                                session.buildings.df.loc[selection.name,
                                                     'group'] = cell.id  # pass cell ID to building
 
                         # select all buildings within range
                         elif self.selection_mode == 'all':
-                            for n in range(0, len(session.buildings_df[i])):
-                                selection = session.buildings_df[i].iloc[n]
-                                session.buildings_df.loc[selection.name,
+                            for n in range(0, len(session.buildings.df[i])):
+                                selection = session.buildings.df[i].iloc[n]
+                                session.buildings.df.loc[selection.name,
                                                         'selected'] = True
-                                session.buildings_df.loc[selection.name,
+                                session.buildings.df.loc[selection.name,
                                                     'group'] = cell.id  # pass cell ID to building
 
                         # set slider handles via selected cell:
@@ -94,16 +94,16 @@ class Buildings_Interaction:
                             elif cell.handle == 'start_simulation':
                                 session.handlers['simulation'].activate()
 
-        session.api.send_message(json.dumps(session.api.make_buildings_groups_dict()))
+        session.api.send_message(json.dumps(session.buildings.make_buildings_groups_dict()))
 
     def draw(self, canvas):
 
         try:
             # highlight selected buildings (draws colored stroke on top)
-            if len(session.buildings_df[session.buildings_df.selected]):
+            if len(session.buildings.df[session.buildings.df.selected]):
                 session.gis.draw_polygon_layer(
                     canvas,
-                    session.buildings_df[session.buildings_df.selected], 2, (255, 0, 127)
+                    session.buildings.df[session.buildings.df.selected], 2, (255, 0, 127)
                 )
 
             # coloring slider area:

@@ -64,7 +64,7 @@ class Input_Scenarios:
             self.process_grid_change()
 
     def process_grid_change(self):
-        session.buildings_df['selected'] = False
+        session.buildings.df['selected'] = False
         session.environment['active_scenario_handle'] = 'Ref'
         session.grid_2.grid[18][19].handle = None
         self.images = [image for image in self.images_disabled]
@@ -140,11 +140,11 @@ class Input_Scenarios:
 
     def draw(self, canvas):
 
-        if len(session.buildings_df[session.buildings_df.selected]):
+        if len(session.buildings.df[session.buildings.df.selected]):
             # highlight selected buildings
             session.gis.draw_polygon_layer(
                 canvas,
-                session.buildings_df[session.buildings_df.selected], 2, (255, 0, 127)
+                session.buildings.df[session.buildings.df.selected], 2, (255, 0, 127)
             )
 
         # display scenario images:

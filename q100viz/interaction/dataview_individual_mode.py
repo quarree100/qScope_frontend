@@ -48,7 +48,7 @@ class DataViewIndividual_Mode():
         session.api.send_session_env()
 
         data_view_individual_data = pd.DataFrame(data={
-            "data_view_individual_data" : [session.api.make_buildings_groups_dict()]})
+            "data_view_individual_data" : [session.buildings.make_buildings_groups_dict()]})
         session.api.send_dataframe_as_json(data_view_individual_data)
 
     def process_event(self, event):
@@ -56,7 +56,7 @@ class DataViewIndividual_Mode():
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
             session.api.send_simplified_dataframe_with_environment_variables(
-                session.buildings_df[session.buildings_df.selected],
+                session.buildings.df[session.buildings.df.selected],
                 session.environment)
 
             self.process_grid_change()
@@ -66,7 +66,7 @@ class DataViewIndividual_Mode():
             # session.api.send_dataframe_as_json(connected_buildings)
 
     def process_grid_change(self):
-        session.buildings_df['selected'] = False
+        session.buildings.df['selected'] = False
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
@@ -77,7 +77,7 @@ class DataViewIndividual_Mode():
                             session.handlers['buildings_interaction'].activate()
 
         data_view_individual_data = pd.DataFrame(data={
-            "data_view_individual_data" : [session.api.make_buildings_groups_dict()]})
+            "data_view_individual_data" : [session.buildings.make_buildings_groups_dict()]})
         session.api.send_dataframe_as_json(data_view_individual_data)
 
 

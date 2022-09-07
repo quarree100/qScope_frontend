@@ -2,13 +2,10 @@
 
 import pygame
 import json
-import pandas as pd
 import numpy
 
 import q100viz.keystone as keystone
 import q100viz.session as session
-
-from q100viz.settings.config import config
 
 ############################ SLIDER ###################################
 class Slider:
@@ -125,7 +122,7 @@ class Slider:
             session.active_handler.activate()  # TODO: add confidence delay!
 
         elif self.handle == 'num_connections':
-            session.environment['scenario_num_connections'] = int(self.value * len(session.buildings_df.index))
+            session.environment['scenario_num_connections'] = int(self.value * len(session.buildings.df.index))
 
             # connect additional buildings as set in scenario:
             if session.environment['scenario_num_connections'] > 0:
@@ -133,11 +130,11 @@ class Slider:
                 if not session.scenario_selected_buildings.empty:
                     session.scenario_selected_buildings['selected'] = False
                     session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                    session.buildings_df.update(session.scenario_selected_buildings)
+                    session.buildings.df.update(session.scenario_selected_buildings)
 
                 # sample data:
                 try:
-                    session.scenario_selected_buildings = session.buildings_df.sample(n=session.environment['scenario_num_connections'])
+                    session.scenario_selected_buildings = session.buildings.df.sample(n=session.environment['scenario_num_connections'])
                 except Exception as e:
                     print("max number of possible samples reached. " + str(e))
                     session.log += "\n%s" % e
@@ -151,13 +148,13 @@ class Slider:
                 # select and connect sampled buildings:
                 session.scenario_selected_buildings['selected'] = True
                 session.scenario_selected_buildings['connection_to_heat_grid'] = True
-                session.buildings_df.update(session.scenario_selected_buildings)
+                session.buildings.df.update(session.scenario_selected_buildings)
                 print("selecting random {0} buildings:".format(session.environment['scenario_num_connections']))
 
             else:  # value is 0: deselect all
                 session.scenario_selected_buildings['selected'] = False
                 session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                session.buildings_df.update(session.scenario_selected_buildings)
+                session.buildings.df.update(session.scenario_selected_buildings)
 
 
         elif self.handle == 'scenario_energy_prices':
@@ -165,14 +162,14 @@ class Slider:
 
         # household-specific:
         if self.handle == 'connection_to_heat_grid':
-            session.buildings_df.loc[((
-                session.buildings_df.selected == True) & (session.buildings_df.group == self.group)), 'connection_to_heat_grid'] = self.value > 0.5
+            session.buildings.df.loc[((
+                session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = self.value > 0.5
         elif self.handle == 'refurbished':
-            session.buildings_df.loc[(
-                session.buildings_df.selected == True) & (session.buildings_df.group == self.group), 'refurbished'] = self.value > 0.5
+            session.buildings.df.loc[(
+                session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'refurbished'] = self.value > 0.5
         elif self.handle == 'environmental_engagement':
-            session.buildings_df.loc[(
-                session.buildings_df.selected == True)  & (session.buildings_df.group == self.group), 'environmental_engagement'] = self.value > 0.5
+            session.buildings.df.loc[(
+                session.buildings.df.selected == True)  & (session.buildings.df.group == self.group), 'environmental_engagement'] = self.value > 0.5
 
         # questionnaire:
         elif self.handle == 'answer':
@@ -193,7 +190,7 @@ class Slider:
 
         if self.previous_value is not self.value:
             session.api.send_message(json.dumps(session.environment))
-            session.api.send_message(json.dumps(session.api.make_buildings_groups_dict()))
+            session.api.send_message(json.dumps(session.buildings.make_buildings_groups_dict()))
 
             self.previous_value = self.value
 

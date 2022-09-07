@@ -2,7 +2,6 @@ import pandas
 import os
 import subprocess
 import threading
-from matplotlib import pyplot as plt
 import pygame
 import datetime
 import random

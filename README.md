@@ -19,13 +19,20 @@ Run the sketch:
 python run_q100viz.py
 ```
 
+### Flags
+
+- `--main_window`: runs canvas in current window
+- `--start_at [mode]`: which mode to start in? can be any of buildings_interaction, simulation, individual_data_view, total_data_view
+- `--sim_steps [num]`: how may steps should the simulation do? max num=9496 (year 2045)
+- `--verbose`: start in verbose mode
+
 ### Interactions
 
 - **P** key: toggle polygons
 - **M** key: toggle basemap
 - **G** key: toggle grid
 - **C** key: toggle calibration mode
-- **V** key: toggle verbose mode
+- **V** key: toggle verbose mode --> will print more information and export the canvas.png continuously
 
 - In calibration mode:
   - **TAB** key: select active corner
@@ -76,4 +83,4 @@ where:
 
 
 ## further requirements:
-- GAMA has to be installed and the path to its headless folder has to be provided in config.py
+- GAMA (1.8.2) has to be installed and the path to its headless folder has to be provided in config.py

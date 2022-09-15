@@ -20,10 +20,8 @@ for folder in folder1, folder2:
 
     folder_idx += 1
 
-print("found files: ", list_of_files)
+print("looking for *.csv files.. found: ", list_of_files)
 ############################ compare data #############################
-# connections_df1 = pandas.read_csv(folder1 + '/connections/connections_export.csv')
-# connections_df2 = pandas.read_csv(folder2 + '/connections/connections_export.csv')
 for i in range(len(list_of_files[0])):
     print("#"*72)
     print("comparing {0} with {1}: ".format(list_of_files[0][i], list_of_files[1][i]))

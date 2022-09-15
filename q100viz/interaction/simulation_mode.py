@@ -204,7 +204,7 @@ class SimulationMode:
             folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
             title_="akkumulierte Gesamtemissionen des Quartiers",
-            outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png".format(idx),
+            outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
             xlabel_="Jahr",
             ylabel_="Gesamte Emissionen [gCO2]",
             x_='current_date'
@@ -216,7 +216,7 @@ class SimulationMode:
             columns=['power_price', 'oil_price', 'gas_price'],
             labels_=['Energiepreis', 'Ölpreis', 'Gaspreis'],
             title_="Energiekosten",
-            outfile=self.current_output_folder + "/energy_prices/energy_prices_total.png".format(idx),
+            outfile=self.current_output_folder + "/energy_prices/energy_prices_total.png",
             xlabel_="Jahr",
             ylabel_="Kosten [€]",
             x_='current_date'

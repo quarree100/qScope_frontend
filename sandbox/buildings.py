@@ -1,6 +1,5 @@
 import geopandas
 import pandas
-import random
 
 crs = "EPSG:3857"
 ######################## dev tools ##########################
@@ -92,16 +91,13 @@ buildings_df['energy_prices_graphs'] = ''
 # generic data
 buildings_df['CO2'] = (buildings_df['spec_heat_consumption'] + buildings_df['spec_power_consumption']) / 20000
 
-electricity_supply_types = ['green', 'gray', 'mix']
-buildings_df['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in buildings_df.values]
-
 buildings_df['connection_to_heat_grid'] = buildings_df['energy_source'].isna().to_numpy()
 buildings_df['connection_to_heat_grid_prior'] = buildings_df['connection_to_heat_grid']
 
 buildings_df['refurbished'] = buildings_df['connection_to_heat_grid']
 buildings_df['refurbished_prior'] = buildings_df['refurbished']
 
-buildings_df['environmental_engagement'] = [True if random.random() > 0.5 else False for row in buildings_df.values]
+buildings_df['environmental_engagement'] = False
 buildings_df['environmental_engagement_prior'] = buildings_df['environmental_engagement']
 
 # buildings interaction

@@ -1,9 +1,6 @@
 import pandas
 import os
 import subprocess
-import threading
-from matplotlib import pyplot as plt
-import pygame
 import datetime
 import random
 from buildings import buildings_df
@@ -179,7 +176,7 @@ class SimulationMode:
 
 
         selected_buildings = buildings_df[buildings_df.selected]
-        selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
+        selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source',
             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
         # start simulation
@@ -243,7 +240,7 @@ class SimulationMode:
         print("simulation finished. duration = ",
               datetime.datetime.now() - sim_start)
 
-        os.chdir(self.cwd)  # return to previous cwd
+        os.chdir(self.cwd)  # return to previous working directory
 
 if __name__ == '__main__':
     main()

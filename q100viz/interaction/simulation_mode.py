@@ -167,7 +167,7 @@ class SimulationMode:
                         title_="CO2-Emissionen",
                         outfile=self.current_output_folder + "/emissions/CO2_emissions_{0}.png".format(idx),
                         xlabel_="Jahr",
-                        ylabel_="ø-Emissionen [g CO2 eq]",
+                        ylabel_="ø-Emissionen [$g_{CO2,eq}$]",
                         x_='current_date',
                     )
 
@@ -180,7 +180,7 @@ class SimulationMode:
                         outfile=self.current_output_folder + "/energy_prices/energy_prices_{0}.png".format(idx),
                         title_="Energiekosten",
                         xlabel_="Jahr",
-                        ylabel_="[€/kWh]???????",
+                        ylabel_="Energiekosten [€/Monat]",
                         x_='current_date'
                     )
 
@@ -203,10 +203,10 @@ class SimulationMode:
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
             folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
-            title_="akkumulierte Gesamtemissionen des Quartiers",
+            title_="kumulierte Gesamtemissionen des Quartiers",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
             xlabel_="Jahr",
-            ylabel_="Gesamte Emissionen [gCO2]",
+            ylabel_="CO2 [$g_{eq}$]",
             x_='current_date'
         )
 
@@ -214,11 +214,11 @@ class SimulationMode:
             csv_name="/energy_prices/energy_prices_total.csv",
             folders=self.output_folders,
             columns=['power_price', 'oil_price', 'gas_price'],
-            labels_=['Energiepreis', 'Ölpreis', 'Gaspreis'],
-            title_="Energiekosten",
+            labels_=['Strompreis', 'Ölpreis', 'Gaspreis'],
+            title_="Energiepreis",
             outfile=self.current_output_folder + "/energy_prices/energy_prices_total.png",
             xlabel_="Jahr",
-            ylabel_="Kosten [€]",
+            ylabel_="Preis [ct/kWh]",
             x_='current_date'
         )
 

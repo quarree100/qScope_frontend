@@ -31,7 +31,21 @@ class SimulationMode:
 
     def activate(self):
 
-        self.final_step = config['SIMULATION_NUM_STEPS']
+        # derive final step from defined simulation runtime:
+        if config['SIMULATION_FORCE_NUM_STEPS'] is 0:
+            runtime = pandas.read_csv('/home/dunland/github/qScope/data/includes/csv-data_technical/initial_variables.csv', index_col='var').loc['model_runtime_string', 'value']
+            if runtime == '2020-2030':
+                self.final_step = 10 * 365
+
+            elif runtime == '2020-2040':
+                self.final_step = 20 * 365
+
+            elif runtime == '2020-2045':
+                self.final_step = 25 * 365
+        else:
+            # overwrite final step if set via flag --sim_steps:
+            self.final_step = config['SIMULATION_FORCE_NUM_STEPS']
+
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
 

@@ -33,7 +33,7 @@ class SimulationMode:
 
         # derive final step from defined simulation runtime:
         if config['SIMULATION_FORCE_NUM_STEPS'] == 0:
-            runtime = pandas.read_csv('/home/dunland/github/qScope/data/includes/csv-data_technical/initial_variables.csv',
+            runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
                                       index_col='var').loc['model_runtime_string', 'value']
             if runtime == '2020-2030':
                 self.final_step = 10 * 365

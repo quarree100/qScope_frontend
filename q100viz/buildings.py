@@ -1,4 +1,3 @@
-from tkinter import SEL_FIRST
 import pandas
 import random
 import shapely
@@ -15,7 +14,7 @@ class Buildings:
         self.df = pandas.DataFrame()
         self.df['energy_source'] = None
 
-    ##################### Load data #####################
+    ########################### Load data #############################
     def load_data(self):
         # Bestand:
         bestand = gis.read_shapefile(
@@ -93,8 +92,12 @@ class Buildings:
         self.df['selected'] = False
         self.df['group'] = -1
 
-        # buildings geometry: find closest heat grid line
-        # TODO: move this somewhere else.
+        self.find_closest_heat_grid_line(print_full_df=True)
+
+        return self.df
+
+    ##################### find closest heat grid line #################
+    def find_closest_heat_grid_line(self, print_full_df):
         self.df['target_point'] = None
 
         for idx, row in self.df.iterrows():
@@ -106,7 +109,6 @@ class Buildings:
             centroid = poly.centroid
 
             shortest_dist = 9999999
-            target_point = None
 
             for linestring in session.gis.nahwaermenetz.to_dict('records'):
                 line_points = session.gis.surface.transform(linestring['geometry'].coords)
@@ -119,10 +121,10 @@ class Buildings:
                     shortest_dist = this_dist
                     self.df.at[idx, 'target_point'] = interpol
 
-        api.print_full_df(self.df)
+        if print_full_df:
+            api.print_full_df(self.df)
 
-        return self.df
-
+    ############################# user groups #########################
     def make_buildings_groups_dict(self):
 
         session.buildings_groups_list = [
@@ -152,6 +154,7 @@ class Buildings:
 
         return wrapper
 
+    ############################## clusters ###########################
     def make_clusters(self):
         '''make groups of the selected buildings. group by standard deviation of energy consumption'''
         cluster_list = []

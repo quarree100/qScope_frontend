@@ -81,7 +81,8 @@ class Buildings:
         self.df['CO2'] = (self.df['spec_heat_consumption'] + self.df['spec_power_consumption']) / 20000
         electricity_supply_types = ['green', 'gray', 'mix']
         self.df['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in self.df.values]
-        self.df['connection_to_heat_grid'] = self.df['energy_source'].isna().to_numpy()
+        for idx, row in self.df.iterrows():
+            self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else False
         self.df['connection_to_heat_grid_prior'] = self.df['connection_to_heat_grid']
         self.df['refurbished'] = self.df['connection_to_heat_grid']
         self.df['refurbished_prior'] = self.df['refurbished']
@@ -93,8 +94,14 @@ class Buildings:
         self.df['selected'] = False
         self.df['group'] = -1
 
-        # buildings geometry: find closest heat grid line
-        # TODO: move this somewhere else.
+        api.print_full_df(self.df[['energy_source', 'connection_to_heat_grid']])
+
+        self.find_closest_heat_grid_line(print_full_df=False)
+
+        return self.df
+
+    ##################### find closest heat grid line #################
+    def find_closest_heat_grid_line(self, print_full_df):
         self.df['target_point'] = None
 
         for idx, row in self.df.iterrows():
@@ -118,8 +125,6 @@ class Buildings:
                 if this_dist < shortest_dist:
                     shortest_dist = this_dist
                     self.df.at[idx, 'target_point'] = interpol
-
-        api.print_full_df(self.df)
 
         return self.df
 

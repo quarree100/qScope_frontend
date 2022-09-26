@@ -251,12 +251,31 @@ while True:
             canvas, session.buildings_df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
         session.gis.draw_polygon_layer_bool(
             canvas, session.buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
-        try:
-            session.gis.draw_polygon_layer_bool(
-                canvas, session.buildings_df[session.buildings_df['connection_to_heat_grid']], 2, (0, 168, 78))  # stroke according to connection status
-        except Exception as e:
-            session.log += "\n%s" % e
-            print("cannot draw polygon layer: ", e)
+
+        # stroke according to connection status:
+        session.gis.draw_polygon_layer_bool(
+            surface=canvas, df=session.buildings_df, stroke=1, fill_false=(0, 0, 0), fill_true=(0, 168, 78), fill_attr='connection_to_heat_grid')
+
+
+        # color buildings if connection is not -1:
+        # session.gis.draw_polygon_layer_connection_year(
+        #     session.buildings_df,
+        #     stroke=0,
+        #     fill_true=(96, 205, 21),
+        #     fill_false=(213, 50, 21),
+        #     fill_attr='connection_to_heat_grid')
+
+        # # stroke simple black:
+        # session.gis.draw_polygon_layer_bool(
+        #     canvas, session.buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')
+
+        # # stroke according to connection status:
+        # session.gis.draw_polygon_layer_connection_year(
+        #     session.buildings_df,
+        #     stroke=2,
+        #     fill_true=(0, 168, 78),
+        #     fill_false=(0),
+        #     fill_attr='connection_to_heat_grid')
 
     # draw grid
     grid_1.draw(show_grid)

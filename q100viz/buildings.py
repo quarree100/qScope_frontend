@@ -80,7 +80,8 @@ class Buildings:
         self.df['CO2'] = (self.df['spec_heat_consumption'] + self.df['spec_power_consumption']) / 20000
         electricity_supply_types = ['green', 'gray', 'mix']
         self.df['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in self.df.values]
-        self.df['connection_to_heat_grid'] = self.df['energy_source'].isna().to_numpy()
+        for idx, row in self.df.iterrows():
+            self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else False
         self.df['connection_to_heat_grid_prior'] = self.df['connection_to_heat_grid']
         self.df['refurbished'] = self.df['connection_to_heat_grid']
         self.df['refurbished_prior'] = self.df['refurbished']
@@ -92,7 +93,7 @@ class Buildings:
         self.df['selected'] = False
         self.df['group'] = -1
 
-        self.find_closest_heat_grid_line(print_full_df=True)
+        self.find_closest_heat_grid_line(print_full_df=False)
 
         return self.df
 

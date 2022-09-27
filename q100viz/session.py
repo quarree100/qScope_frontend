@@ -131,11 +131,3 @@ flag_export_canvas = False
 def print_verbose(message):
     if VERBOSE_MODE:
         print(message)
-
-
-def print_full_df(df):
-    with pd.option_context('display.max_rows', None,
-                           'display.max_columns', None,
-                           'display.precision', 3,
-                           ):
-        print(df)

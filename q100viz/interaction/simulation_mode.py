@@ -22,6 +22,7 @@ class SimulationMode:
         self.current_output_folder = ''  # will be set in activate()
         self.xml_path = ''               # will be set in activate()
         self.final_step = None           # will be set in activate()
+        self.max_year = 2045             # will be set in activate()
         self.output_folders = []         # list of output folders of all game rounds
         self.using_timestamp = True
 
@@ -36,16 +37,21 @@ class SimulationMode:
             runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
                                       index_col='var').loc['model_runtime_string', 'value']
             if runtime == '2020-2030':
-                self.final_step = 10 * 365
+                self.final_step = 10 * 365 + 3  # include leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
+                self.max_year = 2030  # used by slider
 
             elif runtime == '2020-2040':
-                self.final_step = 20 * 365
+                self.final_step = 20 * 365 + 5
+                self.max_year = 2040
 
             elif runtime == '2020-2045':
-                self.final_step = 25 * 365
+                self.final_step = 25 * 365 + 7
+                self.max_year = 2045
         else:
             # overwrite final step if set via flag --sim_steps:
             self.final_step = config['SIMULATION_FORCE_NUM_STEPS']
+            self.max_year = int(self.final_step / 365)
+
 
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))

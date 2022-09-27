@@ -51,15 +51,28 @@ class GIS:
             session.log += "\n%s" % e
             print("cannot draw polygon layer: ", e)
 
-    def draw_polygon_layer_bool(self, surface, df, stroke, fill, lerp_target=None, lerp_attr=None):
+    def draw_polygon_layer_bool(self, surface, df, stroke, fill_false, fill_true=None, fill_attr=None):
         '''draw polygon layer, lerp using bool value'''
         try:
             for polygon in df.to_dict('records'):
-                if fill:
-                    fill_color = pygame.Color(*fill)
+                if fill_false:
+                    fill_color = pygame.Color(*fill_false)
 
-                    if lerp_target:
-                        fill_color = pygame.Color(lerp_target) if polygon[lerp_attr] else fill_color
+                    if fill_true:
+                        fill_color = pygame.Color(fill_true) if polygon[fill_attr] else fill_color
+
+                points = self.surface.transform(polygon['geometry'].exterior.coords)
+                pygame.draw.polygon(self.surface, fill_color, points, stroke)
+
+        except Exception as e:
+            session.log += "\n%s" % e
+            print("cannot draw polygon layer: ", e)
+
+    def draw_polygon_layer_connection_year(self, df, stroke, fill_true, fill_false=None, fill_attr=None):
+        '''draw polygon layer, lerp using bool value'''
+        try:
+            for polygon in df.to_dict('records'):
+                fill_color = pygame.Color(fill_true) if polygon[fill_attr] > -1 else fill_false
 
                 points = self.surface.transform(polygon['geometry'].exterior.coords)
                 pygame.draw.polygon(self.surface, fill_color, points, stroke)

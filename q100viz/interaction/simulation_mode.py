@@ -126,16 +126,7 @@ class SimulationMode:
         outputs.loc[len(outputs)] = [
             '5', 'Emissions cumulative', str(self.final_step - 1)]
 
-        # export buildings_clusters to csv
-        clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(
-            self.timestamp)) if self.using_timestamp else '../data/output/buildings_clusters_{0}.csv'.format(str(self.timestamp))
-
-        print(clusters_outname)
-
-        if not os.path.isdir(self.current_output_folder):
-            os.makedirs(self.current_output_folder)
-
-        # debug: select random of 100 buildings:
+        ############### debug: select random of 100 buildings: ########
         if session.debug_num_of_random_buildings > 0:
             df = session.buildings_df.sample(
                 n=session.debug_num_of_random_buildings)
@@ -146,6 +137,13 @@ class SimulationMode:
             session.buildings_df.update(df)
             print("selecting random {0} buildings:".format(
                 session.debug_num_of_random_buildings))
+
+        ################# export buildings_clusters to csv ############
+        clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(
+            self.timestamp)) if self.using_timestamp else '../data/output/buildings_clusters_{0}.csv'.format(str(self.timestamp))
+
+        if not os.path.isdir(self.current_output_folder):
+            os.makedirs(self.current_output_folder)
 
         selected_buildings = session.buildings_df[session.buildings_df.selected]
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',

@@ -109,7 +109,7 @@ def export_combined_emissions_graph(current_output_folder, outfile):
     # graphics:
     plt.title("Emissionen")
     plt.xlabel("Jahr")
-    plt.ylabel(r'$CO_{2}$ [kg/kWh]')
+    plt.ylabel(r'$CO_{2}$ [kg/Monat]')
     plt.xticks(rotation=270, fontsize=18)
     # plt.annotate date of connection
 
@@ -184,7 +184,7 @@ def export_combined_energy_prices_graph(current_output_folder, outfile):
     # TODO: specify colors
     plt.title("Energiekosten")
     plt.xlabel("Jahr")
-    plt.ylabel("[ct/kWh]")
+    plt.ylabel("[€/Monat]")
     plt.xticks(rotation=270, fontsize=18)
     # plt.annotate date of connection
 

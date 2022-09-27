@@ -37,15 +37,15 @@ class SimulationMode:
             runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
                                       index_col='var').loc['model_runtime_string', 'value']
             if runtime == '2020-2030':
-                self.final_step = 10 * 365
+                self.final_step = 10 * 365 - 3 # including leapyears
                 self.max_year = 2030  # used by slider
 
             elif runtime == '2020-2040':
-                self.final_step = 20 * 365
+                self.final_step = 20 * 365 - 5
                 self.max_year = 2040
 
             elif runtime == '2020-2045':
-                self.final_step = 25 * 365
+                self.final_step = 25 * 365 - 7
                 self.max_year = 2045
         else:
             # overwrite final step if set via flag --sim_steps:
@@ -137,17 +137,19 @@ class SimulationMode:
 
         # debug: select random of 100 buildings:
         if session.debug_num_of_random_buildings > 0:
-            df = session.buildings_df.sample(n=session.debug_num_of_random_buildings)
+            df = session.buildings_df.sample(
+                n=session.debug_num_of_random_buildings)
             df['selected'] = True
             df['group'] = [random.randint(0, 3) for x in df.values]
             if session.debug_force_connect:
                 df['connection_to_heat_grid'] = True
             session.buildings_df.update(df)
-            print("selecting random {0} buildings:".format(session.debug_num_of_random_buildings))
+            print("selecting random {0} buildings:".format(
+                session.debug_num_of_random_buildings))
 
         selected_buildings = session.buildings_df[session.buildings_df.selected]
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
-            'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
+                            'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
         session.gama_iteration_images[session.environment['iteration_round']] = [
@@ -165,6 +167,9 @@ class SimulationMode:
                 self.timestamp, str(self.final_step - 1))))
         ]
 
+        # send final_step to infoscreen:
+        session.api.send_dataframe_as_json(pandas.DataFrame(data={"final_step": [self.final_step]}))
+
         # start simulation
         self.make_xml(params, outputs, self.xml_path,
                       self.final_step, None, 'agent_decision_making')
@@ -172,46 +177,49 @@ class SimulationMode:
 
         ####################### export matplotlib graphs #######################
 
-        ##### individual buildings data ####
-
-        # get csv path, load data
-
+        ########## individual buildings data ########
         for group_df in session.buildings_groups_list:
             if group_df is not None:
                 for idx in group_df.index:
 
                     # export emissions graph:
                     graphs.export_graphs(
-                        csv_name="/emissions/CO2_emissions_{0}.csv".format(idx),
+                        csv_name="/emissions/CO2_emissions_{0}.csv".format(
+                            idx),
                         folders=self.output_folders,
                         columns=['building_emissions'],
                         title_="CO2-Emissionen",
-                        outfile=self.current_output_folder + "/emissions/CO2_emissions_{0}.png".format(idx),
+                        outfile=self.current_output_folder +
+                        "/emissions/CO2_emissions_{0}.png".format(idx),
                         xlabel_="Jahr",
-                        ylabel_="ø-Emissionen [g CO2 eq]",
+                        ylabel_="ø-Emissionen [$g_{CO2,eq}$]",
                         x_='current_date',
                     )
 
                     # export energy prices graph:
                     graphs.export_graphs(
-                        csv_name="/energy_prices/energy_prices_{0}.csv".format(idx),
+                        csv_name="/energy_prices/energy_prices_{0}.csv".format(
+                            idx),
                         folders=self.output_folders,
-                        columns=['building_expenses_heat', 'building_expenses_power'],
+                        columns=['building_expenses_heat',
+                                 'building_expenses_power'],
                         labels_=['Wärmekosten', 'Stromkosten'],
-                        outfile=self.current_output_folder + "/energy_prices/energy_prices_{0}.png".format(idx),
+                        outfile=self.current_output_folder +
+                        "/energy_prices/energy_prices_{0}.png".format(idx),
                         title_="Energiekosten",
                         xlabel_="Jahr",
-                        ylabel_="[€/kWh]???????",
+                        ylabel_="Energiekosten [€/Monat]",
                         x_='current_date'
                     )
 
                     # pass path to buildings in infoscreen-compatible format
-                    group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath('data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
-                    group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath('data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
+                    group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath(
+                        'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
+                    group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
+                        'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
                 session.buildings_df.update(group_df)
 
-        ######### neighborhood data ########
-
+        ############# neighborhood data #############
         graphs.export_combined_emissions_graph(
             self.current_output_folder,
             outfile=self.current_output_folder + "/energy_prices/CO2_emissions_groups.png")
@@ -224,10 +232,10 @@ class SimulationMode:
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
             folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
-            title_="akkumulierte Gesamtemissionen des Quartiers",
+            title_="kumulierte Gesamtemissionen des Quartiers",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
             xlabel_="Jahr",
-            ylabel_="Gesamte Emissionen [gCO2]",
+            ylabel_="CO2 [$g_{eq}$]",
             x_='current_date'
         )
 
@@ -235,34 +243,34 @@ class SimulationMode:
             csv_name="/energy_prices/energy_prices_total.csv",
             folders=self.output_folders,
             columns=['power_price', 'oil_price', 'gas_price'],
-            labels_=['Energiepreis', 'Ölpreis', 'Gaspreis'],
-            title_="Energiekosten",
+            labels_=['Strompreis', 'Ölpreis', 'Gaspreis'],
+            title_="Energiepreis",
             outfile=self.current_output_folder + "/energy_prices/energy_prices_total.png",
             xlabel_="Jahr",
-            ylabel_="Kosten [€]",
+            ylabel_="Preis [ct/kWh]",
             x_='current_date'
         )
 
         # define titles for images and their location
         self.matplotlib_neighborhood_images = {
-            "emissions_neighborhood_accu" : "data/outputs/output_{0}/emissions/CO2_emissions_neighborhood.png".format(str(self.timestamp)),
-            "energy_prices" : "data/outputs/output_{0}/energy_prices/energy_prices_total.png".format(str(self.timestamp)),
-            "emissions_groups" : "data/outputs/output_{0}/emissions/CO2_emissions_groups.png".format(str(self.timestamp)),
-            "energy_prices_groups" : "data/outputs/output_{0}/energy_prices/energy_prices_groups.png".format(str(self.timestamp))
+            "emissions_neighborhood_accu": "data/outputs/output_{0}/emissions/CO2_emissions_neighborhood.png".format(str(self.timestamp)),
+            "energy_prices": "data/outputs/output_{0}/energy_prices/energy_prices_total.png".format(str(self.timestamp)),
+            "emissions_groups": "data/outputs/output_{0}/emissions/CO2_emissions_groups.png".format(str(self.timestamp)),
+            "energy_prices_groups": "data/outputs/output_{0}/energy_prices/energy_prices_groups.png".format(str(self.timestamp))
         }
 
         # send matplotlib created images to infoscreen
         session.environment['neighborhood_images'] = self.matplotlib_neighborhood_images
         # session.api.send_dataframe_as_json(selected_buildings)
 
-        ############################### csv export #############################
+        ########################### csv export ########################
 
         # compose csv paths for infoscreen to make graphs
         session.emissions_data_paths[session.environment['iteration_round']] = [
             str(os.path.normpath('data/outputs/output_{0}/emissions/{1}'.format(self.timestamp, file_name))) for file_name in os.listdir('../data/outputs/output_{0}/emissions'.format(str(self.timestamp)))
         ]
 
-        ###### send GAMA image paths to infoscreen (per iteration round!) ######
+        ## send GAMA image paths to infoscreen (per iteration round!) #
         dataview_wrapper = ['' for i in range(session.num_of_rounds)]
         for i in range(session.num_of_rounds):
             images_and_data = {'iteration_round': i,
@@ -277,12 +285,15 @@ class SimulationMode:
 
         data_view_neighborhood_df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
-        session.environment['iteration_round'] = (session.environment['iteration_round'] + 1) % session.num_of_rounds  # increase round counter to globally log q-scope iterations
+
+        # increase round counter to globally log q-scope iterations:
+        session.environment['iteration_round'] = (
+            session.environment['iteration_round'] + 1) % session.num_of_rounds
 
         # TODO: wait until GAMA delivers outputs
         session.handlers['individual_data_view'].activate()
 
-
+    ########################### frontend input ########################
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
@@ -291,6 +302,7 @@ class SimulationMode:
 
             self.process_grid_change()
 
+    ############################# grid changes ########################
     def process_grid_change(self):
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
@@ -305,6 +317,7 @@ class SimulationMode:
 
         pass
 
+    ################################ draw #############################
     def draw(self, canvas):
         if session.VERBOSE_MODE:
             font = pygame.font.SysFont('Arial', 40)
@@ -315,7 +328,8 @@ class SimulationMode:
             # highlight selected buildings
             session.gis.draw_polygon_layer(
                 canvas,
-                session.buildings_df[session.buildings_df.selected], 2, (255, 0, 127)
+                session.buildings_df[session.buildings_df.selected], 2, (
+                    255, 0, 127)
             )
 
     ########################### script: prepare #######################

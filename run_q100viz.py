@@ -19,7 +19,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--random', help="select n random buildings", type=int, default=0)
 parser.add_argument('--verbose', '-v', help="start in verbose mode", action='store_true')
 parser.add_argument(
-    '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_NUM_STEPS'])
+    '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_FORCE_NUM_STEPS'])
 parser.add_argument('--force_connect', help="connect all buildings to Q100",
     action='store_true')
 parser.add_argument('--start_at', help="start at specific game mode", type=str, default=session.environment['mode'])
@@ -30,27 +30,30 @@ parser.add_argument('--research_model', help="use research model instead of q-Sc
 args = parser.parse_args()
 
 session.debug_num_of_random_buildings = args.random
-config['SIMULATION_NUM_STEPS'] = args.sim_steps
+config['SIMULATION_FORCE_NUM_STEPS'] = args.sim_steps
 session.debug_force_connect = args.force_connect
 session.active_handler = session.handlers[args.start_at]
 session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
 
+simulation_steps_string = 'force simulation to run {0} steps'.format(config['SIMULATION_FORCE_NUM_STEPS']) if config['SIMULATION_FORCE_NUM_STEPS'] != 0 else 'simulation will run as specified in ../data/includes/csv-data_technical/initial_variables.csv'
+print('\n', '#' * 72)
 print(
 """
 - random {0} buildings will be selected
 - force selected buildings to connect? {1}
-- simulation will run {2} steps
+- {2}
 - using simulation model file {3}
 """\
     .format(
         session.debug_num_of_random_buildings,
         str(session.debug_force_connect),
-        str(config['SIMULATION_NUM_STEPS']),
+        simulation_steps_string,
         str(config['GAMA_MODEL_FILE'])
     )
 )
+print('\n', '#' * 72, '\n')
 
 ############################## PYGAME SETUP ###########################
 # Set FPS

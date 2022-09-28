@@ -164,7 +164,7 @@ class SimulationMode:
         random_bd = buildings_df.sample(n=5)
         random_bd['selected'] = True
         random_bd['group'] = [random.randint(0, 3) for x in random_bd.values]
-        random_bd['connection_to_heat_grid'] = True
+        random_bd['connection_to_heat_grid'] = random.randint(2020, 2045)
         buildings_df.update(random_bd)
 
         # put these into user groups:

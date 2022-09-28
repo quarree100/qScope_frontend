@@ -58,7 +58,7 @@ class DataViewTotal_Mode():
             self.process_grid_change()
 
             connected_buildings = pd.DataFrame(data=[
-                {'connected_buildings' : len(session.buildings_df[session.buildings_df['connection_to_heat_grid'] == True])}])
+                {'connected_buildings' : len(session.buildings_df[session.buildings_df['connection_to_heat_grid'] != False])}])
             session.api.send_dataframe_as_json(connected_buildings)
 
     def process_grid_change(self):

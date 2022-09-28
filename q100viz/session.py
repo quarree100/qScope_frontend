@@ -78,7 +78,7 @@ environment = {
     'mode': 'buildings_interaction',
     'scenario_energy_prices' : 2018,
     'scenario_num_connections' : 0,  # how many more buildings to connect?
-    'iteration_round' : 0 # num of q-scope iterations during this workshops
+    'current_iteration_round' : 0 # num of q-scope iterations during this workshop
     }
 
 num_of_questions = 5  # TODO: this equals length of csv

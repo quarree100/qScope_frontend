@@ -3,6 +3,7 @@
 import pygame
 import json
 import numpy as np
+import random
 
 import q100viz.keystone as keystone
 import q100viz.session as session
@@ -170,17 +171,16 @@ class Slider:
 
                     # select and connect sampled buildings:
                     session.scenario_selected_buildings['selected'] = True
-                    session.scenario_selected_buildings['connection_to_heat_grid'] = True
-                    session.buildings.df.update(
-                        session.scenario_selected_buildings)
+                    session.scenario_selected_buildings['connection_to_heat_grid'] = random.randint(2020, session.handlers['simulation'].max_year)
                     print("selecting random {0} buildings:".format(
                         session.environment['scenario_num_connections']))
 
                 else:  # value is 0: deselect all
                     session.scenario_selected_buildings['selected'] = False
                     session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                    session.buildings.df.update(
-                        session.scenario_selected_buildings)
+                # update buildings:
+                session.buildings.df.update(
+                    session.scenario_selected_buildings)
 
             elif self.handle == 'scenario_energy_prices':
                 session.environment['scenario_energy_prices'] = [
@@ -207,7 +207,7 @@ class Slider:
 
             # questionnaire:
             elif self.handle == 'answer':
-                session.environment['answer'] = 'no' if self.value >= 0.5 else 'yes'
+                session.handlers['questionnaire'] = 'no' if self.value >= 0.5 else 'yes'
 
             elif self.handle == 'next_question':
                 if session.seconds_elapsed > self.last_change + 1:  # some delay for stable interaction

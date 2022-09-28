@@ -66,7 +66,7 @@ def make_groups(buildings):
     for group in buildings_groups:
             # aggregated data:
             connections_sum = group.groupby(
-                by='cell')['connection_to_heat_grid'].sum()
+                by='cell')['connection_to_heat_grid' != False].sum()
             data = json.loads(export_json(
                 connections_sum.rename('connections', inplace=True), None))
 
@@ -163,7 +163,7 @@ buildings['selected'] = False
 buildings['group'] = -1
 
 bd = buildings.sample(50)
-bd['connection_to_heat_grid'] = True
+bd['connection_to_heat_grid'] = random.randint(2020, 2045)
 buildings.update(bd)
 
 with pandas.option_context('display.max_rows', None,

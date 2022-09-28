@@ -143,7 +143,7 @@ class Buildings:
                 user_selected_buildings = json.loads(
                     api.export_json(group_df[session.COMMUNICATION_RELEVANT_KEYS], None))
                 group_wrapper['buildings'] = user_selected_buildings
-                group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] == True])
+                group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] != False])
 
                 message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)

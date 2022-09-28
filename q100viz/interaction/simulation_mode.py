@@ -130,13 +130,13 @@ class SimulationMode:
 
         ############### debug: select random of 100 buildings: ########
         if session.debug_num_of_random_buildings > 0:
-            df = session.buildings_df.sample(
+            df = session.buildings.df.sample(
                 n=session.debug_num_of_random_buildings)
             df['selected'] = True
             df['group'] = [random.randint(0, 3) for x in df.values]
             if session.debug_force_connect:
                 df['connection_to_heat_grid'] = random.randint(2020, session.handlers['simulation'].max_year)
-            session.buildings_df.update(df)
+            session.buildings.df.update(df)
             print("selecting random {0} buildings:".format(
                 session.debug_num_of_random_buildings))
 
@@ -147,7 +147,7 @@ class SimulationMode:
         if not os.path.isdir(self.current_output_folder):
             os.makedirs(self.current_output_folder)
 
-        selected_buildings = session.buildings_df[session.buildings_df.selected]
+        selected_buildings = session.buildings.df[session.buildings.df.selected]
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
                             'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
 
@@ -217,12 +217,14 @@ class SimulationMode:
                         'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
                     group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
                         'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
-                session.buildings_df.update(group_df)
+                session.buildings.df.update(group_df)
 
         ############# neighborhood data #############
         graphs.export_combined_emissions_graph(
+            session.buildings_groups_list,
             self.current_output_folder,
-            outfile=self.current_output_folder + "/energy_prices/CO2_emissions_groups.png")
+            self.current_output_folder + "/emissions/CO2_emissions_groups.png"
+            )
 
         graphs.export_combined_energy_prices_graph(
             self.current_output_folder,
@@ -307,7 +309,7 @@ class SimulationMode:
                         pass
 
         session.api.send_simplified_dataframe_with_environment_variables(
-            session.buildings_df[session.buildings_df.selected], session.environment)
+            session.buildings.df[session.buildings.df.selected], session.environment)
 
     def update(self):
 
@@ -320,11 +322,11 @@ class SimulationMode:
             canvas.blit(font.render("Berechne Energiekosten und Emissionen...", True, (255, 255, 255)),
                         (session.canvas_size[0]/4, session.canvas_size[1]/2))
 
-        if len(session.buildings_df[session.buildings_df.selected]):
+        if len(session.buildings.df[session.buildings.df.selected]):
             # highlight selected buildings
             session.gis.draw_polygon_layer(
                 canvas,
-                session.buildings_df[session.buildings_df.selected], 2, (
+                session.buildings.df[session.buildings.df.selected], 2, (
                     255, 0, 127)
             )
 

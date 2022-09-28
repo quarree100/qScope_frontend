@@ -2,7 +2,21 @@ import matplotlib.pyplot as plt
 import pandas
 import datetime
 
-import q100viz.session as session
+quarree_colors_8bit = [   # corporate design of QUARREE100
+    (0, 117, 180),   # Quarree-blue
+    (253, 193, 19),  # Quarree-yellow
+    (0, 168, 78),    # Quarree-dark-green
+    (186, 212, 50),  # Quarree-light-green
+    (103, 102, 104)  # Quarree-gray
+]
+quarree_colors_float = [   # corporate design of QUARREE100
+    (0/255, 117/255, 180/255),   # Quarree-blue
+    (253/255, 193/255, 19/255),  # Quarree-yellow
+    (0/255, 168/255, 78/255),    # Quarree-dark-green
+    (186/255, 212/255, 50/255),  # Quarree-light-green
+    (103/255, 102/255, 104/255)  # Quarree-gray
+]
+
 
 ############################### export graphs #####################
 def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, folders=None, outfile=None):
@@ -20,7 +34,6 @@ def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labe
             rounds_data.append(csv_data)
         except Exception as e:
             print(e, "... probably the selected buildings have changed between the rounds")
-            session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
     plt.figure(figsize=(16, 9))  # inches
     it_round = 0
@@ -32,11 +45,11 @@ def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labe
 
             # lower brightness for each round:
             color_ = (
-                session.quarree_colors_float[col_num % len(
+                quarree_colors_float[col_num % len(
                     columns)][0]/(1+it_round*0.33),  # r, float
-                session.quarree_colors_float[col_num % len(
+                quarree_colors_float[col_num % len(
                     columns)][1]/(1+it_round*0.33),  # g, float
-                session.quarree_colors_float[col_num % len(
+                quarree_colors_float[col_num % len(
                     columns)][2]/(1+it_round*0.33),  # b, float
             )
 
@@ -60,13 +73,10 @@ def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labe
     plt.xticks(rotation=270, fontsize=18)
     plt.legend(loc='upper left')
 
-    if session.TEST_MODE == "matplotlib":
-        plt.show()
-        quit()
-
     plt.savefig(outfile, transparent=True)
 
-def export_combined_emissions_graph(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False):
+###################### graphs for "total data view" ###################
+def export_combined_emissions_graph(buildings_groups_list, current_output_folder, outfile, graph_popup=False):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -130,7 +140,7 @@ def export_combined_emissions_graph(buildings_groups_list, current_output_folder
     if outfile:
         plt.savefig(outfile, transparent=True)
 
-def export_combined_energy_prices_graph(current_output_folder, outfile):
+def export_combined_energy_prices_graph(buildings_groups_list, current_output_folder, outfile):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -143,7 +153,7 @@ def export_combined_energy_prices_graph(current_output_folder, outfile):
     # get csv for each building in each group
     data = []
     labels = []
-    for group_df in session.buildings_groups_list:
+    for group_df in buildings_groups_list:
         if group_df is not None:
             for idx in group_df.index:
                 # load from csv:

@@ -156,7 +156,7 @@ grid_2 = grid.Grid(
         {'slider2' : (0, ncols)})
 
 # init buildings:
-buildings_df = buildings.load_data()
+buildings.load_data()
 
 # mode-specific grid setup:
 buildings_interaction_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])

@@ -111,7 +111,7 @@ class Grid:
                     cell.prev_rot = cell.rot
 
             session.flag_export_canvas = True
-            session.active_handler.process_grid_change()
+            session.active_mode.process_grid_change()
 
             # update slider values TODO: adjust this if more than 1 slider per grid
             # TODO: this causes type error when no slider value provided in cspy → provide 0 by default?

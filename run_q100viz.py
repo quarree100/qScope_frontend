@@ -29,7 +29,7 @@ args = parser.parse_args()
 session.debug_num_of_random_buildings = args.random
 config['SIMULATION_FORCE_NUM_STEPS'] = args.sim_steps
 session.debug_force_connect = args.force_connect
-session.active_handler = session.handlers[args.start_at]
+session.active_mode = session.string_to_mode(args.start_at)
 session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
@@ -100,14 +100,14 @@ udp_thread = threading.Thread(target=udp_server.listen,
                                 daemon=True)
 udp_thread.start()
 
-session.active_handler.activate()
+session.active_mode.activate()
 
 ############################ Begin Game Loop ##########################
 while True:
     # process mouse/keyboard events
     for event in pygame.event.get():
-        if session.active_handler:
-            session.active_handler.process_event(event)
+        if session.active_mode:
+            session.active_mode.process_event(event)
 
         if event.type == KEYDOWN:
             ############################# graphics ####################
@@ -129,24 +129,23 @@ while True:
             ##################### mode selection ######################
             # enter questionnaire mode:
             if event.key == K_1:
-                session.handlers['questionnaire'].activate()
+                session.questionnaire.activate()
             # activate Input Scenarios Mode:
             # elif event.key == K_2:
-            #     session.handlers['input_scenarios'].activate()
+            #     session.input_scenarios.activate()
             # activate Input Households Mode:
             elif event.key == K_3:
-                session.handlers['buildings_interaction'].activate()
+                session.buildings_interaction.activate()
             # enter simulation mode:
             elif event.key == K_4:
                 session.environment['active_scenario_handle'] = 'A'
-                session.handlers['simulation'].activate()
+                session.simulation.activate()
             elif event.key == K_5:
-                session.handlers['individual_data_view'].activate()
+                session.individual_data_view.activate()
 
             # toggle calibration:
             elif event.key == K_c:
-                session.active_handler = session.handlers[
-                    'calibrate' if session.active_handler != session.handlers['calibrate'] else 'buildings_interaction']
+                session.active_mode = session.calibration if session.active_mode != session.calibration else session.buildings_interaction
 
             ########## manual slider control for test purposes: #######
             elif event.key == K_PLUS:
@@ -180,7 +179,7 @@ while True:
             sys.exit()
 
     # update running mode:
-    session.active_handler.update()
+    session.active_mode.update()
 
     ################################## DRAWING ########################
     # clear surfaces
@@ -237,8 +236,8 @@ while True:
     pygame.draw.polygon(session.viewport, (0, 0, 0), session.viewport.transform(mask_points))
 
     # draw mode-specific surface:
-    if session.active_handler:
-        session.active_handler.draw(session.viewport)
+    if session.active_mode:
+        session.active_mode.draw(session.viewport)
 
     # render surfaces
     if session.show_basemap:

@@ -136,8 +136,8 @@ class Slider:
                 handler = [key for key in ['buildings_interaction', 'simulation',
                                         'individual_data_view', 'total_data_view']][int(self.value * 4)]
                 print(handler)
-                session.active_handler = session.handlers[handler]
-                session.active_handler.activate()  # TODO: add confidence delay!
+                session.active_mode = session.string_to_mode[handler]
+                session.active_mode.activate()  # TODO: add confidence delay!
 
             elif self.handle == 'num_connections':
                 session.environment['scenario_num_connections'] = int(
@@ -171,7 +171,7 @@ class Slider:
 
                     # select and connect sampled buildings:
                     session.scenario_selected_buildings['selected'] = True
-                    session.scenario_selected_buildings['connection_to_heat_grid'] = random.randint(2020, session.handlers['simulation'].max_year)
+                    session.scenario_selected_buildings['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
                     print("selecting random {0} buildings:".format(
                         session.environment['scenario_num_connections']))
 
@@ -191,7 +191,7 @@ class Slider:
             # household-specific:
             if self.handle == 'connection_to_heat_grid':
                 session.buildings.df.loc[((
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [2020, session.handlers['simulation'].max_year]))
+                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [2020, session.simulation.max_year]))
                 self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
                     np.interp(float(self.value), [0.2, 1], [2020, 2045]))
 
@@ -207,21 +207,21 @@ class Slider:
 
             # questionnaire:
             elif self.handle == 'answer':
-                session.handlers['questionnaire'] = 'no' if self.value >= 0.5 else 'yes'
+                session.questionnaire.answer = 'no' if self.value >= 0.5 else 'yes'
 
             elif self.handle == 'next_question':
                 if session.seconds_elapsed > self.last_change + 1:  # some delay for stable interaction
                     if self.toggle_question:
                         if self.value >= 0.5:
                             self.toggle_question = not self.toggle_question
-                            if session.active_handler is session.handlers['questionnaire']:
-                                session.active_handler.get_next_question()
+                            if session.active_mode is session.questionnaire:
+                                session.active_mode.get_next_question()
                             self.last_change = session.seconds_elapsed
                     else:
                         if self.value < 0.5:
                             self.toggle_question = not self.toggle_question
-                            if session.active_handler is session.handlers['questionnaire']:
-                                session.active_handler.get_next_question()
+                            if session.active_mode is session.questionnaire:
+                                session.active_mode.get_next_question()
                             self.last_change = session.seconds_elapsed
 
             session.api.send_message(json.dumps(session.environment))

@@ -27,7 +27,7 @@ class DataViewIndividual_Mode():
         #         image.warp()
 
     def activate(self):
-        session.active_handler = self
+        session.active_mode = self
         session.environment['mode'] = self.name
 
         session.show_polygons = False
@@ -72,9 +72,9 @@ class DataViewIndividual_Mode():
                 for x, cell in enumerate(row):
                     if cell.selected:
                         if cell.handle == 'start_total_data_view':
-                            session.handlers['total_data_view'].activate()
+                            session.total_data_view.activate()
                         elif cell.handle == 'start_buildings_interaction':
-                            session.handlers['buildings_interaction'].activate()
+                            session.buildings_interaction.activate()
 
         data_view_individual_data = pd.DataFrame(data={
             "data_view_individual_data" : [session.buildings.make_buildings_groups_dict()]})

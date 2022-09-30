@@ -192,7 +192,6 @@ with ``[[???[x], ???[y]], [upper-left[x], upper-left[y]], [upper-right[x], upper
 Modes
 ^^^^^
 * there are different machine states, defined by the files in ``q100viz/interaction/`` → these are the modes the program is running at (per time)
-* states are defined via `session.handlers`
 * implemented modes are:
     * CalibrationMode_
     * EditMode_: deprecated!
@@ -352,9 +351,9 @@ and then in `input_mode.py`:
 
     # enter simulation mode:
   elif x == int(session.grid_settings['ncols'] * 2 / 3 + 2):
-      session.active_handler = session.handlers['simulation']
+      session.active_mode = session.simulation
       grid.deselect(int(session.grid_settings['ncols'] * 2 / 3), len(grid.grid) - 1)
-      print(session.active_handler)
+      print(session.active_mode)
 
       # compose dataframe to start
       df = pd.DataFrame(session.environment, index=[0])

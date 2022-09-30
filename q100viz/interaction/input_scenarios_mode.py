@@ -39,7 +39,7 @@ class Input_Scenarios:
         # graphics:
         session.show_polygons = False
         session.show_basemap = False
-        session.active_handler = self
+        session.active_mode = self
         session.environment['mode'] = self.name
 
         # sliders:
@@ -97,7 +97,7 @@ class Input_Scenarios:
                         # set slider handles via selected cell in last row:
                         elif cell.handle is not None:
                             if cell.handle == 'start_buildings_interaction':
-                                session.handlers['buildings_interaction'].activate()
+                                session.buildings_interaction.activate()
 
         session.api.send_session_env()
 

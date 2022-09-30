@@ -32,6 +32,9 @@ class SimulationMode:
 
     def activate(self):
 
+        session.environment['mode'] = self.name
+        session.active_mode = self
+
         # increase round counter to globally log q-scope iterations:
         session.environment['current_iteration_round'] = (
             session.environment['current_iteration_round'] + 1) % session.num_of_rounds
@@ -57,9 +60,6 @@ class SimulationMode:
 
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
-
-        session.environment['mode'] = self.name
-        session.active_handler = self
 
         # display setup:
         for grid in session.grid_1, session.grid_2:
@@ -135,7 +135,7 @@ class SimulationMode:
             df['selected'] = True
             df['group'] = [random.randint(0, 3) for x in df.values]
             if session.debug_force_connect:
-                df['connection_to_heat_grid'] = random.randint(2020, session.handlers['simulation'].max_year)
+                df['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
             session.buildings.df.update(df)
             print("selecting random {0} buildings:".format(
                 session.debug_num_of_random_buildings))
@@ -289,7 +289,7 @@ class SimulationMode:
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
 
         # TODO: wait until GAMA delivers outputs
-        session.handlers['individual_data_view'].activate()
+        session.individual_data_view.activate()
 
     ########################### frontend input ########################
     def process_event(self, event):
@@ -385,7 +385,7 @@ class SimulationMode:
         subprocess.call(command, shell=True)
         print("simulation finished. duration = ",
               datetime.datetime.now() - sim_start)
-        # self.open_and_call(command, session.handlers['individual_data_view'].activate())
+        # self.open_and_call(command, session.individual_data_view.activate())
 
         os.chdir(self.cwd)  # return to previous cwd
 

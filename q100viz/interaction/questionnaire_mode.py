@@ -13,10 +13,11 @@ class Questionnaire_Mode():
     def __init__(self):
         self.name = 'questionnaire'
         self.question_index = 0
+        self.answer = 'no'
         # session.question = session.questions[self.question_index]
 
     def activate(self):
-        session.active_handler = session.handlers['questionnaire']
+        session.active_mode = self
         session.environment['mode'] = self.name
 
         session.show_polygons = False
@@ -34,7 +35,7 @@ class Questionnaire_Mode():
         session.grid_2.sliders['slider2'].show_controls = False
         session.grid_2.sliders['slider2'].handle = 'next_question'
 
-        session.active_handler = session.handlers['questionnaire']
+        session.active_mode = session.questionnaire
         session.environment['mode'] = self.name
 
         session.api.send_df_with_session_env(None)
@@ -84,7 +85,7 @@ class Questionnaire_Mode():
                 pd.DataFrame(data={"question_number" : [self.question_index]}))
         else:  # leave questionnaire mode, enter input mode
             self.question_index = 0
-            session.handlers['input_scenarios'].activate()
+            session.input_scenarios.activate()
 
     def update(self):
         pass

@@ -11,7 +11,7 @@ class Buildings_Interaction:
         self.selection_mode = config['buildings_selection_mode'] # decides how to select intersected buildings. can be 'all' or 'rotation'
 
     def activate(self):
-        session.active_handler = session.handlers['buildings_interaction']
+        session.active_mode = self
         session.environment['mode'] = self.name
 
         # graphics:
@@ -86,13 +86,13 @@ class Buildings_Interaction:
                                         slider.update_handle(cell.handle, cell.id)
 
                             elif cell.handle == 'start_individual_data_view':
-                                session.handlers['individual_data_view'].activate()
+                                session.individual_data_view.activate()
 
                             elif cell.handle == 'start_total_data_view':
-                                session.handlers['total_data_view'].activate()
+                                session.total_data_view.activate()
 
                             elif cell.handle == 'start_simulation':
-                                session.handlers['simulation'].activate()
+                                session.simulation.activate()
 
         session.api.send_message(json.dumps(session.buildings.make_buildings_groups_dict()))
 

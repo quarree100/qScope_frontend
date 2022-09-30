@@ -5,6 +5,7 @@ import pygame
 import json
 
 import q100viz.session as session
+import q100viz.devtools as devtools
 import q100viz.gis as gis
 import q100viz.api as api
 from q100viz.settings.config import config
@@ -103,16 +104,16 @@ class Buildings:
 
         for idx, row in self.df.iterrows():
             polygon = row['geometry']
-            points = session.gis.surface.transform(polygon.exterior.coords)
-            pygame.draw.polygon(session.gis.surface, pygame.Color(255,123,222), points)
+            points = session._gis.surface.transform(polygon.exterior.coords)
+            pygame.draw.polygon(session._gis.surface, pygame.Color(255,123,222), points)
 
             poly = shapely.geometry.Polygon(points)
             centroid = poly.centroid
 
             shortest_dist = 9999999
 
-            for linestring in session.gis.nahwaermenetz.to_dict('records'):
-                line_points = session.gis.surface.transform(linestring['geometry'].coords)
+            for linestring in session._gis.nahwaermenetz.to_dict('records'):
+                line_points = session._gis.surface.transform(linestring['geometry'].coords)
                 line = shapely.geometry.LineString(line_points)
 
                 interpol = line.interpolate(line.project(centroid))
@@ -182,8 +183,8 @@ class Buildings:
                 interval += 0.1  # increase range, try again if necessary
 
             cluster_list.append(cluster)
-            session.print_verbose(
-                "building {0} is in a group of to {1} buildings with similar specs:".format(self.df.index[idx], len(cluster)))
-            # session.print_verbose(cluster[['spec_heat_consumption', 'spec_power_consumption']].describe())
+            devtools.print_verbose(
+                "building {0} is in a group of to {1} buildings with similar specs:".format(self.df.index[idx], len(cluster)), session.VERBOSE_MODE)
+            # devtools.print_verbose(cluster[['spec_heat_consumption', 'spec_power_consumption']].describe(), session.VERBOSE_MODE)
 
         return cluster_list

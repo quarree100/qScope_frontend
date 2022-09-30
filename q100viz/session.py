@@ -2,9 +2,12 @@
 
 import pandas as pd
 import pygame
+import json
 
 from q100viz.settings.config import config
 import q100viz.api as api
+import q100viz.gis as gis
+import q100viz.grid as grid
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
 # from q100viz.interaction.input_scenarios_mode import Input_Scenarios
@@ -63,16 +66,59 @@ num_of_rounds = 4  # max num of rounds; will repeat after this
 num_of_users = 4  # num of valid users # TODO: combine with num of valid tags!
 gama_iteration_images = ['' for n in range(num_of_rounds)]
 emissions_data_paths = ['' for n in range(num_of_rounds)]
+
 ##################### global variables: #####################
-gis = None
-basemap = None
-grid_1 = None
-grid_2 = None
 buildings = q100viz.buildings.Buildings()
 buildings_groups_list = [None for n in range(num_of_users)]
+
 scenario_selected_buildings = pd.DataFrame()
 seconds_elapsed = 0
 ticks_elapsed = 0
+
+# Initialize geographic viewport and basemap
+_gis = gis.GIS(
+    canvas_size,
+    # northeast          northwest           southwest           southeast
+    [[1013631, 7207409], [1012961, 7207198], [1013359, 7205932], [1014029, 7206143]],
+    viewport)
+
+basemap = gis.Basemap(
+    canvas_size, config['BASEMAP_FILE'],
+    # northwest          southwest           southeast           northeast
+    [[1012695, 7207571], [1012695, 7205976], [1014205, 7205976], [1014205, 7207571]],
+    _gis)
+basemap.warp()
+
+############################## INITIALIZATION #########################
+# Initialize grid, projected onto the viewport
+grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))  # TODO: seperate files for the two grids
+nrows = grid_settings['nrows']
+ncols = grid_settings['ncols']
+grid_1 = grid.Grid(
+    canvas_size, ncols, nrows, [
+        [config['GRID_1_X1'], config['GRID_1_Y1']],
+        [config['GRID_1_X1'], config['GRID_1_Y2']],
+        [config['GRID_1_X2'], config['GRID_1_Y2']],
+        [config['GRID_1_X2'], config['GRID_1_Y1']]],
+        viewport, config['GRID_1_SETUP_FILE'],
+        {'slider0' : [[0, 115], [0, 100], [50, 100], [50, 115]],
+            'slider1' : [[50, 115], [50, 100], [100, 100], [100, 115]]},
+        {'slider0' : (0, int(ncols/2)),
+        'slider1' : (int(ncols/2), ncols)})
+grid_2 = grid.Grid(
+    canvas_size, ncols, nrows, [
+        [config['GRID_2_X1'], config['GRID_2_Y1']],
+        [config['GRID_2_X1'], config['GRID_2_Y2']],
+        [config['GRID_2_X2'], config['GRID_2_Y2']],
+        [config['GRID_2_X2'], config['GRID_2_Y1']]],
+        viewport, config['GRID_2_SETUP_FILE'],
+        {'slider2' : [[0, 115], [0, 100], [50, 100], [50, 115]]},
+        {'slider2' : (0, ncols)})
+
+buildings_df = buildings.load_data()
+
+show_polygons = False
+show_basemap = False
 
 environment = {
     'mode': 'buildings_interaction',
@@ -126,8 +172,3 @@ handlers = {
 }
 active_handler = handlers[environment['mode']]
 flag_export_canvas = False
-
-######################## dev tools ##########################
-def print_verbose(message):
-    if VERBOSE_MODE:
-        print(message)

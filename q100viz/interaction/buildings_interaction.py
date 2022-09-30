@@ -101,7 +101,7 @@ class Buildings_Interaction:
         try:
             # highlight selected buildings (draws colored stroke on top)
             if len(session.buildings.df[session.buildings.df.selected]):
-                session.gis.draw_polygon_layer(
+                session._gis.draw_polygon_layer(
                     canvas,
                     session.buildings.df[session.buildings.df.selected], 2, (255, 0, 127)
                 )
@@ -131,4 +131,4 @@ def get_intersection(df, grid, x, y):
         [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
     )
     # find elements intersecting with selected cell
-    return session.gis.get_intersection_indexer(df, cell_vertices)
+    return session._gis.get_intersection_indexer(df, cell_vertices)

@@ -3,6 +3,7 @@ import pandas
 import threading
 import socketio
 import q100viz.session as session
+import q100viz.devtools as devtools
 import datetime
 
 
@@ -22,8 +23,8 @@ class API:
 
     def send_message(self, msg):
         if msg != self.previous_message:
-            session.print_verbose(datetime.datetime.now().strftime(
-                " %H:%M:%S ") + "sending data:\n" + str(msg))
+            devtools.print_verbose(datetime.datetime.now().strftime(
+                " %H:%M:%S ") + "sending data:\n" + str(msg), session.VERBOSE_MODE)
             try:
                 self.io.emit('message', msg)
                 self.previous_message = msg

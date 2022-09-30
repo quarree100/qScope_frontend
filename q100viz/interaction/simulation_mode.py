@@ -324,7 +324,7 @@ class SimulationMode:
 
         if len(session.buildings.df[session.buildings.df.selected]):
             # highlight selected buildings
-            session.gis.draw_polygon_layer(
+            session._gis.draw_polygon_layer(
                 canvas,
                 session.buildings.df[session.buildings.df.selected], 2, (
                     255, 0, 127)

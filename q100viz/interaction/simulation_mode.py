@@ -57,6 +57,7 @@ class SimulationMode:
         else:
             # overwrite final step if set via flag --sim_steps:
             self.final_step = config['SIMULATION_FORCE_NUM_STEPS']
+            self.max_year = self.final_step / 365
 
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))

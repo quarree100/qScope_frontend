@@ -197,20 +197,20 @@ while True:
     if session.show_polygons:
         session._gis.draw_linestring_layer(canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
         session._gis.draw_polygon_layer(canvas, session._gis.waermezentrale, 0, (252, 137, 0))
-        session._gis.draw_buildings_connections(session.buildings_df)  # draw lines to closest heat grid
+        session._gis.draw_buildings_connections(session.buildings.df)  # draw lines to closest heat grid
         session._gis.draw_polygon_layer_bool(
-            canvas, session.buildings_df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
+            canvas, session.buildings.df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
         session._gis.draw_polygon_layer_bool(
-            canvas, session.buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
+            canvas, session.buildings.df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
 
         # stroke according to connection status:
         session._gis.draw_polygon_layer_bool(
-            surface=canvas, df=session.buildings_df, stroke=1, fill_false=(0, 0, 0), fill_true=(0, 168, 78), fill_attr='connection_to_heat_grid')
+            surface=canvas, df=session.buildings.df, stroke=1, fill_false=(0, 0, 0), fill_true=(0, 168, 78), fill_attr='connection_to_heat_grid')
 
 
         # color buildings if connection is not -1:
         # session.gis.draw_polygon_layer_connection_year(
-        #     session.buildings_df,
+        #     session.buildings.df,
         #     stroke=0,
         #     fill_true=(96, 205, 21),
         #     fill_false=(213, 50, 21),
@@ -218,11 +218,11 @@ while True:
 
         # # stroke simple black:
         # session.gis.draw_polygon_layer_bool(
-        #     canvas, session.buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')
+        #     canvas, session.buildings.df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')
 
         # # stroke according to connection status:
         # session.gis.draw_polygon_layer_connection_year(
-        #     session.buildings_df,
+        #     session.buildings.df,
         #     stroke=2,
         #     fill_true=(0, 168, 78),
         #     fill_false=(0),

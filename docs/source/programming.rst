@@ -291,7 +291,7 @@ valid handles are:
   ✓, spec_power_consumption, float
   ✓, energy_source,"gas, oil, None"
 
-zusätzlich kann `environmental_engagement` eingestellt werden als Einstellung von Agentenverhalten (TODO!)
+zusätzlich kann `save_energy` eingestellt werden als Einstellung von Agentenverhalten (TODO!)
 
 **questionnaire**:
 

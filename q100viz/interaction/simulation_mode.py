@@ -30,7 +30,7 @@ class SimulationMode:
 
         self.xml = None
 
-    def activate(self):
+    def activate(self, max_year=None):
 
         session.environment['mode'] = self.name
         session.active_mode = self
@@ -58,6 +58,10 @@ class SimulationMode:
             # overwrite final step if set via flag --sim_steps:
             self.final_step = config['SIMULATION_FORCE_NUM_STEPS']
             self.max_year = self.final_step / 365
+
+        if max_year is not None:
+            self.max_year = max_year
+            self.final_step = ((max_year - 2020) * 365) + int((max_year - 2020)/4)
 
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
@@ -150,7 +154,7 @@ class SimulationMode:
 
         selected_buildings = session.buildings.df[session.buildings.df.selected]
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
-                            'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
+                            'connection_to_heat_grid', 'refurbished', 'save_energy']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
         session.gama_iteration_images[session.environment['current_iteration_round']] = [
@@ -179,7 +183,7 @@ class SimulationMode:
         ####################### export matplotlib graphs #######################
 
         ########## individual buildings data ########
-        for group_df in session.buildings_groups_list:
+        for group_df in session.buildings.list_from_groups():
             if group_df is not None:
                 for idx in group_df.index:
 
@@ -222,7 +226,7 @@ class SimulationMode:
 
         ############# neighborhood data #############
         graphs.export_combined_emissions_graph(
-            session.buildings_groups_list,
+            session.buildings.list_from_groups(),
             self.current_output_folder,
             self.current_output_folder + "/emissions/CO2_emissions_groups.png"
             )

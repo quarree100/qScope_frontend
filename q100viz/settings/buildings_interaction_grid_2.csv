@@ -1,7 +1,7 @@
 x,y,handle,color
 0,18,connection_to_heat_grid,aquamarine
 2,18,refurbished,burlywood1
-4,18,environmental_engagement,cadetblue1
+4,18,save_energy,cadetblue1
 20,12,start_total_data_view,darkolivegreen
 20,14,start_individual_data_view,darkolivegreen1
 20,16,start_simulation,yellow

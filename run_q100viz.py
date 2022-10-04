@@ -34,7 +34,7 @@ session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
 
-simulation_steps_string = 'force simulation to run {0} steps'.format(config['SIMULATION_FORCE_NUM_STEPS']) if config['SIMULATION_FORCE_NUM_STEPS'] != 0 else 'simulation will run as specified in ../data/includes/csv-data_technical/initial_variables.csv'
+simulation_steps_string = 'force simulation to run {0} steps'.format(config['SIMULATION_FORCE_NUM_STEPS']) if config['SIMULATION_FORCE_NUM_STEPS'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
 print('\n', '#' * 72)
 print(
 """

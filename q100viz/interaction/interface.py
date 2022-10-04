@@ -47,7 +47,7 @@ class Slider:
         # stores coordinates as [[bottom-left.x, bottom-left.y], [top-left.x, top-left.y] [top-right.x, top-right.y], [bottom-right.x, bottom-right.y]]
         self.coords_transformed = self.surface.transform(coords)
         self.VALID_HANDLES = ['connection_to_heat_grid', 'refurbished',
-                              'environmental_engagement', 'game_stage', 'num_connections', 'scenario_energy_prices', 'default']
+                              'save_energy', 'game_stage', 'num_connections', 'scenario_energy_prices', 'default']
 
         self.human_readable_value = {None: ''}
         for key in self.VALID_HANDLES:
@@ -55,7 +55,7 @@ class Slider:
         self.human_readable_function = {
             'connection_to_heat_grid': "Wärmenetzanschluss",
             'refurbished': "Sanierung",
-            'environmental_engagement': "Energiebewusstsein",
+            'save_energy': "Energie sparen",
             'game_stage': "Spielmodus",
             'num_connections': "zusätzliche Anschlüsse",
             'scenario_energy_prices': "Energiekostenszenario",
@@ -163,7 +163,7 @@ class Slider:
                         session.log += "\n%s" % e
 
                     # drop already selected buildings from list:
-                    for buildings_group in session.buildings_groups_list:
+                    for buildings_group in session.buildings.list_from_groups():
                         for idx in buildings_group.index:
                             if idx in session.scenario_selected_buildings.index:
                                 session.scenario_selected_buildings = session.scenario_selected_buildings.drop(
@@ -200,10 +200,10 @@ class Slider:
                     session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'refurbished'] = self.value > 0.5
                 self.human_readable_value['refurbished'] = 'saniert' if self.value > 0.5 else 'unsaniert'
 
-            elif self.handle == 'environmental_engagement':
+            elif self.handle == 'save_energy':
                 session.buildings.df.loc[(
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'environmental_engagement'] = self.value > 0.5
-                self.human_readable_value['environmental_engagement'] = self.value
+                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'save_energy'] = self.value > 0.5
+                self.human_readable_value['save_energy'] = self.value
 
             # questionnaire:
             elif self.handle == 'answer':

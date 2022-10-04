@@ -95,7 +95,7 @@ def export_combined_emissions_graph(buildings_groups_list, current_output_folder
                     group_df.loc[idx, 'address'],
                     "saniert" if group_df.loc[idx, 'refurbished'] else "unsaniert",
                     group_df.loc[idx, 'connection_to_heat_grid'] if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
-                    "energiesparend" if group_df.loc[idx, 'environmental_engagement'] else "normaler Verbrauch")
+                    "energiesparend" if group_df.loc[idx, 'save_energy'] else "normaler Verbrauch")
                 )
 
     # make graph
@@ -143,7 +143,7 @@ def export_combined_energy_prices_graph(current_output_folder, outfile):
     # get csv for each building in each group
     data = []
     labels = []
-    for group_df in session.buildings_groups_list:
+    for group_df in session.buildings.list_from_groups():
         if group_df is not None:
             for idx in group_df.index:
                 # load from csv:

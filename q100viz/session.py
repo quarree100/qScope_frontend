@@ -73,7 +73,6 @@ emissions_data_paths = ['' for n in range(num_of_rounds)]
 
 ##################### global variables: #####################
 buildings = q100viz.buildings.Buildings()
-buildings_groups_list = [None for n in range(num_of_users)]
 
 scenario_selected_buildings = pd.DataFrame()
 seconds_elapsed = 0
@@ -82,8 +81,8 @@ ticks_elapsed = 0
 # list of possible handles
 mode_selector_handles = ['start_individual_data_view', 'start_total_data_view'
                          'start_buildings_interaction', 'start_simulation']
-COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'CO2', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'environmental_engagement', 'environmental_engagement_prior', 'energy_source', 'cell']
-VALID_GRID_HANDLES = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'environmental_engagement', 'game_stage', 'num_connections', 'scenario_energy_prices']
+COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'CO2', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'save_energy', 'save_energy_prior', 'energy_source', 'cell']
+VALID_GRID_HANDLES = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'save_energy', 'game_stage', 'num_connections', 'scenario_energy_prices']
 
 # environment (used for communication with infoscreen)
 environment = {

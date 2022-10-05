@@ -5,7 +5,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, folders=None, outfile=None):
+def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, search_in_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -13,10 +13,18 @@ def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labe
     rounds_data = []
 
     # looks for all files with specified csv_name:
-    for output_folder in folders:
+    for output_folder in search_in_folders:
         try:
             csv_data = (pandas.read_csv(output_folder + csv_name))
             csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
+
+            # data conversion:
+            for col in columns:
+                if convert_grams_to_tons:
+                    csv_data[col] = csv_data[col].apply(grams_to_tons)
+                elif convert_grams_to_kg:
+                    csv_data[col] = csv_data[col].apply(grams_to_kg)
+
             rounds_data.append(csv_data)
         except Exception as e:
             print(e, "... probably the selected buildings have changed between the rounds")
@@ -60,13 +68,9 @@ def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labe
     plt.xticks(rotation=270, fontsize=18)
     plt.legend(loc='upper left')
 
-    if session.TEST_MODE == "matplotlib":
-        plt.show()
-        quit()
-
     plt.savefig(outfile, transparent=True)
 
-def export_combined_emissions_graph(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False):
+def export_combined_emissions(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -78,7 +82,8 @@ def export_combined_emissions_graph(buildings_groups_list, current_output_folder
 
     # get csv for each building in each group
     data = []
-    labels = []
+    decisions = []
+    addresses = []
     for group_df in buildings_groups_list:
         if group_df is not None:
             for idx in group_df.index:
@@ -90,13 +95,15 @@ def export_combined_emissions_graph(buildings_groups_list, current_output_folder
                     data.append(new_df)
                 except Exception as e:
                     print(e)
-                labels.append(
-                    "{0}\n({1}, Anschluss {2}, {3})".format(
-                    group_df.loc[idx, 'address'],
+
+                # add labels:
+                decisions.append(
+                    "{0}, Anschluss: {1}, {2})".format(
                     "saniert" if group_df.loc[idx, 'refurbished'] else "unsaniert",
                     group_df.loc[idx, 'connection_to_heat_grid'] if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
                     "energiesparend" if group_df.loc[idx, 'save_energy'] else "normaler Verbrauch")
                 )
+                addresses.append(group_df.loc[idx, 'address'])
 
     # make graph
     plt.figure(figsize=(16,9))  # inches
@@ -107,7 +114,7 @@ def export_combined_emissions_graph(buildings_groups_list, current_output_folder
 
         # annotate lines:
         plt.gca().annotate(
-            labels[label_idx],
+            decisions[label_idx],
             xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
                 df.loc[df.index[len(df.index)-1], 'building_emissions']),
             xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
@@ -121,7 +128,7 @@ def export_combined_emissions_graph(buildings_groups_list, current_output_folder
     plt.xlabel("Jahr")
     plt.ylabel(r'Emissionen $CO_{2}$ [kg/Monat]')
     plt.xticks(rotation=270, fontsize=18)
-    plt.legend(labels, bbox_to_anchor=(1,1), loc="upper left", fontsize="x-small")
+    plt.legend(addresses, bbox_to_anchor=(1,1), loc="upper left", fontsize="x-small")
     plt.tight_layout()
     # plt.annotate date of connection
 
@@ -130,7 +137,7 @@ def export_combined_emissions_graph(buildings_groups_list, current_output_folder
     if outfile:
         plt.savefig(outfile, transparent=True)
 
-def export_combined_energy_prices_graph(current_output_folder, outfile):
+def export_combined_energy_prices(current_output_folder, outfile):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -211,3 +218,6 @@ def GAMA_time_to_datetime(input):
 
 def grams_to_kg(val):
     return val / 1000
+
+def grams_to_tons(val):
+    return val / 1000000

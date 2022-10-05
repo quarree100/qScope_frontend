@@ -25,6 +25,7 @@ class SimulationMode:
         self.max_year = 2045             # will be set in activate()
         self.output_folders = []         # list of output folders of all game rounds
         self.using_timestamp = True
+        self.seed = 1.0
 
         self.matplotlib_neighborhood_images = {}
 
@@ -188,24 +189,25 @@ class SimulationMode:
                 for idx in group_df.index:
 
                     # export emissions graph:
-                    graphs.export_graphs(
+                    graphs.export_using_columns(
                         csv_name="/emissions/CO2_emissions_{0}.csv".format(
                             idx),
-                        folders=self.output_folders,
+                        search_in_folders=self.output_folders,
                         columns=['building_emissions'],
                         title_="CO2-Emissionen",
                         outfile=self.current_output_folder +
                         "/emissions/CO2_emissions_{0}.png".format(idx),
                         xlabel_="Jahr",
-                        ylabel_="ø-Emissionen [$g_{CO2,eq}$]",
+                        ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
                         x_='current_date',
+                        convert_grams_to_kg=True
                     )
 
                     # export energy prices graph:
-                    graphs.export_graphs(
+                    graphs.export_using_columns(
                         csv_name="/energy_prices/energy_prices_{0}.csv".format(
                             idx),
-                        folders=self.output_folders,
+                        search_in_folders=self.output_folders,
                         columns=['building_expenses_heat',
                                  'building_expenses_power'],
                         labels_=['Wärmekosten', 'Stromkosten'],
@@ -225,30 +227,35 @@ class SimulationMode:
                 session.buildings.df.update(group_df)
 
         ############# neighborhood data #############
-        graphs.export_combined_emissions_graph(
+        # combined emissions graph for selected buildings:
+        graphs.export_combined_emissions(
             session.buildings.list_from_groups(),
             self.current_output_folder,
             self.current_output_folder + "/emissions/CO2_emissions_groups.png"
             )
 
-        graphs.export_combined_energy_prices_graph(
+        # combined energy prices graph for selected buildings:
+        graphs.export_combined_energy_prices(
             self.current_output_folder,
             outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
-        graphs.export_graphs(
+        # neighborhood total emissions:
+        graphs.export_using_columns(
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
-            folders=self.output_folders,
+            search_in_folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
             title_="kumulierte Gesamtemissionen des Quartiers",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
             xlabel_="Jahr",
-            ylabel_="CO2 [$g_{eq}$]",
-            x_='current_date'
+            ylabel_="CO2 [$kg_{eq}$]",
+            x_='current_date',
+            convert_grams_to_kg=True
         )
 
-        graphs.export_graphs(
+        # neighborhood total energy prices prognosis:
+        graphs.export_using_columns(
             csv_name="/energy_prices/energy_prices_total.csv",
-            folders=self.output_folders,
+            search_in_folders=self.output_folders,
             columns=['power_price', 'oil_price', 'gas_price'],
             labels_=['Strompreis', 'Ölpreis', 'Gaspreis'],
             title_="Energiepreis",
@@ -336,14 +343,14 @@ class SimulationMode:
             )
 
     ########################### script: prepare #######################
-    def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None, seed=1.0):
+    def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None):
 
         # header
         xml_temp = ['<Experiment_plan>']
         xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}"'.format(
             str(experiment_name), str(self.model_file), str(finalStep)))
-        if seed is not None:
-            xml_temp.append('seed="{0}"'.format(str(seed)))
+        if self.seed is not None:
+            xml_temp.append('seed="{0}"'.format(str(self.seed)))
         if until is not None:
             xml_temp.append('until="{0}"'.format(str(until)))
         xml_temp.append('>')

@@ -72,7 +72,7 @@ class EditMode:
     def draw(self, canvas):
         if len(session.buildings.df[session.buildings.df.selected]):
             # highlight selected buildings
-            session.gis.draw_polygon_layer(
+            session._gis.draw_polygon_layer(
                 canvas,
                 session.buildings.df[session.buildings.df.selected], 3, (255, 255, 255)
             )

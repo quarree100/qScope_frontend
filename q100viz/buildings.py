@@ -5,6 +5,7 @@ import pygame
 import json
 
 import q100viz.session as session
+import q100viz.devtools as devtools
 import q100viz.gis as gis
 import q100viz.api as api
 from q100viz.settings.config import config
@@ -80,19 +81,20 @@ class Buildings:
         self.df['CO2'] = (self.df['spec_heat_consumption'] + self.df['spec_power_consumption']) / 20000
         electricity_supply_types = ['green', 'gray', 'mix']
         self.df['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in self.df.values]
-        self.df['connection_to_heat_grid'] = self.df['energy_source'].isna().to_numpy()
+        for idx, row in self.df.iterrows():
+            self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else False
         self.df['connection_to_heat_grid_prior'] = self.df['connection_to_heat_grid']
         self.df['refurbished'] = self.df['connection_to_heat_grid']
         self.df['refurbished_prior'] = self.df['refurbished']
-        self.df['environmental_engagement'] = [True if random.random() > 0.5 else False for row in self.df.values]
-        self.df['environmental_engagement_prior'] = self.df['environmental_engagement']
+        self.df['save_energy'] = False
+        self.df['save_energy_prior'] = self.df['save_energy']
 
         # buildings interaction
         self.df['cell'] = ""
         self.df['selected'] = False
         self.df['group'] = -1
 
-        self.find_closest_heat_grid_line(print_full_df=True)
+        self.find_closest_heat_grid_line(print_full_df=False)
 
         return self.df
 
@@ -102,16 +104,16 @@ class Buildings:
 
         for idx, row in self.df.iterrows():
             polygon = row['geometry']
-            points = session.gis.surface.transform(polygon.exterior.coords)
-            pygame.draw.polygon(session.gis.surface, pygame.Color(255,123,222), points)
+            points = session._gis.surface.transform(polygon.exterior.coords)
+            pygame.draw.polygon(session._gis.surface, pygame.Color(255,123,222), points)
 
             poly = shapely.geometry.Polygon(points)
             centroid = poly.centroid
 
             shortest_dist = 9999999
 
-            for linestring in session.gis.nahwaermenetz.to_dict('records'):
-                line_points = session.gis.surface.transform(linestring['geometry'].coords)
+            for linestring in session._gis.nahwaermenetz.to_dict('records'):
+                line_points = session._gis.surface.transform(linestring['geometry'].coords)
                 line = shapely.geometry.LineString(line_points)
 
                 interpol = line.interpolate(line.project(centroid))
@@ -125,24 +127,26 @@ class Buildings:
             api.print_full_df(self.df)
 
     ############################# user groups #########################
-    def make_buildings_groups_dict(self):
-
-        session.buildings_groups_list = [
+    def list_from_groups(self):
+        '''returns a list with one df for each user group'''
+        return [
             self.df[self.df['group'] == 0][session.COMMUNICATION_RELEVANT_KEYS],
             self.df[self.df['group'] == 1][session.COMMUNICATION_RELEVANT_KEYS],
             self.df[self.df['group'] == 2][session.COMMUNICATION_RELEVANT_KEYS],
             self.df[self.df['group'] == 3][session.COMMUNICATION_RELEVANT_KEYS]]
 
+    def make_buildings_groups_dict(self):
+
         wrapper = ['' for i in range(session.num_of_users)]
         message = {}
 
-        for i, group_df in enumerate(session.buildings_groups_list):
+        for i, group_df in enumerate(self.list_from_groups()):
             group_wrapper = {}
             if len(group_df) > 0:
                 user_selected_buildings = json.loads(
                     api.export_json(group_df[session.COMMUNICATION_RELEVANT_KEYS], None))
                 group_wrapper['buildings'] = user_selected_buildings
-                group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] == True])
+                group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] != False])
 
                 message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)
@@ -181,8 +185,14 @@ class Buildings:
                 interval += 0.1  # increase range, try again if necessary
 
             cluster_list.append(cluster)
-            session.print_verbose(
-                "building {0} is in a group of to {1} buildings with similar specs:".format(self.df.index[idx], len(cluster)))
-            # session.print_verbose(cluster[['spec_heat_consumption', 'spec_power_consumption']].describe())
+            devtools.print_verbose(
+                "building {0} is in a group of to {1} buildings with similar specs:".format(self.df.index[idx], len(cluster)), session.VERBOSE_MODE)
+            # devtools.print_verbose(cluster[['spec_heat_consumption', 'spec_power_consumption']].describe(), session.VERBOSE_MODE)
 
         return cluster_list
+
+    ################### allocate random buildings #####################
+    def allocate_random_groups(self, n):
+        '''sets group to random[0, n] for each building'''
+        for idx, row in self.df.iterrows():
+            self.df.at[idx, 'group'] = random.randint(0, n)

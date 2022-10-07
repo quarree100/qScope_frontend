@@ -22,36 +22,50 @@ class SimulationMode:
         self.current_output_folder = ''  # will be set in activate()
         self.xml_path = ''               # will be set in activate()
         self.final_step = None           # will be set in activate()
+        self.max_year = 2045             # will be set in activate()
         self.output_folders = []         # list of output folders of all game rounds
         self.using_timestamp = True
+        self.seed = 1.0
 
         self.matplotlib_neighborhood_images = {}
 
         self.xml = None
 
-    def activate(self):
+    def activate(self, max_year=None):
+
+        session.environment['mode'] = self.name
+        session.active_mode = self
+
+        # increase round counter to globally log q-scope iterations:
+        session.environment['current_iteration_round'] = (
+            session.environment['current_iteration_round'] + 1) % session.num_of_rounds
 
         # derive final step from defined simulation runtime:
         if config['SIMULATION_FORCE_NUM_STEPS'] == 0:
             runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
                                       index_col='var').loc['model_runtime_string', 'value']
             if runtime == '2020-2030':
-                self.final_step = 10 * 365
+                self.final_step = 10 * 365 + 3  # include leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
+                self.max_year = 2030  # used by slider
 
             elif runtime == '2020-2040':
-                self.final_step = 20 * 365
+                self.final_step = 20 * 365 + 5
+                self.max_year = 2040
 
             elif runtime == '2020-2045':
-                self.final_step = 25 * 365
+                self.final_step = 25 * 365 + 7
+                self.max_year = 2045
         else:
             # overwrite final step if set via flag --sim_steps:
             self.final_step = config['SIMULATION_FORCE_NUM_STEPS']
+            self.max_year = self.final_step / 365
+
+        if max_year is not None:
+            self.max_year = max_year
+            self.final_step = ((max_year - 2020) * 365) + int((max_year - 2020)/4)
 
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
-
-        session.environment['mode'] = self.name
-        session.active_handler = self
 
         # display setup:
         for grid in session.grid_1, session.grid_2:
@@ -120,33 +134,31 @@ class SimulationMode:
         outputs.loc[len(outputs)] = [
             '5', 'Emissions cumulative', str(self.final_step - 1)]
 
-        # export buildings_clusters to csv
-        clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(
-            self.timestamp)) if self.using_timestamp else '../data/output/buildings_clusters_{0}.csv'.format(str(self.timestamp))
-
-        print(clusters_outname)
-
-        if not os.path.isdir(self.current_output_folder):
-            os.makedirs(self.current_output_folder)
-
-        # debug: select random of 100 buildings:
+        ############### debug: select random of 100 buildings: ########
         if session.debug_num_of_random_buildings > 0:
-            df = session.buildings_df.sample(
+            df = session.buildings.df.sample(
                 n=session.debug_num_of_random_buildings)
             df['selected'] = True
             df['group'] = [random.randint(0, 3) for x in df.values]
             if session.debug_force_connect:
-                df['connection_to_heat_grid'] = True
-            session.buildings_df.update(df)
+                df['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
+            session.buildings.df.update(df)
             print("selecting random {0} buildings:".format(
                 session.debug_num_of_random_buildings))
 
-        selected_buildings = session.buildings_df[session.buildings_df.selected]
+        ################# export buildings_clusters to csv ############
+        clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(
+            self.timestamp)) if self.using_timestamp else '../data/output/buildings_clusters_{0}.csv'.format(str(self.timestamp))
+
+        if not os.path.isdir(self.current_output_folder):
+            os.makedirs(self.current_output_folder)
+
+        selected_buildings = session.buildings.df[session.buildings.df.selected]
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
-                            'connection_to_heat_grid', 'refurbished', 'environmental_engagement']].to_csv(clusters_outname)
+                            'connection_to_heat_grid', 'refurbished', 'save_energy']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
-        session.gama_iteration_images[session.environment['iteration_round']] = [
+        session.gama_iteration_images[session.environment['current_iteration_round']] = [
             str(os.path.normpath('data/outputs/output_{0}/snapshot/Chartsnull-{1}.png'.format(
                 self.timestamp, str(self.final_step - 1)))),
             str(os.path.normpath('data/outputs/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(
@@ -172,29 +184,30 @@ class SimulationMode:
         ####################### export matplotlib graphs #######################
 
         ########## individual buildings data ########
-        for group_df in session.buildings_groups_list:
+        for group_df in session.buildings.list_from_groups():
             if group_df is not None:
                 for idx in group_df.index:
 
                     # export emissions graph:
-                    graphs.export_graphs(
+                    graphs.export_using_columns(
                         csv_name="/emissions/CO2_emissions_{0}.csv".format(
                             idx),
-                        folders=self.output_folders,
+                        search_in_folders=self.output_folders,
                         columns=['building_emissions'],
                         title_="CO2-Emissionen",
                         outfile=self.current_output_folder +
                         "/emissions/CO2_emissions_{0}.png".format(idx),
                         xlabel_="Jahr",
-                        ylabel_="ø-Emissionen [$g_{CO2,eq}$]",
+                        ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
                         x_='current_date',
+                        convert_grams_to_kg=True
                     )
 
                     # export energy prices graph:
-                    graphs.export_graphs(
+                    graphs.export_using_columns(
                         csv_name="/energy_prices/energy_prices_{0}.csv".format(
                             idx),
-                        folders=self.output_folders,
+                        search_in_folders=self.output_folders,
                         columns=['building_expenses_heat',
                                  'building_expenses_power'],
                         labels_=['Wärmekosten', 'Stromkosten'],
@@ -211,31 +224,38 @@ class SimulationMode:
                         'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
                     group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
                         'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
-                session.buildings_df.update(group_df)
+                session.buildings.df.update(group_df)
 
         ############# neighborhood data #############
-        graphs.export_combined_emissions_graph(
+        # combined emissions graph for selected buildings:
+        graphs.export_combined_emissions(
+            session.buildings.list_from_groups(),
             self.current_output_folder,
-            outfile=self.current_output_folder + "/energy_prices/CO2_emissions_groups.png")
+            self.current_output_folder + "/emissions/CO2_emissions_groups.png"
+            )
 
-        graphs.export_combined_energy_prices_graph(
+        # combined energy prices graph for selected buildings:
+        graphs.export_combined_energy_prices(
             self.current_output_folder,
             outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
-        graphs.export_graphs(
+        # neighborhood total emissions:
+        graphs.export_using_columns(
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
-            folders=self.output_folders,
+            search_in_folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
             title_="kumulierte Gesamtemissionen des Quartiers",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
             xlabel_="Jahr",
-            ylabel_="CO2 [$g_{eq}$]",
-            x_='current_date'
+            ylabel_="CO2 [$kg_{eq}$]",
+            x_='current_date',
+            convert_grams_to_kg=True
         )
 
-        graphs.export_graphs(
+        # neighborhood total energy prices prognosis:
+        graphs.export_using_columns(
             csv_name="/energy_prices/energy_prices_total.csv",
-            folders=self.output_folders,
+            search_in_folders=self.output_folders,
             columns=['power_price', 'oil_price', 'gas_price'],
             labels_=['Strompreis', 'Ölpreis', 'Gaspreis'],
             title_="Energiepreis",
@@ -260,7 +280,7 @@ class SimulationMode:
         ########################### csv export ########################
 
         # compose csv paths for infoscreen to make graphs
-        session.emissions_data_paths[session.environment['iteration_round']] = [
+        session.emissions_data_paths[session.environment['current_iteration_round']] = [
             str(os.path.normpath('data/outputs/output_{0}/emissions/{1}'.format(self.timestamp, file_name))) for file_name in os.listdir('../data/outputs/output_{0}/emissions'.format(str(self.timestamp)))
         ]
 
@@ -280,12 +300,8 @@ class SimulationMode:
         data_view_neighborhood_df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
 
-        # increase round counter to globally log q-scope iterations:
-        session.environment['iteration_round'] = (
-            session.environment['iteration_round'] + 1) % session.num_of_rounds
-
         # TODO: wait until GAMA delivers outputs
-        session.handlers['individual_data_view'].activate()
+        session.individual_data_view.activate()
 
     ########################### frontend input ########################
     def process_event(self, event):
@@ -305,7 +321,7 @@ class SimulationMode:
                         pass
 
         session.api.send_simplified_dataframe_with_environment_variables(
-            session.buildings_df[session.buildings_df.selected], session.environment)
+            session.buildings.df[session.buildings.df.selected], session.environment)
 
     def update(self):
 
@@ -318,23 +334,23 @@ class SimulationMode:
             canvas.blit(font.render("Berechne Energiekosten und Emissionen...", True, (255, 255, 255)),
                         (session.canvas_size[0]/4, session.canvas_size[1]/2))
 
-        if len(session.buildings_df[session.buildings_df.selected]):
+        if len(session.buildings.df[session.buildings.df.selected]):
             # highlight selected buildings
-            session.gis.draw_polygon_layer(
+            session._gis.draw_polygon_layer(
                 canvas,
-                session.buildings_df[session.buildings_df.selected], 2, (
+                session.buildings.df[session.buildings.df.selected], 2, (
                     255, 0, 127)
             )
 
     ########################### script: prepare #######################
-    def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None, seed=1.0):
+    def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None):
 
         # header
         xml_temp = ['<Experiment_plan>']
         xml_temp.append('  <Simulation experiment="{0}" sourcePath="{1}" finalStep="{2}"'.format(
             str(experiment_name), str(self.model_file), str(finalStep)))
-        if seed is not None:
-            xml_temp.append('seed="{0}"'.format(str(seed)))
+        if self.seed is not None:
+            xml_temp.append('seed="{0}"'.format(str(self.seed)))
         if until is not None:
             xml_temp.append('until="{0}"'.format(str(until)))
         xml_temp.append('>')
@@ -381,7 +397,7 @@ class SimulationMode:
         subprocess.call(command, shell=True)
         print("simulation finished. duration = ",
               datetime.datetime.now() - sim_start)
-        # self.open_and_call(command, session.handlers['individual_data_view'].activate())
+        # self.open_and_call(command, session.individual_data_view.activate())
 
         os.chdir(self.cwd)  # return to previous cwd
 

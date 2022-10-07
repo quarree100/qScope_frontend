@@ -11,7 +11,7 @@ class Buildings_Interaction:
         self.selection_mode = config['buildings_selection_mode'] # decides how to select intersected buildings. can be 'all' or 'rotation'
 
     def activate(self):
-        session.active_handler = session.handlers['buildings_interaction']
+        session.active_mode = self
         session.environment['mode'] = self.name
 
         # graphics:
@@ -44,7 +44,6 @@ class Buildings_Interaction:
 
         session.buildings.df['selected'] = False  # reset buildings
         session.buildings.df['group'] = -1  # reset group
-        # session.buildings_groups_list = [None for i in range(session.num_of_users)] # reset groups
 
         # reset sliders:
         for grid in session.grid_1, session.grid_2:
@@ -86,13 +85,13 @@ class Buildings_Interaction:
                                         slider.update_handle(cell.handle, cell.id)
 
                             elif cell.handle == 'start_individual_data_view':
-                                session.handlers['individual_data_view'].activate()
+                                session.individual_data_view.activate()
 
                             elif cell.handle == 'start_total_data_view':
-                                session.handlers['total_data_view'].activate()
+                                session.total_data_view.activate()
 
                             elif cell.handle == 'start_simulation':
-                                session.handlers['simulation'].activate()
+                                session.simulation.activate()
 
         session.api.send_message(json.dumps(session.buildings.make_buildings_groups_dict()))
 
@@ -101,7 +100,7 @@ class Buildings_Interaction:
         try:
             # highlight selected buildings (draws colored stroke on top)
             if len(session.buildings.df[session.buildings.df.selected]):
-                session.gis.draw_polygon_layer(
+                session._gis.draw_polygon_layer(
                     canvas,
                     session.buildings.df[session.buildings.df.selected], 2, (255, 0, 127)
                 )
@@ -131,4 +130,4 @@ def get_intersection(df, grid, x, y):
         [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
     )
     # find elements intersecting with selected cell
-    return session.gis.get_intersection_indexer(df, cell_vertices)
+    return session._gis.get_intersection_indexer(df, cell_vertices)

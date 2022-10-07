@@ -27,7 +27,7 @@ class DataViewTotal_Mode():
         #         image.warp()
 
     def activate(self):
-        session.active_handler = self
+        session.active_mode = self
         session.environment['mode'] = self.name
 
         session.show_polygons = False
@@ -58,7 +58,7 @@ class DataViewTotal_Mode():
             self.process_grid_change()
 
             connected_buildings = pd.DataFrame(data=[
-                {'connected_buildings' : len(session.buildings_df[session.buildings_df['connection_to_heat_grid'] == True])}])
+                {'connected_buildings' : len(session.buildings_df[session.buildings_df['connection_to_heat_grid'] != False])}])
             session.api.send_dataframe_as_json(connected_buildings)
 
     def process_grid_change(self):
@@ -68,9 +68,9 @@ class DataViewTotal_Mode():
                 for x, cell in enumerate(row):
                     if cell.selected:
                         if cell.handle == 'start_individual_data_view':
-                            session.handlers['individual_data_view'].activate()
+                            session.individual_data_view.activate()
                         elif cell.handle == 'start_buildings_interaction':
-                            session.handlers['buildings_interaction'].activate()
+                            session.buildings_interaction.activate()
 
 
 

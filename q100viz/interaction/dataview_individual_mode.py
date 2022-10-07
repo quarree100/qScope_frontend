@@ -27,7 +27,7 @@ class DataViewIndividual_Mode():
         #         image.warp()
 
     def activate(self):
-        session.active_handler = self
+        session.active_mode = self
         session.environment['mode'] = self.name
 
         session.show_polygons = False
@@ -62,7 +62,7 @@ class DataViewIndividual_Mode():
             self.process_grid_change()
 
             # connected_buildings = pd.DataFrame(data=[
-            #     {'connected_buildings' : len(session.buildings[session.buildings['connection_to_heat_grid'] == True])}])
+            #     {'connected_buildings' : len(session.buildings[session.buildings['connection_to_heat_grid'] != False])}])
             # session.api.send_dataframe_as_json(connected_buildings)
 
     def process_grid_change(self):
@@ -72,9 +72,9 @@ class DataViewIndividual_Mode():
                 for x, cell in enumerate(row):
                     if cell.selected:
                         if cell.handle == 'start_total_data_view':
-                            session.handlers['total_data_view'].activate()
+                            session.total_data_view.activate()
                         elif cell.handle == 'start_buildings_interaction':
-                            session.handlers['buildings_interaction'].activate()
+                            session.buildings_interaction.activate()
 
         data_view_individual_data = pd.DataFrame(data={
             "data_view_individual_data" : [session.buildings.make_buildings_groups_dict()]})

@@ -100,10 +100,13 @@ class Buildings_Interaction:
         try:
             # highlight selected buildings (draws colored stroke on top)
             if len(session.buildings.df[session.buildings.df.selected]):
-                session._gis.draw_polygon_layer(
-                    canvas,
-                    session.buildings.df[session.buildings.df.selected], 2, (255, 0, 127)
-                )
+
+                sel_buildings = session.buildings.df[(session.buildings.df.selected)]
+                for building in sel_buildings.to_dict('records'):
+                    fill_color = pygame.Color(session.user_colors[building['group']])
+
+                    points = session._gis.surface.transform(building['geometry'].exterior.coords)
+                    pygame.draw.polygon(session._gis.surface, fill_color, points, 2)
 
             # coloring slider area:
             for slider_dict in session.grid_1.sliders, session.grid_2.sliders:
@@ -111,8 +114,8 @@ class Buildings_Interaction:
                     slider.draw_area()
 
         except Exception as e:
-                print(e)
-                session.log += "\nCannot draw slider: %s" % e
+                print("Cannot draw frontend:", e)
+                session.log += "\nCannot draw frontend: %s" % e
 
         # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
         font = pygame.font.SysFont('Arial', 18)

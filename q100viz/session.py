@@ -68,6 +68,14 @@ show_basemap = False
 ####################### interaction #########################
 num_of_rounds = 4  # max num of rounds; will repeat after this
 num_of_users = 4  # num of valid users # TODO: combine with num of valid tags!
+user_colors = [
+    (0, 117, 180),   # Quarree-blue
+    (253, 193, 19),  # Quarree-yellow
+    (182, 0, 182),
+    (0, 168, 78),    # Quarree-dark-green
+    (186, 212, 50),  # Quarree-light-green
+    (182, 146, 0)
+]
 gama_iteration_images = ['' for n in range(num_of_rounds)]
 emissions_data_paths = ['' for n in range(num_of_rounds)]
 

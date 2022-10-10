@@ -2,6 +2,7 @@
 
 import pygame
 import pandas as pd
+import json
 
 import q100viz.session as session
 from q100viz.graphics.graphictools import Image
@@ -47,9 +48,8 @@ class DataViewIndividual_Mode():
 
         session.api.send_session_env()
 
-        data_view_individual_data = pd.DataFrame(data={
-            "data_view_individual_data" : [session.buildings.make_buildings_groups_dict()]})
-        session.api.send_dataframe_as_json(data_view_individual_data)
+        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
+
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -76,9 +76,8 @@ class DataViewIndividual_Mode():
                         elif cell.handle == 'start_buildings_interaction':
                             session.buildings_interaction.activate()
 
-        data_view_individual_data = pd.DataFrame(data={
-            "data_view_individual_data" : [session.buildings.make_buildings_groups_dict()]})
-        session.api.send_dataframe_as_json(data_view_individual_data)
+        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
+
 
 
     def draw(self, canvas):

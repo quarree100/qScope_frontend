@@ -226,7 +226,7 @@ class Slider:
 
             session.api.send_message(json.dumps(session.environment))
             session.api.send_message(json.dumps(
-                session.buildings.make_buildings_groups_dict()))
+                session.buildings.get_dict_with_api_wrapper()))
 
             self.previous_value = self.value
 

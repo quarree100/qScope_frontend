@@ -93,7 +93,7 @@ class Buildings_Interaction:
                             elif cell.handle == 'start_simulation':
                                 session.simulation.activate()
 
-        session.api.send_message(json.dumps(session.buildings.make_buildings_groups_dict()))
+        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
 
     def draw(self, canvas):
 

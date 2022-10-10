@@ -120,7 +120,7 @@ class GIS:
         except Exception as e:
             session.log += "\n%s" % e
             print("cannot draw building connection layer: ", e)
-                
+
 
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):

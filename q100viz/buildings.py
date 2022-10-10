@@ -135,7 +135,7 @@ class Buildings:
             self.df[self.df['group'] == 2][session.COMMUNICATION_RELEVANT_KEYS],
             self.df[self.df['group'] == 3][session.COMMUNICATION_RELEVANT_KEYS]]
 
-    def make_buildings_groups_dict(self):
+    def get_dict_with_api_wrapper(self):
 
         wrapper = ['' for i in range(session.num_of_users)]
         message = {}
@@ -147,6 +147,11 @@ class Buildings:
                     api.export_json(group_df[session.COMMUNICATION_RELEVANT_KEYS], None))
                 group_wrapper['buildings'] = user_selected_buildings
                 group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] != False])
+                group_wrapper['slider_handles'] = []
+                for sliders in session.grid_1.sliders, session.grid_2.sliders:
+                    for slider in sliders.values():
+                        if slider.group == i and slider.handle is not None:
+                            group_wrapper['slider_handles'].append(slider.handle)
 
                 message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)

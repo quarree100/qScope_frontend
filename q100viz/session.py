@@ -74,7 +74,7 @@ user_colors = [
     (182, 0, 182),
     (0, 168, 78),    # Quarree-dark-green
     (186, 212, 50),  # Quarree-light-green
-    (182, 146, 0)
+    (155, 155, 155)
 ]
 gama_iteration_images = ['' for n in range(num_of_rounds)]
 emissions_data_paths = ['' for n in range(num_of_rounds)]

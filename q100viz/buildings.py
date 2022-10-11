@@ -128,7 +128,7 @@ class Buildings:
 
     ############################# user groups #########################
     def list_from_groups(self):
-        '''returns a list with one df for each user group'''
+        '''returns a list with of buildings with 'group' >= 0; one df for each user group'''
         return [
             self.df[self.df['group'] == 0][session.COMMUNICATION_RELEVANT_KEYS],
             self.df[self.df['group'] == 1][session.COMMUNICATION_RELEVANT_KEYS],

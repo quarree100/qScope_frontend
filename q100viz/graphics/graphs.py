@@ -1,3 +1,4 @@
+from socketserver import ForkingTCPServer
 import matplotlib.pyplot as plt
 import pandas
 import datetime
@@ -74,17 +75,12 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
-    colors = [
-        ('seagreen', 'limegreen'),
-        ('darkgoldenrod', 'gold'),
-        ('steelblue', 'lightskyblue'),
-        ('black', 'gray')]
 
     # get csv for each building in each group
     data = []
     decisions = []
     addresses = []
-    for group_df in buildings_groups_list:
+    for group_num, group_df in enumerate(buildings_groups_list):
         if group_df is not None:
             for idx in group_df.index:
                 # load from csv:
@@ -92,28 +88,32 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
                     new_df = pandas.read_csv(current_output_folder + "/emissions/CO2_emissions_{0}.csv".format(idx))
                     new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
                     new_df['building_emissions'] = new_df['building_emissions'].apply(grams_to_kg)
+                    new_df['color'] = [rgb_to_float_tuple(session.user_colors[group_num]) for i in new_df.values]
                     data.append(new_df)
                 except Exception as e:
                     print(e)
 
                 # add labels:
                 decisions.append(
-                    "{0}, Anschluss: {1}, {2})".format(
-                    "saniert" if group_df.loc[idx, 'refurbished'] else "unsaniert",
+                    "({0}, {1}, {2})".format(
+                    "s" if group_df.loc[idx, 'refurbished'] else "u",
                     group_df.loc[idx, 'connection_to_heat_grid'] if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
-                    "energiesparend" if group_df.loc[idx, 'save_energy'] else "normaler Verbrauch")
+                    "ES" if group_df.loc[idx, 'save_energy'] else "NV")
                 )
                 addresses.append(group_df.loc[idx, 'address'])
 
     # make graph
-    plt.figure(figsize=(16,9))  # inches
+    plt.figure(figsize=(16,9))  #
+
+    print(data)
 
     for label_idx, df in enumerate(data):
         # plot:
-        plt.plot(df['current_date'], df['building_emissions'], color=colors[label_idx%len(colors)][0])
+        plt.plot(df['current_date'], df['building_emissions'], color=df['color'][label_idx])
 
         # annotate lines:
         plt.gca().annotate(
+            addresses[label_idx] + "\n" +
             decisions[label_idx],
             xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
                 df.loc[df.index[len(df.index)-1], 'building_emissions']),
@@ -121,16 +121,16 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
                     df.loc[df.index[len(df.index)-1], 'building_emissions'] * 1.02),
             fontsize=12,
             horizontalalignment='right',
-            color=colors[label_idx%len(colors)][0]
+            color=df['color'][label_idx]
         )
 
     # graphics:
     plt.xlabel("Jahr")
     plt.ylabel(r'Emissionen $CO_{2}$ [kg/Monat]')
     plt.xticks(rotation=270, fontsize=18)
-    plt.legend(addresses, bbox_to_anchor=(1,1), loc="upper left", fontsize="x-small")
+    # plt.legend(addresses, bbox_to_anchor=(1,1), loc="upper left", fontsize="x-small")
     plt.tight_layout()
-    # plt.annotate date of connection
+    plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="x-small")
 
     if graph_popup:
         plt.show()
@@ -221,3 +221,9 @@ def grams_to_kg(val):
 
 def grams_to_tons(val):
     return val / 1000000
+
+def rgb_to_hex(rgb):
+    return '%02x%02x%02x' % rgb
+
+def rgb_to_float_tuple(rgb):
+    return (rgb[0] / 255, rgb[1] / 255, rgb[2] / 255)

@@ -32,3 +32,4 @@ def select_buildings_for_simulation(buildings_df, list_of_buildings_indices, max
         df['save_energy'] = save_energy
 
         buildings_df.update(df)
+        print(buildings_df[buildings_df['group'] >= 0]['group'])

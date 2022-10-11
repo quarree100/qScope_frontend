@@ -183,7 +183,7 @@ def export_combined_energy_prices(current_output_folder, outfile):
                     df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_heat'] * 1.02),
             color=colors[i%len(colors)][0],
             fontsize=12,
-            horizontalalignment='right'
+            horizontalalignment='left'
         )
 
         label_idx += 1
@@ -214,7 +214,8 @@ def export_combined_energy_prices(current_output_folder, outfile):
     plt.xticks(rotation=270, fontsize=18)
     plt.tight_layout()
 
-    plt.savefig(outfile, transparent=True)
+    if outfile is not None:
+        plt.savefig(outfile, transparent=True)
 
 def GAMA_time_to_datetime(input):
     dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)

@@ -27,7 +27,8 @@ class Buildings:
                 # 'Kataster_6': 'float',  # Nettogrundfläche
                 'Kataster13': 'float',  # spez. Wärmeverbrauch
                 'Kataster15': 'float',  # spez. Stromverbrauch
-                'Kataster_E': 'string'  # Energieträger
+                'Kataster_E': 'string',  # Energieträger
+                'Kataster_A': 'string'  # Gebäudetyp
                 }).set_index('Kataster_C')
 
         bestand.index.names = ['id']
@@ -35,7 +36,7 @@ class Buildings:
         bestand['address'] = bestand['Kataster_S'] + ' ' + bestand['Kataster_H']
         bestand = bestand.drop('Kataster_S', 1)
         bestand = bestand.drop('Kataster_H', 1)
-        bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source'})
+        bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source', 'Kataster_A' : 'type'})
 
         # bestand['area'] = bestand['Kataster_6'].fillna(0).to_numpy()
         # bestand = bestand.drop('Kataster_6', 1)
@@ -124,7 +125,7 @@ class Buildings:
                     self.df.at[idx, 'target_point'] = interpol
 
         if print_full_df:
-            api.print_full_df(self.df)
+            devtools.print_full_df(self.df)
 
     ############################# user groups #########################
     def list_from_groups(self):

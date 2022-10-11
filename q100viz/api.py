@@ -93,11 +93,3 @@ def export_json(df, outfile=None):
     """Export a dataframe to JSON file. This is necessary to transform GeoDataFrames into a JSON serializable format"""
     return pandas.DataFrame(df).to_json(
         outfile, orient='records', force_ascii=False, default_handler=str)
-
-
-def print_full_df(df):
-    with pandas.option_context('display.max_rows', None,
-                               'display.max_columns', None,
-                               'display.precision', 3,
-                               ):
-        print(df)

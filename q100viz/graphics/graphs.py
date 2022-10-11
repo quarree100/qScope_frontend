@@ -89,6 +89,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
                     new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
                     new_df['building_emissions'] = new_df['building_emissions'].apply(grams_to_kg)
                     new_df['color'] = [rgb_to_float_tuple(session.user_colors[group_num]) for i in new_df.values]
+                    new_df['group_num'] = [group_num for i in new_df.values]
                     data.append(new_df)
                 except Exception as e:
                     print(e)
@@ -112,15 +113,16 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
         plt.plot(df['current_date'], df['building_emissions'], color=df['color'][label_idx])
 
         # annotate lines:
+        group_num = df.loc[df.index[0], 'group_num']
         plt.gca().annotate(
             addresses[label_idx] + "\n" +
             decisions[label_idx],
-            xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                df.loc[df.index[len(df.index)-1], 'building_emissions']),
-            xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                    df.loc[df.index[len(df.index)-1], 'building_emissions'] * 1.02),
+            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_emissions']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_emissions'] * 1.02),
             fontsize=12,
-            horizontalalignment='right',
+            horizontalalignment='left',
             color=df['color'][label_idx]
         )
 
@@ -150,12 +152,13 @@ def export_combined_energy_prices(current_output_folder, outfile):
     # get csv for each building in each group
     data = []
     labels = []
-    for group_df in session.buildings.list_from_groups():
+    for group_num, group_df in enumerate(session.buildings.list_from_groups()):
         if group_df is not None:
             for idx in group_df.index:
                 # load from csv:
                 new_df = pandas.read_csv(current_output_folder + "/energy_prices/energy_prices_{0}.csv".format(idx))
                 new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
+                new_df['group_num'] = [group_num for i in new_df.values]
                 data.append(new_df)
 
                 labels.append(group_df.loc[idx, 'address'] + ' - Wärme')  # TODO: add decisions
@@ -171,12 +174,13 @@ def export_combined_energy_prices(current_output_folder, outfile):
                 df['building_expenses_heat'], color=colors[i%len(colors)][0])
 
         # annotate graph:
+        group_num = df.loc[df.index[0], 'group_num']
         plt.gca().annotate(
             labels[label_idx],
-            xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                df.loc[df.index[len(df.index)-1], 'building_expenses_heat']),
-            xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                    df.loc[df.index[len(df.index)-1], 'building_expenses_heat'] * 1.02),
+            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_heat']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_heat'] * 1.02),
             color=colors[i%len(colors)][0],
             fontsize=12,
             horizontalalignment='right'
@@ -191,24 +195,24 @@ def export_combined_energy_prices(current_output_folder, outfile):
         # annotate graph
         plt.gca().annotate(
             labels[label_idx],
-            xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                df.loc[df.index[len(df.index)-1], 'building_expenses_power']),
-            xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                    df.loc[df.index[len(df.index)-1], 'building_expenses_power'] * 1.02),
+            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_power']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_power'] * 1.02),
             color=colors[i%len(colors)][1],
             fontsize=12,
-            horizontalalignment='right'
+            horizontalalignment='left'
         )
 
         label_idx += 1
 
     # graphics:
     # TODO: specify colors
-    plt.title("Energiekosten")
+    # plt.title("Energiekosten")
     plt.xlabel("Jahr")
-    plt.ylabel("[€/Monat]")
+    plt.ylabel("Energiekosten [€/Monat]")
     plt.xticks(rotation=270, fontsize=18)
-    # plt.annotate date of connection
+    plt.tight_layout()
 
     plt.savefig(outfile, transparent=True)
 

@@ -1,5 +1,6 @@
 ######################## dev tools ##########################
 import random
+import pandas
 
 def print_verbose(message, VERBOSE_MODE):
     if VERBOSE_MODE:
@@ -33,3 +34,10 @@ def select_buildings_for_simulation(buildings_df, list_of_buildings_indices, max
 
         buildings_df.update(df)
         print(buildings_df[buildings_df['group'] >= 0]['group'])
+
+def print_full_df(df):
+    with pandas.option_context('display.max_rows', None,
+                               'display.max_columns', None,
+                               'display.precision', 3,
+                               ):
+        print(df)

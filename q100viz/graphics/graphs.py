@@ -33,18 +33,18 @@ def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="
 
     plt.figure(figsize=(16, 9))  # inches
 
-   # plot pre-calculated reference data:
-    if compare_data_folder is not None:
-        label_ = '{0} (Bestand)'.format(labels_[col_num]) if labels_ is not None else 'Bestand'
-        compare_df = pandas.read_csv(compare_data_folder + csv_name)
-        compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
-        for col in columns:
-            if convert_grams_to_tons:
-                compare_df[col] = compare_df[col].apply(grams_to_tons)
-            elif convert_grams_to_kg:
-                compare_df[col] = compare_df[col].apply(grams_to_kg)
+    for col_num, column in enumerate(columns):
+        # plot pre-calculated reference data:
+        if compare_data_folder is not None:
+            label_ = 'Bestand' if labels_ is None else '{0} (Bestand)'.format(labels_[col_num])
+            compare_df = pandas.read_csv(compare_data_folder + csv_name)
+            compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
+            for col in columns:
+                if convert_grams_to_tons:
+                    compare_df[col] = compare_df[col].apply(grams_to_tons)
+                elif convert_grams_to_kg:
+                    compare_df[col] = compare_df[col].apply(grams_to_kg)
 
-        for column in columns:
             compare_df.plot(
                 kind='line',
                 x=x_,
@@ -56,8 +56,8 @@ def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="
 
     it_round = 0
     for df in rounds_data:
-        col_num = 0
-        for column in columns:
+        for col_num, column in enumerate(columns):
+            # plot regular graph:
             label_ = 'Durchlauf {0}'.format(
                 it_round+1) if labels_ == None else '{0} (Durchlauf {1})'.format(labels_[col_num], it_round+1)
 
@@ -80,8 +80,6 @@ def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="
                 color=color_,
                 ax=plt.gca(),
                 linewidth=3)
-
-            col_num += 1
 
         it_round += 1
 

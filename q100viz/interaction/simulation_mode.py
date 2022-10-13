@@ -9,7 +9,7 @@ import random
 import q100viz.session as session
 from q100viz.settings.config import config
 import q100viz.graphics.graphs as graphs
-
+import q100viz.devtools as devtools
 class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
@@ -58,11 +58,11 @@ class SimulationMode:
         else:
             # overwrite final step if set via flag --sim_steps:
             self.final_step = config['SIMULATION_FORCE_NUM_STEPS']
-            self.max_year = self.final_step / 365
+            self.max_year = int(2020 + self.final_step / 365)
 
-        if max_year is not None:
-            self.max_year = max_year
-            self.final_step = ((max_year - 2020) * 365) + int((max_year - 2020)/4)
+        # if max_year is not None:
+        #     self.max_year = max_year
+        #     self.final_step = ((max_year - 2020) * 365) + int((max_year - 2020)/4)
 
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
@@ -136,15 +136,9 @@ class SimulationMode:
 
         ############### debug: select random of 100 buildings: ########
         if session.debug_num_of_random_buildings > 0:
-            df = session.buildings.df.sample(
-                n=session.debug_num_of_random_buildings)
-            df['selected'] = True
-            df['group'] = [random.randint(0, 3) for x in df.values]
-            if session.debug_force_connect:
-                df['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
-            session.buildings.df.update(df)
-            print("selecting random {0} buildings:".format(
-                session.debug_num_of_random_buildings))
+            print(self.max_year)
+            connection_date = random.randint(2020, self.max_year) if session.debug_force_connect else False
+            devtools.select_random_buildings_for_simulation(session.buildings.df, session.debug_num_of_random_buildings, connection_to_heat_grid=connection_date, refurbished=session.debug_force_refurbished, save_energy=session.debug_force_save_energy)
 
         ################# export buildings_clusters to csv ############
         clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(

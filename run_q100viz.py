@@ -17,8 +17,9 @@ parser.add_argument('--random', help="select n random buildings", type=int, defa
 parser.add_argument('--verbose', '-v', help="start in verbose mode", action='store_true')
 parser.add_argument(
     '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_FORCE_NUM_STEPS'])
-parser.add_argument('--force_connect', help="connect all buildings to Q100",
-    action='store_true')
+parser.add_argument('--force_connect', help="connect all buildings to Q100", action='store_true')
+parser.add_argument('--force_refurbished', help="refurbish all selected buildings", action='store_true')
+parser.add_argument('--force_save_energy', help="set all selected buildings to save_energy", action='store_true')
 parser.add_argument('--start_at', help="start at specific game mode", type=str, default=session.environment['mode'])
 parser.add_argument('--test', help="pre-set of functions to test different elements...", type=str)
 parser.add_argument('--main_window', help="runs program in main window", action='store_true')
@@ -29,6 +30,8 @@ args = parser.parse_args()
 session.debug_num_of_random_buildings = args.random
 config['SIMULATION_FORCE_NUM_STEPS'] = args.sim_steps
 session.debug_force_connect = args.force_connect
+session.debug_force_refurbished = args.force_refurbished
+session.debug_force_save_energy = args.force_save_energy
 session.active_mode = session.string_to_mode(args.start_at)
 session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose

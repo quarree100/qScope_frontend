@@ -74,7 +74,7 @@ class API:
             for key, value in env.items():
                 result[key] = value
             clusterData = json.loads(export_json(
-                df[["address", "CO2", "connection_to_heat_grid", "refurbished", "save_energy"]], None))
+                df[["address", "connection_to_heat_grid", "refurbished", "save_energy"]], None))
             result["clusters"] = clusterData
             self.send_message(json.dumps(result))
 

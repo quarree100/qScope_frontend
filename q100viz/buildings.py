@@ -68,8 +68,8 @@ class Buildings:
         self.df['avg_spec_power_consumption'] = 0
         self.df['cluster_size'] = 0
 
-        buildings_cluster = self.make_clusters()
-        # update building with average data:
+        # make clusters and get average cluster data:
+        buildings_cluster = self.make_clusters(start_interval=0.5)
         for j in range(len(self.df)):
             self.df.at[self.df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
             self.df.at[self.df.index[j], 'avg_spec_power_consumption'] = buildings_cluster[j]['spec_power_consumption'].mean()
@@ -79,9 +79,6 @@ class Buildings:
         self.df['energy_prices_graphs'] = ''
 
         # generic data
-        self.df['CO2'] = (self.df['spec_heat_consumption'] + self.df['spec_power_consumption']) / 20000
-        electricity_supply_types = ['green', 'gray', 'mix']
-        self.df['electricity_supplier'] = [electricity_supply_types[random.randint(0,2)] for row in self.df.values]
         for idx, row in self.df.iterrows():
             self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else False
         self.df['connection_to_heat_grid_prior'] = self.df['connection_to_heat_grid']
@@ -165,11 +162,11 @@ class Buildings:
         return wrapper
 
     ############################## clusters ###########################
-    def make_clusters(self):
+    def make_clusters(self, start_interval):
         '''make groups of the selected buildings. group by standard deviation of energy consumption'''
         cluster_list = []
         for idx in range(len(self.df.index)):
-            interval = 0.5  # standard deviation
+            interval = start_interval  # standard deviation
             cluster = pandas.DataFrame()
             while len(cluster) < 2:  # make sure no building is alone
                 cluster = self.df.loc[(

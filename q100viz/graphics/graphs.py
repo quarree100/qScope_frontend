@@ -1,4 +1,3 @@
-from socketserver import ForkingTCPServer
 import matplotlib.pyplot as plt
 import pandas
 import datetime
@@ -6,7 +5,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, search_in_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False):
+def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -14,9 +13,9 @@ def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="
     rounds_data = []
 
     # looks for all files with specified csv_name:
-    for output_folder in search_in_folders:
+    for output_folder in data_folders:
         try:
-            csv_data = (pandas.read_csv(output_folder + csv_name))
+            csv_data = pandas.read_csv(output_folder + csv_name)
             csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
 
             # data conversion:
@@ -27,11 +26,34 @@ def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="
                     csv_data[col] = csv_data[col].apply(grams_to_kg)
 
             rounds_data.append(csv_data)
+
         except Exception as e:
             print(e, "... probably the selected buildings have changed between the rounds")
             session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
     plt.figure(figsize=(16, 9))  # inches
+
+   # plot pre-calculated reference data:
+    if compare_data_folder is not None:
+        label_ = '{0} (Bestand)'.format(labels_[col_num]) if labels_ is not None else 'Bestand'
+        compare_df = pandas.read_csv(compare_data_folder + csv_name)
+        compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
+        for col in columns:
+            if convert_grams_to_tons:
+                compare_df[col] = compare_df[col].apply(grams_to_tons)
+            elif convert_grams_to_kg:
+                compare_df[col] = compare_df[col].apply(grams_to_kg)
+
+        for column in columns:
+            compare_df.plot(
+                kind='line',
+                x=x_,
+                y=column,
+                label=label_,
+                color='lightgray',
+                ax=plt.gca(),
+                linewidth=3)
+
     it_round = 0
     for df in rounds_data:
         col_num = 0
@@ -69,9 +91,10 @@ def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="
     plt.xticks(rotation=270, fontsize=18)
     plt.legend(loc='upper left')
 
-    plt.savefig(outfile, transparent=True)
+    if outfile is not None:
+        plt.savefig(outfile, transparent=True)
 
-def export_combined_emissions(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False):
+def export_combined_emissions(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False, compare_data_folder=None):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -90,7 +113,15 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
                     new_df['building_emissions'] = new_df['building_emissions'].apply(grams_to_kg)
                     new_df['color'] = [rgb_to_float_tuple(session.user_colors[group_num]) for i in new_df.values]
                     new_df['group_num'] = [group_num for i in new_df.values]
+
+                    if compare_data_folder is not None:
+                        compare_df = pandas.read_csv(compare_data_folder + '/emissions/CO2_emissions_{0}.csv'.format(idx))
+                        print(compare_df)
+                        new_df['compare'] = compare_df['building_emissions'].apply(grams_to_kg)
+                        print(new_df)
+
                     data.append(new_df)
+
                 except Exception as e:
                     print(e)
 
@@ -110,6 +141,8 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
 
     for label_idx, df in enumerate(data):
         # plot:
+        if compare_data_folder is not None:
+            plt.plot(df['current_date'], df['compare'], color='lightgray')
         plt.plot(df['current_date'], df['building_emissions'], color=df['color'][label_idx])
 
         # annotate lines:
@@ -139,7 +172,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
     if outfile:
         plt.savefig(outfile, transparent=True)
 
-def export_combined_energy_prices(current_output_folder, outfile):
+def export_combined_energy_prices(current_output_folder, outfile, compare_data_folder=None):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -152,6 +185,7 @@ def export_combined_energy_prices(current_output_folder, outfile):
     # get csv for each building in each group
     data = []
     labels = []
+    compare_data = []
     for group_num, group_df in enumerate(session.buildings.list_from_groups()):
         if group_df is not None:
             for idx in group_df.index:
@@ -164,11 +198,23 @@ def export_combined_energy_prices(current_output_folder, outfile):
                 labels.append(group_df.loc[idx, 'address'] + ' - Wärme')  # TODO: add decisions
                 labels.append(group_df.loc[idx, 'address'] + ' - Strom')  # TODO: add decisions
 
+                if compare_data_folder is not None:
+                    comp = pandas.read_csv(compare_data_folder + '/energy_prices/energy_prices_{0}.csv'.format(idx))
+                    comp['current_date'] = comp['current_date'].apply(GAMA_time_to_datetime)
+                    compare_data.append(comp)
+
+    print(compare_data)
+
     # make graph
     plt.figure(figsize=(16,9))  # inches
 
     label_idx = 0
     for i, df in enumerate(data):
+        # plot pre-calculated default data of that building
+        if compare_data_folder is not None:
+            plt.plot(compare_data[i]['current_date'],
+                compare_data[i]['building_expenses_heat'], color='lightgray')
+
         # plot heat expenses:
         plt.plot(df['current_date'],
                 df['building_expenses_heat'], color=colors[i%len(colors)][0])
@@ -188,9 +234,15 @@ def export_combined_energy_prices(current_output_folder, outfile):
 
         label_idx += 1
 
+        # plot pre-calculated default data of that building
+        if compare_data_folder is not None:
+            plt.plot(compare_data[i]['current_date'],
+                compare_data[i]['building_expenses_power'], color='lightgray')
+
         # plot power expenses:
         plt.plot(df['current_date'],
                 df['building_expenses_power'], color=colors[i%len(colors)][1])
+
 
         # annotate graph
         plt.gca().annotate(

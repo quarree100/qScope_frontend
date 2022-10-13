@@ -154,8 +154,7 @@ class SimulationMode:
             os.makedirs(self.current_output_folder)
 
         selected_buildings = session.buildings.df[session.buildings.df.selected]
-        selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'electricity_supplier',
-                            'connection_to_heat_grid', 'refurbished', 'save_energy']].to_csv(clusters_outname)
+        selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
         session.gama_iteration_images[session.environment['current_iteration_round']] = [
@@ -192,7 +191,7 @@ class SimulationMode:
                     graphs.export_using_columns(
                         csv_name="/emissions/CO2_emissions_{0}.csv".format(
                             idx),
-                        search_in_folders=self.output_folders,
+                        data_folders=self.output_folders,
                         columns=['building_emissions'],
                         title_="CO2-Emissionen",
                         outfile=self.current_output_folder +
@@ -200,14 +199,15 @@ class SimulationMode:
                         xlabel_="Jahr",
                         ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
                         x_='current_date',
-                        convert_grams_to_kg=True
+                        convert_grams_to_kg=True,
+                        compare_data_folder=self.current_output_folder + "/../output_bestand"
                     )
 
                     # export energy prices graph:
                     graphs.export_using_columns(
                         csv_name="/energy_prices/energy_prices_{0}.csv".format(
                             idx),
-                        search_in_folders=self.output_folders,
+                        data_folders=self.output_folders,
                         columns=['building_expenses_heat',
                                  'building_expenses_power'],
                         labels_=['Wärmekosten', 'Stromkosten'],
@@ -216,7 +216,8 @@ class SimulationMode:
                         title_="Energiekosten",
                         xlabel_="Jahr",
                         ylabel_="Energiekosten [€/Monat]",
-                        x_='current_date'
+                        x_='current_date',
+                        compare_data_folder=self.current_output_folder + "/../output_bestand"
                     )
 
                     # pass path to buildings in infoscreen-compatible format
@@ -242,27 +243,29 @@ class SimulationMode:
         # neighborhood total emissions:
         graphs.export_using_columns(
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
-            search_in_folders=self.output_folders,
+            data_folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
             title_="kumulierte Gesamtemissionen des Quartiers",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
             xlabel_="Jahr",
             ylabel_="CO2 [$kg_{eq}$]",
             x_='current_date',
-            convert_grams_to_kg=True
+            convert_grams_to_kg=True,
+            compare_data_folder=self.current_output_folder + "/../output_bestand"
         )
 
         # neighborhood total energy prices prognosis:
         graphs.export_using_columns(
             csv_name="/energy_prices/energy_prices_total.csv",
-            search_in_folders=self.output_folders,
+            data_folders=self.output_folders,
             columns=['power_price', 'oil_price', 'gas_price'],
             labels_=['Strompreis', 'Ölpreis', 'Gaspreis'],
             title_="Energiepreis",
             outfile=self.current_output_folder + "/energy_prices/energy_prices_total.png",
             xlabel_="Jahr",
             ylabel_="Preis [ct/kWh]",
-            x_='current_date'
+            x_='current_date',
+            compare_data_folder=self.current_output_folder + "/../output_bestand"
         )
 
         # define titles for images and their location

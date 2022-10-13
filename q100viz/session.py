@@ -19,7 +19,7 @@ import q100viz.keystone as keystone
 import q100viz.buildings
 
 ################################ DECLARATIONS #########################
-################### dev and debug variables #################
+#----------------------- dev and debug variables ----------------------
 log = ""
 TEST_MODE = ""
 VERBOSE_MODE = False
@@ -27,11 +27,11 @@ VERBOSE_MODE = False
 debug_num_of_random_buildings = 0
 debug_force_connect = False
 
-# ################# infoscreen communication ################
+# ---------------------- infoscreen communication ---------------------
 io = 'http://localhost:8081'  # Socket.io
 api = api.API(io)
 
-########################## graphics #########################
+#------------------------------ graphics ------------------------------
 canvas_size = 1920, 1080
 
 quarree_colors_8bit = [   # corporate design of QUARREE100
@@ -65,7 +65,7 @@ viewport.calculate()
 show_polygons = False
 show_basemap = False
 
-####################### interaction #########################
+#------------------------------ interaction ---------------------------
 num_of_rounds = 4  # max num of rounds; will repeat after this
 num_of_users = 4  # num of valid users # TODO: combine with num of valid tags!
 user_colors = [
@@ -79,7 +79,7 @@ user_colors = [
 gama_iteration_images = ['' for n in range(num_of_rounds)]
 emissions_data_paths = ['' for n in range(num_of_rounds)]
 
-##################### global variables: #####################
+#-------------------------- global variables: -------------------------
 buildings = q100viz.buildings.Buildings()
 
 scenario_selected_buildings = pd.DataFrame()
@@ -89,8 +89,9 @@ ticks_elapsed = 0
 # list of possible handles
 mode_selector_handles = ['start_individual_data_view', 'start_total_data_view'
                          'start_buildings_interaction', 'start_simulation']
-COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'CO2', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'save_energy', 'save_energy_prior', 'energy_source', 'cell']
-VALID_GRID_HANDLES = ['connection_to_heat_grid', 'electricity_supplier', 'refurbished', 'save_energy', 'game_stage', 'num_connections', 'scenario_energy_prices']
+# columns exported from buildings.df for communication with GAMA and Infoscreen. ATTENTION: When this is changed, make sure to change it in GAMA and infoscreen likewise!
+COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'type', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'save_energy', 'save_energy_prior', 'energy_source', 'cell']
+VALID_GRID_HANDLES = ['connection_to_heat_grid', 'refurbished', 'save_energy', 'game_stage', 'num_connections', 'scenario_energy_prices']
 
 # environment (used for communication with infoscreen)
 environment = {
@@ -122,7 +123,7 @@ scenario_titles = {
 num_of_questions = 5  # TODO: this equals length of csv
 
 ############################## INITIALIZATION #########################
-########################### gis #############################
+#--------------------------------- gis --------------------------------
 # Initialize geographic viewport and basemap
 _gis = gis.GIS(
     canvas_size,
@@ -162,10 +163,10 @@ grid_2 = grid.Grid(
         {'slider2' : [[0, 115], [0, 100], [50, 100], [50, 115]]},
         {'slider2' : (0, ncols)})
 
-# init buildings:
+# --------------------------- init buildings: -------------------------
 buildings.load_data()
 
-# mode-specific grid setup:
+# ----------------------- mode-specific grid setup: -------------------
 buildings_interaction_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
 buildings_interaction_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
 input_scenarios_grid_1 = pd.read_csv(config['GRID_1_INPUT_SCENARIOS_FILE'])
@@ -175,6 +176,7 @@ individual_data_view_grid_2 = pd.read_csv(config['GRID_2_INDIVIDUAL_DATA_VIEW_FI
 total_data_view_grid_1 = pd.read_csv(config['GRID_1_TOTAL_DATA_VIEW_FILE'])
 total_data_view_grid_2 = pd.read_csv(config['GRID_2_TOTAL_DATA_VIEW_FILE'])
 
+# -------------------------------- modes ------------------------------
 calibration = CalibrationMode()
 questionnaire = Questionnaire_Mode()
 # 'input_scenarios': Input_Scenarios(),
@@ -184,7 +186,6 @@ individual_data_view = DataViewIndividual_Mode()
 total_data_view = DataViewTotal_Mode()
 
 ################################# FUNCTIONS ###########################
-# TODO: why does this function return a tuple?
 def string_to_mode(input_string):
     if input_string == 'calibrate':
         return calibration

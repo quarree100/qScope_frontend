@@ -33,7 +33,7 @@ class CalibrationMode:
 
                 # recalculate all surface projections
                 session.viewport.calculate()
-                session.gis.surface.calculate(session.viewport.transform_mat)
+                session._gis.surface.calculate(session.viewport.transform_mat)
 
                 for grid in (session.grid_1, session.grid_2):
                     grid.surface.calculate(session.viewport.transform_mat)
@@ -42,10 +42,10 @@ class CalibrationMode:
                         slider.surface.calculate(session.viewport.transform_mat)
                         slider.transform()
 
-                session.basemap.surface.calculate(session.gis.surface.transform_mat)
+                session.basemap.surface.calculate(session._gis.surface.transform_mat)
                 session.basemap.warp()
 
-                # for image in session.handlers['input_scenarios'].images:
+                # for image in session.input_scenarios.images:
                 #     image.surface.calculate(session.viewport.transform_mat)
                 #     image.warp()
 

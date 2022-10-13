@@ -3,6 +3,7 @@
 import pygame
 import json
 import numpy as np
+import random
 
 import q100viz.keystone as keystone
 import q100viz.session as session
@@ -46,7 +47,7 @@ class Slider:
         # stores coordinates as [[bottom-left.x, bottom-left.y], [top-left.x, top-left.y] [top-right.x, top-right.y], [bottom-right.x, bottom-right.y]]
         self.coords_transformed = self.surface.transform(coords)
         self.VALID_HANDLES = ['connection_to_heat_grid', 'refurbished',
-                              'environmental_engagement', 'game_stage', 'num_connections', 'scenario_energy_prices', 'default']
+                              'save_energy', 'game_stage', 'num_connections', 'scenario_energy_prices', 'default']
 
         self.human_readable_value = {None: ''}
         for key in self.VALID_HANDLES:
@@ -54,7 +55,7 @@ class Slider:
         self.human_readable_function = {
             'connection_to_heat_grid': "Wärmenetzanschluss",
             'refurbished': "Sanierung",
-            'environmental_engagement': "Energiebewusstsein",
+            'save_energy': "Energie sparen",
             'game_stage': "Spielmodus",
             'num_connections': "zusätzliche Anschlüsse",
             'scenario_energy_prices': "Energiekostenszenario",
@@ -135,8 +136,8 @@ class Slider:
                 handler = [key for key in ['buildings_interaction', 'simulation',
                                         'individual_data_view', 'total_data_view']][int(self.value * 4)]
                 print(handler)
-                session.active_handler = session.handlers[handler]
-                session.active_handler.activate()  # TODO: add confidence delay!
+                session.active_mode = session.string_to_mode[handler]
+                session.active_mode.activate()  # TODO: add confidence delay!
 
             elif self.handle == 'num_connections':
                 session.environment['scenario_num_connections'] = int(
@@ -162,7 +163,7 @@ class Slider:
                         session.log += "\n%s" % e
 
                     # drop already selected buildings from list:
-                    for buildings_group in session.buildings_groups_list:
+                    for buildings_group in session.buildings.list_from_groups():
                         for idx in buildings_group.index:
                             if idx in session.scenario_selected_buildings.index:
                                 session.scenario_selected_buildings = session.scenario_selected_buildings.drop(
@@ -170,17 +171,16 @@ class Slider:
 
                     # select and connect sampled buildings:
                     session.scenario_selected_buildings['selected'] = True
-                    session.scenario_selected_buildings['connection_to_heat_grid'] = True
-                    session.buildings.df.update(
-                        session.scenario_selected_buildings)
+                    session.scenario_selected_buildings['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
                     print("selecting random {0} buildings:".format(
                         session.environment['scenario_num_connections']))
 
                 else:  # value is 0: deselect all
                     session.scenario_selected_buildings['selected'] = False
                     session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                    session.buildings.df.update(
-                        session.scenario_selected_buildings)
+                # update buildings:
+                session.buildings.df.update(
+                    session.scenario_selected_buildings)
 
             elif self.handle == 'scenario_energy_prices':
                 session.environment['scenario_energy_prices'] = [
@@ -191,7 +191,7 @@ class Slider:
             # household-specific:
             if self.handle == 'connection_to_heat_grid':
                 session.buildings.df.loc[((
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = -1 if self.value <= 0.2 else np.interp((self.value), [0.2, 1], [2020, session.handlers['simulation'].max_year])
+                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [2020, session.simulation.max_year]))
                 self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
                     np.interp(float(self.value), [0.2, 1], [2020, 2045]))
 
@@ -200,33 +200,33 @@ class Slider:
                     session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'refurbished'] = self.value > 0.5
                 self.human_readable_value['refurbished'] = 'saniert' if self.value > 0.5 else 'unsaniert'
 
-            elif self.handle == 'environmental_engagement':
+            elif self.handle == 'save_energy':
                 session.buildings.df.loc[(
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'environmental_engagement'] = self.value > 0.5
-                self.human_readable_value['environmental_engagement'] = self.value
+                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'save_energy'] = self.value > 0.5
+                self.human_readable_value['save_energy'] = self.value
 
             # questionnaire:
             elif self.handle == 'answer':
-                session.environment['answer'] = 'no' if self.value >= 0.5 else 'yes'
+                session.questionnaire.answer = 'no' if self.value >= 0.5 else 'yes'
 
             elif self.handle == 'next_question':
                 if session.seconds_elapsed > self.last_change + 1:  # some delay for stable interaction
                     if self.toggle_question:
                         if self.value >= 0.5:
                             self.toggle_question = not self.toggle_question
-                            if session.active_handler is session.handlers['questionnaire']:
-                                session.active_handler.get_next_question()
+                            if session.active_mode is session.questionnaire:
+                                session.active_mode.get_next_question()
                             self.last_change = session.seconds_elapsed
                     else:
                         if self.value < 0.5:
                             self.toggle_question = not self.toggle_question
-                            if session.active_handler is session.handlers['questionnaire']:
-                                session.active_handler.get_next_question()
+                            if session.active_mode is session.questionnaire:
+                                session.active_mode.get_next_question()
                             self.last_change = session.seconds_elapsed
 
             session.api.send_message(json.dumps(session.environment))
             session.api.send_message(json.dumps(
-                session.buildings.make_buildings_groups_dict()))
+                session.buildings.get_dict_with_api_wrapper()))
 
             self.previous_value = self.value
 

@@ -100,21 +100,27 @@ class GIS:
             print("cannot draw polygon layer: ", e)
 
     def draw_buildings_connections(self, df):
-        for row in df.to_dict('records'):
+        try:
+            for row in df.to_dict('records'):
 
-            points = self.surface.transform(row['geometry'].exterior.coords)
-            centroid = shapely.geometry.Polygon(points).centroid
+                points = self.surface.transform(row['geometry'].exterior.coords)
+                centroid = shapely.geometry.Polygon(points).centroid
 
-            target = row['target_point']
+                target = row['target_point']
 
-            if row['connection_to_heat_grid']:
-                pygame.draw.line(
-                    self.surface,
-                    color=pygame.Color(0, 168, 78),
-                    start_pos=((centroid.x, centroid.y)),
-                    end_pos=((target.x, target.y)),
-                    width=4
-                    )
+                if row['connection_to_heat_grid']:
+                    pygame.draw.line(
+                        self.surface,
+                        color=pygame.Color(0, 168, 78),
+                        start_pos=((centroid.x, centroid.y)),
+                        end_pos=((target.x, target.y)),
+                        width=4
+                        )
+
+        except Exception as e:
+            session.log += "\n%s" % e
+            print("cannot draw building connection layer: ", e)
+
 
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):

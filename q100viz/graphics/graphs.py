@@ -1,3 +1,4 @@
+from socketserver import ForkingTCPServer
 import matplotlib.pyplot as plt
 import pandas
 import datetime
@@ -5,7 +6,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, folders=None, outfile=None):
+def export_using_columns(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, search_in_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -13,10 +14,18 @@ def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labe
     rounds_data = []
 
     # looks for all files with specified csv_name:
-    for output_folder in folders:
+    for output_folder in search_in_folders:
         try:
             csv_data = (pandas.read_csv(output_folder + csv_name))
             csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
+
+            # data conversion:
+            for col in columns:
+                if convert_grams_to_tons:
+                    csv_data[col] = csv_data[col].apply(grams_to_tons)
+                elif convert_grams_to_kg:
+                    csv_data[col] = csv_data[col].apply(grams_to_kg)
+
             rounds_data.append(csv_data)
         except Exception as e:
             print(e, "... probably the selected buildings have changed between the rounds")
@@ -60,62 +69,77 @@ def export_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labe
     plt.xticks(rotation=270, fontsize=18)
     plt.legend(loc='upper left')
 
-    if session.TEST_MODE == "matplotlib":
-        plt.show()
-        quit()
-
     plt.savefig(outfile, transparent=True)
 
-def export_combined_emissions_graph(current_output_folder, outfile):
+def export_combined_emissions(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
-    colors = [
-        ('seagreen', 'limegreen'),
-        ('darkgoldenrod', 'gold'),
-        ('steelblue', 'lightskyblue'),
-        ('black', 'gray')]
 
     # get csv for each building in each group
     data = []
-    labels = []
-    for group_df in session.buildings_groups_list:
+    decisions = []
+    addresses = []
+    for group_num, group_df in enumerate(buildings_groups_list):
         if group_df is not None:
             for idx in group_df.index:
                 # load from csv:
-                new_df = pandas.read_csv(current_output_folder + "/emissions/CO2_emissions_{0}.csv".format(idx))
-                new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
-                new_df['building_emissions'] = new_df['building_emissions'].apply(grams_to_kg)
-                data.append(new_df)
+                try:
+                    new_df = pandas.read_csv(current_output_folder + "/emissions/CO2_emissions_{0}.csv".format(idx))
+                    new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
+                    new_df['building_emissions'] = new_df['building_emissions'].apply(grams_to_kg)
+                    new_df['color'] = [rgb_to_float_tuple(session.user_colors[group_num]) for i in new_df.values]
+                    new_df['group_num'] = [group_num for i in new_df.values]
+                    data.append(new_df)
+                except Exception as e:
+                    print(e)
 
-                labels.append(group_df.loc[idx, 'address'])  # TODO: add decisions
+                # add labels:
+                decisions.append(
+                    "({0}, {1}, {2})".format(
+                    "s" if group_df.loc[idx, 'refurbished'] else "u",
+                    group_df.loc[idx, 'connection_to_heat_grid'] if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
+                    "ES" if group_df.loc[idx, 'save_energy'] else "NV")
+                )
+                addresses.append(group_df.loc[idx, 'address'])
 
     # make graph
-    plt.figure(figsize=(16,9))  # inches
+    plt.figure(figsize=(16,9))  #
+
+    print(data)
 
     for label_idx, df in enumerate(data):
-        plt.plot(df['current_date'], df['building_emissions'], color=colors[label_idx%len(colors)][0])
+        # plot:
+        plt.plot(df['current_date'], df['building_emissions'], color=df['color'][label_idx])
+
+        # annotate lines:
+        group_num = df.loc[df.index[0], 'group_num']
         plt.gca().annotate(
-            labels[label_idx],
-            xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                df.loc[df.index[len(df.index)-1], 'building_emissions']),
-            xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                    df.loc[df.index[len(df.index)-1], 'building_emissions'] * 1.02),
+            addresses[label_idx] + "\n" +
+            decisions[label_idx],
+            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_emissions']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_emissions'] * 1.02),
             fontsize=12,
-            horizontalalignment='right',
-            color=colors[label_idx%len(colors)][0]
+            horizontalalignment='left',
+            color=df['color'][label_idx]
         )
 
     # graphics:
-    plt.title("Emissionen")
     plt.xlabel("Jahr")
-    plt.ylabel(r'$CO_{2}$ [kg/Monat]')
+    plt.ylabel(r'Emissionen $CO_{2}$ [kg/Monat]')
     plt.xticks(rotation=270, fontsize=18)
-    # plt.annotate date of connection
+    # plt.legend(addresses, bbox_to_anchor=(1,1), loc="upper left", fontsize="x-small")
+    plt.tight_layout()
+    plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="x-small")
 
-    plt.savefig(current_output_folder + "/emissions/CO2_emissions_groups.png", transparent=True)
+    if graph_popup:
+        plt.show()
+    if outfile:
+        plt.savefig(outfile, transparent=True)
 
-def export_combined_energy_prices_graph(current_output_folder, outfile):
+def export_combined_energy_prices(current_output_folder, outfile):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -128,12 +152,13 @@ def export_combined_energy_prices_graph(current_output_folder, outfile):
     # get csv for each building in each group
     data = []
     labels = []
-    for group_df in session.buildings_groups_list:
+    for group_num, group_df in enumerate(session.buildings.list_from_groups()):
         if group_df is not None:
             for idx in group_df.index:
                 # load from csv:
                 new_df = pandas.read_csv(current_output_folder + "/energy_prices/energy_prices_{0}.csv".format(idx))
                 new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
+                new_df['group_num'] = [group_num for i in new_df.values]
                 data.append(new_df)
 
                 labels.append(group_df.loc[idx, 'address'] + ' - Wärme')  # TODO: add decisions
@@ -149,15 +174,16 @@ def export_combined_energy_prices_graph(current_output_folder, outfile):
                 df['building_expenses_heat'], color=colors[i%len(colors)][0])
 
         # annotate graph:
+        group_num = df.loc[df.index[0], 'group_num']
         plt.gca().annotate(
             labels[label_idx],
-            xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                df.loc[df.index[len(df.index)-1], 'building_expenses_heat']),
-            xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                    df.loc[df.index[len(df.index)-1], 'building_expenses_heat'] * 1.02),
+            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_heat']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_heat'] * 1.02),
             color=colors[i%len(colors)][0],
             fontsize=12,
-            horizontalalignment='right'
+            horizontalalignment='left'
         )
 
         label_idx += 1
@@ -169,26 +195,27 @@ def export_combined_energy_prices_graph(current_output_folder, outfile):
         # annotate graph
         plt.gca().annotate(
             labels[label_idx],
-            xy=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                df.loc[df.index[len(df.index)-1], 'building_expenses_power']),
-            xytext=(df.loc[df.index[len(df.index)-1], 'current_date'],
-                    df.loc[df.index[len(df.index)-1], 'building_expenses_power'] * 1.02),
+            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_power']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_power'] * 1.02),
             color=colors[i%len(colors)][1],
             fontsize=12,
-            horizontalalignment='right'
+            horizontalalignment='left'
         )
 
         label_idx += 1
 
     # graphics:
     # TODO: specify colors
-    plt.title("Energiekosten")
+    # plt.title("Energiekosten")
     plt.xlabel("Jahr")
-    plt.ylabel("[€/Monat]")
+    plt.ylabel("Energiekosten [€/Monat]")
     plt.xticks(rotation=270, fontsize=18)
-    # plt.annotate date of connection
+    plt.tight_layout()
 
-    plt.savefig(outfile, transparent=True)
+    if outfile is not None:
+        plt.savefig(outfile, transparent=True)
 
 def GAMA_time_to_datetime(input):
     dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)
@@ -196,3 +223,12 @@ def GAMA_time_to_datetime(input):
 
 def grams_to_kg(val):
     return val / 1000
+
+def grams_to_tons(val):
+    return val / 1000000
+
+def rgb_to_hex(rgb):
+    return '%02x%02x%02x' % rgb
+
+def rgb_to_float_tuple(rgb):
+    return (rgb[0] / 255, rgb[1] / 255, rgb[2] / 255)

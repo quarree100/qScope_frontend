@@ -3,6 +3,7 @@ import pandas
 import threading
 import socketio
 import q100viz.session as session
+import q100viz.devtools as devtools
 import datetime
 
 
@@ -22,8 +23,8 @@ class API:
 
     def send_message(self, msg):
         if msg != self.previous_message:
-            session.print_verbose(datetime.datetime.now().strftime(
-                " %H:%M:%S ") + "sending data:\n" + str(msg))
+            devtools.print_verbose(datetime.datetime.now().strftime(
+                " %H:%M:%S ") + "sending data:\n" + str(msg), session.VERBOSE_MODE)
             try:
                 self.io.emit('message', msg)
                 self.previous_message = msg
@@ -73,7 +74,7 @@ class API:
             for key, value in env.items():
                 result[key] = value
             clusterData = json.loads(export_json(
-                df[["address", "CO2", "connection_to_heat_grid", "refurbished", "environmental_engagement"]], None))
+                df[["address", "CO2", "connection_to_heat_grid", "refurbished", "save_energy"]], None))
             result["clusters"] = clusterData
             self.send_message(json.dumps(result))
 
@@ -92,11 +93,3 @@ def export_json(df, outfile=None):
     """Export a dataframe to JSON file. This is necessary to transform GeoDataFrames into a JSON serializable format"""
     return pandas.DataFrame(df).to_json(
         outfile, orient='records', force_ascii=False, default_handler=str)
-
-
-def print_full_df(df):
-    with pandas.option_context('display.max_rows', None,
-                               'display.max_columns', None,
-                               'display.precision', 3,
-                               ):
-        print(df)

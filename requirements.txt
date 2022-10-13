@@ -1,5 +1,11 @@
+datetime
 geopandas
+json
+numpy
 opencv-python
+pandas
 pygame
 python-socketio
+random
+shapely
 websocket-client

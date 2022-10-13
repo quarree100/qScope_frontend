@@ -1,15 +1,12 @@
 import sys
 import os
 import threading
-import json
 import pygame
 import datetime
 import argparse
 from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
 from q100viz.settings.config import config
-import q100viz.gis as gis
-import q100viz.grid as grid
 import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.interaction.interface import *
@@ -32,12 +29,12 @@ args = parser.parse_args()
 session.debug_num_of_random_buildings = args.random
 config['SIMULATION_FORCE_NUM_STEPS'] = args.sim_steps
 session.debug_force_connect = args.force_connect
-session.active_handler = session.handlers[args.start_at]
+session.active_mode = session.string_to_mode(args.start_at)
 session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
 
-simulation_steps_string = 'force simulation to run {0} steps'.format(config['SIMULATION_FORCE_NUM_STEPS']) if config['SIMULATION_FORCE_NUM_STEPS'] != 0 else 'simulation will run as specified in ../data/includes/csv-data_technical/initial_variables.csv'
+simulation_steps_string = 'force simulation to run {0} steps'.format(config['SIMULATION_FORCE_NUM_STEPS']) if config['SIMULATION_FORCE_NUM_STEPS'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
 print('\n', '#' * 72)
 print(
 """
@@ -79,61 +76,17 @@ canvas_size = session.canvas_size
 canvas = pygame.display.set_mode(canvas_size, NOFRAME)
 pygame.display.set_caption("q100viz")
 
-# Initialize geographic viewport and basemap
-
-_gis = session.gis = gis.GIS(
-    canvas_size,
-    # northeast          northwest           southwest           southeast
-    [[1013631, 7207409], [1012961, 7207198], [1013359, 7205932], [1014029, 7206143]],
-    session.viewport)
-
-basemap = session.basemap = gis.Basemap(
-    canvas_size, config['BASEMAP_FILE'],
-    # northwest          southwest           southeast           northeast
-    [[1012695, 7207571], [1012695, 7205976], [1014205, 7205976], [1014205, 7207571]],
-    _gis)
-basemap.warp()
-
-# Initialize grid, projected onto the viewport
-grid_settings = session.grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))  # TODO: seperate files for the two grids
-nrows = grid_settings['nrows']
-ncols = grid_settings['ncols']
-grid_1 = session.grid_1 = grid.Grid(
-    canvas_size, ncols, nrows, [
-        [config['GRID_1_X1'], config['GRID_1_Y1']],
-        [config['GRID_1_X1'], config['GRID_1_Y2']],
-        [config['GRID_1_X2'], config['GRID_1_Y2']],
-        [config['GRID_1_X2'], config['GRID_1_Y1']]],
-        session.viewport, config['GRID_1_SETUP_FILE'],
-        {'slider0' : [[0, 115], [0, 100], [50, 100], [50, 115]],
-            'slider1' : [[50, 115], [50, 100], [100, 100], [100, 115]]},
-        {'slider0' : (0, int(ncols/2)),
-        'slider1' : (int(ncols/2), ncols)})
-grid_2 = session.grid_2 = grid.Grid(
-    canvas_size, ncols, nrows, [
-        [config['GRID_2_X1'], config['GRID_2_Y1']],
-        [config['GRID_2_X1'], config['GRID_2_Y2']],
-        [config['GRID_2_X2'], config['GRID_2_Y2']],
-        [config['GRID_2_X2'], config['GRID_2_Y1']]],
-        session.viewport, config['GRID_2_SETUP_FILE'],
-        {'slider2' : [[0, 115], [0, 100], [50, 100], [50, 115]]},
-        {'slider2' : (0, ncols)})
-
-session.show_polygons = False
-session.show_basemap = False
 show_grid = False
 show_typologiezonen = False
 show_nahwaermenetz = True
 display_viewport = True
-
-session.buildings_df = session.buildings.load_data()
 
 ################### mask viewport with black surface ##################
 mask_points = [[0, 0], [85.5, 0], [85.5, 82], [0, 82], [0, -50],
                [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
 ################# UDP server for incoming cspy messages ###############
-for grid_, grid_udp in [[grid_1, grid_udp_1], [grid_2, grid_udp_2]]:
+for grid_, grid_udp in [[session.grid_1, grid_udp_1], [session.grid_2, grid_udp_2]]:
     udp_server = udp.UDPServer(*grid_udp, 4096)
     udp_thread = threading.Thread(target=udp_server.listen,
                                   args=(grid_.read_scanner_data,),
@@ -147,18 +100,14 @@ udp_thread = threading.Thread(target=udp_server.listen,
                                 daemon=True)
 udp_thread.start()
 
-handlers = session.handlers
-
-# mouse_position = MousePosition(canvas_size)
-
-session.active_handler.activate()
+session.active_mode.activate()
 
 ############################ Begin Game Loop ##########################
 while True:
     # process mouse/keyboard events
     for event in pygame.event.get():
-        if session.active_handler:
-            session.active_handler.process_event(event)
+        if session.active_mode:
+            session.active_mode.process_event(event)
 
         if event.type == KEYDOWN:
             ############################# graphics ####################
@@ -180,28 +129,27 @@ while True:
             ##################### mode selection ######################
             # enter questionnaire mode:
             if event.key == K_1:
-                session.handlers['questionnaire'].activate()
+                session.questionnaire.activate()
             # activate Input Scenarios Mode:
             # elif event.key == K_2:
-            #     session.handlers['input_scenarios'].activate()
+            #     session.input_scenarios.activate()
             # activate Input Households Mode:
             elif event.key == K_3:
-                session.handlers['buildings_interaction'].activate()
+                session.buildings_interaction.activate()
             # enter simulation mode:
             elif event.key == K_4:
                 session.environment['active_scenario_handle'] = 'A'
-                session.handlers['simulation'].activate()
+                session.simulation.activate()
             elif event.key == K_5:
-                session.handlers['individual_data_view'].activate()
+                session.individual_data_view.activate()
 
             # toggle calibration:
             elif event.key == K_c:
-                session.active_handler = handlers[
-                    'calibrate' if session.active_handler != handlers['calibrate'] else 'buildings_interaction']
+                session.active_mode = session.calibration if session.active_mode != session.calibration else session.buildings_interaction
 
             ########## manual slider control for test purposes: #######
             elif event.key == K_PLUS:
-                for grid in grid_1, grid_2:
+                for grid in session.grid_1, session.grid_2:
                     for key, val in grid.sliders.items():
                         if grid.sliders[key].value is not None:
                             grid.sliders[key].value += 0.1
@@ -209,7 +157,7 @@ while True:
                             grid.sliders[key].value = 0.1
                         grid.sliders[key].update()
             elif event.key == K_MINUS:
-                for grid in grid_1, grid_2:
+                for grid in session.grid_1, session.grid_2:
                     for key, val in grid.sliders.items():
                         if grid.sliders[key].value is not None:
                             grid.sliders[key].value = round(slider.value - 0.1, 3)
@@ -231,38 +179,38 @@ while True:
             sys.exit()
 
     # update running mode:
-    session.active_handler.update()
+    session.active_mode.update()
 
     ################################## DRAWING ########################
     # clear surfaces
     canvas.fill(0)
     session.viewport.fill(0)
-    _gis.surface.fill(0)
-    for grid in (grid_1, grid_2):
+    session._gis.surface.fill(0)
+    for grid in (session.grid_1, session.grid_2):
         grid.surface.fill(0)
         for slider in grid.sliders.values():
             slider.surface.fill(0)
 
     # draw GIS layers:
     if show_typologiezonen:
-        session.gis.draw_polygon_layer(canvas, session.gis.typologiezonen, 0, (123, 201, 230, 50))
+        session._gis.draw_polygon_layer(canvas, session._gis.typologiezonen, 0, (123, 201, 230, 50))
     if session.show_polygons:
-        session.gis.draw_linestring_layer(canvas, session.gis.nahwaermenetz, (217, 9, 9), 3)
-        session.gis.draw_polygon_layer(canvas, session.gis.waermezentrale, 0, (252, 137, 0))
-        session.gis.draw_buildings_connections(session.buildings_df)  # draw lines to closest heat grid
-        session.gis.draw_polygon_layer_bool(
-            canvas, session.buildings_df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
-        session.gis.draw_polygon_layer_bool(
-            canvas, session.buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
+        session._gis.draw_linestring_layer(canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
+        session._gis.draw_polygon_layer(canvas, session._gis.waermezentrale, 0, (252, 137, 0))
+        session._gis.draw_buildings_connections(session.buildings.df)  # draw lines to closest heat grid
+        session._gis.draw_polygon_layer_bool(
+            canvas, session.buildings.df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
+        session._gis.draw_polygon_layer_bool(
+            canvas, session.buildings.df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
 
         # stroke according to connection status:
-        session.gis.draw_polygon_layer_bool(
-            surface=canvas, df=session.buildings_df, stroke=1, fill_false=(0, 0, 0), fill_true=(0, 168, 78), fill_attr='connection_to_heat_grid')
+        session._gis.draw_polygon_layer_bool(
+            surface=canvas, df=session.buildings.df, stroke=1, fill_false=(0, 0, 0), fill_true=(0, 168, 78), fill_attr='connection_to_heat_grid')
 
 
         # color buildings if connection is not -1:
         # session.gis.draw_polygon_layer_connection_year(
-        #     session.buildings_df,
+        #     session.buildings.df,
         #     stroke=0,
         #     fill_true=(96, 205, 21),
         #     fill_false=(213, 50, 21),
@@ -270,36 +218,36 @@ while True:
 
         # # stroke simple black:
         # session.gis.draw_polygon_layer_bool(
-        #     canvas, session.buildings_df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')
+        #     canvas, session.buildings.df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')
 
         # # stroke according to connection status:
         # session.gis.draw_polygon_layer_connection_year(
-        #     session.buildings_df,
+        #     session.buildings.df,
         #     stroke=2,
         #     fill_true=(0, 168, 78),
         #     fill_false=(0),
         #     fill_attr='connection_to_heat_grid')
 
     # draw grid
-    grid_1.draw(show_grid)
-    grid_2.draw(show_grid)
+    session.grid_1.draw(show_grid)
+    session.grid_2.draw(show_grid)
 
     # draw mask
     pygame.draw.polygon(session.viewport, (0, 0, 0), session.viewport.transform(mask_points))
 
     # draw mode-specific surface:
-    if session.active_handler:
-        session.active_handler.draw(session.viewport)
+    if session.active_mode:
+        session.active_mode.draw(session.viewport)
 
     # render surfaces
     if session.show_basemap:
         crop_width = 4644
         crop_height = 800
-        canvas.blit(basemap.image, (0, 0), (0, 0, crop_width, crop_height))
+        canvas.blit(session.basemap.image, (0, 0), (0, 0, crop_width, crop_height))
 
     # GIS layer
     if session.show_polygons:
-        canvas.blit(_gis.surface, (0, 0))
+        canvas.blit(session._gis.surface, (0, 0))
 
     ########################## DATA PROCESSING ########################
 
@@ -313,14 +261,14 @@ while True:
     #     session.flag_export_canvas = False
 
     # slider
-    for grid in grid_1, grid_2:
+    for grid in session.grid_1, session.grid_2:
         for slider in grid.sliders.values():
             slider.render(session.viewport)
             slider.render(session.viewport)
 
     # draw grid
-    canvas.blit(grid_1.surface, (0, 0))
-    canvas.blit(grid_2.surface, (0, 0))
+    canvas.blit(session.grid_1.surface, (0, 0))
+    canvas.blit(session.grid_2.surface, (0, 0))
 
     if display_viewport:
         canvas.blit(session.viewport, (0, 0))

@@ -148,10 +148,10 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
         plt.gca().annotate(
             addresses[label_idx] + "\n" +
             decisions[label_idx],
-            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
-                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_emissions']),
-            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
-                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_emissions'] * 1.02),
+            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'building_emissions']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'building_emissions'] * 1.02),
             fontsize=12,
             horizontalalignment='left',
             color=df['color'][label_idx]
@@ -170,7 +170,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
     if outfile:
         plt.savefig(outfile, transparent=True)
 
-def export_combined_energy_prices(current_output_folder, outfile, compare_data_folder=None):
+def export_combined_energy_prices(current_output_folder, outfile=None, compare_data_folder=None):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -221,10 +221,10 @@ def export_combined_energy_prices(current_output_folder, outfile, compare_data_f
         group_num = df.loc[df.index[0], 'group_num']
         plt.gca().annotate(
             labels[label_idx],
-            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
-                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_heat']),
-            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
-                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_heat'] * 1.02),
+            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'building_expenses_heat']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'building_expenses_heat'] * 1.02),
             color=colors[i%len(colors)][0],
             fontsize=12,
             horizontalalignment='left'
@@ -245,10 +245,10 @@ def export_combined_energy_prices(current_output_folder, outfile, compare_data_f
         # annotate graph
         plt.gca().annotate(
             labels[label_idx],
-            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
-                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_power']),
-            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'current_date'],
-                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num)], 'building_expenses_power'] * 1.02),
+            xy=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'building_expenses_power']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/len(data) * group_num / session.num_of_users + 1)], 'building_expenses_power'] * 1.02),
             color=colors[i%len(colors)][1],
             fontsize=12,
             horizontalalignment='left'

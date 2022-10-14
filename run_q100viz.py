@@ -13,13 +13,13 @@ from q100viz.interaction.interface import *
 
 ##################### parse command line arguments ####################
 parser = argparse.ArgumentParser()
-parser.add_argument('--random', help="select n random buildings", type=int, default=0)
+parser.add_argument('--select_random', help="select n random buildings", type=int, default=0)
 parser.add_argument('--verbose', '-v', help="start in verbose mode", action='store_true')
 parser.add_argument(
-    '--sim_steps', help="number of steps for simulation", type=int, default=config['SIMULATION_FORCE_NUM_STEPS'])
-parser.add_argument('--force_connect', help="connect all buildings to Q100", action='store_true')
-parser.add_argument('--force_refurbished', help="refurbish all selected buildings", action='store_true')
-parser.add_argument('--force_save_energy', help="set all selected buildings to save_energy", action='store_true')
+    '--simulate_until', help="max_year of simulation", type=int, default=config['SIMULATION_FORCE_MAX_YEAR'])
+parser.add_argument('--connect', '-c', help="specify year of connection for selected buildings", type=int, default=0)
+parser.add_argument('--refurbish', '-r', help="refurbish all selected buildings", action='store_true')
+parser.add_argument('--save_energy', '-e', help="set all selected buildings to save_energy", action='store_true')
 parser.add_argument('--start_at', help="start at specific game mode", type=str, default=session.environment['mode'])
 parser.add_argument('--test', help="pre-set of functions to test different elements...", type=str)
 parser.add_argument('--main_window', help="runs program in main window", action='store_true')
@@ -27,28 +27,29 @@ parser.add_argument('--research_model', help="use research model instead of q-Sc
 
 args = parser.parse_args()
 
-session.debug_num_of_random_buildings = args.random
-config['SIMULATION_FORCE_NUM_STEPS'] = args.sim_steps
-session.debug_force_connect = args.force_connect
-session.debug_force_refurbished = args.force_refurbished
-session.debug_force_save_energy = args.force_save_energy
+session.debug_num_of_random_buildings = args.select_random
+config['SIMULATION_FORCE_MAX_YEAR'] = args.simulate_until
+session.debug_connection_date = args.connect
+session.debug_force_refurbished = args.refurbish
+session.debug_force_save_energy = args.save_energy
 session.active_mode = session.string_to_mode(args.start_at)
 session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
 
-simulation_steps_string = 'force simulation to run {0} steps'.format(config['SIMULATION_FORCE_NUM_STEPS']) if config['SIMULATION_FORCE_NUM_STEPS'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
+simulation_steps_string = 'force simulation to run {0} steps'.format(config['SIMULATION_FORCE_MAX_YEAR']) if config['SIMULATION_FORCE_MAX_YEAR'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
+connection_date_string = 'connect selected buildings in year {0}'.format(session.debug_connection_date) if session.debug_connection_date > 0 else ''
 print('\n', '#' * 72)
 print(
 """
 - random {0} buildings will be selected
-- force selected buildings to connect? {1}
+- {1}
 - {2}
 - using simulation model file {3}
 """\
     .format(
         session.debug_num_of_random_buildings,
-        str(session.debug_force_connect),
+        connection_date_string,
         simulation_steps_string,
         str(config['GAMA_MODEL_FILE'])
     )

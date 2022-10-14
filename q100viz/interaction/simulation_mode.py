@@ -5,6 +5,7 @@ import threading
 import pygame
 import datetime
 import random
+import json
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -31,41 +32,12 @@ class SimulationMode:
 
         self.xml = None
 
-    def activate(self, max_year=None):
+    def activate(self, input_max_year=None):
+
+        self.max_year = input_max_year
 
         session.environment['mode'] = self.name
         session.active_mode = self
-
-        # increase round counter to globally log q-scope iterations:
-        session.environment['current_iteration_round'] = (
-            session.environment['current_iteration_round'] + 1) % session.num_of_rounds
-
-        # derive final step from defined simulation runtime:
-        if config['SIMULATION_FORCE_NUM_STEPS'] == 0:
-            runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
-                                      index_col='var').loc['model_runtime_string', 'value']
-            if runtime == '2020-2030':
-                self.final_step = 10 * 365 + 3  # include leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
-                self.max_year = 2030  # used by slider
-
-            elif runtime == '2020-2040':
-                self.final_step = 20 * 365 + 5
-                self.max_year = 2040
-
-            elif runtime == '2020-2045':
-                self.final_step = 25 * 365 + 7
-                self.max_year = 2045
-        else:
-            # overwrite final step if set via flag --sim_steps:
-            self.final_step = config['SIMULATION_FORCE_NUM_STEPS']
-            self.max_year = int(2020 + self.final_step / 365)
-
-        # if max_year is not None:
-        #     self.max_year = max_year
-        #     self.final_step = ((max_year - 2020) * 365) + int((max_year - 2020)/4)
-
-        self.model_file = os.path.normpath(
-            os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
 
         # display setup:
         for grid in session.grid_1, session.grid_2:
@@ -76,6 +48,31 @@ class SimulationMode:
         session.show_polygons = False
 
         session.api.send_session_env()
+
+        # increase round counter to globally log q-scope iterations:
+        session.environment['current_iteration_round'] = (
+            session.environment['current_iteration_round'] + 1) % session.num_of_rounds
+
+        # derive final step from defined simulation runtime:
+        if config['SIMULATION_FORCE_MAX_YEAR'] == 0:
+            runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
+                                      index_col='var').loc['model_runtime_string', 'value']
+            self.max_year = int(runtime[-4:])  # last four digits of model_runtime_string
+            self.final_step = ((self.max_year - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
+
+        else:
+            # overwrite final step if set via flag --sim_steps:
+            self.max_year = config['SIMULATION_FORCE_MAX_YEAR']
+            self.final_step = ((self.max_year - 2020) * 365) + int((self.max_year - 2020)/4)
+        devtools.print_verbose('simulation will run until year {0} ({1} steps)'.format(self.max_year, self.final_step), session.VERBOSE_MODE)
+
+        # overwrite by function input:
+        if input_max_year is not None:
+            self.max_year = input_max_year
+            self.final_step = ((self.max_year - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
+
+        self.model_file = os.path.normpath(
+            os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
 
         # simulation start time
         self.timestamp = str(
@@ -136,9 +133,10 @@ class SimulationMode:
 
         ############### debug: select random of 100 buildings: ########
         if session.debug_num_of_random_buildings > 0:
-            print(self.max_year)
-            connection_date = random.randint(2020, self.max_year) if session.debug_force_connect else False
+            connection_date = random.randint(2020, self.max_year) if session.debug_connection_date > 0 else False
             devtools.select_random_buildings_for_simulation(session.buildings.df, session.debug_num_of_random_buildings, connection_to_heat_grid=connection_date, refurbished=session.debug_force_refurbished, save_energy=session.debug_force_save_energy)
+
+        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
 
         ################# export buildings_clusters to csv ############
         clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(

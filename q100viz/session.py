@@ -25,7 +25,7 @@ TEST_MODE = ""
 VERBOSE_MODE = False
 
 debug_num_of_random_buildings = 0
-debug_force_connect = False
+debug_connection_date = 0
 debug_force_refurbished = False
 debug_force_save_energy = False
 

@@ -70,7 +70,7 @@ class SimulationMode:
         # overwrite by function input:
         if input_max_year is not None:
             self.max_year = input_max_year
-            self.final_step = ((self.max_year - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
+            self.final_step = ((self.max_year + 1 - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
 
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
@@ -181,7 +181,7 @@ class SimulationMode:
                 for idx in group_df.index:
 
                     # export emissions graph:
-                    graphs.export_individual_graphs(
+                    graphs.export_individual_graph(
                         csv_name="/emissions/CO2_emissions_{0}.csv".format(
                             idx),
                         data_folders=self.output_folders,
@@ -203,7 +203,7 @@ class SimulationMode:
                         + "\nspez. Stromverbrauch:" + group_df.loc(idx, 'spec_power_consumption')
 
                     # export energy prices graph:
-                    graphs.export_individual_graphs(
+                    graphs.export_individual_graph(
                         csv_name="/energy_prices/energy_prices_{0}.csv".format(
                             idx),
                         data_folders=self.output_folders,
@@ -214,7 +214,7 @@ class SimulationMode:
                         "/energy_prices/energy_prices_{0}.png".format(idx),
                         title_="Energiekosten",
                         xlabel_="Jahr",
-                        ylabel_="Energiekosten [€/Monat]",
+                        ylabel_="€/Monat",
                         x_='current_date',
                         compare_data_folder=self.current_output_folder + "/../output_bestand",
                         figtext=figtext
@@ -241,7 +241,7 @@ class SimulationMode:
             outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
         # neighborhood total emissions:
-        graphs.export_individual_graphs(
+        graphs.export_individual_graph(
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
             data_folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
@@ -255,11 +255,11 @@ class SimulationMode:
         )
 
         # neighborhood total energy prices prognosis:
-        graphs.export_individual_graphs(
+        graphs.export_individual_graph(
             csv_name="/energy_prices/energy_prices_total.csv",
             data_folders=self.output_folders,
-            columns=['power_price', 'oil_price', 'gas_price'],
-            labels_=['Strompreis', 'Ölpreis', 'Gaspreis'],
+            columns=['gas_price', 'power_price', 'oil_price'],
+            labels_=['Gaspreis', 'Strompreis', 'Ölpreis',],
             title_="Energiepreis",
             outfile=self.current_output_folder + "/energy_prices/energy_prices_total.png",
             xlabel_="Jahr",

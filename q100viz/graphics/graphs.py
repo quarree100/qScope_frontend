@@ -5,7 +5,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_individual_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext=""):
+def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext_=""):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -83,7 +83,8 @@ def export_individual_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabe
 
         it_round += 1
 
-    plt.figtext(0.5, 0.01, figtext, wrap=False, horizontalalignment='center')
+    plt.tight_layout()  # makes sure all objects are inside the figure boundaries
+    plt.figtext(0.5, -0.1, figtext_, wrap=False, horizontalalignment='center')
     plt.title(title_)
     plt.xlabel(xlabel_)
     plt.ylabel(ylabel_)
@@ -91,7 +92,7 @@ def export_individual_graphs(csv_name, columns, x_, title_="", xlabel_="", ylabe
     plt.legend(loc='upper left')
 
     if outfile is not None:
-        plt.savefig(outfile, transparent=True)
+        plt.savefig(outfile, transparent=True, bbox_inches="tight")
 
 def export_combined_emissions(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False, compare_data_folder=None):
     '''exports all data for selected group buildings into one graph for total data view'''
@@ -159,6 +160,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
         )
 
     # graphics:
+    plt.title("Quartiersemissionen")
     plt.xlabel("Jahr")
     plt.ylabel(r'Emissionen $CO_{2}$ [kg/Monat]')
     plt.xticks(rotation=270, fontsize=18)
@@ -169,7 +171,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
     if graph_popup:
         plt.show()
     if outfile:
-        plt.savefig(outfile, transparent=True)
+        plt.savefig(outfile, transparent=True, bbox_inches="tight")
 
 def export_combined_energy_prices(current_output_folder, outfile=None, compare_data_folder=None):
     '''exports all data for selected group buildings into one graph for total data view'''
@@ -259,14 +261,14 @@ def export_combined_energy_prices(current_output_folder, outfile=None, compare_d
 
     # graphics:
     # TODO: specify colors
-    # plt.title("Energiekosten")
+    plt.title("Energiekosten")
     plt.xlabel("Jahr")
-    plt.ylabel("Energiekosten [€/Monat]")
+    plt.ylabel("€/Monat")
     plt.xticks(rotation=270, fontsize=18)
     plt.tight_layout()
 
     if outfile is not None:
-        plt.savefig(outfile, transparent=True)
+        plt.savefig(outfile, transparent=True, bbox_inches="tight")
 
 def GAMA_time_to_datetime(input):
     dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)

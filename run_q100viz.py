@@ -1,4 +1,3 @@
-from multiprocessing import connection
 import sys
 import os
 import threading
@@ -48,7 +47,7 @@ session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
 
-simulation_steps_string = 'force simulation to run {0} steps'.format(
+simulation_steps_string = 'simulate until year {0}'.format(
     config['SIMULATION_FORCE_MAX_YEAR']) if config['SIMULATION_FORCE_MAX_YEAR'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
 connection_date_string = 'connect selected buildings in year {0}'.format(
     session.debug_connection_date) if session.debug_connection_date > 0 else ''

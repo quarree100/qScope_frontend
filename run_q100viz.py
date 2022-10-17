@@ -1,3 +1,4 @@
+from multiprocessing import connection
 import sys
 import os
 import threading
@@ -7,23 +8,33 @@ import argparse
 from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
 from q100viz.settings.config import config
+import q100viz.devtools as devtools
 import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.interaction.interface import *
 
 ##################### parse command line arguments ####################
 parser = argparse.ArgumentParser()
-parser.add_argument('--select_random', help="select n random buildings", type=int, default=0)
-parser.add_argument('--verbose', '-v', help="start in verbose mode", action='store_true')
+parser.add_argument('--select_random',
+                    help="select n random buildings", type=int, default=0)
+parser.add_argument('--verbose', '-v',
+                    help="start in verbose mode", action='store_true')
 parser.add_argument(
     '--simulate_until', help="max_year of simulation", type=int, default=config['SIMULATION_FORCE_MAX_YEAR'])
-parser.add_argument('--connect', '-c', help="specify year of connection for selected buildings", type=int, default=0)
-parser.add_argument('--refurbish', '-r', help="refurbish all selected buildings", action='store_true')
-parser.add_argument('--save_energy', '-e', help="set all selected buildings to save_energy", action='store_true')
-parser.add_argument('--start_at', help="start at specific game mode", type=str, default=session.environment['mode'])
-parser.add_argument('--test', help="pre-set of functions to test different elements...", type=str)
-parser.add_argument('--main_window', help="runs program in main window", action='store_true')
-parser.add_argument('--research_model', help="use research model instead of q-Scope-interaction model", action='store_true')
+parser.add_argument(
+    '--connect', '-c', help="specify year of connection for selected buildings", type=int, default=0)
+parser.add_argument('--refurbish', '-r',
+                    help="refurbish all selected buildings", action='store_true')
+parser.add_argument('--save_energy', '-e',
+                    help="set all selected buildings to save_energy", action='store_true')
+parser.add_argument('--start_at', help="start at specific game mode",
+                    type=str, default=session.environment['mode'])
+parser.add_argument(
+    '--test', help="pre-set of functions to test different elements...", type=str)
+parser.add_argument(
+    '--main_window', help="runs program in main window", action='store_true')
+parser.add_argument('--research_model',
+                    help="use research model instead of q-Scope-interaction model", action='store_true')
 
 args = parser.parse_args()
 
@@ -37,16 +48,18 @@ session.TEST_MODE = args.test
 session.VERBOSE_MODE = args.verbose
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
 
-simulation_steps_string = 'force simulation to run {0} steps'.format(config['SIMULATION_FORCE_MAX_YEAR']) if config['SIMULATION_FORCE_MAX_YEAR'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
-connection_date_string = 'connect selected buildings in year {0}'.format(session.debug_connection_date) if session.debug_connection_date > 0 else ''
+simulation_steps_string = 'force simulation to run {0} steps'.format(
+    config['SIMULATION_FORCE_MAX_YEAR']) if config['SIMULATION_FORCE_MAX_YEAR'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
+connection_date_string = 'connect selected buildings in year {0}'.format(
+    session.debug_connection_date) if session.debug_connection_date > 0 else ''
 print('\n', '#' * 72)
 print(
-"""
+    """
 - random {0} buildings will be selected
 - {1}
 - {2}
 - using simulation model file {3}
-"""\
+"""
     .format(
         session.debug_num_of_random_buildings,
         connection_date_string,
@@ -62,8 +75,9 @@ FPS = session.FPS = 12
 
 # set window position
 if not args.main_window:
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320,1440)
-    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0,2160)  # projection to the left
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (320, 1440)
+    os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (
+        0, 2160)  # projection to the left
 
 # Initialize program
 pygame.init()
@@ -100,12 +114,99 @@ for grid_, grid_udp in [[session.grid_1, grid_udp_1], [session.grid_2, grid_udp_
 # receive and forward GAMA messages during simulation:
 udp_server = udp.UDPServer('localhost', 8081, 4096)
 udp_thread = threading.Thread(target=udp_server.listen,
-                                args=(session.api.forward_gama_message,),
-                                daemon=True)
+                              args=(session.api.forward_gama_message,),
+                              daemon=True)
 udp_thread.start()
 
 session.active_mode.activate()
 
+############################ Model Validation #########################
+
+batch_sim_start = datetime.datetime.now()
+
+# batch commands: shuffle buildings each time, GAMA branch = pre_main (not including change of agora dataset yet!)
+# 1. all false
+devtools.select_random_buildings_for_simulation(
+    session.buildings.df, 4)
+session.simulation.__init__()
+session.simulation.activate()
+
+# 2. connect in 2027
+session.buildings.load_data()  # re-init buildings
+session.environment['current_iteration_round'] = 0
+devtools.select_random_buildings_for_simulation(
+    session.buildings.df, 4,
+    connection_to_heat_grid=random.randint(2020, 2045))
+session.simulation.__init__()
+session.simulation.activate()
+
+# 3. saniert true; rest false
+session.buildings.load_data()  # re-init buildings
+session.environment['current_iteration_round'] = 0
+devtools.select_random_buildings_for_simulation(
+    session.buildings.df, 4,
+    refurbished=True)
+session.simulation.__init__()
+session.simulation.activate()
+
+# 4. Energiesparen true; rest false
+session.buildings.load_data()  # re-init buildings
+session.environment['current_iteration_round'] = 0
+devtools.select_random_buildings_for_simulation(
+    session.buildings.df, 4,
+    save_energy=True)
+session.simulation.__init__()
+session.simulation.activate()
+
+# 5. Anschluss 2027; Saniert true; Energiesparen false
+session.buildings.load_data()  # re-init buildings
+session.environment['current_iteration_round'] = 0
+devtools.select_random_buildings_for_simulation(
+    session.buildings.df, 4,
+    connection_to_heat_grid=random.randint(2020, 2045),
+    refurbished=True)
+session.simulation.__init__()
+session.simulation.activate()
+
+# 6. Anschluss 2027; Saniert false; Energiesparen true
+session.buildings.load_data()  # re-init buildings
+session.environment['current_iteration_round'] = 0
+devtools.select_random_buildings_for_simulation(
+    session.buildings.df, 4,
+    connection_to_heat_grid=random.randint(2020, 2045),
+    save_energy=True)
+session.simulation.__init__()
+session.simulation.activate()
+
+# 7. Anschluss false; Saniert true; Energiesparen true
+session.buildings.load_data()  # re-init buildings
+session.environment['current_iteration_round'] = 0
+devtools.select_random_buildings_for_simulation(
+    session.buildings.df, 4,
+    refurbished=True,
+    save_energy=True)
+session.simulation.__init__()
+session.simulation.activate()
+
+# 8. Alles auf true
+session.buildings.load_data()  # re-init buildings
+session.environment['current_iteration_round'] = 0
+devtools.select_random_buildings_for_simulation(
+    session.buildings.df, 4,
+    connection_to_heat_grid=random.randint(2020, 2045),
+    save_energy=True,
+    refurbished=True)
+session.simulation.__init__()
+session.simulation.activate()
+
+print("all simulations finished. total duration = ",
+      datetime.datetime.now() - batch_sim_start)
+
+with open("qScope-log_%s.txt" % datetime.datetime.now(), "w") as f:
+    f.write(session.log)
+    f.close()
+pygame.quit()
+sys.exit()
 ############################ Begin Game Loop ##########################
 while True:
     # process mouse/keyboard events
@@ -164,11 +265,11 @@ while True:
                 for grid in session.grid_1, session.grid_2:
                     for key, val in grid.sliders.items():
                         if grid.sliders[key].value is not None:
-                            grid.sliders[key].value = round(slider.value - 0.1, 3)
+                            grid.sliders[key].value = round(
+                                slider.value - 0.1, 3)
                         else:
                             grid.sliders[key].value = 0.1
                         grid.sliders[key].update()
-
 
             # verbose mode:
             elif event.key == K_v:
@@ -197,11 +298,15 @@ while True:
 
     # draw GIS layers:
     if show_typologiezonen:
-        session._gis.draw_polygon_layer(canvas, session._gis.typologiezonen, 0, (123, 201, 230, 50))
+        session._gis.draw_polygon_layer(
+            canvas, session._gis.typologiezonen, 0, (123, 201, 230, 50))
     if session.show_polygons:
-        session._gis.draw_linestring_layer(canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
-        session._gis.draw_polygon_layer(canvas, session._gis.waermezentrale, 0, (252, 137, 0))
-        session._gis.draw_buildings_connections(session.buildings.df)  # draw lines to closest heat grid
+        session._gis.draw_linestring_layer(
+            canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
+        session._gis.draw_polygon_layer(
+            canvas, session._gis.waermezentrale, 0, (252, 137, 0))
+        session._gis.draw_buildings_connections(
+            session.buildings.df)  # draw lines to closest heat grid
         session._gis.draw_polygon_layer_bool(
             canvas, session.buildings.df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
         session._gis.draw_polygon_layer_bool(
@@ -210,7 +315,6 @@ while True:
         # stroke according to connection status:
         session._gis.draw_polygon_layer_bool(
             surface=canvas, df=session.buildings.df, stroke=1, fill_false=(0, 0, 0), fill_true=(0, 168, 78), fill_attr='connection_to_heat_grid')
-
 
         # color buildings if connection is not -1:
         # session.gis.draw_polygon_layer_connection_year(
@@ -237,7 +341,8 @@ while True:
     session.grid_2.draw(show_grid)
 
     # draw mask
-    pygame.draw.polygon(session.viewport, (0, 0, 0), session.viewport.transform(mask_points))
+    pygame.draw.polygon(session.viewport, (0, 0, 0),
+                        session.viewport.transform(mask_points))
 
     # draw mode-specific surface:
     if session.active_mode:
@@ -247,7 +352,8 @@ while True:
     if session.show_basemap:
         crop_width = 4644
         crop_height = 800
-        canvas.blit(session.basemap.image, (0, 0), (0, 0, crop_width, crop_height))
+        canvas.blit(session.basemap.image, (0, 0),
+                    (0, 0, crop_width, crop_height))
 
     # GIS layer
     if session.show_polygons:
@@ -282,8 +388,8 @@ while True:
     font = pygame.font.SysFont('Arial', 20)
     # mouse position
     # if session.VERBOSE_MODE:
-        # mouse_pos = pygame.mouse.get_pos()
-        # canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
+    # mouse_pos = pygame.mouse.get_pos()
+    # canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
 
     ############################# pygame time #########################
 

@@ -1,3 +1,4 @@
+from tokenize import group
 import pandas
 import os
 import subprocess
@@ -64,7 +65,7 @@ class SimulationMode:
             # overwrite final step if set via flag --sim_steps:
             self.max_year = config['SIMULATION_FORCE_MAX_YEAR']
             self.final_step = ((self.max_year - 2020) * 365) + int((self.max_year - 2020)/4)
-        devtools.print_verbose('simulation will run until year {0} ({1} steps)'.format(self.max_year, self.final_step), session.VERBOSE_MODE)
+        print('simulation will run until year {0} ({1} steps)'.format(self.max_year, self.final_step))
 
         # overwrite by function input:
         if input_max_year is not None:
@@ -180,7 +181,7 @@ class SimulationMode:
                 for idx in group_df.index:
 
                     # export emissions graph:
-                    graphs.export_using_columns(
+                    graphs.export_individual_graphs(
                         csv_name="/emissions/CO2_emissions_{0}.csv".format(
                             idx),
                         data_folders=self.output_folders,
@@ -195,8 +196,14 @@ class SimulationMode:
                         compare_data_folder=self.current_output_folder + "/../output_bestand"
                     )
 
+                    figtext = \
+                        group_df.loc(idx, 'type') \
+                        + "\n" + group_df.loc(idx, 'address') \
+                        + "\nspez. Wärmeverbrauch:" + group_df.loc(idx, 'spec_heat_consumption') \
+                        + "\nspez. Stromverbrauch:" + group_df.loc(idx, 'spec_power_consumption')
+
                     # export energy prices graph:
-                    graphs.export_using_columns(
+                    graphs.export_individual_graphs(
                         csv_name="/energy_prices/energy_prices_{0}.csv".format(
                             idx),
                         data_folders=self.output_folders,
@@ -209,7 +216,8 @@ class SimulationMode:
                         xlabel_="Jahr",
                         ylabel_="Energiekosten [€/Monat]",
                         x_='current_date',
-                        compare_data_folder=self.current_output_folder + "/../output_bestand"
+                        compare_data_folder=self.current_output_folder + "/../output_bestand",
+                        figtext=figtext
                     )
 
                     # pass path to buildings in infoscreen-compatible format
@@ -233,7 +241,7 @@ class SimulationMode:
             outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
         # neighborhood total emissions:
-        graphs.export_using_columns(
+        graphs.export_individual_graphs(
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
             data_folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
@@ -247,7 +255,7 @@ class SimulationMode:
         )
 
         # neighborhood total energy prices prognosis:
-        graphs.export_using_columns(
+        graphs.export_individual_graphs(
             csv_name="/energy_prices/energy_prices_total.csv",
             data_folders=self.output_folders,
             columns=['power_price', 'oil_price', 'gas_price'],

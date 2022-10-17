@@ -24,7 +24,7 @@ class API:
     def send_message(self, msg):
         if msg != self.previous_message:
             devtools.print_verbose(datetime.datetime.now().strftime(
-                " %H:%M:%S ") + "sending data:\n" + str(msg), session.VERBOSE_MODE)
+                " %H:%M:%S ") + "sending data:\n" + str(msg), session.VERBOSE_MODE, session.log)
             try:
                 self.io.emit('message', msg)
                 self.previous_message = msg

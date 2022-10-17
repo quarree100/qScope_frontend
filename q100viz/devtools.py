@@ -2,9 +2,10 @@
 import random
 import pandas
 
-def print_verbose(message, VERBOSE_MODE):
+def print_verbose(message, VERBOSE_MODE, log):
     if VERBOSE_MODE:
         print(message)
+        if log: log += ("\n" + message)
 
 def select_random_buildings_for_simulation(buildings_df, num_buildings=1, max_buildings_group=3, connection_to_heat_grid=False, refurbished=False, save_energy=False):
         '''pick random n buildings, activate for simulation and update buildings list'''

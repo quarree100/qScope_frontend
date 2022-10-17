@@ -59,12 +59,12 @@ class SimulationMode:
             runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
                                       index_col='var').loc['model_runtime_string', 'value']
             self.max_year = int(runtime[-4:])  # last four digits of model_runtime_string
-            self.final_step = ((self.max_year - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
+            self.final_step = ((self.max_year + 1 - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
 
         else:
             # overwrite final step if set via flag --sim_steps:
             self.max_year = config['SIMULATION_FORCE_MAX_YEAR']
-            self.final_step = ((self.max_year - 2020) * 365) + int((self.max_year - 2020)/4)
+            self.final_step = ((self.max_year + 1 - 2020) * 365) + int((self.max_year - 2020)/4)
         print('simulation will run until year {0} ({1} steps)'.format(self.max_year, self.final_step))
 
         # overwrite by function input:
@@ -197,6 +197,7 @@ class SimulationMode:
                     )
 
                     figtext_debug = str(group_df.loc[idx, 'address']) + \
+                        ", " + str(idx) + \
                         ", " + str(group_df.loc[idx, 'type']) + \
                         "\n ø-spez. Wärmeverbrauch (" + \
                         str(int(group_df.loc[idx, 'cluster_size'])) + \

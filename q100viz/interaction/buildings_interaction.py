@@ -103,7 +103,7 @@ class Buildings_Interaction:
 
                 sel_buildings = session.buildings.df[(session.buildings.df.selected)]
                 for building in sel_buildings.to_dict('records'):
-                    fill_color = pygame.Color(session.user_colors[building['group']])
+                    fill_color = pygame.Color(session.user_colors[int(building['group'])])
 
                     points = session._gis.surface.transform(building['geometry'].exterior.coords)
                     pygame.draw.polygon(session._gis.surface, fill_color, points, 2)

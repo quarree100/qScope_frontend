@@ -5,7 +5,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext_=""):
+def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext=""):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -84,7 +84,7 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
         it_round += 1
 
     plt.tight_layout()  # makes sure all objects are inside the figure boundaries
-    plt.figtext(0.5, -0.1, figtext_, wrap=False, horizontalalignment='center')
+    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center')
     plt.title(title_)
     plt.xlabel(xlabel_)
     plt.ylabel(ylabel_)

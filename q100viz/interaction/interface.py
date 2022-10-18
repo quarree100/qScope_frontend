@@ -90,10 +90,20 @@ class Slider:
                 # slider control texts:
                 if self.show_text and cell.y == len(self.grid.grid) - 1:
                     font = pygame.font.SysFont('Arial', 10)
+                    handle_string = ""
+                    if cell.handle == "connection_to_heat_grid":
+                        handle_string = "Anschluss"
+                    elif cell.handle == "refurbished":
+                        handle_string = "Sanierung"
+                    elif cell.handle == "save_energy":
+                        handle_string = "Energiesparen"
+                    if cell.handle == "scenario_energy_prices":
+                        handle_string = "Energiepreise"
+                    if cell.handle == "num_connections":
+                        handle_string = "Anschlüsse"
                     self.surface.blit(
-                        font.render(str(cell.handle)[
-                                    :8], True, (255, 255, 255)),
-                        [rect_points[0][0], rect_points[0][1] + 30]
+                        font.render(handle_string, True, (255, 255, 255)),
+                        [rect_points[0][0], rect_points[0][1] + 35]
                     )
 
         font = pygame.font.SysFont('Arial', 18)
@@ -110,16 +120,40 @@ class Slider:
         canvas.blit(self.surface, (0, 0))
 
     def draw_area(self):
-        pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
+        # pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
 
         # draw vertical middle line for some handles:
-        if self.handle in ['refurbished']:
-            pygame.draw.line(self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1] + 2),
-                             (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[1][1] + 2), width=2)
+        if self.handle in ['refurbished', 'save_energy']:
+            pygame.draw.line(
+                self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1] + 2),
+                (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[1][1] + 2), width=2)
+
+            # red field:
+            c = self.coords
+            points = [
+                c[0],  # bottom left 
+                c[1],  # top left
+                [c[2][0] - c[1][0]/2, c[2][1]],  # top right 
+                [c[3][0] - c[1][0]/2, c[3][1]]]  # bottom right
+            points_transformed = self.surface.transform(points)
+            pygame.draw.polygon(self.surface, pygame.Color(200,20,55), points_transformed)
+
+            # green field:
+            c = self.coords
+            points = [
+                [c[0][0] + (c[3][0] - c[0][0]) / 2, c[0][1]],  # bottom left
+                [c[1][0] + (c[2][0] - c[1][0]) / 2, c[1][1]],  # top left
+                c[2],  # top right
+                c[3]]  # bottom right
+            points_transformed = self.surface.transform(points)
+            pygame.draw.polygon(self.surface, pygame.Color(20,200,55), points_transformed)
+
 
         if self.handle == 'connection_to_heat_grid':
             pygame.draw.line(self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) * 0.2, self.coords_transformed[0][1] + 2),
                              (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) * 0.2, self.coords_transformed[1][1] + 2), width=2)
+
+        
 
     def transform(self):
         self.coords_transformed = self.surface.transform(self.coords)
@@ -203,7 +237,7 @@ class Slider:
             elif self.handle == 'save_energy':
                 session.buildings.df.loc[(
                     session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'save_energy'] = self.value > 0.5
-                self.human_readable_value['save_energy'] = self.value
+                self.human_readable_value['save_energy'] = 'ja' if self.value > 0.5 else 'nein'
 
             # questionnaire:
             elif self.handle == 'answer':
@@ -233,6 +267,7 @@ class Slider:
     def update_handle(self, cell_handle, cell_id):
         if self.show_controls:
             self.handle = cell_handle
+            self.update()  # update values
             self.group = cell_id
             if self.previous_handle is not self.handle:
                 session.api.send_message(json.dumps({'sliders': {

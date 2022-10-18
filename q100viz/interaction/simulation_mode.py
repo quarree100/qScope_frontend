@@ -197,15 +197,6 @@ class SimulationMode:
                         figtext="(monatlich berechnet)"
                     )
 
-                    figtext_debug = str(group_df.loc[idx, 'address']) + \
-                        ", " + str(idx) + \
-                        ", " + str(group_df.loc[idx, 'type']) + \
-                        "\n ø-spez. Wärmeverbrauch (" + \
-                        str(int(group_df.loc[idx, 'cluster_size'])) + \
-                                " ähnliche Gebäude): " + \
-                        str(round(group_df.loc[idx, 'avg_spec_heat_consumption'], 2)) + \
-                        ", ø-spez. Stromverbrauch: " + str(round(group_df.loc[idx, 'avg_spec_power_consumption'], 2))
-
                     # export energy prices graph:
                     graphs.export_individual_graph(
                         csv_name="/energy_prices/energy_prices_{0}.csv".format(
@@ -221,7 +212,6 @@ class SimulationMode:
                         ylabel_="€/Monat",
                         x_='current_date',
                         compare_data_folder=self.current_output_folder + "/../output_bestand",
-                        figtext_=figtext_debug
                     )
 
                     # pass path to buildings in infoscreen-compatible format

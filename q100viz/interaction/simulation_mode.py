@@ -185,7 +185,7 @@ class SimulationMode:
                         csv_name="/emissions/CO2_emissions_{0}.csv".format(
                             idx),
                         data_folders=self.output_folders,
-                        columns=['building_emissions'],
+                        columns=['building_household_emissions'],
                         title_="CO2-Emissionen",
                         outfile=self.current_output_folder +
                         "/emissions/CO2_emissions_{0}.png".format(idx),

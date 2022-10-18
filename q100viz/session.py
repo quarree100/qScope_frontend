@@ -3,6 +3,7 @@
 import pandas as pd
 import pygame
 import json
+from q100viz.interaction.model_validation_mode import ModelValidation_Mode
 
 from q100viz.settings.config import config
 import q100viz.api as api
@@ -15,6 +16,7 @@ from q100viz.interaction.buildings_interaction import Buildings_Interaction
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.dataview_individual_mode import DataViewIndividual_Mode
 from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode
+from q100viz.interaction.model_validation_mode import ModelValidation_Mode
 import q100viz.keystone as keystone
 import q100viz.buildings
 
@@ -186,6 +188,7 @@ buildings_interaction = Buildings_Interaction()
 simulation = SimulationMode()
 individual_data_view = DataViewIndividual_Mode()
 total_data_view = DataViewTotal_Mode()
+model_validation = ModelValidation_Mode()
 
 ################################# FUNCTIONS ###########################
 def string_to_mode(input_string):
@@ -201,6 +204,8 @@ def string_to_mode(input_string):
         return individual_data_view
     elif input_string == 'dataview_total':
         return total_data_view
+    elif input_string == 'model_validation':
+        return model_validation
 
 flag_export_canvas = False
 active_mode = string_to_mode(environment['mode'])

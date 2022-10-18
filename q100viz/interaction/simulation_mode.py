@@ -193,7 +193,8 @@ class SimulationMode:
                         ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
                         x_='current_date',
                         convert_grams_to_kg=True,
-                        compare_data_folder=self.current_output_folder + "/../output_bestand"
+                        compare_data_folder=self.current_output_folder + "/../output_bestand",
+                        figtext="(monatlich berechnet)"
                     )
 
                     figtext_debug = str(group_df.loc[idx, 'address']) + \
@@ -248,7 +249,7 @@ class SimulationMode:
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
             data_folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
-            title_="kumulierte Gesamtemissionen des Quartiers",
+            title_="jährlich kumulierte Gesamtemissionen des Quartiers",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
             xlabel_="Jahr",
             ylabel_="CO2 [$kg_{eq}$]",

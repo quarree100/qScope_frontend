@@ -4,12 +4,24 @@ import sys
 
 import q100viz.session as session
 import q100viz.devtools as devtools
+############################ Model Validation #########################
 
 class ModelValidation_Mode():
     def activate(self):
-        ############################ Model Validation #########################
-
         batch_sim_start = datetime.datetime.now()
+
+        self.batch_experiment_1()
+
+        print("all simulations finished. total duration = ",
+            datetime.datetime.now() - batch_sim_start)
+
+        with open("qScope-log_%s.txt" % datetime.datetime.now(), "w") as f:
+            f.write(session.log)
+            f.close()
+
+        sys.exit()
+
+    def batch_experiment_1(self):
 
         # batch commands: shuffle buildings each time, GAMA branch = pre_main (not including change of agora dataset yet!)
         # 1. all false
@@ -86,10 +98,10 @@ class ModelValidation_Mode():
         session.simulation.__init__()
         session.simulation.activate()
 
-        print("all simulations finished. total duration = ",
-            datetime.datetime.now() - batch_sim_start)
+    def batch_experiment_2(self):
+        # batch commands: select the same buildings each time, GAMA branch = agora_reduction
+        pass
 
-        with open("qScope-log_%s.txt" % datetime.datetime.now(), "w") as f:
-            f.write(session.log)
-            f.close()
-        sys.exit()
+    def batch_experiment_3(self):
+        # 8 simulations with changing num of connections
+        pass

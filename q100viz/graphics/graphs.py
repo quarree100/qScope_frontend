@@ -160,7 +160,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
         )
 
     # graphics:
-    plt.title("Quartiersemissionen")
+    plt.title("Quartiersemissionen im Vergleich")
     plt.xlabel("Jahr")
     plt.ylabel(r'Emissionen $CO_{2}$ [kg/Monat]')
     plt.xticks(rotation=270, fontsize=18)
@@ -261,7 +261,7 @@ def export_combined_energy_prices(current_output_folder, outfile=None, compare_d
 
     # graphics:
     # TODO: specify colors
-    plt.title("Energiekosten")
+    plt.title("Energiekosten im Vergleich")
     plt.xlabel("Jahr")
     plt.ylabel("€/Monat")
     plt.xticks(rotation=270, fontsize=18)

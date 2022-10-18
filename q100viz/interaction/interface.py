@@ -173,48 +173,48 @@ class Slider:
                 session.active_mode = session.string_to_mode[handler]
                 session.active_mode.activate()  # TODO: add confidence delay!
 
-            elif self.handle == 'num_connections':
-                session.environment['scenario_num_connections'] = int(
-                    self.value * len(session.buildings.df.index))
-                self.human_readable_value['num_connections'] = int(
-                    self.value * len(session.buildings.df.index))
+            # elif self.handle == 'num_connections':
+            #     session.environment['scenario_num_connections'] = int(
+            #         self.value * len(session.buildings.df.index))
+            #     self.human_readable_value['num_connections'] = int(
+            #         self.value * len(session.buildings.df.index))
 
-                # connect additional buildings as set in scenario:
-                if session.environment['scenario_num_connections'] > 0:
-                    # reset:
-                    if not session.scenario_selected_buildings.empty:
-                        session.scenario_selected_buildings['selected'] = False
-                        session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                        session.buildings.df.update(
-                            session.scenario_selected_buildings)
+            #     # connect additional buildings as set in scenario:
+            #     if session.environment['scenario_num_connections'] > 0:
+            #         # reset:
+            #         if not session.scenario_selected_buildings.empty:
+            #             session.scenario_selected_buildings['selected'] = False
+            #             session.scenario_selected_buildings['connection_to_heat_grid'] = False
+            #             session.buildings.df.update(
+            #                 session.scenario_selected_buildings)
 
-                    # sample data:
-                    try:
-                        session.scenario_selected_buildings = session.buildings.df.sample(
-                            n=session.environment['scenario_num_connections'])
-                    except Exception as e:
-                        print("max number of possible samples reached. " + str(e))
-                        session.log += "\n%s" % e
+            #         # sample data:
+            #         try:
+            #             session.scenario_selected_buildings = session.buildings.df.sample(
+            #                 n=session.environment['scenario_num_connections'])
+            #         except Exception as e:
+            #             print("max number of possible samples reached. " + str(e))
+            #             session.log += "\n%s" % e
 
-                    # drop already selected buildings from list:
-                    for buildings_group in session.buildings.list_from_groups():
-                        for idx in buildings_group.index:
-                            if idx in session.scenario_selected_buildings.index:
-                                session.scenario_selected_buildings = session.scenario_selected_buildings.drop(
-                                    idx)
+            #         # drop already selected buildings from list:
+            #         for buildings_group in session.buildings.list_from_groups():
+            #             for idx in buildings_group.index:
+            #                 if idx in session.scenario_selected_buildings.index:
+            #                     session.scenario_selected_buildings = session.scenario_selected_buildings.drop(
+            #                         idx)
 
-                    # select and connect sampled buildings:
-                    session.scenario_selected_buildings['selected'] = True
-                    session.scenario_selected_buildings['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
-                    print("selecting random {0} buildings:".format(
-                        session.environment['scenario_num_connections']))
+            #         # select and connect sampled buildings:
+            #         session.scenario_selected_buildings['selected'] = True
+            #         session.scenario_selected_buildings['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
+            #         print("selecting random {0} buildings:".format(
+            #             session.environment['scenario_num_connections']))
 
-                else:  # value is 0: deselect all
-                    session.scenario_selected_buildings['selected'] = False
-                    session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                # update buildings:
-                session.buildings.df.update(
-                    session.scenario_selected_buildings)
+            #     else:  # value is 0: deselect all
+            #         session.scenario_selected_buildings['selected'] = False
+            #         session.scenario_selected_buildings['connection_to_heat_grid'] = False
+            #     # update buildings:
+            #     session.buildings.df.update(
+            #         session.scenario_selected_buildings)
 
             elif self.handle == 'scenario_energy_prices':
                 session.environment['scenario_energy_prices'] = [

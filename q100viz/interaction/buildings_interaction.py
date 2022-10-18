@@ -1,6 +1,7 @@
 ''' Input Households Mode: Interact with building-specific parameters using the map '''
 
 import json
+import random
 import pygame
 
 import q100viz.session as session
@@ -93,6 +94,59 @@ class Buildings_Interaction:
                             elif cell.handle == 'start_simulation':
                                 session.simulation.activate()
 
+                            # connect buildings globally:
+                            elif cell.handle in ['connections_0', 'connections_20', 'connections_40', 'connections_60', 'connections_80', 'connections_100']:
+                                dec_connections = 0
+                                if cell.handle == "connections_20":
+                                    dec_connections = 0.2
+                                elif cell.handle == "connections_40":
+                                    dec_connections = 0.4
+                                elif cell.handle == "connections_60":
+                                    dec_connections = 0.6
+                                elif cell.handle == "connections_80":
+                                    dec_connections = 0.8
+                                elif cell.handle == "connections_100":
+                                    dec_connections = 1
+                                    
+                                session.environment['scenario_num_connections'] = int(
+                                    dec_connections * len(session.buildings.df.index))
+
+                                # connect additional buildings as set in scenario:
+                                if session.environment['scenario_num_connections'] > 0:
+                                    # reset:
+                                    if not session.scenario_selected_buildings.empty:
+                                        session.scenario_selected_buildings['selected'] = False
+                                        session.scenario_selected_buildings['connection_to_heat_grid'] = False
+                                        session.buildings.df.update(
+                                            session.scenario_selected_buildings)
+
+                                    # sample data:
+                                    try:
+                                        session.scenario_selected_buildings = session.buildings.df.sample(
+                                            n=session.environment['scenario_num_connections'])
+                                    except Exception as e:
+                                        print("max number of possible samples reached. " + str(e))
+                                        session.log += "\n%s" % e
+
+                                    # drop already selected buildings from list:
+                                    for buildings_group in session.buildings.list_from_groups():
+                                        for idx in buildings_group.index:
+                                            if idx in session.scenario_selected_buildings.index:
+                                                session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
+
+                                    # select and connect sampled buildings:
+                                    session.scenario_selected_buildings['selected'] = True
+                                    session.scenario_selected_buildings['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
+                                    print("selecting random {0} buildings:".format(
+                                        session.environment['scenario_num_connections']))
+                                else:  # value is 0: deselect all
+                                    session.scenario_selected_buildings['selected'] = False
+                                    session.scenario_selected_buildings['connection_to_heat_grid'] = False
+                                # update buildings:
+                                session.buildings.df.update(
+                                    session.scenario_selected_buildings)
+
+        session.api.send_message(json.dumps(session.environment))
         session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
 
     def draw(self, canvas):
@@ -117,13 +171,13 @@ class Buildings_Interaction:
                 print("Cannot draw frontend:", e)
                 session.log += "\nCannot draw frontend: %s" % e
 
-        # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
         font = pygame.font.SysFont('Arial', 18)
 
         x = 18
         y = 1*22
         canvas.blit(font.render("Anschlüsse", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[x+y][1][0])
 
+        # draw num connections:
         i = 1
         for num_string in ["0%", "20%", "40%", "60%", "80%", "100%"]:
             row = 22
@@ -131,6 +185,7 @@ class Buildings_Interaction:
             canvas.blit(font.render(num_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[x+row*i][1][0])
             i += 1
 
+        # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
         canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
         canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
         canvas.blit(font.render("Simulation", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])

@@ -5,3 +5,9 @@ x,y,handle,color
 20,12,start_total_data_view,darkolivegreen
 20,14,start_individual_data_view,darkolivegreen1
 20,16,start_simulation,yellow
+20,2,connections_0,#C7C7C7
+20,3,connections_20,#BCC7A5
+20,4,connections_40,#A4C75F
+20,5,connections_60,#B0D95D
+20,6,connections_80,#A0DB2A
+20,7,connections_100,#AAFF00

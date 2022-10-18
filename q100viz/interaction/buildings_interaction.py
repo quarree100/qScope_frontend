@@ -119,6 +119,18 @@ class Buildings_Interaction:
 
         # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
         font = pygame.font.SysFont('Arial', 18)
+
+        x = 18
+        y = 1*22
+        canvas.blit(font.render("Anschlüsse", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[x+y][1][0])
+
+        i = 1
+        for num_string in ["0%", "20%", "40%", "60%", "80%", "100%"]:
+            row = 22
+            x = row * 1 + 18
+            canvas.blit(font.render(num_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[x+row*i][1][0])
+            i += 1
+
         canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
         canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
         canvas.blit(font.render("Simulation", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])

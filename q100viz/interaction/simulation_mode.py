@@ -193,7 +193,7 @@ class SimulationMode:
                         ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
                         x_='current_date',
                         convert_grams_to_kg=True,
-                        compare_data_folder=self.current_output_folder + "/../output_bestand",
+                        # compare_data_folder=self.current_output_folder + "/../output_bestand",
                         figtext="(monatlich berechnet)"
                     )
 
@@ -202,16 +202,16 @@ class SimulationMode:
                         csv_name="/energy_prices/energy_prices_{0}.csv".format(
                             idx),
                         data_folders=self.output_folders,
-                        columns=['building_expenses_heat',
-                                 'building_expenses_power'],
+                        columns=['building_household_expenses_heat',
+                                 'building_household_expenses_power'],
                         labels_=['Wärmekosten', 'Stromkosten'],
                         outfile=self.current_output_folder +
                         "/energy_prices/energy_prices_{0}.png".format(idx),
                         title_="Energiekosten",
                         xlabel_="Jahr",
                         ylabel_="€/Monat",
-                        x_='current_date',
-                        compare_data_folder=self.current_output_folder + "/../output_bestand",
+                        x_='current_date'
+                        # compare_data_folder=self.current_output_folder + "/../output_bestand"
                     )
 
                     # pass path to buildings in infoscreen-compatible format

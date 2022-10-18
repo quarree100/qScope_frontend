@@ -110,14 +110,14 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
                 try:
                     new_df = pandas.read_csv(current_output_folder + "/emissions/CO2_emissions_{0}.csv".format(idx))
                     new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
-                    new_df['building_emissions'] = new_df['building_emissions'].apply(grams_to_kg)
+                    new_df['building_household_emissions'] = new_df['building_household_emissions'].apply(grams_to_kg)
                     new_df['color'] = [rgb_to_float_tuple(session.user_colors[group_num]) for i in new_df.values]
                     new_df['group_num'] = [group_num for i in new_df.values]
 
                     if compare_data_folder is not None:
                         compare_df = pandas.read_csv(compare_data_folder + '/emissions/CO2_emissions_{0}.csv'.format(idx))
                         print(compare_df)
-                        new_df['compare'] = compare_df['building_emissions'].apply(grams_to_kg)
+                        new_df['compare'] = compare_df['building_household_emissions'].apply(grams_to_kg)
                         print(new_df)
 
                     data.append(new_df)
@@ -143,7 +143,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
         # plot:
         if compare_data_folder is not None:
             plt.plot(df['current_date'], df['compare'], color='lightgray')
-        plt.plot(df['current_date'], df['building_emissions'], color=df['color'][label_idx])
+        plt.plot(df['current_date'], df['building_household_emissions'], color=df['color'][label_idx])
 
         # annotate lines:
         group_num = df.loc[df.index[0], 'group_num']
@@ -151,9 +151,9 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
             addresses[label_idx] + "\n" +
             decisions[label_idx],
             xy=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_emissions']),
+                df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_emissions']),
             xytext=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                    df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_emissions'] * 1.02),
+                    df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_emissions'] * 1.02),
             fontsize=12,
             horizontalalignment='left',
             color=df['color'][label_idx]
@@ -214,20 +214,20 @@ def export_combined_energy_prices(current_output_folder, outfile=None, compare_d
         # plot pre-calculated default data of that building
         if compare_data_folder is not None:
             plt.plot(compare_data[i]['current_date'],
-                compare_data[i]['building_expenses_heat'], color='lightgray')
+                compare_data[i]['building_household_expenses_heat'], color='lightgray')
 
         # plot heat expenses:
         plt.plot(df['current_date'],
-                df['building_expenses_heat'], color=colors[i%len(colors)][0])
+                df['building_household_expenses_heat'], color=colors[i%len(colors)][0])
 
         # annotate graph:
         group_num = df.loc[df.index[0], 'group_num']
         plt.gca().annotate(
             labels[label_idx],
             xy=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_expenses_heat']),
+                df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_expenses_heat']),
             xytext=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                    df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_expenses_heat'] * 1.02),
+                    df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_expenses_heat'] * 1.02),
             color=colors[i%len(colors)][0],
             fontsize=12,
             horizontalalignment='left'
@@ -238,20 +238,20 @@ def export_combined_energy_prices(current_output_folder, outfile=None, compare_d
         # plot pre-calculated default data of that building
         if compare_data_folder is not None:
             plt.plot(compare_data[i]['current_date'],
-                compare_data[i]['building_expenses_power'], color='lightgray')
+                compare_data[i]['building_household_expenses_power'], color='lightgray')
 
         # plot power expenses:
         plt.plot(df['current_date'],
-                df['building_expenses_power'], color=colors[i%len(colors)][1])
+                df['building_household_expenses_power'], color=colors[i%len(colors)][1])
 
 
         # annotate graph
         plt.gca().annotate(
             labels[label_idx],
             xy=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_expenses_power']),
+                df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_expenses_power']),
             xytext=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                    df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_expenses_power'] * 1.02),
+                    df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_expenses_power'] * 1.02),
             color=colors[i%len(colors)][1],
             fontsize=12,
             horizontalalignment='left'

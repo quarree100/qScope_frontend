@@ -193,7 +193,7 @@ class SimulationMode:
                         ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
                         x_='current_date',
                         convert_grams_to_kg=True,
-                        # compare_data_folder=self.current_output_folder + "/../output_bestand",
+                        compare_data_folder=self.current_output_folder + "/../output_bestand",
                         figtext="(monatlich berechnet)"
                     )
 
@@ -211,7 +211,7 @@ class SimulationMode:
                         xlabel_="Jahr",
                         ylabel_="€/Monat",
                         x_='current_date'
-                        # compare_data_folder=self.current_output_folder + "/../output_bestand"
+                        compare_data_folder=self.current_output_folder + "/../output_bestand"
                     )
 
                     # pass path to buildings in infoscreen-compatible format

@@ -3,6 +3,7 @@
 import json
 import random
 import pygame
+import datetime
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -10,6 +11,9 @@ class Buildings_Interaction:
     def __init__(self):
         self.name = 'buildings_interaction'
         self.selection_mode = config['buildings_selection_mode'] # decides how to select intersected buildings. can be 'all' or 'rotation'
+        self.previous_connections_selector = ''
+        self.waiting_for_simulation = False
+        self.sim_token_selection_time = datetime.datetime.now()
 
     def activate(self):
         session.active_mode = self
@@ -92,10 +96,14 @@ class Buildings_Interaction:
                                 session.total_data_view.activate()
 
                             elif cell.handle == 'start_simulation':
-                                session.simulation.activate()
+                                if not self.waiting_for_simulation:
+                                    self.sim_token_selection_time = datetime.datetime.now()
+                                    self.waiting_for_simulation = True
 
                             # connect buildings globally:
-                            elif cell.handle in ['connections_0', 'connections_20', 'connections_40', 'connections_60', 'connections_80', 'connections_100']:
+                            elif cell.handle in ['connections_0', 'connections_20', 'connections_40', 'connections_60', 'connections_80', 'connections_100'] and cell.handle != self.previous_connections_selector:
+
+                                self.previous_connections_selector = cell.handle
                                 dec_connections = 0
                                 if cell.handle == "connections_20":
                                     dec_connections = 0.2
@@ -146,6 +154,9 @@ class Buildings_Interaction:
                                 session.buildings.df.update(
                                     session.scenario_selected_buildings)
 
+                    elif cell.handle == 'start_simulation':  # cell not selected    
+                        self.waiting_for_simulation = False
+
         session.api.send_message(json.dumps(session.environment))
         session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
 
@@ -188,11 +199,18 @@ class Buildings_Interaction:
         # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
         canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
         canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
+
+        # sim_string = "Simulation" if (self.waiting_for_simulation and session.VERBOSE_MODE) else "Simulation\n" + str(round((datetime.datetime.now() - self.sim_token_selection_time).total_seconds(), 2))
+        # canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])
         canvas.blit(font.render("Simulation", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])
 
 
     def update(self):
-        pass
+        if self.waiting_for_simulation:
+            if (datetime.datetime.now() - self.sim_token_selection_time).total_seconds() > 2:
+                self.waiting_for_simulation = False
+                session.simulation.activate()
+
 
 def get_intersection(df, grid, x, y):
     # get viewport coordinates of the cell rectangle

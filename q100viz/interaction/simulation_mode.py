@@ -210,7 +210,7 @@ class SimulationMode:
                         title_="Energiekosten",
                         xlabel_="Jahr",
                         ylabel_="€/Monat",
-                        x_='current_date'
+                        x_='current_date',
                         compare_data_folder=self.current_output_folder + "/../output_bestand"
                     )
 

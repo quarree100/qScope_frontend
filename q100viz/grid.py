@@ -100,7 +100,7 @@ class Grid:
                 for x, cell in enumerate(row):
                     cell.id, cell.rot = msg['grid'][y * self.x_size + x]
 
-                    cell.selected = cell.id != 0  # any non-white object selects cells
+                    cell.selected = cell.id != 5  # any non-white object selects cells
 
                     # calculate relative rotation
                     # an inactive cell has a rotation value of -1

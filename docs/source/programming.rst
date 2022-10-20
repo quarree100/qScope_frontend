@@ -222,7 +222,7 @@ e.g. emission, in ``InputMode.draw()``:
 
 .. code-block:: python
 
-  if cell.id > 0:
+  if cell.id < 4:
      if cell.rel_rot == 1:
          i = get_intersection(session.buildings, grid, x, y)
          session.buildings.loc[i, 'CO2'] += 20

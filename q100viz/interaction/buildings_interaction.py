@@ -115,7 +115,7 @@ class Buildings_Interaction:
                                     dec_connections = 0.8
                                 elif cell.handle == "connections_100":
                                     dec_connections = 1
-                                    
+
                                 session.environment['scenario_num_connections'] = int(
                                     dec_connections * len(session.buildings.df.index))
 
@@ -154,7 +154,7 @@ class Buildings_Interaction:
                                 session.buildings.df.update(
                                     session.scenario_selected_buildings)
 
-                    elif cell.handle == 'start_simulation':  # cell not selected    
+                    elif cell.handle == 'start_simulation':  # cell not selected
                         self.waiting_for_simulation = False
 
         session.api.send_message(json.dumps(session.environment))

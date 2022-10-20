@@ -30,8 +30,8 @@ class DataViewTotal_Mode():
         session.active_mode = self
         session.environment['mode'] = self.name
 
-        session.show_polygons = False
-        session.show_basemap = False
+        session.show_polygons = True
+        session.show_basemap = True
 
         # setup sliders:
         session.grid_1.sliders['slider0'].show_text = False

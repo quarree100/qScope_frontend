@@ -131,9 +131,9 @@ class Slider:
             # red field:
             c = self.coords
             points = [
-                c[0],  # bottom left 
+                c[0],  # bottom left
                 c[1],  # top left
-                [c[2][0] - c[1][0]/2, c[2][1]],  # top right 
+                [c[2][0] - c[1][0]/2, c[2][1]],  # top right
                 [c[3][0] - c[1][0]/2, c[3][1]]]  # bottom right
             points_transformed = self.surface.transform(points)
             pygame.draw.polygon(self.surface, pygame.Color(200,20,55), points_transformed)
@@ -153,12 +153,13 @@ class Slider:
             pygame.draw.line(self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) * 0.2, self.coords_transformed[0][1] + 2),
                              (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) * 0.2, self.coords_transformed[1][1] + 2), width=2)
 
-        
+
 
     def transform(self):
         self.coords_transformed = self.surface.transform(self.coords)
 
-    def update(self):
+    def process_value(self):
+        print(self.value)
         ''' TODO: set up a struct (maybe csv) to import standard values >> this section should be automatized!
         e.g.
         if self.handle == 'name':
@@ -167,8 +168,7 @@ class Slider:
         if self.value is not self.previous_value:
             # globals:
             if self.handle == 'game_stage':
-                handler = [key for key in ['buildings_interaction', 'simulation',
-                                        'individual_data_view', 'total_data_view']][int(self.value * 4)]
+                handler = [key for key in ['buildings_interaction', 'simulation', 'individual_data_view', 'total_data_view']][int(self.value * 4)]
                 print(handler)
                 session.active_mode = session.string_to_mode[handler]
                 session.active_mode.activate()  # TODO: add confidence delay!
@@ -225,9 +225,9 @@ class Slider:
             # household-specific:
             if self.handle == 'connection_to_heat_grid':
                 session.buildings.df.loc[((
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [2020, session.simulation.max_year]))
+                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [2024, 2040]))
                 self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
-                    np.interp(float(self.value), [0.2, 1], [2020, 2045]))
+                    np.interp(float(self.value), [0.2, 1], [2020, 2040]))
 
             elif self.handle == 'refurbished':
                 session.buildings.df.loc[(
@@ -267,7 +267,7 @@ class Slider:
     def update_handle(self, cell_handle, cell_id):
         if self.show_controls:
             self.handle = cell_handle
-            self.update()  # update values
+            self.process_value()  # update values
             self.group = cell_id
             if self.previous_handle is not self.handle:
                 session.api.send_message(json.dumps({'sliders': {

@@ -128,10 +128,10 @@ class Buildings:
     def list_from_groups(self):
         '''returns a list with of buildings with 'group' >= 0; one df for each user group'''
         return [
+            self.df[self.df['group'] == 0][session.COMMUNICATION_RELEVANT_KEYS],
             self.df[self.df['group'] == 1][session.COMMUNICATION_RELEVANT_KEYS],
             self.df[self.df['group'] == 2][session.COMMUNICATION_RELEVANT_KEYS],
-            self.df[self.df['group'] == 3][session.COMMUNICATION_RELEVANT_KEYS],
-            self.df[self.df['group'] == 4][session.COMMUNICATION_RELEVANT_KEYS]]
+            self.df[self.df['group'] == 3][session.COMMUNICATION_RELEVANT_KEYS]]
 
     def get_dict_with_api_wrapper(self):
 

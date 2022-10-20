@@ -4,7 +4,7 @@ import threading
 import pygame
 import datetime
 import argparse
-from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_1, K_2, K_3, K_4, K_5, K_6, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
 from q100viz.settings.config import config
 import q100viz.udp as udp
@@ -158,6 +158,8 @@ while True:
                 session.simulation.activate()
             elif event.key == K_5:
                 session.individual_data_view.activate()
+            elif event.key == K_6:
+                session.total_data_view.activate()
 
             # toggle calibration:
             elif event.key == K_c:
@@ -171,7 +173,7 @@ while True:
                             grid.sliders[key].value += 0.1
                         else:
                             grid.sliders[key].value = 0.1
-                        grid.sliders[key].update()
+                        grid.sliders[key].process_value()
             elif event.key == K_MINUS:
                 for grid in session.grid_1, session.grid_2:
                     for key, val in grid.sliders.items():
@@ -180,7 +182,7 @@ while True:
                                 slider.value - 0.1, 3)
                         else:
                             grid.sliders[key].value = 0.1
-                        grid.sliders[key].update()
+                        grid.sliders[key].process_value()
 
             # verbose mode:
             elif event.key == K_v:

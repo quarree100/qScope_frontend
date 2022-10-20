@@ -36,7 +36,7 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
     for col_num, column in enumerate(columns):
         # plot pre-calculated reference data:
         if compare_data_folder is not None:
-            label_ = 'Bestand' if labels_ is None else '{0} (Bestand)'.format(labels_[col_num])
+            label_ = 'unverändert' if labels_ is None else '{0} (unverändert)'.format(labels_[col_num])
             compare_df = pandas.read_csv(compare_data_folder + csv_name)
             compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
             for col in columns:

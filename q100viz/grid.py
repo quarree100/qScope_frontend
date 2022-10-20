@@ -117,7 +117,7 @@ class Grid:
             # TODO: this causes type error when no slider value provided in cspy → provide 0 by default?
             for slider_id in self.sliders.keys():
                 if msg['sliders'][slider_id] is not None: self.sliders[slider_id].value = msg['sliders'][slider_id]
-                self.sliders[slider_id].update()
+                self.sliders[slider_id].process_value()
 
         except TypeError as t:
             # pass

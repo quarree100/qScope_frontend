@@ -73,7 +73,6 @@ show_basemap = False
 num_of_rounds = 4  # max num of rounds; will repeat after this
 num_of_users = 4  # num of valid users # TODO: combine with num of valid tags!
 user_colors = [
-    (125, 125, 125), # None
     (0, 117, 180),   # Quarree-blue
     (253, 193, 19),  # Quarree-yellow
     (182, 0, 182),   # purple

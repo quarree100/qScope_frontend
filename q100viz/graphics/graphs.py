@@ -5,7 +5,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext=""):
+def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -58,8 +58,11 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
     for df in rounds_data:
         for col_num, column in enumerate(columns):
             # plot regular graph:
-            label_ = 'Durchlauf {0}'.format(
-                it_round+1) if labels_ == None else '{0} (Durchlauf {1})'.format(labels_[col_num], it_round+1)
+            if label_show_iteration_round:
+                label_ = 'Durchlauf {0}'.format(
+                    it_round+1) if labels_ == None else '{0} (Durchlauf {1})'.format(labels_[col_num], it_round+1)
+            elif labels_ is not None:
+                label_ = '{0}'.format(labels_[col_num])
 
             # lower brightness for each round:
             color_ = (
@@ -90,6 +93,66 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
     plt.ylabel(ylabel_)
     plt.xticks(rotation=270, fontsize=18)
     plt.legend(loc='upper left')
+
+    if outfile is not None:
+        plt.savefig(outfile, transparent=True, bbox_inches="tight")
+
+def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", line_types=None, label_show_iteration_round=True, show_legend=True):
+    '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
+
+    plt.rc('font', size=18)
+    # read exported results:
+    rounds_data = []
+
+    # looks for all files with specified csv_name:
+    for output_folder in data_folders:
+        try:
+            csv_data = pandas.read_csv(output_folder + csv_name)
+            csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
+
+            # data conversion:
+            for col in csv_columns:
+                if convert_grams_to_tons:
+                    csv_data[col] = csv_data[col].apply(grams_to_tons)
+                elif convert_grams_to_kg:
+                    csv_data[col] = csv_data[col].apply(grams_to_kg)
+
+            rounds_data.append(csv_data)
+
+        except Exception as e:
+            print(e, "... probably the selected buildings have changed between the rounds")
+            session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
+
+    plt.figure(figsize=(16, 9))  # inches
+
+    it_round = 0
+    for df in rounds_data:
+        for col_num, column in enumerate(csv_columns):
+
+            line_style = ['-', '--'][col_num]
+            # plot:
+            df.plot(
+                kind='line',
+                linestyle=line_style,
+                x=x_,
+                y=column,
+                color='lightgray',
+                ax=plt.gca(),
+                label = '{0}'.format(labels_[col_num]),
+                linewidth=3)
+
+        it_round += 1
+
+    plt.tight_layout()  # makes sure all objects are inside the figure boundaries
+    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center')
+    plt.title(title_)
+    plt.xlabel(xlabel_)
+    plt.ylabel(ylabel_)
+    plt.xticks(rotation=270, fontsize=18)
+    if show_legend:
+        plt.legend(loc='upper left')
+    else:
+        plt.gca().get_legend().remove()
 
     if outfile is not None:
         plt.savefig(outfile, transparent=True, bbox_inches="tight")

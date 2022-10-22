@@ -209,6 +209,15 @@ class Buildings_Interaction:
         if self.waiting_for_simulation:
             if (datetime.datetime.now() - self.sim_token_selection_time).total_seconds() > 2:
                 self.waiting_for_simulation = False
+
+                # setup graphics for simulation mode:
+                for grid in session.grid_1, session.grid_2:
+                    for slider in grid.sliders.values():
+                        slider.show_text = False
+                        slider.show_controls = False
+                session.show_basemap = False
+                session.show_polygons = False
+
                 session.simulation.activate()
 
 

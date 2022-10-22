@@ -77,6 +77,9 @@ class Buildings:
 
         self.df['emissions_graphs'] = ''
         self.df['energy_prices_graphs'] = ''
+        for idx in self.df.index:
+            self.df.at[idx, 'emissions_graphs'] = "../data/precomputed/simulation_defaults/emissions/CO2_emissions_{0}.png".format(idx)
+            self.df.at[idx, 'energy_prices_graphs'] = "../data/precomputed/simulation_defaults/energy_prices/energy_prices_{0}.png".format(idx)
 
         # generic data
         for idx, row in self.df.iterrows():

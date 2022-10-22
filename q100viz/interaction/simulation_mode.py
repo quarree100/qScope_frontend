@@ -193,7 +193,7 @@ class SimulationMode:
                         ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
                         x_='current_date',
                         convert_grams_to_kg=True,
-                        compare_data_folder=self.current_output_folder + "/../output_bestand",
+                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
                         figtext="(monatlich berechnet)"
                     )
 
@@ -211,7 +211,7 @@ class SimulationMode:
                         xlabel_="Jahr",
                         ylabel_="€/Monat",
                         x_='current_date',
-                        compare_data_folder=self.current_output_folder + "/../output_bestand"
+                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
                     )
 
                     # pass path to buildings in infoscreen-compatible format
@@ -245,7 +245,7 @@ class SimulationMode:
             ylabel_="CO2 [$kg_{eq}$]",
             x_='current_date',
             convert_grams_to_kg=True,
-            compare_data_folder=self.current_output_folder + "/../output_bestand"
+            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
         )
 
         # neighborhood total energy prices prognosis:
@@ -259,7 +259,7 @@ class SimulationMode:
             xlabel_="Jahr",
             ylabel_="Preis [ct/kWh]",
             x_='current_date',
-            compare_data_folder=self.current_output_folder + "/../output_bestand"
+            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
         )
 
         # define titles for images and their location

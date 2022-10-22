@@ -216,8 +216,8 @@ while True:
     if session.show_polygons:
         session._gis.draw_linestring_layer(
             canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
-        session._gis.draw_polygon_layer(
-            canvas, session._gis.waermezentrale, 0, (252, 137, 0))
+        # session._gis.draw_polygon_layer(
+            # canvas, session._gis.waermezentrale, 0, (252, 137, 0))
         session._gis.draw_buildings_connections(
             session.buildings.df)  # draw lines to closest heat grid
         session._gis.draw_polygon_layer_bool(

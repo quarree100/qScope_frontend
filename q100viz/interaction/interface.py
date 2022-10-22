@@ -227,7 +227,7 @@ class Slider:
                 session.buildings.df.loc[((
                     session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [2024, 2040]))
                 self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
-                    np.interp(float(self.value), [0.2, 1], [2020, 2040]))
+                    np.interp(float(self.value), [0.2, 1], [2024, 2040]))
 
             elif self.handle == 'refurbished':
                 session.buildings.df.loc[(

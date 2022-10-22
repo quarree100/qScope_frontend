@@ -22,8 +22,8 @@ class GIS:
         # GIS layers
         self.typologiezonen = read_shapefile(config['TYPOLOGIEZONEN_FILE'])
         self.nahwaermenetz = read_shapefile(config['NAHWAERMENETZ_FILE'])
-        self.waermezentrale = read_shapefile(config['WAERMESPEICHER_FILE'], 'Waermespeicher').append(
-            read_shapefile(config['HEIZZENTRALE_FILE']))
+        # self.waermezentrale = read_shapefile(config['WAERMESPEICHER_FILE'], 'Waermespeicher').append(
+            # read_shapefile(config['HEIZZENTRALE_FILE']))
 
     def get_intersection_indexer(self, df, v_polygon):
         polygon = self.surface.inverse_transform(v_polygon)

@@ -230,7 +230,7 @@ class SimulationMode:
             )
 
         # combined energy prices graph for selected buildings:
-        graphs.export_combined_energy_prices(
+        graphs.export_buildings_comparison(
             self.current_output_folder,
             outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
@@ -251,7 +251,7 @@ class SimulationMode:
         # neighborhood total energy prices prognosis:
         graphs.export_individual_graph(
             csv_name="/energy_prices/energy_prices_total.csv",
-            data_folders=self.output_folders,
+            data_folders=[self.current_output_folder],
             columns=['gas_price', 'power_price', 'oil_price'],
             labels_=['Gaspreis', 'Strompreis', 'Ölpreis',],
             title_="Energiepreis",
@@ -259,7 +259,8 @@ class SimulationMode:
             xlabel_="Jahr",
             ylabel_="Preis [ct/kWh]",
             x_='current_date',
-            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
+            label_show_iteration_round=False
+            # compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
         )
 
         # define titles for images and their location

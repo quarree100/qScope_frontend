@@ -236,7 +236,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
     if outfile:
         plt.savefig(outfile, transparent=True, bbox_inches="tight")
 
-def export_combined_energy_prices(current_output_folder, outfile=None, compare_data_folder=None):
+def export_buildings_comparison(current_output_folder, outfile=None, compare_data_folder=None):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)

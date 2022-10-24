@@ -65,12 +65,12 @@ class SimulationMode:
             # overwrite final step if set via flag --sim_steps:
             self.max_year = config['SIMULATION_FORCE_MAX_YEAR']
             self.final_step = ((self.max_year + 1 - 2020) * 365) + int((self.max_year - 2020)/4)
-        print('simulation will run until year {0} ({1} steps)'.format(self.max_year, self.final_step))
-
         # overwrite by function input:
         if input_max_year is not None:
-            self.max_year = input_max_year
-            self.final_step = ((self.max_year + 1 - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
+            self.max_year = min(input_max_year + 1, 2046)
+            self.final_step = ((self.max_year - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
+
+        print('simulation will run until {0}-12-31 ({1} steps)'.format(self.max_year-1, self.final_step))
 
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
@@ -194,7 +194,15 @@ class SimulationMode:
                         x_='current_date',
                         convert_grams_to_kg=True,
                         compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
-                        figtext="(monatlich berechnet)"
+                        figtext=
+                            str(idx) + " "
+                            + str(group_df.loc[idx, 'address']) + " "
+                            + str(group_df.loc[idx, 'type'])
+                            + "\nø-spez. Wärmeverbrauch: "
+                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + ", ø-spez. Stromverbrauch: "
+                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            if session.VERBOSE_MODE else "(monatlich berechnet)"
                     )
 
                     # export energy prices graph:
@@ -211,7 +219,16 @@ class SimulationMode:
                         xlabel_="Jahr",
                         ylabel_="€/Monat",
                         x_='current_date',
-                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
+                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
+                        figtext=
+                            str(idx) + " "
+                            + str(group_df.loc[idx, 'address']) + " "
+                            + str(group_df.loc[idx, 'type'])
+                            + "\nø-spez. Wärmeverbrauch: "
+                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + ", ø-spez. Stromverbrauch: "
+                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            if session.VERBOSE_MODE else ""
                     )
 
                     # pass path to buildings in infoscreen-compatible format
@@ -230,8 +247,8 @@ class SimulationMode:
             )
 
         # combined energy prices graph for selected buildings:
-        graphs.export_buildings_comparison(
-            self.current_output_folder,
+        graphs.export_compared_energy_costs(
+            search_in_folder=self.current_output_folder,
             outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
         # neighborhood total emissions:

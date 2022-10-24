@@ -97,8 +97,8 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
     if outfile is not None:
         plt.savefig(outfile, transparent=True, bbox_inches="tight")
 
-def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", line_types=None, label_show_iteration_round=True, show_legend=True):
-    '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
+def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", show_legend=True):
+    '''exports default data to graph with gray curve'''
 
     plt.rc('font', size=18)
     # read exported results:
@@ -157,6 +157,7 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
     if outfile is not None:
         plt.savefig(outfile, transparent=True, bbox_inches="tight")
 
+################### export comparison of emissions ####################
 def export_combined_emissions(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False, compare_data_folder=None):
     '''exports all data for selected group buildings into one graph for total data view'''
 
@@ -179,9 +180,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
 
                     if compare_data_folder is not None:
                         compare_df = pandas.read_csv(compare_data_folder + '/emissions/CO2_emissions_{0}.csv'.format(idx))
-                        print(compare_df)
                         new_df['compare'] = compare_df['building_household_emissions'].apply(grams_to_kg)
-                        print(new_df)
 
                     data.append(new_df)
 
@@ -199,8 +198,6 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
 
     # make graph
     plt.figure(figsize=(16,9))  #
-
-    print(data)
 
     for label_idx, df in enumerate(data):
         # plot:
@@ -236,91 +233,87 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
     if outfile:
         plt.savefig(outfile, transparent=True, bbox_inches="tight")
 
-def export_buildings_comparison(current_output_folder, outfile=None, compare_data_folder=None):
+##################### export energy costs comparison ##################
+def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_folder=None):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
-    colors = [
-        ('seagreen', 'limegreen'),
-        ('darkgoldenrod', 'gold'),
-        ('steelblue', 'lightskyblue'),
-        ('saddlebrown', 'sandybrown')]
 
     # get csv for each building in each group
-    data = []
-    labels = []
+    list_of_csv_dfs = []
     compare_data = []
+    addresses = []
+    decisions = []
     for group_num, group_df in enumerate(session.buildings.list_from_groups()):
         if group_df is not None:
             for idx in group_df.index:
                 # load from csv:
-                new_df = pandas.read_csv(current_output_folder + "/energy_prices/energy_prices_{0}.csv".format(idx))
-                new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
-                new_df['group_num'] = [group_num for i in new_df.values]
-                data.append(new_df)
+                this_csv_df = pandas.read_csv(search_in_folder + "/energy_prices/energy_prices_{0}.csv".format(idx))
+                this_csv_df['current_date'] = this_csv_df['current_date'].apply(GAMA_time_to_datetime)
+                this_csv_df['group_num'] = [group_num for i in this_csv_df.values]
+                list_of_csv_dfs.append(this_csv_df)
 
-                labels.append(group_df.loc[idx, 'address'] + ' - Wärme')  # TODO: add decisions
-                labels.append(group_df.loc[idx, 'address'] + ' - Strom')  # TODO: add decisions
+                # add labels:
+                decisions.append(
+                    "({0}, {1}, {2})".format(
+                    "s" if group_df.loc[idx, 'refurbished'] else "u",
+                    group_df.loc[idx, 'connection_to_heat_grid'] if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
+                    "ES" if group_df.loc[idx, 'save_energy'] else "NV")
+                )
+                addresses.append(group_df.loc[idx, 'address'])
 
                 if compare_data_folder is not None:
                     comp = pandas.read_csv(compare_data_folder + '/energy_prices/energy_prices_{0}.csv'.format(idx))
                     comp['current_date'] = comp['current_date'].apply(GAMA_time_to_datetime)
                     compare_data.append(comp)
 
-    print(compare_data)
-
     # make graph
     plt.figure(figsize=(16,9))  # inches
 
-    label_idx = 0
-    for i, df in enumerate(data):
+    for i, building_data in enumerate(list_of_csv_dfs):
+        group_num = building_data.loc[building_data.index[0], 'group_num']
         # plot pre-calculated default data of that building
         if compare_data_folder is not None:
             plt.plot(compare_data[i]['current_date'],
                 compare_data[i]['building_household_expenses_heat'], color='lightgray')
 
         # plot heat expenses:
-        plt.plot(df['current_date'],
-                df['building_household_expenses_heat'], color=colors[i%len(colors)][0])
+        plt.plot(building_data['current_date'],
+                building_data['building_household_expenses_heat'], color=rgb_to_float_tuple(session.user_colors[group_num]), label="Wärme")
 
         # annotate graph:
-        group_num = df.loc[df.index[0], 'group_num']
         plt.gca().annotate(
-            labels[label_idx],
-            xy=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_expenses_heat']),
-            xytext=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                    df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_expenses_heat'] * 1.02),
-            color=colors[i%len(colors)][0],
+            addresses[i] + "\n" + decisions[i],
+            xy=(building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(list_of_csv_dfs)+1) * group_num)], 'current_date'],
+                building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(list_of_csv_dfs)+1) * group_num)], 'building_household_expenses_heat']),
+            xytext=(building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(list_of_csv_dfs)+1) * group_num)], 'current_date'],
+                    building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(list_of_csv_dfs)+1) * group_num)], 'building_household_expenses_heat'] * 1.02),
+            color=rgb_to_float_tuple(session.user_colors[group_num]),
             fontsize=12,
             horizontalalignment='left'
         )
-
-        label_idx += 1
 
         # plot pre-calculated default data of that building
         if compare_data_folder is not None:
             plt.plot(compare_data[i]['current_date'],
-                compare_data[i]['building_household_expenses_power'], color='lightgray')
+                compare_data[i]['building_household_expenses_power'], linestyle="dashed", color='lightgray')
 
         # plot power expenses:
-        plt.plot(df['current_date'],
-                df['building_household_expenses_power'], color=colors[i%len(colors)][1])
+        plt.plot(building_data['current_date'],
+                building_data['building_household_expenses_power'], color=rgb_to_float_tuple(session.user_colors[group_num]), linestyle='dashed', label="Strom")
 
 
         # annotate graph
-        plt.gca().annotate(
-            labels[label_idx],
-            xy=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_expenses_power']),
-            xytext=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                    df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_expenses_power'] * 1.02),
-            color=colors[i%len(colors)][1],
-            fontsize=12,
-            horizontalalignment='left'
-        )
-
-        label_idx += 1
+        # plt.gca().annotate(
+        #     addresses[i] + "\n" + decisions[i],
+        #     xy=(building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(group_data)+1) * group_num)], 'current_date'],
+        #         building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(group_data)+1) * group_num)], 'building_household_expenses_power']),
+        #     xytext=(building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(group_data)+1) * group_num)], 'current_date'],
+        #             building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(group_data)+1) * group_num)], 'building_household_expenses_power'] * 1.02),
+        #     color=rgb_to_float_tuple(session.user_colors[i]),
+        #     fontsize=12,
+        #     horizontalalignment='left'
+        # )
 
     # graphics:
     # TODO: specify colors
@@ -329,6 +322,7 @@ def export_buildings_comparison(current_output_folder, outfile=None, compare_dat
     plt.ylabel("€/Monat")
     plt.xticks(rotation=270, fontsize=18)
     plt.tight_layout()
+    plt.legend(labels=['Wärme', 'Strom'], loc='upper right')
 
     if outfile is not None:
         plt.savefig(outfile, transparent=True, bbox_inches="tight")

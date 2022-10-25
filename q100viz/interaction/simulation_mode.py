@@ -20,6 +20,8 @@ class SimulationMode:
 
         # simulation setup
         self.headless_folder = config['GAMA_HEADLESS_FOLDER']
+        self.reference_data_folder = os.path.normpath(
+            os.path.join(self.cwd, config['REFERENCE_DATA_FOLDER']))
         self.script = self.headless_folder + 'gama-headless.sh'
         self.current_output_folder = ''  # will be set in activate()
         self.xml_path = ''               # will be set in activate()

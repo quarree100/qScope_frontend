@@ -6,7 +6,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9)):
+def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -86,7 +86,7 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
                 x=x_,
                 y=column,
                 label=label_,
-                color=colors[column][len(rounds_data) - 1 - it_round],
+                color=colors[column][len(rounds_data) - 1 - it_round] if overwrite_color is None else overwrite_color,
                 ax=plt.gca(),
                 linewidth=3)
 
@@ -144,7 +144,7 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
                 y=column,
                 color='lightgray',
                 ax=plt.gca(),
-                label = '{0}'.format(labels_[col_num]),
+                label = '{0}'.format(labels_[col_num]) if labels_ is not None else "unverändert",
                 linewidth=3)
 
         it_round += 1

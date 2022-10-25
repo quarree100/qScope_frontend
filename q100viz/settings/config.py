@@ -17,6 +17,7 @@ config = {
     'GAMA_OUTPUT_FOLDER': '../data/outputs/output',
     'GAMA_MODEL_FILE' : '../q100_abm_qscope-workshop/q100/models/qscope_ABM.gaml',
     'SIMULATION_FORCE_MAX_YEAR' : 0,
+    'REFERENCE_DATA_FOLDER' : '../data/precomputed/simulation_defaults',
 
     # grid setup
     'CSPY_SETTINGS_FILE': '../data/cityscopy.json',

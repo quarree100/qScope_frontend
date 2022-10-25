@@ -186,7 +186,7 @@ class SimulationMode:
                             idx),
                         data_folders=self.output_folders,
                         columns=['building_household_emissions'],
-                        title_="CO2-Emissionen",
+                        title_="CO2-Emissionen (monatlich berechnet)",
                         outfile=self.current_output_folder +
                         "/emissions/CO2_emissions_{0}.png".format(idx),
                         xlabel_="Jahr",
@@ -202,7 +202,8 @@ class SimulationMode:
                             + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
                             + ", ø-spez. Stromverbrauch: "
                             + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                            if session.VERBOSE_MODE else "(monatlich berechnet)"
+                            if session.VERBOSE_MODE else "",
+                        figsize=(16,12)  # inches
                     )
 
                     # export energy prices graph:
@@ -228,7 +229,8 @@ class SimulationMode:
                             + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
                             + ", ø-spez. Stromverbrauch: "
                             + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                            if session.VERBOSE_MODE else ""
+                            if session.VERBOSE_MODE else "",
+                        figsize=(16,12)  # inches
                     )
 
                     # pass path to buildings in infoscreen-compatible format
@@ -240,7 +242,7 @@ class SimulationMode:
 
         ############# neighborhood data #############
         # combined emissions graph for selected buildings:
-        graphs.export_combined_emissions(
+        graphs.export_compared_emissions(
             session.buildings.list_from_groups(),
             self.current_output_folder,
             self.current_output_folder + "/emissions/CO2_emissions_groups.png"
@@ -266,7 +268,7 @@ class SimulationMode:
         )
 
         # neighborhood total energy prices prognosis:
-        graphs.export_individual_graph(
+        graphs.export_neighborhood_total_emissions(
             csv_name="/energy_prices/energy_prices_total.csv",
             data_folders=[self.current_output_folder],
             columns=['gas_price', 'power_price', 'oil_price'],

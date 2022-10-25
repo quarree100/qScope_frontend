@@ -1,3 +1,4 @@
+from tkinter.tix import ListNoteBook
 import matplotlib.pyplot as plt
 import pandas
 import datetime
@@ -5,7 +6,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True):
+def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9)):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -31,7 +32,20 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
             print(e, "... probably the selected buildings have changed between the rounds")
             session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
-    plt.figure(figsize=(16, 9))  # inches
+    plt.figure(figsize=figsize)  # inches
+
+    colors = {
+        'building_household_emissions' : ['black', 'dimgray', 'darkgray', 'silver'],
+        'emissions_neighborhood_accu' : ['black', 'dimgray', 'darkgray', 'silver'],
+        'building_household_expenses_heat' : ['firebrick', 'darkred', 'indianred', 'lightcoral'],
+        'building_household_expenses_power' : ['gold', 'khaki', 'peachpuff', 'linen']
+    }
+    linestyles = {
+        'building_household_emissions' : '-',
+        'emissions_neighborhood_accu' : '-',
+        'building_household_expenses_heat' : '-',
+        'building_household_expenses_power' : '--',
+    }
 
     for col_num, column in enumerate(columns):
         # plot pre-calculated reference data:
@@ -47,6 +61,7 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
 
             compare_df.plot(
                 kind='line',
+                linestyle=linestyles[column],
                 x=x_,
                 y=column,
                 label=label_,
@@ -54,8 +69,8 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
                 ax=plt.gca(),
                 linewidth=3)
 
-    it_round = 0
-    for df in rounds_data:
+    for it_round, df in enumerate(rounds_data):
+        # color = ['black', 'dimgray', 'darkgray', 'lightgray'][it_round]
         for col_num, column in enumerate(columns):
             # plot regular graph:
             if label_show_iteration_round:
@@ -64,23 +79,14 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
             elif labels_ is not None:
                 label_ = '{0}'.format(labels_[col_num])
 
-            # lower brightness for each round:
-            color_ = (
-                session.quarree_colors_float[col_num % len(
-                    columns)][0]/(1+it_round*0.33),  # r, float
-                session.quarree_colors_float[col_num % len(
-                    columns)][1]/(1+it_round*0.33),  # g, float
-                session.quarree_colors_float[col_num % len(
-                    columns)][2]/(1+it_round*0.33),  # b, float
-            )
-
             # plot:
             df.plot(
                 kind='line',
+                linestyle=linestyles[column],
                 x=x_,
                 y=column,
                 label=label_,
-                color=color_,
+                color=colors[column][len(rounds_data) - 1 - it_round],
                 ax=plt.gca(),
                 linewidth=3)
 
@@ -92,12 +98,13 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
     plt.xlabel(xlabel_)
     plt.ylabel(ylabel_)
     plt.xticks(rotation=270, fontsize=18)
-    plt.legend(loc='upper left')
+    plt.legend(loc='upper right')
 
     if outfile is not None:
-        plt.savefig(outfile, transparent=True, bbox_inches="tight")
+        plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
-def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", show_legend=True):
+############# create reference graph from default data ################
+def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", show_legend=True, figsize=(16,9)):
     '''exports default data to graph with gray curve'''
 
     plt.rc('font', size=18)
@@ -123,10 +130,9 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
             print(e, "... probably the selected buildings have changed between the rounds")
             session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
-    plt.figure(figsize=(16, 9))  # inches
+    plt.figure(figsize=figsize)  # inches
 
-    it_round = 0
-    for df in rounds_data:
+    for it_round, df in enumerate(rounds_data):
         for col_num, column in enumerate(csv_columns):
 
             line_style = ['-', '--'][col_num]
@@ -155,10 +161,10 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
         plt.gca().get_legend().remove()
 
     if outfile is not None:
-        plt.savefig(outfile, transparent=True, bbox_inches="tight")
+        plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 ################### export comparison of emissions ####################
-def export_combined_emissions(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False, compare_data_folder=None):
+def export_compared_emissions(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False, compare_data_folder=None, figsize=(16,9)):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -197,7 +203,7 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
                 addresses.append(group_df.loc[idx, 'address'])
 
     # make graph
-    plt.figure(figsize=(16,9))  #
+    plt.figure(figsize=(figsize))
 
     for label_idx, df in enumerate(data):
         # plot:
@@ -231,10 +237,10 @@ def export_combined_emissions(buildings_groups_list, current_output_folder, outf
     if graph_popup:
         plt.show()
     if outfile:
-        plt.savefig(outfile, transparent=True, bbox_inches="tight")
+        plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 ##################### export energy costs comparison ##################
-def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_folder=None):
+def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_folder=None, figsize=(16,9)):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -268,7 +274,7 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
                     compare_data.append(comp)
 
     # make graph
-    plt.figure(figsize=(16,9))  # inches
+    plt.figure(figsize=figsize)  # inches
 
     for i, building_data in enumerate(list_of_csv_dfs):
         group_num = building_data.loc[building_data.index[0], 'group_num']
@@ -323,9 +329,99 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
     plt.xticks(rotation=270, fontsize=18)
     plt.tight_layout()
     plt.legend(labels=['Wärme', 'Strom'], loc='upper right')
+    plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="x-small")
 
     if outfile is not None:
-        plt.savefig(outfile, transparent=True, bbox_inches="tight")
+        plt.savefig(outfile, transparent=False, bbox_inches="tight")
+
+#################### export neighborhood total emissions ##############
+def export_neighborhood_total_emissions(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9)):
+    '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
+
+    plt.rc('font', size=18)
+    # read exported results:
+    rounds_data = []
+
+    # looks for all files with specified csv_name:
+    for output_folder in data_folders:
+        try:
+            csv_data = pandas.read_csv(output_folder + csv_name)
+            csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
+
+            # data conversion:
+            for col in columns:
+                if convert_grams_to_tons:
+                    csv_data[col] = csv_data[col].apply(grams_to_tons)
+                elif convert_grams_to_kg:
+                    csv_data[col] = csv_data[col].apply(grams_to_kg)
+
+            rounds_data.append(csv_data)
+
+        except Exception as e:
+            print(e, "... probably the selected buildings have changed between the rounds")
+            session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
+
+    plt.figure(figsize=figsize)  # inches
+
+    for col_num, column in enumerate(columns):
+        # plot pre-calculated reference data:
+        if compare_data_folder is not None:
+            label_ = 'unverändert' if labels_ is None else '{0} (unverändert)'.format(labels_[col_num])
+            compare_df = pandas.read_csv(compare_data_folder + csv_name)
+            compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
+            for col in columns:
+                if convert_grams_to_tons:
+                    compare_df[col] = compare_df[col].apply(grams_to_tons)
+                elif convert_grams_to_kg:
+                    compare_df[col] = compare_df[col].apply(grams_to_kg)
+
+            compare_df.plot(
+                kind='line',
+                x=x_,
+                y=column,
+                label=label_,
+                color='lightgray',
+                ax=plt.gca(),
+                linewidth=3)
+
+    colors = {
+        'gas_price' : 'lightblue',
+        'oil_price' : 'saddlebrown',
+        'power_price' : 'gold'
+    }
+
+    for it_round, df in enumerate(rounds_data):
+        for col_num, column in enumerate(columns):
+
+            # plot regular graph:
+            if label_show_iteration_round:
+                label_ = 'Durchlauf {0}'.format(
+                    it_round+1) if labels_ == None else '{0} (Durchlauf {1})'.format(labels_[col_num], it_round+1)
+            elif labels_ is not None:
+                label_ = '{0}'.format(labels_[col_num])
+
+            # plot:
+            df.plot(
+                kind='line',
+                x=x_,
+                y=column,
+                label=label_,
+                color=colors[column],
+                ax=plt.gca(),
+                linewidth=3)
+
+        it_round += 1
+
+    plt.tight_layout()  # makes sure all objects are inside the figure boundaries
+    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center')
+    plt.title(title_)
+    plt.xlabel(xlabel_)
+    plt.ylabel(ylabel_)
+    plt.xticks(rotation=270, fontsize=18)
+    plt.legend(loc='upper left')
+
+    if outfile is not None:
+        plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 def GAMA_time_to_datetime(input):
     dt_object = int(datetime.datetime.strptime(input[7:-11], '%Y-%m-%d').year)

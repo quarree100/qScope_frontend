@@ -41,6 +41,8 @@ class DataViewIndividual_Mode():
         session.grid_1.sliders['slider1'].show_controls = False
         session.grid_2.sliders['slider2'].show_text = False
         session.grid_2.sliders['slider2'].show_controls = True
+        session.grid_2.sliders['slider3'].show_text = False
+        session.grid_2.sliders['slider3'].show_controls = True
 
         # setup mode selectors:
         session.grid_1.update_cell_data(session.individual_data_view_grid_1)

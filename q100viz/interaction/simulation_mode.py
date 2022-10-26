@@ -15,6 +15,7 @@ import q100viz.devtools as devtools
 class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
+        self.activation_buffer_time = 4  # seconds before simulation begins
 
         self.cwd = os.getcwd()  # hold current working directory to return to later
 

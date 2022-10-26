@@ -83,6 +83,7 @@ class Slider:
                         cell.color = pygame.Color(
                             cell.color.r, cell.color.g, cell.color.b, a)
 
+                    # draw slider handles:
                     if self.show_controls:
                         pygame.draw.polygon(
                             self.surface, cell.color, rect_points, stroke)

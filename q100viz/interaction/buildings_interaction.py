@@ -14,6 +14,7 @@ class Buildings_Interaction:
         self.previous_connections_selector = ''
         self.waiting_for_simulation = False
         self.sim_token_selection_time = datetime.datetime.now()
+        self.activation_buffer_time = 4  # seconds before simulation begins
 
     def activate(self):
         session.active_mode = self
@@ -202,14 +203,14 @@ class Buildings_Interaction:
         canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
 
         if session.VERBOSE_MODE and self.waiting_for_simulation:
-            sim_string = str(round((datetime.datetime.now() - self.sim_token_selection_time).total_seconds(), 2))
+            sim_string = str(round(session.simulation.activation_buffer_time -(datetime.datetime.now() - self.sim_token_selection_time).total_seconds(), 2))
             canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20+22*17][1][0])
         canvas.blit(font.render("Simulation", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])
 
 
     def update(self):
         if self.waiting_for_simulation:
-            if (datetime.datetime.now() - self.sim_token_selection_time).total_seconds() > 2:
+            if (datetime.datetime.now() - self.sim_token_selection_time).total_seconds() > session.simulation.activation_buffer_time:
                 self.waiting_for_simulation = False
 
                 # setup graphics for simulation mode:

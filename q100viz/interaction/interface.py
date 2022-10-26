@@ -20,7 +20,7 @@ class Slider:
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
         # {slider : (x_min, x_max)}  # which cells to react to
-        self.x_cell_range = x_cell_range
+        self.x_cell_range = x_cell_range  # limits of slider handles
 
         self.color = pygame.Color(125, 125, 125)  # slider area
 

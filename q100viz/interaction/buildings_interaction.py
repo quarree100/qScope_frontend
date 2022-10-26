@@ -99,6 +99,7 @@ class Buildings_Interaction:
                                 if not self.waiting_for_simulation:
                                     self.sim_token_selection_time = datetime.datetime.now()
                                     self.waiting_for_simulation = True
+                                print(self.waiting_for_simulation)
 
                             # connect buildings globally:
                             elif cell.handle in ['connections_0', 'connections_20', 'connections_40', 'connections_60', 'connections_80', 'connections_100'] and cell.handle != self.previous_connections_selector:
@@ -200,8 +201,9 @@ class Buildings_Interaction:
         canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
         canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
 
-        # sim_string = "Simulation" if (self.waiting_for_simulation and session.VERBOSE_MODE) else "Simulation\n" + str(round((datetime.datetime.now() - self.sim_token_selection_time).total_seconds(), 2))
-        # canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])
+        if session.VERBOSE_MODE and self.waiting_for_simulation:
+            sim_string = str(round((datetime.datetime.now() - self.sim_token_selection_time).total_seconds(), 2))
+            canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20+22*17][1][0])
         canvas.blit(font.render("Simulation", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])
 
 

@@ -5,9 +5,9 @@ x,y,handle,color
 11,18,connection_to_heat_grid,aquamarine
 13,18,refurbished,burlywood1
 15,18,save_energy,cadetblue1
-20,11,start_total_data_view,darkolivegreen
-20,13,start_individual_data_view,darkolivegreen1
-20,15,start_simulation,yellow
+20,12,start_total_data_view,darkolivegreen
+20,14,start_individual_data_view,darkolivegreen1
+20,16,start_simulation,yellow
 20,2,connections_0,#C7C7C7
 20,3,connections_20,#BCC7A5
 20,4,connections_40,#A4C75F

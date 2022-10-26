@@ -164,7 +164,8 @@ grid_2 = grid.Grid(
         [config['GRID_2_X2'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y1']]],
         viewport, config['GRID_2_SETUP_FILE'],
-        {'slider2' : [[0, 115], [0, 100], [50, 100], [50, 115]], 'slider3' : [[50, 115], [50, 100], [100, 100], [100, 115]]},
+        {'slider2' : [[0, 115], [0, 100], [50, 100], [50, 115]],
+         'slider3' : [[50, 115], [50, 100], [100, 100], [100, 115]]},
         {'slider2' : (0, int(ncols/2)),
         'slider3' : (int(ncols/2), ncols)})
 

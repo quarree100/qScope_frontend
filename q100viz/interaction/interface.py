@@ -3,10 +3,10 @@
 import pygame
 import json
 import numpy as np
-import random
 
 import q100viz.keystone as keystone
 import q100viz.session as session
+from q100viz.settings.config import config_slider
 
 ############################ SLIDER ###################################
 
@@ -19,8 +19,10 @@ class Slider:
         self.id = id  # unique identifier for slider
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
-        # {slider : (x_min, x_max)}  # which cells to react to
         self.x_cell_range = x_cell_range  # limits of slider handles
+        self.physical_slider_area_length = config_slider[id]['PHYSICAL_SLIDER_AREA_LENGTH']  # cm
+        self.physical_diff_L = config_slider[id]['PHYSICAL_DIFF_L']  # diff from left side of area to cspy slider detection, in cm
+        self.physical_diff_R = config_slider[id]['PHYSICAL_DIFF_R']  # diff to right side of area to cspy slider detection, in cm
 
         self.color = pygame.Color(125, 125, 125)  # slider area
 
@@ -114,16 +116,18 @@ class Slider:
             self.surface.blit(font.render(str(self.human_readable_function[self.handle]), True, (255, 255, 255)), [
                               self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
 
-            # display slider value:
+            # display human readable slider value:
             self.surface.blit(font.render(str(self.human_readable_value[self.handle]), True, (
                 255, 255, 255)), (self.coords_transformed[3][0] - 100, self.coords_transformed[3][1]-20))
+
+        if session.VERBOSE_MODE:
+            self.surface.blit(font.render(str(self.value), True, (
+                255, 255, 255)), (self.coords_transformed[3][0] - 20, self.coords_transformed[3][1]-20))
 
         canvas.blit(self.surface, (0, 0))
 
     def draw_area(self):
-        # pygame.draw.polygon(self.surface, self.color, self.coords_transformed)
 
-        # draw vertical middle line for some handles:
         if self.handle in ['refurbished', 'save_energy']:
             pygame.draw.line(
                 self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1] + 2),
@@ -137,7 +141,7 @@ class Slider:
                 [c[2][0] - c[1][0]/2, c[2][1]],  # top right
                 [c[3][0] - c[1][0]/2, c[3][1]]]  # bottom right
             points_transformed = self.surface.transform(points)
-            pygame.draw.polygon(self.surface, pygame.Color(200,20,55), points_transformed)
+            pygame.draw.polygon(self.surface, pygame.Color(130,20,55), points_transformed)
 
             # green field:
             c = self.coords
@@ -147,12 +151,66 @@ class Slider:
                 c[2],  # top right
                 c[3]]  # bottom right
             points_transformed = self.surface.transform(points)
-            pygame.draw.polygon(self.surface, pygame.Color(20,200,55), points_transformed)
-
+            pygame.draw.polygon(self.surface, pygame.Color(20,130,55), points_transformed)
 
         if self.handle == 'connection_to_heat_grid':
-            pygame.draw.line(self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) * 0.2, self.coords_transformed[0][1] + 2),
-                             (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) * 0.2, self.coords_transformed[1][1] + 2), width=2)
+
+            x0 = self.coords_transformed[0][0]  # in px
+            x3 = self.coords_transformed[3][0]  # in px
+            y0 = self.coords_transformed[0][1]  # in px
+            y1 = self.coords_transformed[1][1]  # in px
+            y3 = self.coords_transformed[3][1]  # in px
+
+            # physical slider area dimensions:
+            s0 = x0 + (x3 - x0) * self.physical_diff_L/self.physical_slider_area_length  # in px
+            s1 = x0 + (x3 - x0) * self.physical_diff_R/self.physical_slider_area_length  # in px
+
+            # red field: no connection
+            points = [
+                (x0, y0),  # bottom left
+                (x0, y1),  # top left
+                (s0 + (s1 - s0) * 0.21, y1),  # top right
+                (s0 + (s1 - s0) * 0.21, y0)  # bottom right
+            ]
+            pygame.draw.polygon(self.surface, pygame.Color(130,20,55), points)
+
+            font = pygame.font.SysFont('Arial', 10)
+
+            pygame.draw.line(
+                self.surface, pygame.Color(200, 200, 200), 
+                (s0 + (s1 - s0) * 0.21, y0 - 35),
+                (s0 + (s1 - s0) * 0.21, y1 + 13), width=1
+                )
+            self.surface.blit(font.render("2024", True, (
+                200, 200, 200)), ((s0 + (s1 - s0) * 0.21) - 10, y0 - 35))
+
+            pygame.draw.line(
+                self.surface, pygame.Color(200, 200, 200), 
+                (s0 + (s1 - s0) * 0.6, y0 - 35),
+                (s0 + (s1 - s0) * 0.6, y1 + 13), width=1
+                )
+            self.surface.blit(font.render("2032", True, (
+                200, 200, 200)), ((s0 + (s1 - s0) * 0.6) - 10, y0 - 35))
+
+            pygame.draw.line(
+                self.surface, pygame.Color(200, 200, 200), 
+                (s0 + (s1 - s0), y0 - 35),
+                (s0 + (s1 - s0), y1 + 13), width=1
+                )
+            self.surface.blit(font.render("2040", True, (
+                200, 200, 200)), ((s0 + (s1 - s0) * 1.0) - 10, y0 - 35))
+
+
+            if session.VERBOSE_MODE:
+                self.surface.blit(font.render("L", True, (
+                    255, 255, 255)), (s0, y3-20))
+                self.surface.blit(font.render("|", True, (
+                    255, 255, 255)), (s0 + (s1 - s0) * 0.2, y3-20))
+                self.surface.blit(font.render("x", True, (
+                    255, 255, 255)), ((s0 + (s1 - s0) * self.value) + 5, y3-80))
+                self.surface.blit(font.render("R", True, (
+                    255, 255, 255)), (s1, y3-20))
+
 
 
 
@@ -160,7 +218,6 @@ class Slider:
         self.coords_transformed = self.surface.transform(self.coords)
 
     def process_value(self):
-        print(self.value)
         ''' TODO: set up a struct (maybe csv) to import standard values >> this section should be automatized!
         e.g.
         if self.handle == 'name':

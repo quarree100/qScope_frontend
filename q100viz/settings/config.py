@@ -44,3 +44,31 @@ config = {
     'buildings_selection_mode': 'rotation' # select 'all' intersected buildings or choose by 'rotation'
 
 }
+
+config_slider = {
+    'slider0' :
+        {
+            'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
+            'PHYSICAL_DIFF_L' : 7.0,            
+            'PHYSICAL_DIFF_R' : 34.0,            
+        },
+    'slider1' :
+        {
+            'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
+            'PHYSICAL_DIFF_L' : 9.1,            
+            'PHYSICAL_DIFF_R' : 30.4,            
+        },
+    'slider2' : 
+        {
+            'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
+            'PHYSICAL_DIFF_L' : 7.2,            
+            'PHYSICAL_DIFF_R' : 33.4,            
+        },
+    'slider3' :
+        {
+            'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
+            'PHYSICAL_DIFF_L' : 7.0,            
+            'PHYSICAL_DIFF_R' : 33.4,            
+        },  
+
+}

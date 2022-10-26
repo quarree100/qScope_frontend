@@ -35,7 +35,7 @@ class SimulationMode:
 
         self.xml = None
 
-    def activate(self, input_max_year=None):
+    def activate(self, input_max_year=None, export_neighborhood_graphs_only=False):
 
         self.max_year = input_max_year
 
@@ -178,69 +178,70 @@ class SimulationMode:
         ####################### export matplotlib graphs #######################
 
         ########## individual buildings data ########
-        for group_df in session.buildings.list_from_groups():
-            if group_df is not None:
-                for idx in group_df.index:
+        if not export_neighborhood_graphs_only:
+            for group_df in session.buildings.list_from_groups():
+                if group_df is not None:
+                    for idx in group_df.index:
 
-                    # export emissions graph:
-                    graphs.export_individual_graph(
-                        csv_name="/emissions/CO2_emissions_{0}.csv".format(
-                            idx),
-                        data_folders=self.output_folders,
-                        columns=['building_household_emissions'],
-                        title_="CO2-Emissionen (monatlich berechnet)",
-                        outfile=self.current_output_folder +
-                        "/emissions/CO2_emissions_{0}.png".format(idx),
-                        xlabel_="Jahr",
-                        ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
-                        x_='current_date',
-                        convert_grams_to_kg=True,
-                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
-                        figtext=
-                            str(idx) + " "
-                            + str(group_df.loc[idx, 'address']) + " "
-                            + str(group_df.loc[idx, 'type'])
-                            + "\nø-spez. Wärmeverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                            + ", ø-spez. Stromverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                            if session.VERBOSE_MODE else "",
-                        figsize=(16,12)  # inches
-                    )
+                        # export emissions graph:
+                        graphs.export_individual_graph(
+                            csv_name="/emissions/CO2_emissions_{0}.csv".format(
+                                idx),
+                            data_folders=self.output_folders,
+                            columns=['building_household_emissions'],
+                            title_="CO2-Emissionen (monatlich berechnet)",
+                            outfile=self.current_output_folder +
+                            "/emissions/CO2_emissions_{0}.png".format(idx),
+                            xlabel_="Jahr",
+                            ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
+                            x_='current_date',
+                            convert_grams_to_kg=True,
+                            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
+                            figtext=
+                                str(idx) + " "
+                                + str(group_df.loc[idx, 'address']) + " "
+                                + str(group_df.loc[idx, 'type'])
+                                + "\nø-spez. Wärmeverbrauch: "
+                                + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                                + ", ø-spez. Stromverbrauch: "
+                                + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                                if session.VERBOSE_MODE else "",
+                            figsize=(16,12)  # inches
+                        )
 
-                    # export energy prices graph:
-                    graphs.export_individual_graph(
-                        csv_name="/energy_prices/energy_prices_{0}.csv".format(
-                            idx),
-                        data_folders=self.output_folders,
-                        columns=['building_household_expenses_heat',
-                                 'building_household_expenses_power'],
-                        labels_=['Wärmekosten', 'Stromkosten'],
-                        outfile=self.current_output_folder +
-                        "/energy_prices/energy_prices_{0}.png".format(idx),
-                        title_="Energiekosten",
-                        xlabel_="Jahr",
-                        ylabel_="€/Monat",
-                        x_='current_date',
-                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
-                        figtext=
-                            str(idx) + " "
-                            + str(group_df.loc[idx, 'address']) + " "
-                            + str(group_df.loc[idx, 'type'])
-                            + "\nø-spez. Wärmeverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                            + ", ø-spez. Stromverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                            if session.VERBOSE_MODE else "",
-                        figsize=(16,12)  # inches
-                    )
+                        # export energy prices graph:
+                        graphs.export_individual_graph(
+                            csv_name="/energy_prices/energy_prices_{0}.csv".format(
+                                idx),
+                            data_folders=self.output_folders,
+                            columns=['building_household_expenses_heat',
+                                    'building_household_expenses_power'],
+                            labels_=['Wärmekosten', 'Stromkosten'],
+                            outfile=self.current_output_folder +
+                            "/energy_prices/energy_prices_{0}.png".format(idx),
+                            title_="Energiekosten",
+                            xlabel_="Jahr",
+                            ylabel_="€/Monat",
+                            x_='current_date',
+                            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
+                            figtext=
+                                str(idx) + " "
+                                + str(group_df.loc[idx, 'address']) + " "
+                                + str(group_df.loc[idx, 'type'])
+                                + "\nø-spez. Wärmeverbrauch: "
+                                + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                                + ", ø-spez. Stromverbrauch: "
+                                + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                                if session.VERBOSE_MODE else "",
+                            figsize=(16,12)  # inches
+                        )
 
-                    # pass path to buildings in infoscreen-compatible format
-                    group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath(
-                        'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
-                    group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
-                        'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
-                session.buildings.df.update(group_df)
+                        # pass path to buildings in infoscreen-compatible format
+                        group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath(
+                            'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
+                        group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
+                            'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
+                    session.buildings.df.update(group_df)
 
         ############# neighborhood data #############
         # combined emissions graph for selected buildings:

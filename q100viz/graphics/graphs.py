@@ -5,30 +5,33 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None):
+def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, ylim=None):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
     # read exported results:
     rounds_data = []
 
+    max_val = 0
     # looks for all files with specified csv_name:
     for output_folder in data_folders:
         try:
             csv_data = pandas.read_csv(output_folder + csv_name)
             csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
 
-            # data conversion:
             for col in columns:
+                # data conversion:
                 if convert_grams_to_tons:
                     csv_data[col] = csv_data[col].apply(grams_to_tons)
                 elif convert_grams_to_kg:
                     csv_data[col] = csv_data[col].apply(grams_to_kg)
+                # max value will set upper y limit:
+                max_val = csv_data[col].max() if csv_data[col].max() > max_val else max_val
 
             rounds_data.append(csv_data)
 
         except Exception as e:
-            print(e, "... probably the selected buildings have changed between the rounds")
+            print(e, "csv not found in data folders... probably the selected buildings have changed between the rounds")
             session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
     plt.figure(figsize=figsize)  # inches
@@ -73,8 +76,8 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
         for col_num, column in enumerate(columns):
             # plot regular graph:
             if label_show_iteration_round:
-                label_ = 'Durchlauf {0}'.format(
-                    it_round+1) if labels_ == None else '{0} (Durchlauf {1})'.format(labels_[col_num], it_round+1)
+                label_ = 'Runde {0}'.format(
+                    it_round+1) if labels_ == None else '{0} (Runde {1})'.format(labels_[col_num], it_round+1)
             elif labels_ is not None:
                 label_ = '{0}'.format(labels_[col_num])
 
@@ -98,6 +101,8 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
     plt.ylabel(ylabel_)
     plt.xticks(rotation=270, fontsize=18)
     plt.legend(loc='upper right')
+    if ylim is not None:
+        plt.gca().set_ylim(ylim)
 
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
@@ -394,8 +399,8 @@ def export_neighborhood_total_emissions(csv_name, columns, x_, title_="", xlabel
 
             # plot regular graph:
             if label_show_iteration_round:
-                label_ = 'Durchlauf {0}'.format(
-                    it_round+1) if labels_ == None else '{0} (Durchlauf {1})'.format(labels_[col_num], it_round+1)
+                label_ = 'Runde {0}'.format(
+                    it_round+1) if labels_ == None else '{0} (Runde {1})'.format(labels_[col_num], it_round+1)
             elif labels_ is not None:
                 label_ = '{0}'.format(labels_[col_num])
 

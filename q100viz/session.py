@@ -73,13 +73,14 @@ show_basemap = False
 num_of_rounds = 4  # max num of rounds; will repeat after this
 num_of_users = 4  # num of valid users # TODO: combine with num of valid tags!
 user_colors = [
-    (0, 117, 180),   # Quarree-blue
-    (253, 193, 19),  # Quarree-yellow
-    (182, 0, 182),   # purple
-    (0, 168, 78),    # Quarree-dark-green
+    (0, 117, 180),   # Quarree-blue  #0075b4
+    (253, 193, 19),  # Quarree-yellow  #fdc113
+    (182, 0, 182),   # purple  #b600b6
+    (0, 168, 78),    # Quarree-dark-green  #00a84e
     (186, 212, 50),  # Quarree-light-green
     (155, 155, 155)
 ]
+
 gama_iteration_images = ['' for n in range(num_of_rounds)]
 emissions_data_paths = ['' for n in range(num_of_rounds)]
 
@@ -102,7 +103,8 @@ environment = {
     'mode': 'buildings_interaction',
     'scenario_energy_prices' : 2018,
     'scenario_num_connections' : 0,  # how many more buildings to connect?
-    'current_iteration_round' : 0 # num of q-scope iterations during this workshop
+    'current_iteration_round' : 0, # num of q-scope iterations during this workshop
+    'active_user_focus_data' : -1  # determines which user data to focus in individual data view
     }
 
 # scenario data:
@@ -202,9 +204,9 @@ def string_to_mode(input_string):
         return buildings_interaction
     elif input_string == 'simulation':
         return simulation
-    elif input_string == 'dataview_individual':
+    elif input_string == 'individual_data_view':
         return individual_data_view
-    elif input_string == 'dataview_total':
+    elif input_string == 'total_data_view':
         return total_data_view
     elif input_string == 'model_validation':
         return model_validation

@@ -85,12 +85,26 @@ class DataViewTotal_Mode():
         #         (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 3))
         #     x_displace += session.viewport.dst_points[2][0] / 4
 
-        # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
         font = pygame.font.SysFont('Arial', 18)
-        # canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
-        canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
-        # canvas.blit(font.render("Simulation", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])
-        canvas.blit(font.render("Interaktion", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+133][1][0])
+        nrows = 22
+
+        column = 16
+        row = 14
+        font = pygame.font.SysFont('Arial', 18)
+        canvas.blit(font.render(
+            "Individualdaten", True, pygame.Color(255,255,255)),
+            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
+             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+        )
+
+        column = 17
+        row = 18
+        font = pygame.font.SysFont('Arial', 18)
+        canvas.blit(font.render(
+            "Interaktion", True, pygame.Color(255,255,255)),
+            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 8,
+             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+        )
 
     def update(self):
         pass

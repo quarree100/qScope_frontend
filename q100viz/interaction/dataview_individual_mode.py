@@ -77,8 +77,11 @@ class DataViewIndividual_Mode():
                             session.total_data_view.activate()
                         elif cell.handle == 'start_buildings_interaction':
                             session.buildings_interaction.activate()
+                        elif cell.handle in ['active_user_focus_data_0', 'active_user_focus_data_1', 'active_user_focus_data_2', 'active_user_focus_data_3']:
+                            session.environment['active_user_focus_data'] = cell.handle[-1]
 
         session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
+        session.api.send_session_env()
 
 
 
@@ -91,11 +94,32 @@ class DataViewIndividual_Mode():
         #         (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 3))
         #     x_displace += session.viewport.dst_points[2][0] / 4
 
-        # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
+        nrows = 22
         font = pygame.font.SysFont('Arial', 18)
-        canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
-        # canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
-        canvas.blit(font.render("Interaktion", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+133][1][0])
+
+        canvas.blit(font.render(
+            "Quartiersdaten", True, pygame.Color(255,255,255)),
+            (session.grid_2.rects_transformed[20*14][1][0][0] + 5,  # x
+            session.grid_2.rects_transformed[20*14][1][0][1] + 10)  # y
+        )
+
+        column = 17
+        row = 15
+        font = pygame.font.SysFont('Arial', 14)
+        canvas.blit(font.render(
+            "Gebäudeinformation", True, pygame.Color(255,255,255)),
+            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 4,
+             session.grid_2.rects_transformed[column+nrows*row][1][0][1])
+        )
+
+        column = 17
+        row = 18
+        font = pygame.font.SysFont('Arial', 18)
+        canvas.blit(font.render(
+            "Interaktion", True, pygame.Color(255,255,255)),
+            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 8,
+             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+        )
 
     def update(self):
         pass

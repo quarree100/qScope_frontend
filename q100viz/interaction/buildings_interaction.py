@@ -185,28 +185,46 @@ class Buildings_Interaction:
                 session.log += "\nCannot draw frontend: %s" % e
 
         font = pygame.font.SysFont('Arial', 18)
+        nrows = 22
 
-        x = 18
+        column = 18
         y = 1*22
-        canvas.blit(font.render("Anschlüsse", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[x+y][1][0])
+        canvas.blit(font.render("Anschlüsse", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+y][1][0])
 
         # draw num connections:
         i = 1
         for num_string in ["0%", "20%", "40%", "60%", "80%", "100%"]:
-            row = 22
-            x = row * 1 + 18
-            canvas.blit(font.render(num_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[x+row*i][1][0])
+            column = nrows * 1 + 18
+            canvas.blit(font.render(num_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+nrows*i][1][0])
             i += 1
 
-        # display timeline handles:  # TODO: very weird cell accessing... do this systematically!
-        canvas.blit(font.render("Quartiersdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14][1][0])  # [x*y][1=coords][0=bottom-left]
-        canvas.blit(font.render("Individualdaten", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+44][1][0])
+        canvas.blit(font.render(
+            "Quartiersdaten", True, pygame.Color(255,255,255)),
+            (session.grid_2.rects_transformed[20*14][1][0][0] + 5,  # x
+            session.grid_2.rects_transformed[20*14][1][0][1] + 10)  # y
+        )
+
+        column = 16
+        row = 14
+        font = pygame.font.SysFont('Arial', 18)
+        canvas.blit(font.render(
+            "Individualdaten", True, pygame.Color(255,255,255)),
+            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
+             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+        )
 
         if self.waiting_for_simulation:
             sim_string = str(round(session.simulation.activation_buffer_time -(datetime.datetime.now() - self.sim_token_selection_time).total_seconds(), 2))
             canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20+22*17][1][0])
-        canvas.blit(font.render("Simulation", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[20*14+89][1][0])
 
+        column = 17
+        row = 16
+        font = pygame.font.SysFont('Arial', 18)
+        canvas.blit(font.render(
+            "Simulation", True, pygame.Color(255,255,255)),
+            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
+             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+        )
 
     def update(self):
         if self.waiting_for_simulation:

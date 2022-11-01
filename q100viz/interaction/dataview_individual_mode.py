@@ -75,16 +75,28 @@ class DataViewIndividual_Mode():
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
                     if cell.selected:
+
+                        # high performance impact, use sparingly
+                        i = grid.get_intersection(session.buildings.df, x, y)
+
+                        # use rotation value to cycle through buildings located in cell
+                        n = len(session.buildings.df[i])
+                        if n > 0:
+                            selection = session.buildings.df[i].iloc[cell.rot % n]
+                            session.buildings.df.loc[selection.name,
+                                                'selected'] = True  # select cell
+                            session.buildings.df.loc[selection.name,
+                                                'group'] = cell.id  # pass cell ID to building
+
                         if cell.handle == 'start_total_data_view':
                             session.active_mode = session.total_data_view
                         elif cell.handle == 'start_buildings_interaction':
                             session.active_mode = session.buildings_interaction
                         elif cell.handle in ['active_user_focus_data_0', 'active_user_focus_data_1', 'active_user_focus_data_2', 'active_user_focus_data_3']:
-                            session.environment['active_user_focus_data'] = cell.handle[-1]
+                            session.environment['active_user_focus_data'] = int(cell.handle[-1])
 
         session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
         session.api.send_session_env()
-
 
 
     def draw(self, canvas):
@@ -98,7 +110,8 @@ class DataViewIndividual_Mode():
                     fill_color = pygame.Color(session.user_colors[int(building['group'])])
 
                     points = session._gis.surface.transform(building['geometry'].exterior.coords)
-                    pygame.draw.polygon(session._gis.surface, fill_color, points, 2)
+                    stroke = 4 if building['group'] == session.environment['active_user_focus_data'] else 2
+                    pygame.draw.polygon(session._gis.surface, fill_color, points, stroke)
 
         except Exception as e:
                 print("Cannot draw frontend:", e)

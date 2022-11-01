@@ -65,7 +65,7 @@ class Buildings_Interaction:
                 for x, cell in enumerate(row):
                     if cell.selected:
                         # high performance impact, use sparingly
-                        i = get_intersection(session.buildings.df, grid, x, y)
+                        i = grid.get_intersection(session.buildings.df, x, y)
 
                         # use rotation value to cycle through buildings located in cell
                         if self.selection_mode == 'rotation':
@@ -236,12 +236,3 @@ class Buildings_Interaction:
 
                 session.simulation.setup()
                 session.active_mode = session.simulation  # marks simulation to be started in main thread
-
-
-def get_intersection(df, grid, x, y):
-    # get viewport coordinates of the cell rectangle
-    cell_vertices = grid.surface.transform(
-        [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
-    )
-    # find elements intersecting with selected cell
-    return session._gis.get_intersection_indexer(df, cell_vertices)

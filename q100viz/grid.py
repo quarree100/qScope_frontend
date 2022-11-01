@@ -117,7 +117,7 @@ class Grid:
             session.flag_export_canvas = True
             session.active_mode.process_grid_change()
 
-            # update slider values TODO: adjust this if more than 1 slider per grid
+            # update slider values
             # TODO: this causes type error when no slider value provided in cspy → provide 0 by default?
             for slider_id in self.sliders.keys():
                 if msg['sliders'][slider_id] is not None: self.sliders[slider_id].value = msg['sliders'][slider_id]
@@ -128,6 +128,15 @@ class Grid:
             print("type error", t)
         except IndexError:
             print("Warning: incoming grid data is incomplete")
+
+    def get_intersection(self, df, x, y):
+        # get viewport coordinates of the cell rectangle
+        cell_vertices = self.surface.transform(
+            [[_x, _y] for _x, _y in [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]]]
+        )
+        # find elements intersecting with selected cell
+        return session._gis.get_intersection_indexer(df, cell_vertices)
+
 
     def print(self):
         try:

@@ -207,11 +207,11 @@ class SimulationMode:
                                 idx),
                             data_folders=self.output_folders,
                             columns=['building_household_emissions'],
-                            title_="CO2-Emissionen (monatlich berechnet)",
+                            title_="ø-CO2-Emissionen (monatlich berechnet)",
                             outfile=self.current_output_folder +
                             "/emissions/CO2_emissions_{0}.png".format(idx),
                             xlabel_="Jahr",
-                            ylabel_="ø-Emissionen [$kg_{CO2,eq}$]",
+                            ylabel_="$CO_{2}$-Äquivalente (kg)",
                             x_='current_date',
                             convert_grams_to_kg=True,
                             compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
@@ -282,7 +282,7 @@ class SimulationMode:
             title_="jährlich kumulierte Gesamtemissionen des Quartiers",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
             xlabel_="Jahr",
-            ylabel_="CO2 [$kg_{eq}$]",
+            ylabel_="$CO_{2}$-Äquivalente (t)",
             x_='current_date',
             convert_grams_to_kg=True,
             compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
@@ -294,10 +294,10 @@ class SimulationMode:
             data_folders=[self.current_output_folder],
             columns=['gas_price', 'power_price', 'oil_price'],
             labels_=['Gaspreis', 'Strompreis', 'Ölpreis',],
-            title_="Energiepreis",
+            title_="generelle Energiepreise nach Energieträger",
             outfile=self.current_output_folder + "/energy_prices/energy_prices_total.png",
             xlabel_="Jahr",
-            ylabel_="Preis [ct/kWh]",
+            ylabel_="Preis (ct/kWh)",
             x_='current_date',
             label_show_iteration_round=False
             # compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"

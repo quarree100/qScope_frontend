@@ -73,8 +73,8 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
         for col_num, column in enumerate(columns):
             # plot regular graph:
             if label_show_iteration_round:
-                label_ = 'Durchlauf {0}'.format(
-                    it_round+1) if labels_ == None else '{0} (Durchlauf {1})'.format(labels_[col_num], it_round+1)
+                label_ = 'Runde {0}'.format(
+                    it_round+1) if labels_ == None else '{0} (Runde {1})'.format(labels_[col_num], it_round+1)
             elif labels_ is not None:
                 label_ = '{0}'.format(labels_[col_num])
 
@@ -394,8 +394,8 @@ def export_neighborhood_total_emissions(csv_name, columns, x_, title_="", xlabel
 
             # plot regular graph:
             if label_show_iteration_round:
-                label_ = 'Durchlauf {0}'.format(
-                    it_round+1) if labels_ == None else '{0} (Durchlauf {1})'.format(labels_[col_num], it_round+1)
+                label_ = 'Runde {0}'.format(
+                    it_round+1) if labels_ == None else '{0} (Runde {1})'.format(labels_[col_num], it_round+1)
             elif labels_ is not None:
                 label_ = '{0}'.format(labels_[col_num])
 

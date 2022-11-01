@@ -116,10 +116,14 @@ udp_thread = threading.Thread(target=udp_server.listen,
                               daemon=True)
 udp_thread.start()
 
-session.active_mode.activate()
 
 ############################ Begin Game Loop ##########################
 while True:
+
+    if session.previous_mode is not session.active_mode:
+        session.active_mode.activate()
+        session.previous_mode = session.active_mode
+
     # process mouse/keyboard events
     for event in pygame.event.get():
         if session.active_mode:
@@ -155,6 +159,7 @@ while True:
             # enter simulation mode:
             elif event.key == K_4:
                 session.environment['active_scenario_handle'] = 'A'
+                session.simulation.setup()
                 session.simulation.activate()
             elif event.key == K_5:
                 session.individual_data_view.activate()

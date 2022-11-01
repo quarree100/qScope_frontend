@@ -37,6 +37,7 @@ class Buildings_Interaction:
 
         # send data:
         session.api.send_df_with_session_env(None)
+        session.api.send_message(json.dumps({'step' : 0}))
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -223,22 +224,15 @@ class Buildings_Interaction:
         canvas.blit(font.render(
             "Simulation", True, pygame.Color(255,255,255)),
             (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
-             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+            session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
         )
 
     def update(self):
-        if self.waiting_for_simulation:
+        if self.waiting_for_simulation and not session.simulation.running:
             if (datetime.datetime.now() - self.sim_token_selection_time).total_seconds() > session.simulation.activation_buffer_time:
                 self.waiting_for_simulation = False
 
-                # setup graphics for simulation mode:
-                for grid in session.grid_1, session.grid_2:
-                    for slider in grid.sliders.values():
-                        slider.show_text = False
-                        slider.show_controls = False
-                session.show_basemap = False
-                session.show_polygons = False
-
+                session.simulation.setup()
                 session.simulation.activate()
 
 

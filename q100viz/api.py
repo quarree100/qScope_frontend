@@ -64,6 +64,8 @@ class API:
 
     def forward_gama_message(self, msg):
         msg = msg.replace("'", "\"")
+        json_object = json.loads(msg)
+        session.simulation.progress = "{0}%".format(int(0.5 + json_object['step'] / session.simulation.final_step * 100))
         self.send_message(json.dumps(json.loads(msg)))
 
     def send_simplified_dataframe_with_environment_variables(self, df, env):

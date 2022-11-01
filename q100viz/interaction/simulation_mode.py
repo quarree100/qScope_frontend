@@ -1,4 +1,4 @@
-from tokenize import group
+import time
 import pandas
 import os
 import subprocess
@@ -16,6 +16,8 @@ class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
         self.activation_buffer_time = 4  # seconds before simulation begins
+        self.running = False
+        self.progress = "0%"
 
         self.cwd = os.getcwd()  # hold current working directory to return to later
 
@@ -33,31 +35,33 @@ class SimulationMode:
         self.seed = 1.0
 
         self.matplotlib_neighborhood_images = {}
+        self.export_neighborhood_graphs_only = False
 
         self.xml = None
 
-    def activate(self, input_max_year=None, export_neighborhood_graphs_only=False):
-
-        self.max_year = input_max_year
+    def activate(self):
 
         session.environment['mode'] = self.name
         session.active_mode = self
+        self.progress = "0%"
 
         # display setup:
         for grid in session.grid_1, session.grid_2:
             for slider in grid.sliders.values():
                 slider.show_text = False
                 slider.show_controls = False
-        session.show_basemap = False
-        session.show_polygons = False
+        session.show_basemap = True
+        session.show_polygons = True
 
         session.api.send_session_env()
 
-        # increase round counter to globally log q-scope iterations:
-        session.environment['current_iteration_round'] = (
-            session.environment['current_iteration_round'] + 1) % session.num_of_rounds
+        self.running = True
+        simulation_thread = threading.Thread(target=session.simulation.run, daemon=True)
+        simulation_thread.start()
 
-        # derive final step from defined simulation runtime:
+    def setup(self, input_max_year=None, export_neighborhood_graphs_only=False):
+        self.export_neighborhood_graphs_only = export_neighborhood_graphs_only
+            # derive final step from defined simulation runtime:
         if config['SIMULATION_FORCE_MAX_YEAR'] == 0:
             runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
                                       index_col='var').loc['model_runtime_string', 'value']
@@ -174,12 +178,24 @@ class SimulationMode:
         # start simulation
         self.make_xml(params, outputs, self.xml_path,
                       self.final_step, None, 'agent_decision_making')
+
+    def run(self):
+        while not self.running:
+            time.sleep(1)
+
+        self.running = False
+
+        # increase round counter to globally log q-scope iterations:
+        session.environment['current_iteration_round'] = (
+            session.environment['current_iteration_round'] + 1) % session.num_of_rounds
+
+
         self.run_script(self.xml_path)
 
         ####################### export matplotlib graphs #######################
 
         ########## individual buildings data ########
-        if not export_neighborhood_graphs_only:
+        if not self.export_neighborhood_graphs_only:
             for group_df in session.buildings.list_from_groups():
                 if group_df is not None:
                     for idx in group_df.index:
@@ -320,9 +336,9 @@ class SimulationMode:
 
         data_view_neighborhood_df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
+        session.api.send_message(json.dumps({'step' : self.final_step}))
 
-        # TODO: wait until GAMA delivers outputs
-        session.individual_data_view.activate()
+        session.active_mode = session.individual_data_view
 
     ########################### frontend input ########################
     def process_event(self, event):
@@ -350,17 +366,36 @@ class SimulationMode:
 
     ################################ draw #############################
     def draw(self, canvas):
-        font = pygame.font.SysFont('Arial', 40)
-        canvas.blit(font.render("Berechne Energiekosten und Emissionen...", True, (255, 255, 255)),
-                    (session.canvas_size[0]/4, session.canvas_size[1]/2))
+        # font = pygame.font.SysFont('Arial', 40)
+        # canvas.blit(font.render("Berechne Energiekosten und Emissionen...", True, (255, 255, 255)),
+        #             (session.canvas_size[0]/4, session.canvas_size[1]/2))
 
-        if len(session.buildings.df[session.buildings.df.selected]):
-            # highlight selected buildings
-            session._gis.draw_polygon_layer(
-                canvas,
-                session.buildings.df[session.buildings.df.selected], 2, (
-                    255, 0, 127)
-            )
+        try:
+            # highlight selected buildings (draws colored stroke on top)
+            if len(session.buildings.df[session.buildings.df.selected]):
+
+                sel_buildings = session.buildings.df[(session.buildings.df.selected)]
+                for building in sel_buildings.to_dict('records'):
+                    fill_color = pygame.Color(session.user_colors[int(building['group'])])
+
+                    points = session._gis.surface.transform(building['geometry'].exterior.coords)
+                    pygame.draw.polygon(session._gis.surface, fill_color, points, 2)
+
+        except Exception as e:
+                print("Cannot draw frontend:", e)
+                session.log += "\nCannot draw frontend: %s" % e
+
+        font = pygame.font.SysFont('Arial', 18)
+        nrows = 22
+
+        column = 20
+        row = 17
+        font = pygame.font.SysFont('Arial', 18)
+        canvas.blit(font.render(
+            session.simulation.progress, True, pygame.Color(255,255,255)),
+            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
+            session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+        )
 
     ########################### script: prepare #######################
     def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None):

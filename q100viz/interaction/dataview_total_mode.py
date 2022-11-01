@@ -77,13 +77,21 @@ class DataViewTotal_Mode():
 
 
     def draw(self, canvas):
-        # # display graphs:
-        # x_displace = 65
-        # for image in self.images:
-        #     canvas.blit(image.image,
-        #         (x_displace,
-        #         (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 3))
-        #     x_displace += session.viewport.dst_points[2][0] / 4
+
+        try:
+            # highlight selected buildings (draws colored stroke on top)
+            if len(session.buildings.df[session.buildings.df.selected]):
+
+                sel_buildings = session.buildings.df[(session.buildings.df.selected)]
+                for building in sel_buildings.to_dict('records'):
+                    fill_color = pygame.Color(session.user_colors[int(building['group'])])
+
+                    points = session._gis.surface.transform(building['geometry'].exterior.coords)
+                    pygame.draw.polygon(session._gis.surface, fill_color, points, 2)
+
+        except Exception as e:
+                print("Cannot draw frontend:", e)
+                session.log += "\nCannot draw frontend: %s" % e
 
         font = pygame.font.SysFont('Arial', 18)
         nrows = 22

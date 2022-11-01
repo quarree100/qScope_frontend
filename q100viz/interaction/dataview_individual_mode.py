@@ -98,11 +98,6 @@ class DataViewIndividual_Mode():
                     points = session._gis.surface.transform(building['geometry'].exterior.coords)
                     pygame.draw.polygon(session._gis.surface, fill_color, points, 2)
 
-            # coloring slider area:
-            for slider_dict in session.grid_1.sliders, session.grid_2.sliders:
-                for slider in slider_dict.values():
-                    slider.draw_area()
-
         except Exception as e:
                 print("Cannot draw frontend:", e)
                 session.log += "\nCannot draw frontend: %s" % e
@@ -110,10 +105,12 @@ class DataViewIndividual_Mode():
         nrows = 22
         font = pygame.font.SysFont('Arial', 18)
 
+        column = 17
+        row = 12
         canvas.blit(font.render(
             "Quartiersdaten", True, pygame.Color(255,255,255)),
-            (session.grid_2.rects_transformed[20*14][1][0][0] + 5,  # x
-            session.grid_2.rects_transformed[20*14][1][0][1] + 10)  # y
+            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] - 25,  # x
+            session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)  # y
         )
 
         column = 17

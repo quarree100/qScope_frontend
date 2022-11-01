@@ -185,6 +185,8 @@ total_data_view_grid_1 = pd.read_csv(config['GRID_1_TOTAL_DATA_VIEW_FILE'])
 total_data_view_grid_2 = pd.read_csv(config['GRID_2_TOTAL_DATA_VIEW_FILE'])
 
 # -------------------------------- modes ------------------------------
+previous_mode = None
+
 calibration = CalibrationMode()
 questionnaire = Questionnaire_Mode()
 # 'input_scenarios': Input_Scenarios(),

@@ -97,7 +97,7 @@ class Input_Scenarios:
                         # set slider handles via selected cell in last row:
                         elif cell.handle is not None:
                             if cell.handle == 'start_buildings_interaction':
-                                session.buildings_interaction.activate()
+                                session.active_mode = session.buildings_interaction
 
         session.api.send_session_env()
 

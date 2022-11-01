@@ -85,7 +85,8 @@ class Questionnaire_Mode():
                 pd.DataFrame(data={"question_number" : [self.question_index]}))
         else:  # leave questionnaire mode, enter input mode
             self.question_index = 0
-            session.input_scenarios.activate()
+            session.active_mode = session.input_scenarios
+
 
     def update(self):
         pass

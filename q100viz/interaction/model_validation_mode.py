@@ -28,7 +28,8 @@ class ModelValidation_Mode():
         devtools.select_random_buildings_for_simulation(
             session.buildings.df, 4)
         session.simulation.__init__()
-        session.simulation.activate()
+        session.active_mode = session.simulation
+
 
         # 2. connect in 2027
         session.buildings.load_data()  # re-init buildings
@@ -37,7 +38,8 @@ class ModelValidation_Mode():
             session.buildings.df, 4,
             connection_to_heat_grid=random.randint(2020, 2045))
         session.simulation.__init__()
-        session.simulation.activate()
+        session.active_mode = session.simulation
+
 
         # 3. saniert true; rest false
         session.buildings.load_data()  # re-init buildings
@@ -46,7 +48,8 @@ class ModelValidation_Mode():
             session.buildings.df, 4,
             refurbished=True)
         session.simulation.__init__()
-        session.simulation.activate()
+        session.active_mode = session.simulation
+
 
         # 4. Energiesparen true; rest false
         session.buildings.load_data()  # re-init buildings
@@ -55,7 +58,8 @@ class ModelValidation_Mode():
             session.buildings.df, 4,
             save_energy=True)
         session.simulation.__init__()
-        session.simulation.activate()
+        session.active_mode = session.simulation
+
 
         # 5. Anschluss 2027; Saniert true; Energiesparen false
         session.buildings.load_data()  # re-init buildings
@@ -65,7 +69,8 @@ class ModelValidation_Mode():
             connection_to_heat_grid=random.randint(2020, 2045),
             refurbished=True)
         session.simulation.__init__()
-        session.simulation.activate()
+        session.active_mode = session.simulation
+
 
         # 6. Anschluss 2027; Saniert false; Energiesparen true
         session.buildings.load_data()  # re-init buildings
@@ -75,7 +80,8 @@ class ModelValidation_Mode():
             connection_to_heat_grid=random.randint(2020, 2045),
             save_energy=True)
         session.simulation.__init__()
-        session.simulation.activate()
+        session.active_mode = session.simulation
+
 
         # 7. Anschluss false; Saniert true; Energiesparen true
         session.buildings.load_data()  # re-init buildings
@@ -85,7 +91,8 @@ class ModelValidation_Mode():
             refurbished=True,
             save_energy=True)
         session.simulation.__init__()
-        session.simulation.activate()
+        session.active_mode = session.simulation
+
 
         # 8. Alles auf true
         session.buildings.load_data()  # re-init buildings
@@ -96,7 +103,8 @@ class ModelValidation_Mode():
             save_energy=True,
             refurbished=True)
         session.simulation.__init__()
-        session.simulation.activate()
+        session.active_mode = session.simulation
+
 
     def batch_experiment_2(self):
         # batch commands: select the same buildings each time, GAMA branch = agora_reduction

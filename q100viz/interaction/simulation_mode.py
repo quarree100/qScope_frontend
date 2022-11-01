@@ -40,6 +40,7 @@ class SimulationMode:
         self.xml = None
 
     def activate(self):
+        '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
 
         session.environment['mode'] = self.name
         session.active_mode = self
@@ -338,7 +339,7 @@ class SimulationMode:
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
         session.api.send_message(json.dumps({'step' : self.final_step}))
 
-        session.active_mode = session.individual_data_view
+        session.active_mode = session.individual_data_view  # marks individual_data_view_mode to be started in main thread
 
     ########################### frontend input ########################
     def process_event(self, event):
@@ -455,16 +456,3 @@ class SimulationMode:
         # self.open_and_call(command, session.individual_data_view.activate())
 
         os.chdir(self.cwd)  # return to previous cwd
-
-    def open_and_call(self, popen_args, on_exit):
-
-        def run_in_thread(on_exit, popen_args):
-            proc = subprocess.Popen(popen_args, shell=True)
-            proc.wait()
-            on_exit()
-            return
-
-        thread = threading.Thread(
-            target=run_in_thread, args=(on_exit, popen_args))
-        thread.start()
-        return thread

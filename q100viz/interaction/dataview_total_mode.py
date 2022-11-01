@@ -27,6 +27,8 @@ class DataViewTotal_Mode():
         #         image.warp()
 
     def activate(self):
+        '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
+
         session.active_mode = self
         session.environment['mode'] = self.name
 
@@ -70,10 +72,9 @@ class DataViewTotal_Mode():
                 for x, cell in enumerate(row):
                     if cell.selected:
                         if cell.handle == 'start_individual_data_view':
-                            session.individual_data_view.activate()
+                            session.active_mode = session.individual_data_view
                         elif cell.handle == 'start_buildings_interaction':
-                            session.buildings_interaction.activate()
-
+                            session.active_mode = session.buildings_interaction
 
 
     def draw(self, canvas):

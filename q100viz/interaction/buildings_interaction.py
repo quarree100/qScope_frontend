@@ -17,6 +17,8 @@ class Buildings_Interaction:
         self.activation_buffer_time = 4  # seconds before simulation begins
 
     def activate(self):
+        '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
+
         session.active_mode = self
         session.environment['mode'] = self.name
 
@@ -92,10 +94,10 @@ class Buildings_Interaction:
                                         slider.update_handle(cell.handle, cell.id)
 
                             elif cell.handle == 'start_individual_data_view':
-                                session.individual_data_view.activate()
+                                session.active_mode = session.individual_data_view
 
                             elif cell.handle == 'start_total_data_view':
-                                session.total_data_view.activate()
+                                session.active_mode = session.total_data_view
 
                             elif cell.handle == 'start_simulation':
                                 if not self.waiting_for_simulation:
@@ -233,7 +235,7 @@ class Buildings_Interaction:
                 self.waiting_for_simulation = False
 
                 session.simulation.setup()
-                session.simulation.activate()
+                session.active_mode = session.simulation  # marks simulation to be started in main thread
 
 
 def get_intersection(df, grid, x, y):

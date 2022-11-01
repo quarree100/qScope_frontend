@@ -177,7 +177,7 @@ class Slider:
             font = pygame.font.SysFont('Arial', 10)
 
             pygame.draw.line(
-                self.surface, pygame.Color(200, 200, 200), 
+                self.surface, pygame.Color(200, 200, 200),
                 (s0 + (s1 - s0) * 0.21, y0 - 35),
                 (s0 + (s1 - s0) * 0.21, y1 + 13), width=1
                 )
@@ -185,7 +185,7 @@ class Slider:
                 200, 200, 200)), ((s0 + (s1 - s0) * 0.21) - 10, y0 - 35))
 
             pygame.draw.line(
-                self.surface, pygame.Color(200, 200, 200), 
+                self.surface, pygame.Color(200, 200, 200),
                 (s0 + (s1 - s0) * 0.6, y0 - 35),
                 (s0 + (s1 - s0) * 0.6, y1 + 13), width=1
                 )
@@ -193,7 +193,7 @@ class Slider:
                 200, 200, 200)), ((s0 + (s1 - s0) * 0.6) - 10, y0 - 35))
 
             pygame.draw.line(
-                self.surface, pygame.Color(200, 200, 200), 
+                self.surface, pygame.Color(200, 200, 200),
                 (s0 + (s1 - s0), y0 - 35),
                 (s0 + (s1 - s0), y1 + 13), width=1
                 )
@@ -228,8 +228,7 @@ class Slider:
             if self.handle == 'game_stage':
                 handler = [key for key in ['buildings_interaction', 'simulation', 'individual_data_view', 'total_data_view']][int(self.value * 4)]
                 print(handler)
-                session.active_mode = session.string_to_mode[handler]
-                session.active_mode.activate()  # TODO: add confidence delay!
+                session.active_mode = session.string_to_mode[handler]  # TODO: add confidence delay!
 
             # elif self.handle == 'num_connections':
             #     session.environment['scenario_num_connections'] = int(

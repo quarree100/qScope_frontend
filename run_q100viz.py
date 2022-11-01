@@ -148,23 +148,23 @@ while True:
 
             ##################### mode selection ######################
             # enter questionnaire mode:
-            if event.key == K_1:
-                session.questionnaire.activate()
+            # if event.key == K_1:
+            #     session.active_mode = session.questionnaire
             # activate Input Scenarios Mode:
             # elif event.key == K_2:
-            #     session.input_scenarios.activate()
+                # session.active_mode = session.input_scenarios
             # activate Input Households Mode:
             elif event.key == K_3:
-                session.buildings_interaction.activate()
+                session.active_mode = session.buildings_interaction
             # enter simulation mode:
             elif event.key == K_4:
                 session.environment['active_scenario_handle'] = 'A'
                 session.simulation.setup()
-                session.simulation.activate()
+                session.active_mode = session.simulation
             elif event.key == K_5:
-                session.individual_data_view.activate()
+                session.active_mode = session.individual_data_view
             elif event.key == K_6:
-                session.total_data_view.activate()
+                session.active_mode = session.total_data_view
 
             # toggle calibration:
             elif event.key == K_c:

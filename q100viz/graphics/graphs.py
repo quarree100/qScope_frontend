@@ -5,7 +5,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None):
+def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -97,14 +97,14 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
         it_round += 1
 
     plt.tight_layout()  # makes sure all objects are inside the figure boundaries
-    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center', fontsize=28)
-    plt.title(title_, fontsize=28)
-    plt.gca().set_xlabel(xlabel_, fontsize=28)
-    plt.gca().set_ylabel(ylabel_, fontsize=28)
-    plt.xticks(fontsize=28)
-    plt.yticks(fontsize=28)
-    if labels_ is not None:
-        plt.legend(loc='upper right', fontsize=28)
+    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center', fontsize='x-large')
+    plt.title(title_, fontsize='x-large')
+    plt.gca().set_xlabel(xlabel_, fontsize='x-large')
+    plt.gca().set_ylabel(ylabel_, fontsize='x-large')
+    plt.xticks(fontsize='x-large')
+    plt.yticks(fontsize='x-large')
+    if show_legend:
+        plt.legend(loc='upper right', fontsize='x-large')
     else:
         plt.gca().get_legend().remove()
 
@@ -164,7 +164,7 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
     plt.title(title_)
     plt.xlabel(xlabel_)
     plt.ylabel(ylabel_)
-    plt.xticks(rotation=270, fontsize=18)
+    plt.xticks(rotation=270, fontsize='x-large')
     plt.gca().set_ylim(bottom=0)
     if show_legend:
         plt.legend(loc='upper left')
@@ -238,12 +238,13 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
 
     # graphics:
     plt.title("Monatliche Emissionen im Vergleich")
-    plt.xlabel("Jahr")
-    plt.ylabel(r'$CO_{2}$-Äquivalente (kg/Monat)')
-    plt.xticks(rotation=270, fontsize=18)
-    # plt.legend(addresses, bbox_to_anchor=(1,1), loc="upper left", fontsize="x-small")
+    plt.gca().set_xlabel("Jahr", fontsize='x-large')
+    plt.gca().set_ylabel(r'$CO_{2}$-Äquivalente (kg/Monat)', fontsize='x-large')
+    plt.xticks(fontsize='x-large')
+    plt.yticks(fontsize='x-large')
+    # plt.legend(addresses, bbox_to_anchor=(1,1), loc="upper left", fontsize="small")
     plt.tight_layout()
-    plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="x-small")
+    plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="small")
 
     if graph_popup:
         plt.show()
@@ -334,13 +335,14 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
 
     # graphics:
     # TODO: specify colors
-    plt.title("Energiekosten im Vergleich")
-    plt.xlabel("Jahr")
-    plt.ylabel("€/Monat")
-    plt.xticks(rotation=270, fontsize=18)
+    plt.title("Energiekosten im Vergleich", fontsize='x-large')
+    plt.gca().set_xlabel("Jahr", fontsize='x-large')
+    plt.gca().set_ylabel("€/Monat", fontsize='x-large')
+    plt.xticks(fontsize='x-large')
+    plt.yticks(fontsize='x-large')
     plt.tight_layout()
     plt.legend(labels=['Wärme', 'Strom'], loc='upper right')
-    plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="x-small")
+    plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="small")
 
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
@@ -424,13 +426,13 @@ def export_neighborhood_total_data(csv_name, columns, x_, title_="", xlabel_="",
         it_round += 1
 
     plt.tight_layout()  # makes sure all objects are inside the figure boundaries
-    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center', fontsize=28)
-    plt.title(title_, fontsize=28)
-    plt.gca().set_xlabel(xlabel_, fontsize=28)
-    plt.gca().set_ylabel(ylabel_, fontsize=28)
-    plt.xticks(fontsize=28)
-    plt.yticks(fontsize=28)
-    plt.legend(loc='upper left')
+    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center', fontsize='x-large')
+    plt.title(title_, fontsize='x-large')
+    plt.gca().set_xlabel(xlabel_, fontsize='x-large')
+    plt.gca().set_ylabel(ylabel_, fontsize='x-large')
+    plt.xticks(fontsize='x-large')
+    plt.yticks(fontsize='x-large')
+    plt.legend(loc='upper left', fontsize='x-large')
 
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")

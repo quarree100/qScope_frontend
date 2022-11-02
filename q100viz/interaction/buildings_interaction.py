@@ -161,8 +161,6 @@ class Buildings_Interaction:
                                     session.scenario_selected_buildings)
                                     session.scenario_selected_buildings = session.scenario_selected_buildings[0:0] # empty dataframe
 
-                        print(session.environment['scenario_num_connections'], len(session.scenario_selected_buildings))
-
 
                     elif cell.handle == 'start_simulation':  # cell not selected
                         self.waiting_for_simulation = False

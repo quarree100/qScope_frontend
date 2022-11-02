@@ -416,11 +416,11 @@ class SimulationMode:
                             idx),
                         data_folders=self.output_folders,
                         columns=['building_household_emissions'],
-                        title_="ø-CO2-Emissionen (monatlich berechnet)",
+                        title_="Emissionen",
                         outfile=self.current_output_folder +
                         "/emissions/CO2_emissions_{0}.png".format(idx),
                         xlabel_="Jahr",
-                        ylabel_="$CO_{2}$-Äquivalente (kg)",
+                        ylabel_="$CO_{2}$-Äquivalente (kg/Monat)",  # TODO: t/Jahr
                         x_='current_date',
                         convert_grams_to_kg=True,
                         compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",

@@ -97,13 +97,14 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
         it_round += 1
 
     plt.tight_layout()  # makes sure all objects are inside the figure boundaries
-    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center')
-    plt.title(title_)
-    plt.xlabel(xlabel_)
-    plt.ylabel(ylabel_)
-    plt.xticks(rotation=270, fontsize=18)
+    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center', fontsize=28)
+    plt.title(title_, fontsize=28)
+    plt.gca().set_xlabel(xlabel_, fontsize=28)
+    plt.gca().set_ylabel(ylabel_, fontsize=28)
+    plt.xticks(fontsize=28)
+    plt.yticks(fontsize=28)
     if labels_ is not None:
-        plt.legend(loc='upper right')
+        plt.legend(loc='upper right', fontsize=28)
     else:
         plt.gca().get_legend().remove()
 
@@ -236,7 +237,7 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
         )
 
     # graphics:
-    plt.title("Quartiersemissionen im Vergleich")
+    plt.title("Monatliche Emissionen im Vergleich")
     plt.xlabel("Jahr")
     plt.ylabel(r'$CO_{2}$-Äquivalente (kg/Monat)')
     plt.xticks(rotation=270, fontsize=18)
@@ -423,11 +424,12 @@ def export_neighborhood_total_data(csv_name, columns, x_, title_="", xlabel_="",
         it_round += 1
 
     plt.tight_layout()  # makes sure all objects are inside the figure boundaries
-    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center')
-    plt.title(title_)
-    plt.xlabel(xlabel_)
-    plt.ylabel(ylabel_)
-    plt.xticks(rotation=270, fontsize=18)
+    plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center', fontsize=28)
+    plt.title(title_, fontsize=28)
+    plt.gca().set_xlabel(xlabel_, fontsize=28)
+    plt.gca().set_ylabel(ylabel_, fontsize=28)
+    plt.xticks(fontsize=28)
+    plt.yticks(fontsize=28)
     plt.legend(loc='upper left')
 
     if outfile is not None:

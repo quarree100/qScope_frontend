@@ -5,7 +5,7 @@ import datetime
 import q100viz.session as session
 
 ############################### export graphs #####################
-def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None):
+def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -102,7 +102,7 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
     plt.xlabel(xlabel_)
     plt.ylabel(ylabel_)
     plt.xticks(rotation=270, fontsize=18)
-    if labels_ is not None:
+    if show_legend:
         plt.legend(loc='upper right')
     else:
         plt.gca().get_legend().remove()

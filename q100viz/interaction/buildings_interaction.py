@@ -149,7 +149,7 @@ class Buildings_Interaction:
 
                                     # select and connect sampled buildings:
                                     session.scenario_selected_buildings['selected'] = True
-                                    session.scenario_selected_buildings['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
+                                    session.scenario_selected_buildings['connection_to_heat_grid'] = 2024
                                     print("selecting random {0} buildings:".format(
                                         session.environment['scenario_num_connections']))
                                     session.buildings.df.update(

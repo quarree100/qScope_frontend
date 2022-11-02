@@ -161,10 +161,11 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
 
     plt.tight_layout()  # makes sure all objects are inside the figure boundaries
     plt.figtext(0.5, -0.1, figtext, wrap=False, horizontalalignment='center')
-    plt.title(title_)
-    plt.xlabel(xlabel_)
-    plt.ylabel(ylabel_)
-    plt.xticks(rotation=270, fontsize='x-large')
+    plt.title(title_, fontsize='x-large')
+    plt.gca().set_xlabel(xlabel_, fontsize='x-large')
+    plt.gca().set_ylabel(ylabel_, fontsize='x-large')
+    plt.xticks(fontsize='x-large')
+    plt.yticks(fontsize='x-large')
     plt.gca().set_ylim(bottom=0)
     if show_legend:
         plt.legend(loc='upper left')

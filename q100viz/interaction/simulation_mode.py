@@ -224,7 +224,8 @@ class SimulationMode:
                                 + ", ø-spez. Stromverbrauch: "
                                 + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
                                 if session.VERBOSE_MODE else "",
-                            figsize=(16,12)  # inches
+                            figsize=(16,12),  # inches
+                            ylim=(0,700)
                         )
 
                         # export energy prices graph:
@@ -251,7 +252,8 @@ class SimulationMode:
                                 + ", ø-spez. Stromverbrauch: "
                                 + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
                                 if session.VERBOSE_MODE else "",
-                            figsize=(16,12)  # inches
+                            figsize=(16,12),  # inches
+                            ylim=(0,300)
                         )
 
                         # pass path to buildings in infoscreen-compatible format

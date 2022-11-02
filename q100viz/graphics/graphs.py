@@ -12,23 +12,26 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
     # read exported results:
     rounds_data = []
 
+    max_val = 0
     # looks for all files with specified csv_name:
     for output_folder in data_folders:
         try:
             csv_data = pandas.read_csv(output_folder + csv_name)
             csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
 
-            # data conversion:
             for col in columns:
+                # data conversion:
                 if convert_grams_to_tons:
                     csv_data[col] = csv_data[col].apply(grams_to_tons)
                 elif convert_grams_to_kg:
                     csv_data[col] = csv_data[col].apply(grams_to_kg)
+                # max value will set upper y limit:
+                max_val = csv_data[col].max() if csv_data[col].max() > max_val else max_val
 
             rounds_data.append(csv_data)
 
         except Exception as e:
-            print(e, "... probably the selected buildings have changed between the rounds")
+            print(e, "csv not found in data folders... probably the selected buildings have changed between the rounds")
             session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
     plt.figure(figsize=figsize)  # inches
@@ -77,6 +80,8 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
                     it_round+1) if labels_ == None else '{0} (Runde {1})'.format(labels_[col_num], it_round+1)
             elif labels_ is not None:
                 label_ = '{0}'.format(labels_[col_num])
+            else:
+                label_ = ""
 
             # plot:
             df.plot(
@@ -97,7 +102,12 @@ def export_individual_graph(csv_name, columns, x_, title_="", xlabel_="", ylabel
     plt.xlabel(xlabel_)
     plt.ylabel(ylabel_)
     plt.xticks(rotation=270, fontsize=18)
-    plt.legend(loc='upper right')
+    if labels_ is not None:
+        plt.legend(loc='upper right')
+    else:
+        plt.gca().get_legend().remove()
+
+    plt.gca().set_ylim(bottom=0)
 
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
@@ -154,6 +164,7 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
     plt.xlabel(xlabel_)
     plt.ylabel(ylabel_)
     plt.xticks(rotation=270, fontsize=18)
+    plt.gca().set_ylim(bottom=0)
     if show_legend:
         plt.legend(loc='upper left')
     else:
@@ -227,7 +238,7 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
     # graphics:
     plt.title("Quartiersemissionen im Vergleich")
     plt.xlabel("Jahr")
-    plt.ylabel(r'Emissionen $CO_{2}$ [kg/Monat]')
+    plt.ylabel(r'$CO_{2}$-Äquivalente (kg/Monat)')
     plt.xticks(rotation=270, fontsize=18)
     # plt.legend(addresses, bbox_to_anchor=(1,1), loc="upper left", fontsize="x-small")
     plt.tight_layout()
@@ -333,8 +344,8 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
-#################### export neighborhood total emissions ##############
-def export_neighborhood_total_emissions(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9)):
+#################### export neighborhood total data ##################
+def export_neighborhood_total_data(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9)):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)

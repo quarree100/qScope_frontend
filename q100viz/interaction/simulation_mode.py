@@ -60,8 +60,9 @@ class SimulationMode:
         simulation_thread = threading.Thread(target=session.simulation.run, daemon=True)
         simulation_thread.start()
 
-    def setup(self, input_max_year=None, export_neighborhood_graphs_only=False):
+    def setup(self, input_max_year=None, export_neighborhood_graphs_only=False, export_graphs=True):
         self.export_neighborhood_graphs_only = export_neighborhood_graphs_only
+        self.flag_create_graphs = export_graphs
             # derive final step from defined simulation runtime:
         if config['SIMULATION_FORCE_MAX_YEAR'] == 0:
             runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
@@ -180,9 +181,15 @@ class SimulationMode:
         self.make_xml(params, outputs, self.xml_path,
                       self.final_step, None, 'agent_decision_making')
 
+        self.running = True
+
+
     def run(self):
         while not self.running:
             time.sleep(1)
+            if threading.current_thread().__class__.__name__ == '_MainThread':
+                print("Simulation was not set up yet! call simulation.setup() before running.")
+                return
 
         self.running = False
 
@@ -193,117 +200,8 @@ class SimulationMode:
 
         self.run_script(self.xml_path)
 
-        ####################### export matplotlib graphs #######################
-
-        ########## individual buildings data ########
-        if not self.export_neighborhood_graphs_only:
-            for group_df in session.buildings.list_from_groups():
-                if group_df is not None:
-                    for idx in group_df.index:
-
-                        # export emissions graph:
-                        graphs.export_individual_graph(
-                            csv_name="/emissions/CO2_emissions_{0}.csv".format(
-                                idx),
-                            data_folders=self.output_folders,
-                            columns=['building_household_emissions'],
-                            title_="ø-CO2-Emissionen (monatlich berechnet)",
-                            outfile=self.current_output_folder +
-                            "/emissions/CO2_emissions_{0}.png".format(idx),
-                            xlabel_="Jahr",
-                            ylabel_="$CO_{2}$-Äquivalente (kg)",
-                            x_='current_date',
-                            convert_grams_to_kg=True,
-                            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
-                            figtext=
-                                str(idx) + " "
-                                + str(group_df.loc[idx, 'address']) + " "
-                                + str(group_df.loc[idx, 'type'])
-                                + "\nø-spez. Wärmeverbrauch: "
-                                + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                                + ", ø-spez. Stromverbrauch: "
-                                + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                                if session.VERBOSE_MODE else "",
-                            figsize=(16,12),  # inches
-                            ylim=(0,700)
-                        )
-
-                        # export energy prices graph:
-                        graphs.export_individual_graph(
-                            csv_name="/energy_prices/energy_prices_{0}.csv".format(
-                                idx),
-                            data_folders=self.output_folders,
-                            columns=['building_household_expenses_heat',
-                                    'building_household_expenses_power'],
-                            labels_=['Wärmekosten', 'Stromkosten'],
-                            outfile=self.current_output_folder +
-                            "/energy_prices/energy_prices_{0}.png".format(idx),
-                            title_="Energiekosten",
-                            xlabel_="Jahr",
-                            ylabel_="€/Monat",
-                            x_='current_date',
-                            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
-                            figtext=
-                                str(idx) + " "
-                                + str(group_df.loc[idx, 'address']) + " "
-                                + str(group_df.loc[idx, 'type'])
-                                + "\nø-spez. Wärmeverbrauch: "
-                                + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                                + ", ø-spez. Stromverbrauch: "
-                                + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
-                                if session.VERBOSE_MODE else "",
-                            figsize=(16,12),  # inches
-                            ylim=(0,300)
-                        )
-
-                        # pass path to buildings in infoscreen-compatible format
-                        group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath(
-                            'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
-                        group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
-                            'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
-                    session.buildings.df.update(group_df)
-
-        ############# neighborhood data #############
-        # combined emissions graph for selected buildings:
-        graphs.export_compared_emissions(
-            session.buildings.list_from_groups(),
-            self.current_output_folder,
-            self.current_output_folder + "/emissions/CO2_emissions_groups.png"
-            )
-
-        # combined energy prices graph for selected buildings:
-        graphs.export_compared_energy_costs(
-            search_in_folder=self.current_output_folder,
-            outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
-
-        # neighborhood total emissions:
-        graphs.export_individual_graph(
-            csv_name="/emissions/CO2_emissions_neighborhood.csv",
-            data_folders=self.output_folders,
-            columns=['emissions_neighborhood_accu'],
-            title_="jährlich kumulierte Gesamtemissionen des Quartiers",
-            outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
-            xlabel_="Jahr",
-            ylabel_="$CO_{2}$-Äquivalente (t)",
-            x_='current_date',
-            convert_grams_to_kg=True,
-            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
-        )
-
-        # neighborhood total energy prices prognosis:
-        graphs.export_neighborhood_total_emissions(
-            csv_name="/energy_prices/energy_prices_total.csv",
-            data_folders=[self.current_output_folder],
-            columns=['gas_price', 'power_price', 'oil_price'],
-            labels_=['Gaspreis', 'Strompreis', 'Ölpreis',],
-            title_="generelle Energiepreise nach Energieträger",
-            outfile=self.current_output_folder + "/energy_prices/energy_prices_total.png",
-            xlabel_="Jahr",
-            ylabel_="Preis (ct/kWh)",
-            x_='current_date',
-            label_show_iteration_round=False
-            # compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
-        )
+        if self.flag_create_graphs:
+            self.export_graphs()
 
         # define titles for images and their location
         self.matplotlib_neighborhood_images = {
@@ -315,7 +213,6 @@ class SimulationMode:
 
         # send matplotlib created images to infoscreen
         session.environment['neighborhood_images'] = self.matplotlib_neighborhood_images
-        # session.api.send_dataframe_as_json(selected_buildings)
 
         ########################### csv export ########################
 
@@ -458,3 +355,117 @@ class SimulationMode:
         # self.open_and_call(command, session.individual_data_view.activate())
 
         os.chdir(self.cwd)  # return to previous cwd
+
+        ####################### export matplotlib graphs #######################
+
+    def export_graphs(self):
+
+        ############# neighborhood data #############
+        # combined emissions graph for selected buildings:
+        graphs.export_compared_emissions(
+            session.buildings.list_from_groups(),
+            self.current_output_folder,
+            self.current_output_folder + "/emissions/CO2_emissions_groups.png"
+            )
+
+        # combined energy prices graph for selected buildings:
+        graphs.export_compared_energy_costs(
+            search_in_folder=self.current_output_folder,
+            outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
+
+        # neighborhood total emissions:
+        graphs.export_individual_graph(
+            csv_name="/emissions/CO2_emissions_neighborhood.csv",
+            data_folders=self.output_folders,
+            columns=['emissions_neighborhood_accu'],
+            title_="jährlich kumulierte Gesamtemissionen des Quartiers",
+            outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
+            xlabel_="Jahr",
+            ylabel_="$CO_{2}$-Äquivalente (t)",
+            x_='current_date',
+            convert_grams_to_tons=True,
+            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
+        )
+
+        # neighborhood total energy prices prognosis:
+        graphs.export_neighborhood_total_data(
+            csv_name="/energy_prices/energy_prices_total.csv",
+            data_folders=[self.current_output_folder],
+            columns=['gas_price', 'power_price', 'oil_price'],
+            labels_=['Gaspreis', 'Strompreis', 'Ölpreis',],
+            title_="generelle Energiepreise nach Energieträger",
+            outfile=self.current_output_folder + "/energy_prices/energy_prices_total.png",
+            xlabel_="Jahr",
+            ylabel_="Preis (ct/kWh)",
+            x_='current_date',
+            label_show_iteration_round=False
+            # compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
+        )
+
+        ########## individual buildings data ########
+        if self.export_neighborhood_graphs_only:
+            return
+
+        for group_df in session.buildings.list_from_groups():
+            if group_df is not None:
+                for idx in group_df.index:
+
+                    # export emissions graph:
+                    graphs.export_individual_graph(
+                        csv_name="/emissions/CO2_emissions_{0}.csv".format(
+                            idx),
+                        data_folders=self.output_folders,
+                        columns=['building_household_emissions'],
+                        title_="ø-CO2-Emissionen (monatlich berechnet)",
+                        outfile=self.current_output_folder +
+                        "/emissions/CO2_emissions_{0}.png".format(idx),
+                        xlabel_="Jahr",
+                        ylabel_="$CO_{2}$-Äquivalente (kg)",
+                        x_='current_date',
+                        convert_grams_to_kg=True,
+                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
+                        figtext=
+                            str(idx) + " "
+                            + str(group_df.loc[idx, 'address']) + " "
+                            + str(group_df.loc[idx, 'type'])
+                            + "\nø-spez. Wärmeverbrauch: "
+                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + ", ø-spez. Stromverbrauch: "
+                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            if session.VERBOSE_MODE else "",
+                        figsize=(16,12),  # inches
+                    )
+
+                    # export energy prices graph:
+                    graphs.export_individual_graph(
+                        csv_name="/energy_prices/energy_prices_{0}.csv".format(
+                            idx),
+                        data_folders=self.output_folders,
+                        columns=['building_household_expenses_heat',
+                                'building_household_expenses_power'],
+                        labels_=['Wärmekosten', 'Stromkosten'],
+                        outfile=self.current_output_folder +
+                        "/energy_prices/energy_prices_{0}.png".format(idx),
+                        title_="Energiekosten",
+                        xlabel_="Jahr",
+                        ylabel_="€/Monat",
+                        x_='current_date',
+                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
+                        figtext=
+                            str(idx) + " "
+                            + str(group_df.loc[idx, 'address']) + " "
+                            + str(group_df.loc[idx, 'type'])
+                            + "\nø-spez. Wärmeverbrauch: "
+                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + ", ø-spez. Stromverbrauch: "
+                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            if session.VERBOSE_MODE else "",
+                        figsize=(16,12),  # inches
+                    )
+
+                    # pass path to buildings in infoscreen-compatible format
+                    group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath(
+                        'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
+                    group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
+                        'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
+                session.buildings.df.update(group_df)

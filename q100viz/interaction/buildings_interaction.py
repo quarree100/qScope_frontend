@@ -154,7 +154,7 @@ class Buildings_Interaction:
                                         session.environment['scenario_num_connections']))
                                     session.buildings.df.update(
                                     session.scenario_selected_buildings)
-                                else:  # value is 0: deselect all                   
+                                else:  # value is 0: deselect all
                                     session.scenario_selected_buildings['selected'] = False
                                     session.scenario_selected_buildings['connection_to_heat_grid'] = False
                                     session.buildings.df.update(

@@ -127,7 +127,7 @@ class Buildings_Interaction:
                                 # connect additional buildings as set in scenario:
                                 if session.environment['scenario_num_connections'] > 0:
                                     # reset:
-                                    if not session.scenario_selected_buildings.empty:
+                                    if len(session.scenario_selected_buildings.index) > 0:
                                         session.scenario_selected_buildings['selected'] = False
                                         session.scenario_selected_buildings['connection_to_heat_grid'] = False
                                         session.buildings.df.update(
@@ -153,8 +153,7 @@ class Buildings_Interaction:
                                     print("selecting random {0} buildings:".format(
                                         session.environment['scenario_num_connections']))
                                 else:  # value is 0: deselect all
-                                    session.scenario_selected_buildings['selected'] = False
-                                    session.scenario_selected_buildings['connection_to_heat_grid'] = False
+                                    session.scenario_selected_buildings = session.scenario_selected_buildings[0:0]
                                 # update buildings:
                                 session.buildings.df.update(
                                     session.scenario_selected_buildings)
@@ -204,7 +203,7 @@ class Buildings_Interaction:
         canvas.blit(font.render(
             "Quartiersdaten", True, pygame.Color(255,255,255)),
             (session.grid_2.rects_transformed[20*14][1][0][0] + 5,  # x
-            session.grid_2.rects_transformed[20*14][1][0][1] + 10)  # y
+            session.grid_2.rects_transformed[20*14][1][0][1] + 12)  # y
         )
 
         column = 16

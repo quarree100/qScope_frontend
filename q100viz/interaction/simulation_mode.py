@@ -154,7 +154,7 @@ class SimulationMode:
         if not os.path.isdir(self.current_output_folder):
             os.makedirs(self.current_output_folder)
 
-        selected_buildings = session.buildings.df[session.buildings.df.selected]
+        selected_buildings = pandas.concat([session.scenario_selected_buildings, session.buildings.df[session.buildings.df.selected]])
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen

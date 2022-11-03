@@ -85,26 +85,6 @@ def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", yl
                 label_ = ""
 
             # plot:
-            if col_num == 0 and df_prepend_expenses is not None:
-                df_prepend_expenses.plot(
-                    x='year',
-                    y='hh_heat_expenses_2000_2020',
-                    kind='line',
-                    # linestyle='dotted',
-                    color='firebrick',
-                    linewidth=3,
-                    ax=plt.gca(),
-                )
-                df_prepend_expenses.plot(
-                    x='year',
-                    y='hh_power_expenses_2000_2020',
-                    kind='line',
-                    linestyle='--',
-                    color='#956b00',
-                    linewidth=3,
-                    ax=plt.gca(),
-                )
-
             df.plot(
                 kind='line',
                 linestyle=linestyles[column],
@@ -135,7 +115,7 @@ def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", yl
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 ######################### individual energy expenses ############################
-def export_individual_energy_expenses(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True, df_prepend_expenses=None):
+def export_individual_energy_expenses(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True, prepend_historic_data=False):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -158,19 +138,20 @@ def export_individual_energy_expenses(csv_name, columns, x_, title_="", xlabel_=
                 # max value will set upper y limit:
                 max_val = csv_data[col].max() if csv_data[col].max() > max_val else max_val
 
-                if df_prepend_expenses is not None:
-                    df_prepend_expenses = df_prepend_expenses.rename(columns={
+                if prepend_historic_data:
+                    historic_expenses = pandas.read_csv("../data/data_pre-simulation/energy-expenses_hh_2000-2020.csv")
+                    historic_expenses = historic_expenses.rename(columns={
                         'year' : 'current_date',
                         'hh_heat_expenses_2000_2020' : 'building_household_expenses_heat',
                         'hh_power_expenses_2000_2020' : 'building_household_expenses_power'
                     })
 
-                    df_prepend_expenses = df_prepend_expenses[df_prepend_expenses['current_date'] < 2020]
+                    historic_expenses = historic_expenses[historic_expenses['current_date'] < 2020]
 
                     csv_data = pandas.read_csv(output_folder + csv_name)
                     csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
 
-                    csv_data = pandas.concat([df_prepend_expenses, csv_data])
+                    csv_data = pandas.concat([historic_expenses, csv_data])
 
             rounds_data.append(csv_data)
 
@@ -258,7 +239,7 @@ def export_individual_energy_expenses(csv_name, columns, x_, title_="", xlabel_=
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 ############# create reference graph from default data ################
-def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", show_legend=True, figsize=(16,9)):
+def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", show_legend=True, figsize=(16,9), df_prepend_expenses=None):
     '''exports default data to graph with gray curve'''
 
     plt.rc('font', size=18)
@@ -279,6 +260,20 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
                     csv_data[col] = csv_data[col].apply(grams_to_kg)
 
             rounds_data.append(csv_data)
+
+            if df_prepend_expenses is not None:
+                df_prepend_expenses = df_prepend_expenses.rename(columns={
+                    'year' : 'current_date',
+                    'hh_heat_expenses_2000_2020' : 'building_household_expenses_heat',
+                    'hh_power_expenses_2000_2020' : 'building_household_expenses_power'
+                })
+
+                df_prepend_expenses = df_prepend_expenses[df_prepend_expenses['current_date'] < 2020]
+
+                csv_data = pandas.read_csv(output_folder + csv_name)
+                csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
+
+                csv_data = pandas.concat([df_prepend_expenses, csv_data])
 
         except Exception as e:
             print(e, "... probably the selected buildings have changed between the rounds")

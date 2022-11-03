@@ -155,8 +155,8 @@ class SimulationMode:
         if not os.path.isdir(self.current_output_folder):
             os.makedirs(self.current_output_folder)
 
-        selected_buildings = pandas.concat([session.scenario_selected_buildings, session.buildings.df[session.buildings.df.selected]])
-        selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy']].to_csv(clusters_outname)
+        selected_buildings = pandas.concat([session.buildings.df[session.buildings.df.selected], session.scenario_selected_buildings])
+        selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'group']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
         session.gama_iteration_images[session.environment['current_iteration_round']] = [
@@ -374,7 +374,7 @@ class SimulationMode:
             outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
         # neighborhood total emissions:
-        graphs.export_individual_graph(
+        graphs.export_individual_emissions(
             csv_name="/emissions/CO2_emissions_neighborhood.csv",
             data_folders=self.output_folders,
             columns=['emissions_neighborhood_accu'],
@@ -461,7 +461,7 @@ class SimulationMode:
                             + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
                             if session.VERBOSE_MODE else "",
                         figsize=(16,12),  # inches
-                        df_prepend_expenses=pandas.read_csv("../data/data_pre-simulation/energy-expenses_hh_2000-2020.csv")
+                        prepend_historic_data=True
                     )
 
                     # pass path to buildings in infoscreen-compatible format

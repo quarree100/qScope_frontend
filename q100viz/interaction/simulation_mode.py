@@ -411,7 +411,7 @@ class SimulationMode:
                 for idx in group_df.index:
 
                     # export emissions graph:
-                    graphs.export_individual_graph(
+                    graphs.export_individual_emissions(
                         csv_name="/emissions/CO2_emissions_{0}.csv".format(
                             idx),
                         data_folders=self.output_folders,
@@ -437,7 +437,7 @@ class SimulationMode:
                     )
 
                     # export energy prices graph:
-                    graphs.export_individual_graph(
+                    graphs.export_individual_energy_expenses(
                         csv_name="/energy_prices/energy_prices_{0}.csv".format(
                             idx),
                         data_folders=self.output_folders,
@@ -461,6 +461,7 @@ class SimulationMode:
                             + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
                             if session.VERBOSE_MODE else "",
                         figsize=(16,12),  # inches
+                        df_prepend_expenses=pandas.read_csv("../data/data_pre-simulation/energy-expenses_hh_2000-2020.csv")
                     )
 
                     # pass path to buildings in infoscreen-compatible format

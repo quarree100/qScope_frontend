@@ -367,10 +367,10 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
         plt.gca().annotate(
             addresses[label_idx] + "\n" +
             decisions[label_idx],
-            xy=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_emissions']),
-            xytext=(df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'current_date'],
-                    df.loc[df.index[int((len(df.index)-1)/(len(data)+1) * group_num)], 'building_household_emissions'] * 1.02),
+            xy=(df.loc[df.index[int((len(df.index)-1)/(session.num_of_users) * group_num)], 'current_date'],
+                df.loc[df.index[int((len(df.index)-1)/(session.num_of_users) * group_num)], 'building_household_emissions']),
+            xytext=(df.loc[df.index[int((len(df.index)-1)/(session.num_of_users) * group_num)], 'current_date'],
+                    df.loc[df.index[int((len(df.index)-1)/(session.num_of_users) * group_num)], 'building_household_emissions'] * 1.02),
             fontsize=12,
             horizontalalignment='left',
             color=df['color'][label_idx]
@@ -510,10 +510,10 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
         # annotate graph:
         plt.gca().annotate(
             addresses[i] + "\n" + decisions[i],
-            xy=(building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(list_of_csv_dfs)+1) * group_num)], 'current_date'],
-                building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(list_of_csv_dfs)+1) * group_num)], 'building_household_expenses_heat']),
-            xytext=(building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(list_of_csv_dfs)+1) * group_num)], 'current_date'],
-                    building_data.loc[building_data.index[int((len(building_data.index)-1)/(len(list_of_csv_dfs)+1) * group_num)], 'building_household_expenses_heat'] * 1.02),
+            xy=(building_data.loc[building_data.index[int((len(building_data.index)-1)/(session.num_of_users) * group_num)], 'current_date'],
+                building_data.loc[building_data.index[int((len(building_data.index)-1)/(session.num_of_users) * group_num)], 'building_household_expenses_heat']),
+            xytext=(building_data.loc[building_data.index[int((len(building_data.index)-1)/(session.num_of_users) * group_num)], 'current_date'],
+                    building_data.loc[building_data.index[int((len(building_data.index)-1)/(session.num_of_users) * group_num)], 'building_household_expenses_heat'] * 1.02),
             color=rgb_to_float_tuple(session.user_colors[group_num]),
             fontsize=12,
             horizontalalignment='left'

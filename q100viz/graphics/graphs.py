@@ -391,6 +391,74 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
     if outfile:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
+################## neighborhood emissions vs connections ##############
+def export_neighborhood_emissions_connections(connections_file, connections_compare_file, emissions_file, emissions_compare_file, outfile=None, figsize=(16,9)):
+
+    # source data:
+    df_emissions = pandas.read_csv(emissions_file)
+    df_emissions['current_date'] = df_emissions['current_date'].apply(GAMA_time_to_datetime)
+    df_emissions['emissions_neighborhood_total'] = df_emissions['emissions_neighborhood_total'].apply(grams_to_tons)
+
+    df_connections = pandas.read_csv(connections_file)
+    df_connections['current_date'] = df_connections['current_date'].apply(GAMA_time_to_datetime)
+    df_connections['value'] = df_connections['value'] * len(session.buildings.df) / 100
+
+    # reference data:
+    df_emissions_compare = pandas.read_csv(emissions_compare_file)
+    df_emissions_compare['current_date'] = df_emissions_compare['current_date'].apply(GAMA_time_to_datetime)
+    df_emissions_compare['emissions_neighborhood_total'] = df_emissions_compare['emissions_neighborhood_total'].apply(grams_to_tons)
+
+    df_connections_compare = pandas.read_csv(connections_compare_file)
+    df_connections_compare['current_date'] = df_connections_compare['current_date'].apply(GAMA_time_to_datetime)
+
+
+    # plot:
+    fig = plt.figure(figsize=figsize)
+    ax0 = plt.axes()  # all graphs shall be in the same figures
+    plt.title("Quartiersemissionen und Wärmenetzanschlüsse", fontsize='x-large')
+
+    ##################### left y-axis: ####################
+
+    plot1 = ax0.bar(
+        df_connections.iloc[::365, :]['current_date'],
+        df_connections.iloc[::365, :]['value'],
+        color='#00a84e'
+    )
+    plt.gca().set_ylabel('Anzahl Wärmenetzanschlüsse', fontsize='x-large')
+    plt.gca().set_yticks(range(0, len(session.buildings.df), 10),fontsize='x-large')
+
+    plot2 = ax0.bar(
+        df_connections_compare['current_date'],
+        df_connections_compare['value'],
+        color='gray'
+    )
+    ax0.set_xlabel('Jahr', fontsize='x-large')
+    plt.yticks(fontsize='x-large')
+    plt.xticks(fontsize='x-large')
+
+
+    #################### right y-axis: ####################
+    ax1 = ax0.twinx()
+    plot3, = ax1.plot(
+        df_emissions['current_date'],
+        df_emissions['emissions_neighborhood_total'],
+        color='black'
+    )
+
+    plot4, = ax1.plot(
+        df_emissions_compare['current_date'],
+        df_emissions_compare['emissions_neighborhood_total'],
+        color='gray'
+    )
+    plt.gca().set_ylabel("$CO_{2}$-Äquivalente (t)", fontsize='x-large')
+    ax1.set_ylim(bottom=0)
+
+    plt.yticks(fontsize='x-large')
+    plt.legend([plot1, plot2, plot3, plot4], ['Anschlüsse','Anschlüsse (unverändert)', "jährliche Emissionen", "jährliche Emissionen (unverändert)"], loc='lower center', fontsize='x-large')
+
+    if outfile is not None:
+        plt.savefig(outfile, transparent=False, bbox_inches="tight")
+
 ##################### export energy costs comparison ##################
 def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_folder=None, figsize=(16,9)):
     '''exports all data for selected group buildings into one graph for total data view'''

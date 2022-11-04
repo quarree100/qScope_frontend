@@ -199,6 +199,7 @@ class SimulationMode:
 
 
         self.run_script(self.xml_path)
+        session.api.send_message(json.dumps({'step' : self.final_step-1}))  # simulation done
 
         if self.flag_create_graphs:
             self.export_graphs()
@@ -236,7 +237,6 @@ class SimulationMode:
 
         data_view_neighborhood_df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
-        session.api.send_message(json.dumps({'step' : self.final_step}))
 
         session.active_mode = session.total_data_view  # marks total_data_view_mode to be started in main thread
 
@@ -374,17 +374,24 @@ class SimulationMode:
             outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
         # neighborhood total emissions:
-        graphs.export_individual_emissions(
-            csv_name="/emissions/CO2_emissions_neighborhood.csv",
-            data_folders=self.output_folders,
-            columns=['emissions_neighborhood_accu'],
-            title_="jährlich kumulierte Gesamtemissionen des Quartiers",
-            outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
-            xlabel_="Jahr",
-            ylabel_="$CO_{2}$-Äquivalente (t)",
-            x_='current_date',
-            convert_grams_to_tons=True,
-            compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
+        # graphs.export_individual_emissions(
+        #     csv_name="/emissions/CO2_emissions_neighborhood.csv",
+        #     data_folders=self.output_folders,
+        #     columns=['emissions_neighborhood_accu'],
+        #     title_="jährlich kumulierte Gesamtemissionen des Quartiers",
+        #     outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
+        #     xlabel_="Jahr",
+        #     ylabel_="$CO_{2}$-Äquivalente (t)",
+        #     x_='current_date',
+        #     convert_grams_to_tons=True,
+        #     compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
+        # )
+        graphs.export_neighborhood_emissions_connections(
+            emissions_file=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.csv",
+            emissions_compare_file=self.reference_data_folder + "/emissions/CO2_emissions_neighborhood.csv",
+            connections_file=self.current_output_folder + "/connections/connections_export.csv",
+            connections_compare_file=self.reference_data_folder + "/connections/connections_export.csv",
+            outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png"
         )
 
         # neighborhood total energy prices prognosis:

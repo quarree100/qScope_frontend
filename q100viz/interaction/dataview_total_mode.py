@@ -67,10 +67,24 @@ class DataViewTotal_Mode():
 
     def process_grid_change(self):
         session.buildings.df['selected'] = False
+
         for grid in [session.grid_1, session.grid_2]:
             for y, row in enumerate(grid.grid):
                 for x, cell in enumerate(row):
                     if cell.selected:
+
+                        # high performance impact, use sparingly
+                        i = grid.get_intersection(session.buildings.df, x, y)
+
+                        # use rotation value to cycle through buildings located in cell
+                        n = len(session.buildings.df[i])
+                        if n > 0:
+                            selection = session.buildings.df[i].iloc[cell.rot % n]
+                            session.buildings.df.loc[selection.name,
+                                                'selected'] = True  # select cell
+                            session.buildings.df.loc[selection.name,
+                                                'group'] = cell.id  # pass cell ID to building
+
                         if cell.handle == 'start_individual_data_view':
                             session.active_mode = session.individual_data_view
                         elif cell.handle == 'start_buildings_interaction':

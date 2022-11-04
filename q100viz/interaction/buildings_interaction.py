@@ -90,7 +90,7 @@ class Buildings_Interaction:
                         if cell.handle is not None:
                             if cell.handle in session.VALID_GRID_HANDLES:
                                 for slider in grid.sliders.values():
-                                    if cell.x in range(slider.x_cell_range[0], slider.x_cell_range[1]):
+                                    if cell.x in range(slider.x_cell_range[0], slider.x_cell_range[1]) and session.simulation.running is False:
                                         slider.update_handle(cell.handle, cell.id)
 
                             elif cell.handle == 'start_individual_data_view':
@@ -162,7 +162,7 @@ class Buildings_Interaction:
                                     session.scenario_selected_buildings = session.scenario_selected_buildings[0:0] # empty dataframe
 
 
-                    elif cell.handle == 'start_simulation':  # cell not selected
+                    elif cell.handle == 'start_simulation':  # interrupt simulation buffer when deselected
                         self.waiting_for_simulation = False
 
         session.api.send_message(json.dumps(session.environment))

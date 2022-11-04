@@ -28,7 +28,7 @@ class UDPServer:
 
                 callback(message.decode())
 
-                print("receiving message at", self.port)
+                # print("receiving message at", self.port)
                 # devtools.print_verbose(message, session.VERBOSE_MODE)
 
         except KeyboardInterrupt:

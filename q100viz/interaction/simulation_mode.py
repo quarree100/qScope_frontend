@@ -193,13 +193,12 @@ class SimulationMode:
 
         self.running = False
 
+        self.run_script(self.xml_path)
+        session.api.send_message(json.dumps({'step' : self.final_step-1}))  # simulation done
+
         # increase round counter to globally log q-scope iterations:
         session.environment['current_iteration_round'] = (
             session.environment['current_iteration_round'] + 1) % session.num_of_rounds
-
-
-        self.run_script(self.xml_path)
-        session.api.send_message(json.dumps({'step' : self.final_step-1}))  # simulation done
 
         if self.flag_create_graphs:
             self.export_graphs()

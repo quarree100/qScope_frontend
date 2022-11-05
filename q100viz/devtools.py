@@ -7,7 +7,7 @@ def print_verbose(message, VERBOSE_MODE, log):
         print(message)
         if log: log += ("\n" + message)
 
-def select_random_buildings_for_simulation(buildings_df, num_buildings=1, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
+def mark_random_buildings_for_simulation(buildings_df, num_buildings=1, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
         '''pick random n buildings, activate for simulation and update buildings list'''
 
         # get n buildings from buildings dataframe:
@@ -22,7 +22,7 @@ def select_random_buildings_for_simulation(buildings_df, num_buildings=1, max_bu
 
         buildings_df.update(df)
 
-def select_buildings_for_simulation(buildings_df, list_of_buildings_indices, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
+def mark_buildings_for_simulation(buildings_df, list_of_buildings_indices, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
         '''update buildings list with specific selected buildings adjusted for simulation'''
 
         # get n buildings from buildings dataframe:

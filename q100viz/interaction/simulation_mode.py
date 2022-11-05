@@ -144,7 +144,7 @@ class SimulationMode:
         ############### debug: select random of 100 buildings: ########
         if session.debug_num_of_random_buildings > 0:
             connection_date = random.randint(2020, self.max_year) if session.debug_connection_date > 0 else False
-            devtools.select_random_buildings_for_simulation(session.buildings.df, session.debug_num_of_random_buildings, connection_to_heat_grid=connection_date, refurbished=session.debug_force_refurbished, save_energy=session.debug_force_save_energy)
+            devtools.mark_random_buildings_for_simulation(session.buildings.df, session.debug_num_of_random_buildings, connection_to_heat_grid=connection_date, refurbished=session.debug_force_refurbished, save_energy=session.debug_force_save_energy)
 
         session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
 
@@ -389,7 +389,7 @@ class SimulationMode:
             emissions_file=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.csv",
             emissions_compare_file=self.reference_data_folder + "/emissions/CO2_emissions_neighborhood.csv",
             connections_file=self.current_output_folder + "/connections/connections_export.csv",
-            connections_compare_file=self.reference_data_folder + "/connections/connections_export.csv",
+            connections_compare_file=self.reference_data_folder + "/../no_buildings_selected/connections/connections_export.csv",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png"
         )
 

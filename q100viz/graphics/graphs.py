@@ -315,7 +315,7 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 ################### export comparison of emissions ####################
-def export_compared_emissions(buildings_groups_list, current_output_folder, outfile=None, graph_popup=False, compare_data_folder=None, figsize=(16,9)):
+def export_compared_emissions(buildings_groups_list, current_output_folder, outfile=None, compare_data_folder=None, figsize=(16,9)):
     '''exports all data for selected group buildings into one graph for total data view'''
 
     plt.rc('font', size=18)
@@ -386,8 +386,6 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
     plt.tight_layout()
     plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="small")
 
-    if graph_popup:
-        plt.show()
     if outfile:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
@@ -418,43 +416,44 @@ def export_neighborhood_emissions_connections(connections_file, connections_comp
     plt.title("Quartiersemissionen und Wärmenetzanschlüsse", fontsize='x-large')
 
     ##################### left y-axis: ####################
-
-    plot1 = ax0.bar(
-        df_connections.iloc[::365, :]['current_date'],
-        df_connections.iloc[::365, :]['value'],
-        color='#00a84e'
-    )
-    plt.gca().set_ylabel('Anzahl Wärmenetzanschlüsse', fontsize='x-large')
-    plt.gca().set_yticks(range(0, len(session.buildings.df), 10),fontsize='x-large')
-
-    plot2 = ax0.bar(
+    barplot_gray = ax0.bar(
         df_connections_compare['current_date'],
         df_connections_compare['value'],
-        color='gray'
+        color='#d3d3d3'
     )
     ax0.set_xlabel('Jahr', fontsize='x-large')
     plt.yticks(fontsize='x-large')
     plt.xticks(fontsize='x-large')
 
+    barplot_green = ax0.bar(
+        df_connections.iloc[::365, :]['current_date'],
+        df_connections.iloc[::365, :]['value'],
+        color='#00a84e',
+        alpha=0.5
+    )
+    plt.gca().set_ylabel('Anzahl Wärmenetzanschlüsse', fontsize='x-large')
+    plt.gca().set_yticks(range(0, len(session.buildings.df), 10),fontsize='x-large')
 
     #################### right y-axis: ####################
     ax1 = ax0.twinx()
-    plot3, = ax1.plot(
+    line_green, = ax1.plot(
         df_emissions['current_date'],
         df_emissions['emissions_neighborhood_total'],
-        color='black'
+        color='#00431f',
+        linewidth=3
     )
 
-    plot4, = ax1.plot(
+    line_gray, = ax1.plot(
         df_emissions_compare['current_date'],
         df_emissions_compare['emissions_neighborhood_total'],
-        color='gray'
+        color='lightgray',
+        linewidth=3
     )
     plt.gca().set_ylabel("$CO_{2}$-Äquivalente (t)", fontsize='x-large')
     ax1.set_ylim(bottom=0)
 
     plt.yticks(fontsize='x-large')
-    plt.legend([plot1, plot2, plot3, plot4], ['Anschlüsse','Anschlüsse (unverändert)', "jährliche Emissionen", "jährliche Emissionen (unverändert)"], loc='lower center', fontsize='x-large')
+    plt.legend([barplot_green, barplot_gray, line_green, line_gray], ['Anschlüsse','Anschlüsse (unverändert)', "jährliche Emissionen", "jährliche Emissionen (unverändert)"], loc='lower center', fontsize='x-large')
 
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")

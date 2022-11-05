@@ -25,7 +25,7 @@ class ModelValidation_Mode():
 
         # batch commands: shuffle buildings each time, GAMA branch = pre_main (not including change of agora dataset yet!)
         # 1. all false
-        devtools.select_random_buildings_for_simulation(
+        devtools.mark_random_buildings_for_simulation(
             session.buildings.df, 4)
         session.simulation.__init__()
         session.active_mode = session.simulation
@@ -34,7 +34,7 @@ class ModelValidation_Mode():
         # 2. connect in 2027
         session.buildings.load_data()  # re-init buildings
         session.environment['current_iteration_round'] = 0
-        devtools.select_random_buildings_for_simulation(
+        devtools.mark_random_buildings_for_simulation(
             session.buildings.df, 4,
             connection_to_heat_grid=random.randint(2020, 2045))
         session.simulation.__init__()
@@ -44,7 +44,7 @@ class ModelValidation_Mode():
         # 3. saniert true; rest false
         session.buildings.load_data()  # re-init buildings
         session.environment['current_iteration_round'] = 0
-        devtools.select_random_buildings_for_simulation(
+        devtools.mark_random_buildings_for_simulation(
             session.buildings.df, 4,
             refurbished=True)
         session.simulation.__init__()
@@ -54,7 +54,7 @@ class ModelValidation_Mode():
         # 4. Energiesparen true; rest false
         session.buildings.load_data()  # re-init buildings
         session.environment['current_iteration_round'] = 0
-        devtools.select_random_buildings_for_simulation(
+        devtools.mark_random_buildings_for_simulation(
             session.buildings.df, 4,
             save_energy=True)
         session.simulation.__init__()
@@ -64,7 +64,7 @@ class ModelValidation_Mode():
         # 5. Anschluss 2027; Saniert true; Energiesparen false
         session.buildings.load_data()  # re-init buildings
         session.environment['current_iteration_round'] = 0
-        devtools.select_random_buildings_for_simulation(
+        devtools.mark_random_buildings_for_simulation(
             session.buildings.df, 4,
             connection_to_heat_grid=random.randint(2020, 2045),
             refurbished=True)
@@ -75,7 +75,7 @@ class ModelValidation_Mode():
         # 6. Anschluss 2027; Saniert false; Energiesparen true
         session.buildings.load_data()  # re-init buildings
         session.environment['current_iteration_round'] = 0
-        devtools.select_random_buildings_for_simulation(
+        devtools.mark_random_buildings_for_simulation(
             session.buildings.df, 4,
             connection_to_heat_grid=random.randint(2020, 2045),
             save_energy=True)
@@ -86,7 +86,7 @@ class ModelValidation_Mode():
         # 7. Anschluss false; Saniert true; Energiesparen true
         session.buildings.load_data()  # re-init buildings
         session.environment['current_iteration_round'] = 0
-        devtools.select_random_buildings_for_simulation(
+        devtools.mark_random_buildings_for_simulation(
             session.buildings.df, 4,
             refurbished=True,
             save_energy=True)
@@ -97,7 +97,7 @@ class ModelValidation_Mode():
         # 8. Alles auf true
         session.buildings.load_data()  # re-init buildings
         session.environment['current_iteration_round'] = 0
-        devtools.select_random_buildings_for_simulation(
+        devtools.mark_random_buildings_for_simulation(
             session.buildings.df, 4,
             connection_to_heat_grid=random.randint(2020, 2045),
             save_energy=True,

@@ -141,11 +141,8 @@ class Buildings_Interaction:
                                         print("max number of possible samples reached. " + str(e))
                                         session.log += "\n%s" % e
 
-                                    # drop already selected buildings from list:
-                                    for buildings_group in session.buildings.list_from_groups():
-                                        for idx in buildings_group.index:
-                                            if idx in session.scenario_selected_buildings.index:
-                                                session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
+                                    # filter already selected buildings from list:
+                                    session.scenario_selected_buildings = session.scenario_selected_buildings[session.scenario_selected_buildings['group'] < 0]
 
                                     # select and connect sampled buildings:
                                     session.scenario_selected_buildings['selected'] = True
@@ -154,6 +151,7 @@ class Buildings_Interaction:
                                         session.environment['scenario_num_connections']))
                                     session.buildings.df.update(
                                     session.scenario_selected_buildings)
+
                                 else:  # value is 0: deselect all
                                     session.scenario_selected_buildings['selected'] = False
                                     session.scenario_selected_buildings['connection_to_heat_grid'] = False

@@ -159,20 +159,20 @@ class SimulationMode:
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'group']].to_csv(clusters_outname)
 
         # compose image paths as required by infoscreen
-        session.gama_iteration_images[session.environment['current_iteration_round']] = [
-            str(os.path.normpath('data/outputs/output_{0}/snapshot/Chartsnull-{1}.png'.format(
-                self.timestamp, str(self.final_step - 1)))),
-            str(os.path.normpath('data/outputs/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(
-                self.timestamp, str(self.final_step - 1)))),
-            str(os.path.normpath('data/outputs/output_{0}/snapshot/Monthly Emissionsnull-{1}.png'.format(
-                self.timestamp, str(self.final_step - 1)))),
-            str(os.path.normpath('data/outputs/output_{0}/snapshot/households_employment_pienull-{1}.png'.format(
-                self.timestamp, str(self.final_step - 1)))),
-            str(os.path.normpath('data/outputs/output_{0}/snapshot/Modernizationnull-{1}.png'.format(
-                self.timestamp, str(self.final_step - 1)))),
-            str(os.path.normpath('data/outputs/output_{0}/snapshot/neighborhoodnull-{1}.png'.format(
-                self.timestamp, str(self.final_step - 1))))
-        ]
+        # session.gama_iteration_images[session.environment['current_iteration_round']] = [
+        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/Chartsnull-{1}.png'.format(
+        #         self.timestamp, str(self.final_step - 1)))),
+        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(
+        #         self.timestamp, str(self.final_step - 1)))),
+        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/Monthly Emissionsnull-{1}.png'.format(
+        #         self.timestamp, str(self.final_step - 1)))),
+        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/households_employment_pienull-{1}.png'.format(
+        #         self.timestamp, str(self.final_step - 1)))),
+        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/Modernizationnull-{1}.png'.format(
+        #         self.timestamp, str(self.final_step - 1)))),
+        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/neighborhoodnull-{1}.png'.format(
+        #         self.timestamp, str(self.final_step - 1))))
+        # ]
 
         # send final_step to infoscreen:
         session.api.send_dataframe_as_json(pandas.DataFrame(data={"final_step": [self.final_step]}))
@@ -404,7 +404,8 @@ class SimulationMode:
             xlabel_="Jahr",
             ylabel_="Preis (ct/kWh)",
             x_='current_date',
-            label_show_iteration_round=False
+            label_show_iteration_round=False,
+            prepend_data=self.current_output_folder + "/../../data_pre-simulation/energy-prices_hh_2011-2022.csv"
             # compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
         )
 

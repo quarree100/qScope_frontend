@@ -556,7 +556,7 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 #################### export neighborhood total data ##################
-def export_neighborhood_total_data(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9)):
+def export_neighborhood_total_data(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), prepend_data=None):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -565,22 +565,32 @@ def export_neighborhood_total_data(csv_name, columns, x_, title_="", xlabel_="",
 
     # looks for all files with specified csv_name:
     for output_folder in data_folders:
-        try:
-            csv_data = pandas.read_csv(output_folder + csv_name)
-            csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
 
-            # data conversion:
-            for col in columns:
-                if convert_grams_to_tons:
-                    csv_data[col] = csv_data[col].apply(grams_to_tons)
-                elif convert_grams_to_kg:
-                    csv_data[col] = csv_data[col].apply(grams_to_kg)
+        csv_data = pandas.read_csv(output_folder + csv_name)
+        csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
 
-            rounds_data.append(csv_data)
+        # data conversion:
+        for col in columns:
+            if convert_grams_to_tons:
+                csv_data[col] = csv_data[col].apply(grams_to_tons)
+            elif convert_grams_to_kg:
+                csv_data[col] = csv_data[col].apply(grams_to_kg)
 
-        except Exception as e:
-            print(e, "... probably the selected buildings have changed between the rounds")
-            session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
+        if prepend_data is not None:
+            historic_data = pandas.read_csv(prepend_data)
+            historic_data.rename(
+                columns={
+                    'Year' : 'current_date',
+                    'Power' : 'power_price',
+                    'Gas' : 'gas_price',
+                    'Oil' : 'oil_price'
+                    }, inplace=True)
+            historic_data = historic_data[historic_data['current_date'] < 2020]
+            csv_data = pandas.concat([historic_data, csv_data])
+
+        rounds_data.append(csv_data)
+
+
 
     plt.figure(figsize=figsize)  # inches
 

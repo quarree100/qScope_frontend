@@ -30,6 +30,11 @@ class Slider:
         self.previous_handle = None
         self.last_change = session.seconds_elapsed  # time of last slider change
 
+        self.min_connection_year = 2020
+        self.max_connection_year = 2040
+        self.min_refurb_year = 2020
+        self.max_refurb_year = 2040
+
         # this is used for the activation of the next question in questionnaire mode  # TODO: get slider position initially and set toggle accordingly (Slider should not "start at" this position)
         self.toggle_question = False
 
@@ -128,7 +133,7 @@ class Slider:
 
     def draw_area(self):
 
-        if self.handle in ['refurbished', 'save_energy']:
+        if self.handle == 'save_energy':
             pygame.draw.line(
                 self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1] + 2),
                 (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[1][1] + 2), width=2)
@@ -153,7 +158,10 @@ class Slider:
             points_transformed = self.surface.transform(points)
             pygame.draw.polygon(self.surface, pygame.Color(20,130,55), points_transformed)
 
-        if self.handle == 'connection_to_heat_grid':
+        if self.handle in ['connection_to_heat_grid', 'refurbished']:
+            min_year = self.min_connection_year if self.handle is 'connection_to_heat_grid' else self.min_refurb_year
+            max_year = self.max_connection_year if self.handle is 'connection_to_heat_grid' else self.max_refurb_year
+
 
             x0 = self.coords_transformed[0][0]  # in px
             x3 = self.coords_transformed[3][0]  # in px
@@ -176,29 +184,15 @@ class Slider:
 
             font = pygame.font.SysFont('Arial', 10)
 
-            pygame.draw.line(
-                self.surface, pygame.Color(200, 200, 200),
-                (s0 + (s1 - s0) * 0.21, y0 - 35),
-                (s0 + (s1 - s0) * 0.21, y1 + 13), width=1
-                )
-            self.surface.blit(font.render("2024", True, (
-                200, 200, 200)), ((s0 + (s1 - s0) * 0.21) - 10, y0 - 35))
-
-            pygame.draw.line(
-                self.surface, pygame.Color(200, 200, 200),
-                (s0 + (s1 - s0) * 0.6, y0 - 35),
-                (s0 + (s1 - s0) * 0.6, y1 + 13), width=1
-                )
-            self.surface.blit(font.render("2032", True, (
-                200, 200, 200)), ((s0 + (s1 - s0) * 0.6) - 10, y0 - 35))
-
-            pygame.draw.line(
-                self.surface, pygame.Color(200, 200, 200),
-                (s0 + (s1 - s0), y0 - 35),
-                (s0 + (s1 - s0), y1 + 13), width=1
-                )
-            self.surface.blit(font.render("2040", True, (
-                200, 200, 200)), ((s0 + (s1 - s0) * 1.0) - 10, y0 - 35))
+            # intermediate seperators:
+            for x in [0.2, 0.6, 1.0]:
+                pygame.draw.line(
+                    self.surface, pygame.Color(200, 200, 200),
+                    (s0 + (s1 - s0) * x, y0 - 35),
+                    (s0 + (s1 - s0) * x, y1 + 13), width=1
+                    )
+                self.surface.blit(font.render(str(int(np.interp((x), [0.2, 1], [min_year, max_year]))), True, (
+                    200, 200, 200)), ((s0 + (s1 - s0) * x) - 10, y0 - 35))
 
 
             if session.VERBOSE_MODE:
@@ -211,9 +205,6 @@ class Slider:
                 self.surface.blit(font.render("R", True, (
                     255, 255, 255)), (s1, y3-20))
 
-
-
-
     def transform(self):
         self.coords_transformed = self.surface.transform(self.coords)
 
@@ -224,72 +215,19 @@ class Slider:
             session.environment['name'] = val_from_struct * slider_val
         '''
         if self.value is not self.previous_value:
-            # globals:
-            if self.handle == 'game_stage':
-                handler = [key for key in ['buildings_interaction', 'simulation', 'individual_data_view', 'total_data_view']][int(self.value * 4)]
-                print(handler)
-                session.active_mode = session.string_to_mode[handler]  # TODO: add confidence delay!
-
-            # elif self.handle == 'num_connections':
-            #     session.environment['scenario_num_connections'] = int(
-            #         self.value * len(session.buildings.df.index))
-            #     self.human_readable_value['num_connections'] = int(
-            #         self.value * len(session.buildings.df.index))
-
-            #     # connect additional buildings as set in scenario:
-            #     if session.environment['scenario_num_connections'] > 0:
-            #         # reset:
-            #         if not session.scenario_selected_buildings.empty:
-            #             session.scenario_selected_buildings['selected'] = False
-            #             session.scenario_selected_buildings['connection_to_heat_grid'] = False
-            #             session.buildings.df.update(
-            #                 session.scenario_selected_buildings)
-
-            #         # sample data:
-            #         try:
-            #             session.scenario_selected_buildings = session.buildings.df.sample(
-            #                 n=session.environment['scenario_num_connections'])
-            #         except Exception as e:
-            #             print("max number of possible samples reached. " + str(e))
-            #             session.log += "\n%s" % e
-
-            #         # drop already selected buildings from list:
-            #         for buildings_group in session.buildings.list_from_groups():
-            #             for idx in buildings_group.index:
-            #                 if idx in session.scenario_selected_buildings.index:
-            #                     session.scenario_selected_buildings = session.scenario_selected_buildings.drop(
-            #                         idx)
-
-            #         # select and connect sampled buildings:
-            #         session.scenario_selected_buildings['selected'] = True
-            #         session.scenario_selected_buildings['connection_to_heat_grid'] = random.randint(2020, session.simulation.max_year)
-            #         print("selecting random {0} buildings:".format(
-            #             session.environment['scenario_num_connections']))
-
-            #     else:  # value is 0: deselect all
-            #         session.scenario_selected_buildings['selected'] = False
-            #         session.scenario_selected_buildings['connection_to_heat_grid'] = False
-            #     # update buildings:
-            #     session.buildings.df.update(
-            #         session.scenario_selected_buildings)
-
-            elif self.handle == 'scenario_energy_prices':
-                session.environment['scenario_energy_prices'] = [
-                    '2018', '2021', '2022'][int(self.value * 2)]
-                self.human_readable_value['scenario_energy_prices'] = [
-                    '2018', '2021', '2022'][int(self.value * 2)]
 
             # household-specific:
             if self.handle == 'connection_to_heat_grid':
                 session.buildings.df.loc[((
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [2024, 2040]))
+                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [self.min_connection_year, self.max_connection_year]))
                 self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
-                    np.interp(float(self.value), [0.2, 1], [2024, 2040]))
+                    np.interp(float(self.value), [0.2, 1], [self.min_connection_year, self.max_connection_year]))
 
             elif self.handle == 'refurbished':
-                session.buildings.df.loc[(
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'refurbished'] = self.value > 0.5
-                self.human_readable_value['refurbished'] = 'saniert' if self.value > 0.5 else 'unsaniert'
+                session.buildings.df.loc[((
+                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [self.min_refurb_year, self.max_refurb_year]))
+                self.human_readable_value['refurbished'] = "n.a." if self.value <= 0.2 else int(
+                    np.interp(float(self.value), [0.2, 1], [self.min_refurb_year, self.max_refurb_year]))
 
             elif self.handle == 'save_energy':
                 session.buildings.df.loc[(

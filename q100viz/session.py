@@ -92,11 +92,10 @@ seconds_elapsed = 0
 ticks_elapsed = 0
 
 # list of possible handles
-mode_selector_handles = ['start_individual_data_view', 'start_total_data_view'
-                         'start_buildings_interaction', 'start_simulation']
+MODE_SELECTOR_HANDLES = ['start_individual_data_view', 'start_total_data_view', 'start_buildings_interaction', 'start_simulation']
 # columns exported from buildings.df for communication with GAMA and Infoscreen. ATTENTION: When this is changed, make sure to change it in GAMA and infoscreen likewise!
 COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'type', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'save_energy', 'save_energy_prior', 'energy_source', 'cell']
-VALID_GRID_HANDLES = ['connection_to_heat_grid', 'refurbished', 'save_energy', 'game_stage', 'num_connections', 'scenario_energy_prices']
+VALID_DECISION_HANDLES = ['connection_to_heat_grid', 'refurbished', 'save_energy']
 
 # environment (used for communication with infoscreen)
 environment = {
@@ -188,13 +187,15 @@ total_data_view_grid_2 = pd.read_csv(config['GRID_2_TOTAL_DATA_VIEW_FILE'])
 previous_mode = None
 
 calibration = CalibrationMode()
-questionnaire = Questionnaire_Mode()
+# questionnaire = Questionnaire_Mode()
 # 'input_scenarios': Input_Scenarios(),
 buildings_interaction = Buildings_Interaction()
 simulation = SimulationMode()
 individual_data_view = DataViewIndividual_Mode()
 total_data_view = DataViewTotal_Mode()
 model_validation = ModelValidation_Mode()
+
+modes = [buildings_interaction, simulation, individual_data_view, total_data_view]
 
 ################################# FUNCTIONS ###########################
 def string_to_mode(input_string):

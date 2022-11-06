@@ -2,6 +2,7 @@
 
 import pygame
 import pandas as pd
+import datetime
 
 import q100viz.session as session
 from q100viz.graphics.graphictools import Image
@@ -9,7 +10,9 @@ from q100viz.graphics.graphictools import Image
 class DataViewTotal_Mode():
     def __init__(self):
         self.name = 'total_data_view'
-
+        self.waiting_to_start = False
+        self.mode_token_selection_time = datetime.datetime.now()
+        self.activation_buffer_time = 2  # seconds before simulation begins
         # self.images_active = [
         #     Image("images/piechart.tif"),
         #     Image("images/predator-prey.tif"),
@@ -29,8 +32,8 @@ class DataViewTotal_Mode():
     def activate(self):
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
 
-        session.active_mode = self
         session.environment['mode'] = self.name
+        self.waiting_to_start = False
 
         session.show_polygons = True
         session.show_basemap = True
@@ -66,6 +69,7 @@ class DataViewTotal_Mode():
             session.api.send_dataframe_as_json(connected_buildings)
 
     def process_grid_change(self):
+
         session.buildings.df['selected'] = False
 
         for grid in [session.grid_1, session.grid_2]:
@@ -85,10 +89,18 @@ class DataViewTotal_Mode():
                             session.buildings.df.loc[selection.name,
                                                 'group'] = cell.id  # pass cell ID to building
 
-                        if cell.handle == 'start_individual_data_view':
-                            session.active_mode = session.individual_data_view
-                        elif cell.handle == 'start_buildings_interaction':
-                            session.active_mode = session.buildings_interaction
+                        # mode selectors:
+                        if cell.handle in session.MODE_SELECTOR_HANDLES:
+                            mode = session.string_to_mode(cell.handle[6:])
+                            if not mode.waiting_to_start:
+                                self.mode_token_selection_time = datetime.datetime.now()
+                                mode.waiting_to_start = True
+
+                    elif cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt buffer when deselected
+                        mode = session.string_to_mode(cell.handle[6:])
+                        mode.waiting_to_start = False
+
+        session.api.send_session_env()
 
 
     def draw(self, canvas):
@@ -112,7 +124,7 @@ class DataViewTotal_Mode():
         nrows = 22
 
         column = 16
-        row = 14
+        row = 13
         font = pygame.font.SysFont('Arial', 18)
         canvas.blit(font.render(
             "Individualdaten", True, pygame.Color(255,255,255)),
@@ -121,7 +133,7 @@ class DataViewTotal_Mode():
         )
 
         column = 17
-        row = 18
+        row = 17
         font = pygame.font.SysFont('Arial', 18)
         canvas.blit(font.render(
             "Interaktion", True, pygame.Color(255,255,255)),
@@ -129,5 +141,19 @@ class DataViewTotal_Mode():
              session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
         )
 
+        # mode buffer:
+        column = 20
+        for mode, row in zip(session.modes, [18, 16, 14, 12]):
+            if mode.waiting_to_start:
+                sim_string = str(round(mode.activation_buffer_time -(datetime.datetime.now() - self.mode_token_selection_time).total_seconds(), 2))
+                canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+nrows*row][1][0])
+
     def update(self):
-        pass
+        for mode in session.modes:
+            if mode.waiting_to_start:
+                if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > mode.activation_buffer_time:
+                    mode.waiting_to_start = False
+
+                    if mode == session.simulation:
+                        session.simulation.setup()
+                    session.active_mode = mode  # marks simulation to be started in main thread

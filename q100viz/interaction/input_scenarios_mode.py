@@ -39,7 +39,6 @@ class Input_Scenarios:
         # graphics:
         session.show_polygons = False
         session.show_basemap = False
-        session.active_mode = self
         session.environment['mode'] = self.name
 
         # sliders:

@@ -17,7 +17,6 @@ class Questionnaire_Mode():
         # session.question = session.questions[self.question_index]
 
     def activate(self):
-        session.active_mode = self
         session.environment['mode'] = self.name
 
         session.show_polygons = False

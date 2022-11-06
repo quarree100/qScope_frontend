@@ -82,7 +82,7 @@ class Slider:
                     stroke = 4 if cell.selected else 0
 
                     if cell.selected:
-                        if cell.handle not in session.mode_selector_handles:  # do not adopt color of mode selectors
+                        if cell.handle not in session.MODE_SELECTOR_HANDLES:  # do not adopt color of mode selectors
                             cell.color = pygame.Color(
                                 cell.color.r, cell.color.g, cell.color.b, 255)
                             self.color = cell.color

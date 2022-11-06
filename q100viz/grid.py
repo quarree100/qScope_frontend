@@ -83,7 +83,7 @@ class Grid:
                 cell.prev_rot = cell.rot
                 cell.rot  = (cell.rot + 1) % 4
         except IndexError:
-            pass
+            pass  # not this grid
 
     def deselect(self, x_deselect, y_deselect):
         for y, row in enumerate(self.grid):

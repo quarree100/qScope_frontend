@@ -16,6 +16,8 @@ class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
         self.activation_buffer_time = 4  # seconds before simulation begins
+        self.waiting_to_start = False
+
         self.running = False
         self.progress = "0%"
 
@@ -43,7 +45,8 @@ class SimulationMode:
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
 
         session.environment['mode'] = self.name
-        session.active_mode = self
+        self.waiting_to_start = False
+
         self.progress = "0%"
 
         # display setup:

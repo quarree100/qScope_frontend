@@ -16,7 +16,7 @@ class Buildings:
         self.df['energy_source'] = None
 
     ########################### Load data #############################
-    def load_data(self):
+    def load_data(self, create_clusters=False):
         # Bestand:
         bestand = gis.read_shapefile(
             config['GEBAEUDE_BESTAND_FILE'], columns={
@@ -63,18 +63,20 @@ class Buildings:
 
         # adjust data
         self.df['spec_heat_consumption'] = self.df['spec_heat_consumption'].fillna(0).to_numpy()
-        self.df['avg_spec_heat_consumption'] = 0
         self.df['spec_power_consumption'] = self.df['spec_power_consumption'].fillna(0).to_numpy()
-        self.df['avg_spec_power_consumption'] = 0
         self.df['cluster_size'] = 0
 
         # make clusters and get average cluster data:
-        buildings_cluster = self.make_clusters(start_interval=0.5)
-        for j in range(len(self.df)):
-            self.df.at[self.df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
-            self.df.at[self.df.index[j], 'avg_spec_power_consumption'] = buildings_cluster[j]['spec_power_consumption'].mean()
-            self.df.at[self.df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
+        if create_clusters:
+            self.df['avg_spec_power_consumption'] = 0
+            self.df['avg_spec_heat_consumption'] = 0
+            buildings_cluster = self.make_clusters(start_interval=0.5)
+            for j in range(len(self.df)):
+                self.df.at[self.df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
+                self.df.at[self.df.index[j], 'avg_spec_power_consumption'] = buildings_cluster[j]['spec_power_consumption'].mean()
+                self.df.at[self.df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
 
+        # add initial graphs:
         self.df['emissions_graphs'] = ''
         self.df['energy_prices_graphs'] = ''
         for idx in self.df.index:

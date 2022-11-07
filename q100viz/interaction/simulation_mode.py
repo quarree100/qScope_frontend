@@ -439,9 +439,9 @@ class SimulationMode:
                             + str(group_df.loc[idx, 'address']) + " "
                             + str(group_df.loc[idx, 'type'])
                             + "\nø-spez. Wärmeverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + str(group_df.loc[idx, 'spec_heat_consumption'])
                             + ", ø-spez. Stromverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + str(group_df.loc[idx, 'spec_heat_consumption'])
                             if session.VERBOSE_MODE else "",
                         figsize=(16,12),  # inches
                     )
@@ -466,9 +466,9 @@ class SimulationMode:
                             + str(group_df.loc[idx, 'address']) + " "
                             + str(group_df.loc[idx, 'type'])
                             + "\nø-spez. Wärmeverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + str(group_df.loc[idx, 'spec_heat_consumption'])
                             + ", ø-spez. Stromverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + str(group_df.loc[idx, 'spec_heat_consumption'])
                             if session.VERBOSE_MODE else "",
                         figsize=(16,12),  # inches
                         prepend_historic_data=True

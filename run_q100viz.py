@@ -225,8 +225,12 @@ while True:
             # canvas, session._gis.waermezentrale, 0, (252, 137, 0))
         session._gis.draw_buildings_connections(
             session.buildings.df)  # draw lines to closest heat grid
-        session._gis.draw_polygon_layer_bool(
-            canvas, session.buildings.df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
+        if session.VERBOSE_MODE:
+            session._gis.draw_polygon_layer_float(
+                canvas, session.buildings.df, 0, (96, 205, 21), (213, 50, 21), 'spec_heat_consumption')  # fill and lerp
+        else:
+            session._gis.draw_polygon_layer_bool(
+                canvas, session.buildings.df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
         session._gis.draw_polygon_layer_bool(
             canvas, session.buildings.df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
 

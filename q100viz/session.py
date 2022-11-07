@@ -94,7 +94,7 @@ ticks_elapsed = 0
 # list of possible handles
 MODE_SELECTOR_HANDLES = ['start_individual_data_view', 'start_total_data_view', 'start_buildings_interaction', 'start_simulation']
 # columns exported from buildings.df for communication with GAMA and Infoscreen. ATTENTION: When this is changed, make sure to change it in GAMA and infoscreen likewise!
-COMMUNICATION_RELEVANT_KEYS = ['address', 'avg_spec_heat_consumption', 'avg_spec_power_consumption', 'type', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'save_energy', 'save_energy_prior', 'energy_source', 'cell']
+COMMUNICATION_RELEVANT_KEYS = ['address', 'spec_heat_consumption', 'spec_power_consumption', 'type', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'save_energy', 'save_energy_prior', 'energy_source', 'cell']
 VALID_DECISION_HANDLES = ['connection_to_heat_grid', 'refurbished', 'save_energy']
 
 # environment (used for communication with infoscreen)

@@ -346,9 +346,9 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
 
                 # add labels:
                 decisions.append(
-                    "({0}, {1}, {2})".format(
-                    "s" if group_df.loc[idx, 'refurbished'] else "u",
-                    group_df.loc[idx, 'connection_to_heat_grid'] if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
+                    "(S={0}, A={1}, {2})".format(
+                    int(group_df.loc[idx, 'refurbished']) if group_df.loc[idx, 'refurbished'] != False else 'unsaniert',
+                    int(group_df.loc[idx, 'connection_to_heat_grid']) if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
                     "ES" if group_df.loc[idx, 'save_energy'] else "NV")
                 )
                 addresses.append(group_df.loc[idx, 'address'])
@@ -384,7 +384,7 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
     plt.yticks(fontsize='x-large')
     # plt.legend(addresses, bbox_to_anchor=(1,1), loc="upper left", fontsize="small")
     plt.tight_layout()
-    plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="small")
+    plt.figtext(0.5, 0.01, "ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="small")
 
     if outfile:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
@@ -480,11 +480,12 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
 
                 # add labels:
                 decisions.append(
-                    "({0}, {1}, {2})".format(
-                    "s" if group_df.loc[idx, 'refurbished'] else "u",
-                    group_df.loc[idx, 'connection_to_heat_grid'] if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
+                    "(S={0}, A={1}, {2})".format(
+                    int(group_df.loc[idx, 'refurbished']) if group_df.loc[idx, 'refurbished'] != False else 'unsaniert',
+                    int(group_df.loc[idx, 'connection_to_heat_grid']) if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
                     "ES" if group_df.loc[idx, 'save_energy'] else "NV")
                 )
+
                 addresses.append(group_df.loc[idx, 'address'])
 
                 if compare_data_folder is not None:
@@ -549,7 +550,7 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
     plt.yticks(fontsize='x-large')
     plt.tight_layout()
     plt.legend(labels=['Wärme', 'Strom'], loc='upper right')
-    plt.figtext(0.5, 0.01, "s = saniert, u = unsaniert; k.A. = kein Wärmenetzanschluss; ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="small")
+    plt.figtext(0.5, 0.01, "ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="small")
 
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")

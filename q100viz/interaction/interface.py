@@ -82,16 +82,16 @@ class Slider:
                     stroke = 4 if cell.selected else 0
 
                     if cell.selected:
-                        if cell.handle not in session.MODE_SELECTOR_HANDLES:  # do not adopt color of mode selectors
+                        if cell.handle not in session.MODE_SELECTOR_HANDLES and cell.color is not None:  # do not adopt color of mode selectors
                             cell.color = pygame.Color(
                                 cell.color.r, cell.color.g, cell.color.b, 255)
                             self.color = cell.color
-                    else:
+                    elif cell.color is not None:
                         cell.color = pygame.Color(
                             cell.color.r, cell.color.g, cell.color.b, a)
 
                     # draw slider handles:
-                    if self.show_controls:
+                    if self.show_controls and cell.color is not None:
                         pygame.draw.polygon(
                             self.surface, cell.color, rect_points, stroke)
 
@@ -159,8 +159,8 @@ class Slider:
             pygame.draw.polygon(self.surface, pygame.Color(20,130,55), points_transformed)
 
         if self.handle in ['connection_to_heat_grid', 'refurbished']:
-            min_year = self.min_connection_year if self.handle is 'connection_to_heat_grid' else self.min_refurb_year
-            max_year = self.max_connection_year if self.handle is 'connection_to_heat_grid' else self.max_refurb_year
+            min_year = self.min_connection_year if self.handle == 'connection_to_heat_grid' else self.min_refurb_year
+            max_year = self.max_connection_year if self.handle == 'connection_to_heat_grid' else self.max_refurb_year
 
 
             x0 = self.coords_transformed[0][0]  # in px

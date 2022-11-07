@@ -19,6 +19,7 @@ from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode
 from q100viz.interaction.model_validation_mode import ModelValidation_Mode
 import q100viz.keystone as keystone
 import q100viz.buildings
+from q100viz.graphics.graphictools import Image
 
 ################################ DECLARATIONS #########################
 #----------------------- dev and debug variables ----------------------

@@ -161,8 +161,11 @@ class Grid:
                     if not df_handle.empty:
                         cell.handle = df_handle.iloc[0,0]
                     df_color = df.loc[(df['x'] == cell.x) & (df['y'] == cell.y), ['color']]
-                    if not df_color.empty:
-                        cell.color = pygame.color.Color(df_color.iloc[0,0])
+                    if not df_color.empty and df_color.iloc[0,0]:
+                        try:
+                            cell.color = pygame.color.Color(df_color.iloc[0,0])
+                        except:
+                            cell.color = None
 class GridCell:
     def __init__(self, x, y, id=-1, rot=-1):
         self.x = x

@@ -24,11 +24,12 @@ class Buildings:
                 'Kataster_S': 'string',  # Straße
                 'Kataster_H': 'string',  # Hausnummer
                 # 'Kataster_B': 'float',  # Baujahr
-                # 'Kataster_6': 'float',  # Nettogrundfläche
+                'Kataster_6': 'float',  # Nettogrundfläche
                 'Kataster13': 'float',  # spez. Wärmeverbrauch
                 'Kataster15': 'float',  # spez. Stromverbrauch
                 'Kataster_E': 'string',  # Energieträger
-                'Kataster_A': 'string'  # Gebäudetyp
+                'Kataster_A': 'string',  # Gebäudetyp
+                'Kataster_W' : 'int'
                 }).set_index('Kataster_C')
 
         bestand.index.names = ['id']
@@ -36,7 +37,13 @@ class Buildings:
         bestand['address'] = bestand['Kataster_S'] + ' ' + bestand['Kataster_H']
         bestand = bestand.drop('Kataster_S', 1)
         bestand = bestand.drop('Kataster_H', 1)
-        bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source', 'Kataster_A' : 'type'})
+        bestand = bestand.rename(columns = {
+            'Kataster13': 'spec_heat_consumption',
+            'Kataster15': 'spec_power_consumption', 
+            'Kataster_E': 'energy_source', 
+            'Kataster_A' : 'type',
+            'Kataster_6' : 'area',
+            'Kataster_W' : 'units'})
 
         # bestand['area'] = bestand['Kataster_6'].fillna(0).to_numpy()
         # bestand = bestand.drop('Kataster_6', 1)

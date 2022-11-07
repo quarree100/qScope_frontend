@@ -115,7 +115,7 @@ def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", yl
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 ######################### individual energy expenses ############################
-def export_individual_energy_expenses(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True, prepend_historic_data=False):
+def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True, prepend_historic_data=False):
     '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
@@ -139,24 +139,36 @@ def export_individual_energy_expenses(csv_name, columns, x_, title_="", xlabel_=
                 max_val = csv_data[col].max() if csv_data[col].max() > max_val else max_val
 
                 if prepend_historic_data:
-                    historic_expenses = pandas.read_csv("../data/data_pre-simulation/energy-expenses_hh_2000-2020.csv")
-                    historic_expenses = historic_expenses.rename(columns={
-                        'year' : 'current_date',
-                        'hh_heat_expenses_2000_2020' : 'building_household_expenses_heat',
-                        'hh_power_expenses_2000_2020' : 'building_household_expenses_power'
-                    })
+                    historic_prices = pandas.read_csv("../data/data_pre-simulation/energy-prices_hh_2011-2022.csv")
+                    historic_prices.rename(
+                        columns={
+                            'Year' : 'current_date',
+                            'Power' : 'power_price',
+                            'Gas' : 'gas_price',
+                            'Oil' : 'oil_price'
+                            }, inplace=True)
+                    historic_prices = historic_prices[historic_prices['current_date'] < 2020]
 
-                    historic_expenses = historic_expenses[historic_expenses['current_date'] < 2020]
+                    # heat:
+                    for energy_source in zip(['gas', 'oil', 'power'], ['Gas', 'Öl', 'Strom']):
+                        if session.buildings.df.loc[building_idx, 'energy_source'] == energy_source[1]:
+                            historic_prices['building_household_expenses_heat'] = \
+                                historic_prices[energy_source[0]+'_price'] / 100 * session.buildings.df.loc[building_idx, 'area'] * session.buildings.df.loc[building_idx, 'spec_heat_consumption'] / 12 / session.buildings.df.loc[building_idx, 'units']
+
+                    # power:
+                    historic_prices['building_household_expenses_power'] = \
+                        historic_prices['power_price'] / 100 * session.buildings.df.loc[building_idx, 'area'] * session.buildings.df.loc[building_idx, 'spec_power_consumption'] / 12 / session.buildings.df.loc[building_idx, 'units']
+
 
                     csv_data = pandas.read_csv(output_folder + csv_name)
                     csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
 
-                    csv_data = pandas.concat([historic_expenses, csv_data])
+                    csv_data = pandas.concat([historic_prices, csv_data])
 
             rounds_data.append(csv_data)
 
         except Exception as e:
-            print(e, "\ncsv not found in data folders... probably the selected buildings have changed between the rounds")
+            print(e, "\n...probably the selected buildings have changed between the rounds and the according csv could not be found")
             session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
 
@@ -307,7 +319,7 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
     plt.yticks(fontsize='x-large')
     plt.gca().set_ylim(bottom=0)
     if show_legend:
-        plt.legend(loc='upper left')
+        plt.legend(loc='upper left', fontsize='x-large')
     else:
         plt.gca().get_legend().remove()
 
@@ -390,7 +402,7 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 ################## neighborhood emissions vs connections ##############
-def export_neighborhood_emissions_connections(connections_file, connections_compare_file, emissions_file, emissions_compare_file, outfile=None, figsize=(16,9)):
+def export_neighborhood_emissions_connections(connections_file, emissions_file, emissions_compare_file, outfile=None, figsize=(16,9)):
 
     # source data:
     df_emissions = pandas.read_csv(emissions_file)
@@ -406,21 +418,12 @@ def export_neighborhood_emissions_connections(connections_file, connections_comp
     df_emissions_compare['current_date'] = df_emissions_compare['current_date'].apply(GAMA_time_to_datetime)
     df_emissions_compare['emissions_neighborhood_total'] = df_emissions_compare['emissions_neighborhood_total'].apply(grams_to_tons)
 
-    df_connections_compare = pandas.read_csv(connections_compare_file)
-    df_connections_compare['current_date'] = df_connections_compare['current_date'].apply(GAMA_time_to_datetime)
-
-
     # plot:
     fig = plt.figure(figsize=figsize)
     ax0 = plt.axes()  # all graphs shall be in the same figures
     plt.title("Quartiersemissionen und Wärmenetzanschlüsse", fontsize='x-large')
 
     ##################### left y-axis: ####################
-    barplot_gray = ax0.bar(
-        df_connections_compare['current_date'],
-        df_connections_compare['value'],
-        color='#d3d3d3'
-    )
     ax0.set_xlabel('Jahr', fontsize='x-large')
     plt.yticks(fontsize='x-large')
     plt.xticks(fontsize='x-large')
@@ -453,7 +456,7 @@ def export_neighborhood_emissions_connections(connections_file, connections_comp
     ax1.set_ylim(bottom=0)
 
     plt.yticks(fontsize='x-large')
-    plt.legend([barplot_green, barplot_gray, line_green, line_gray], ['Anschlüsse','Anschlüsse (unverändert)', "jährliche Emissionen", "jährliche Emissionen (unverändert)"], loc='lower center', fontsize='x-large')
+    plt.legend([barplot_green, line_green, line_gray], ['Anschlüsse', "jährliche Emissionen", "jährliche Emissionen (unverändert)"], loc='lower center', fontsize='x-large')
 
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
@@ -549,7 +552,7 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
     plt.xticks(fontsize='x-large')
     plt.yticks(fontsize='x-large')
     plt.tight_layout()
-    plt.legend(labels=['Wärme', 'Strom'], loc='upper right')
+    plt.legend(labels=['Wärme', 'Strom'], loc='upper right', fontsize='x-large')
     plt.figtext(0.5, 0.01, "ES = energiesparend, NV = normaler Verbrauch", wrap=False, horizontalalignment='center', fontsize="small")
 
     if outfile is not None:

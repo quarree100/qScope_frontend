@@ -54,7 +54,7 @@ class Slider:
         # stores coordinates as [[bottom-left.x, bottom-left.y], [top-left.x, top-left.y] [top-right.x, top-right.y], [bottom-right.x, bottom-right.y]]
         self.coords_transformed = self.surface.transform(coords)
         self.VALID_HANDLES = ['connection_to_heat_grid', 'refurbished',
-                              'save_energy', 'game_stage', 'num_connections', 'scenario_energy_prices', 'default']
+                              'save_energy']
 
         self.human_readable_value = {None: ''}
         for key in self.VALID_HANDLES:
@@ -214,7 +214,7 @@ class Slider:
         if self.handle == 'name':
             session.environment['name'] = val_from_struct * slider_val
         '''
-        if self.value is not self.previous_value:
+        if self.value is not self.previous_value and session.active_mode != session.simulation:
 
             # household-specific:
             if self.handle == 'connection_to_heat_grid':

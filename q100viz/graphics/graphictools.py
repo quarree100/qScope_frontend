@@ -10,7 +10,7 @@ class Image():
 
         self.img_h, self.img_w, _ = cv2.imread(file).shape
 
-        # calculate the projection matrix (image pixels -> EPSG:3857)
+        # calculate the projection matrix
         self.surface.src_points = [[0, 0], [0, self.img_h], [self.img_w, self.img_h], [self.img_w, 0]]
 
         x_2 = self.img_w/canvas_size[0] * 100

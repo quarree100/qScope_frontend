@@ -154,8 +154,8 @@ class Grid:
             for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
     def update_cell_data(self, df):
-            for y, row in enumerate(self.grid):
-                for x, cell in enumerate(row):
+            for row in self.grid:
+                for cell in row:
                     cell.handle = None
                     df_handle = df.loc[(df['x'] == cell.x) & (df['y'] == cell.y), ['handle']]
                     if not df_handle.empty:

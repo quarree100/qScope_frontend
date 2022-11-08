@@ -456,7 +456,7 @@ class SimulationMode:
                         labels_=['Wärmekosten', 'Stromkosten'],
                         outfile=self.current_output_folder +
                         "/energy_prices/energy_prices_{0}.png".format(idx),
-                        title_="Energiekosten",
+                        title_="Energiekosten pro Haushalt",
                         xlabel_="Jahr",
                         ylabel_="€/Monat",
                         x_='current_date',

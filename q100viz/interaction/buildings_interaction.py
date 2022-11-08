@@ -42,10 +42,6 @@ class Buildings_Interaction:
         session.api.send_df_with_session_env(None)
         session.api.send_message(json.dumps({'step' : 0}))
 
-        self.image = Image("images/gama-logo.png", session.canvas_size, session.viewport)
-        self.image.warp(session.canvas_size)
-
-
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
@@ -235,15 +231,6 @@ class Buildings_Interaction:
             if mode.waiting_to_start:
                 sim_string = str(round(mode.activation_buffer_time -(datetime.datetime.now() - self.mode_token_selection_time).total_seconds(), 2))
                 canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+nrows*row][1][0])
-
-        # icons:
-        column = 16
-        row = 15
-        a = 100 + abs(int(np.sin(pygame.time.get_ticks() / 1000) * 105))
-        self.image.image.set_alpha(a)
-        canvas.blit(self.image.image,
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] - 5,
-            session.grid_2.rects_transformed[column+nrows*row][1][0][1] - 3))
 
     def update(self):
         for mode in session.modes:

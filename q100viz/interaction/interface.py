@@ -7,6 +7,7 @@ import numpy as np
 import q100viz.keystone as keystone
 import q100viz.session as session
 from q100viz.settings.config import config_slider
+from q100viz.graphics.graphictools import Image
 
 ############################ SLIDER ###################################
 
@@ -54,7 +55,7 @@ class Slider:
         # stores coordinates as [[bottom-left.x, bottom-left.y], [top-left.x, top-left.y] [top-right.x, top-right.y], [bottom-right.x, bottom-right.y]]
         self.coords_transformed = self.surface.transform(coords)
         self.VALID_HANDLES = ['connection_to_heat_grid', 'refurbished',
-                              'save_energy', 'game_stage', 'num_connections', 'scenario_energy_prices', 'default']
+                              'save_energy']
 
         self.human_readable_value = {None: ''}
         for key in self.VALID_HANDLES:
@@ -68,6 +69,19 @@ class Slider:
             'scenario_energy_prices': "Energiekostenszenario",
             None: "Slider-Funktion auswählen"
         }
+
+        self.images = {
+            'start_simulation' : Image("images/start_simulation.png", session.canvas_size, session.viewport),
+            'start_buildings_interaction' : Image("images/start_buildings_interaction.png", session.canvas_size, session.viewport),
+            'start_individual_data_view' : Image("images/start_individual_data_view.png", session.canvas_size, session.viewport),
+            'start_total_data_view' : Image("images/start_total_data_view.png", session.canvas_size, session.viewport),
+            'refurbished' : Image("images/refurbished.png", session.canvas_size, session.viewport),
+            'connection_to_heat_grid' : Image("images/connection_to_heat_grid.png", session.canvas_size, session.viewport),
+            'save_energy' : Image("images/save_energy.png", session.canvas_size, session.viewport),
+        }
+
+        for image in self.images.values():
+            image.warp(session.canvas_size)
 
     def render(self, canvas=None):
         # slider controls → set slider color
@@ -91,9 +105,17 @@ class Slider:
                             cell.color.r, cell.color.g, cell.color.b, a)
 
                     # draw slider handles:
-                    if self.show_controls and cell.color is not None:
+                    if cell.color is not None:
                         pygame.draw.polygon(
                             self.surface, cell.color, rect_points, stroke)
+
+                # icons:
+                if cell.handle in ['start_simulation', 'start_individual_data_view', 'start_total_data_view', 'start_buildings_interaction']:
+                    nrows = 22
+                    a = 100 + abs(int(np.sin(pygame.time.get_ticks() / 1000) * 105))
+                    canvas.blit(self.images[cell.handle].image,
+                        (self.grid.rects_transformed[cell.x+nrows*cell.y-4][1][0][0] - 5,  #TODO: why must column be x-4 ???
+                        self.grid.rects_transformed[cell.x+nrows*cell.y][1][0][1] - 4))
 
                 # slider control texts:
                 if self.show_text and cell.y == len(self.grid.grid) - 1:

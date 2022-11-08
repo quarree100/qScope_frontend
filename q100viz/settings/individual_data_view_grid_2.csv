@@ -1,7 +1,7 @@
 x,y,handle,color
-20,11,start_total_data_view,darkolivegreen
+20,11,start_total_data_view,None
 20,13,active_user_focus_data_0,#0075b4
 19,13,active_user_focus_data_1,#fdc113
 18,13,active_user_focus_data_2,#b600b6
 17,13,active_user_focus_data_3,#00a84e
-20,17,start_buildings_interaction,purple
+20,17,start_buildings_interaction,None

@@ -389,7 +389,6 @@ class SimulationMode:
             emissions_file=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.csv",
             emissions_compare_file=self.reference_data_folder + "/emissions/CO2_emissions_neighborhood.csv",
             connections_file=self.current_output_folder + "/connections/connections_export.csv",
-            connections_compare_file=self.reference_data_folder + "/connections/connections_export.csv",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png"
         )
 

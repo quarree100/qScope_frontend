@@ -259,9 +259,6 @@ class SimulationMode:
                     if cell.selected:
                         pass
 
-        session.api.send_simplified_dataframe_with_environment_variables(
-            session.buildings.df[session.buildings.df.selected], session.environment)
-
     def update(self):
 
         pass
@@ -392,7 +389,7 @@ class SimulationMode:
             emissions_file=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.csv",
             emissions_compare_file=self.reference_data_folder + "/emissions/CO2_emissions_neighborhood.csv",
             connections_file=self.current_output_folder + "/connections/connections_export.csv",
-            connections_compare_file=self.reference_data_folder + "/../no_buildings_selected/connections/connections_export.csv",
+            connections_compare_file=self.reference_data_folder + "/connections/connections_export.csv",
             outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png"
         )
 
@@ -439,15 +436,16 @@ class SimulationMode:
                             + str(group_df.loc[idx, 'address']) + " "
                             + str(group_df.loc[idx, 'type'])
                             + "\nø-spez. Wärmeverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + str(group_df.loc[idx, 'spec_heat_consumption'])
                             + ", ø-spez. Stromverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + str(group_df.loc[idx, 'spec_heat_consumption'])
                             if session.VERBOSE_MODE else "",
                         figsize=(16,12),  # inches
                     )
 
                     # export energy prices graph:
                     graphs.export_individual_energy_expenses(
+                        building_idx = idx,
                         csv_name="/energy_prices/energy_prices_{0}.csv".format(
                             idx),
                         data_folders=self.output_folders,
@@ -466,12 +464,12 @@ class SimulationMode:
                             + str(group_df.loc[idx, 'address']) + " "
                             + str(group_df.loc[idx, 'type'])
                             + "\nø-spez. Wärmeverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + str(group_df.loc[idx, 'spec_heat_consumption'])
                             + ", ø-spez. Stromverbrauch: "
-                            + str(group_df.loc[idx, 'avg_spec_heat_consumption'])
+                            + str(group_df.loc[idx, 'spec_heat_consumption'])
                             if session.VERBOSE_MODE else "",
                         figsize=(16,12),  # inches
-                        prepend_historic_data=True
+                        prepend_historic_data=True,
                     )
 
                     # pass path to buildings in infoscreen-compatible format

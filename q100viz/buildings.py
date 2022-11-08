@@ -16,7 +16,7 @@ class Buildings:
         self.df['energy_source'] = None
 
     ########################### Load data #############################
-    def load_data(self):
+    def load_data(self, create_clusters=False):
         # Bestand:
         bestand = gis.read_shapefile(
             config['GEBAEUDE_BESTAND_FILE'], columns={
@@ -24,11 +24,12 @@ class Buildings:
                 'Kataster_S': 'string',  # Straße
                 'Kataster_H': 'string',  # Hausnummer
                 # 'Kataster_B': 'float',  # Baujahr
-                # 'Kataster_6': 'float',  # Nettogrundfläche
+                'Kataster_6': 'float',  # Nettogrundfläche
                 'Kataster13': 'float',  # spez. Wärmeverbrauch
                 'Kataster15': 'float',  # spez. Stromverbrauch
                 'Kataster_E': 'string',  # Energieträger
-                'Kataster_A': 'string'  # Gebäudetyp
+                'Kataster_A': 'string',  # Gebäudetyp
+                'Kataster_W' : 'int'
                 }).set_index('Kataster_C')
 
         bestand.index.names = ['id']
@@ -36,7 +37,13 @@ class Buildings:
         bestand['address'] = bestand['Kataster_S'] + ' ' + bestand['Kataster_H']
         bestand = bestand.drop('Kataster_S', 1)
         bestand = bestand.drop('Kataster_H', 1)
-        bestand = bestand.rename(columns = {'Kataster13': 'spec_heat_consumption', 'Kataster15': 'spec_power_consumption', 'Kataster_E': 'energy_source', 'Kataster_A' : 'type'})
+        bestand = bestand.rename(columns = {
+            'Kataster13': 'spec_heat_consumption',
+            'Kataster15': 'spec_power_consumption', 
+            'Kataster_E': 'energy_source', 
+            'Kataster_A' : 'type',
+            'Kataster_6' : 'area',
+            'Kataster_W' : 'units'})
 
         # bestand['area'] = bestand['Kataster_6'].fillna(0).to_numpy()
         # bestand = bestand.drop('Kataster_6', 1)
@@ -63,18 +70,20 @@ class Buildings:
 
         # adjust data
         self.df['spec_heat_consumption'] = self.df['spec_heat_consumption'].fillna(0).to_numpy()
-        self.df['avg_spec_heat_consumption'] = 0
         self.df['spec_power_consumption'] = self.df['spec_power_consumption'].fillna(0).to_numpy()
-        self.df['avg_spec_power_consumption'] = 0
         self.df['cluster_size'] = 0
 
         # make clusters and get average cluster data:
-        buildings_cluster = self.make_clusters(start_interval=0.5)
-        for j in range(len(self.df)):
-            self.df.at[self.df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
-            self.df.at[self.df.index[j], 'avg_spec_power_consumption'] = buildings_cluster[j]['spec_power_consumption'].mean()
-            self.df.at[self.df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
+        if create_clusters:
+            self.df['avg_spec_power_consumption'] = 0
+            self.df['avg_spec_heat_consumption'] = 0
+            buildings_cluster = self.make_clusters(start_interval=0.5)
+            for j in range(len(self.df)):
+                self.df.at[self.df.index[j], 'avg_spec_heat_consumption'] = buildings_cluster[j]['spec_heat_consumption'].mean()
+                self.df.at[self.df.index[j], 'avg_spec_power_consumption'] = buildings_cluster[j]['spec_power_consumption'].mean()
+                self.df.at[self.df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
 
+        # add initial graphs:
         self.df['emissions_graphs'] = ''
         self.df['energy_prices_graphs'] = ''
         for idx in self.df.index:

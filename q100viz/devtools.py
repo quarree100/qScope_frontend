@@ -29,10 +29,10 @@ def mark_buildings_for_simulation(buildings_df, list_of_buildings_indices, max_b
         df = buildings_df.loc[list_of_buildings_indices]
         for i, idx in enumerate(df.index):
                 df.at[idx, 'group'] = i % max_buildings_group  # values from 0 to 4, group determines allocation to quarterSection on infoscreen
+                df.at[idx, 'connection_to_heat_grid'] = connection_to_heat_grid.astype(int)
+                df.at[idx, 'refurbished'] = refurbished.astype(int)
         df['selected'] = True  # only selected buildings are exported for simulation
         # optional decision adjustments:
-        df['connection_to_heat_grid'] = connection_to_heat_grid
-        df['refurbished'] = refurbished
         df['save_energy'] = save_energy
 
         buildings_df.update(df)

@@ -236,7 +236,7 @@ class Slider:
         if self.handle == 'name':
             session.environment['name'] = val_from_struct * slider_val
         '''
-        if self.value is not self.previous_value:
+        if self.value is not self.previous_value and session.active_mode != session.simulation:
 
             # household-specific:
             if self.handle == 'connection_to_heat_grid':

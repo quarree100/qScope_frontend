@@ -34,7 +34,8 @@ class DataViewIndividual_Mode():
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
 
         session.environment['mode'] = self.name
-        self.waiting_to_start = False
+        for mode in session.modes:
+            mode.waiting_to_start = False
 
         session.show_polygons = True
         session.show_basemap = True

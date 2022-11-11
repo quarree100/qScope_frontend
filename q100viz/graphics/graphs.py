@@ -121,6 +121,7 @@ def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title
     plt.rc('font', size=18)
     # read exported results:
     rounds_data = []
+    historic_prices = pandas.DataFrame()
 
     max_val = 0
     # looks for all files with specified csv_name:
@@ -198,6 +199,8 @@ def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title
                     compare_df[col] = compare_df[col].apply(grams_to_tons)
                 elif convert_grams_to_kg:
                     compare_df[col] = compare_df[col].apply(grams_to_kg)
+
+            compare_df = pandas.concat([historic_prices, compare_df])
 
             compare_df.plot(
                 kind='line',
@@ -456,7 +459,7 @@ def export_neighborhood_emissions_connections(connections_file, emissions_file, 
     ax1.set_ylim(bottom=0)
 
     plt.yticks(fontsize='x-large')
-    plt.legend([barplot_green, line_green, line_gray], ['Anschlüsse', "jährliche Emissionen", "jährliche Emissionen (unverändert)"], loc='lower center', fontsize='x-large')
+    plt.legend([barplot_green, line_green, line_gray], ['Anschlüsse', "monatliche Emissionen", "monatliche Emissionen (unverändert)"], loc='lower center', fontsize='x-large')
 
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")

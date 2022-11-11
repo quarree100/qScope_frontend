@@ -39,8 +39,8 @@ class Buildings:
         bestand = bestand.drop('Kataster_H', 1)
         bestand = bestand.rename(columns = {
             'Kataster13': 'spec_heat_consumption',
-            'Kataster15': 'spec_power_consumption', 
-            'Kataster_E': 'energy_source', 
+            'Kataster15': 'spec_power_consumption',
+            'Kataster_E': 'energy_source',
             'Kataster_A' : 'type',
             'Kataster_6' : 'area',
             'Kataster_W' : 'units'})
@@ -83,12 +83,12 @@ class Buildings:
                 self.df.at[self.df.index[j], 'avg_spec_power_consumption'] = buildings_cluster[j]['spec_power_consumption'].mean()
                 self.df.at[self.df.index[j], 'cluster_size'] = int(len(buildings_cluster[j]))
 
-        # add initial graphs:
+        # add initial graphs (path relative for infoscreen):
         self.df['emissions_graphs'] = ''
         self.df['energy_prices_graphs'] = ''
         for idx in self.df.index:
-            self.df.at[idx, 'emissions_graphs'] = "../data/precomputed/simulation_defaults/emissions/CO2_emissions_{0}.png".format(idx)
-            self.df.at[idx, 'energy_prices_graphs'] = "../data/precomputed/simulation_defaults/energy_prices/energy_prices_{0}.png".format(idx)
+            self.df.at[idx, 'emissions_graphs'] = "img/blank_16x12inches.png".format(idx)
+            self.df.at[idx, 'energy_prices_graphs'] = "img/blank_16x12inches.png".format(idx)
 
         # generic data
         for idx, row in self.df.iterrows():

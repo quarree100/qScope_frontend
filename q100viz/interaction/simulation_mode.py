@@ -45,7 +45,8 @@ class SimulationMode:
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
 
         session.environment['mode'] = self.name
-        self.waiting_to_start = False
+        for mode in session.modes:
+            mode.waiting_to_start = False
 
         self.progress = "0%"
 
@@ -195,6 +196,12 @@ class SimulationMode:
                 return
 
         self.running = False
+
+        # update building images with reference data for discussion:
+        for idx in session.buildings.df.index:
+            session.buildings.df.at[idx, 'emissions_graphs'] = "../data/precomputed/simulation_defaults/emissions/CO2_emissions_{0}.png".format(idx)
+            session.buildings.df.at[idx, 'energy_prices_graphs'] = "../data/precomputed/simulation_defaults/energy_prices/energy_prices_{0}.png".format(idx)
+        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
 
         self.run_script(self.xml_path)
         session.api.send_message(json.dumps({'step' : self.final_step-1}))  # simulation done
@@ -476,4 +483,5 @@ class SimulationMode:
                         'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
                     group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
                         'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
+
                 session.buildings.df.update(group_df)

@@ -49,26 +49,26 @@ config_slider = {
     'slider0' :
         {
             'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 7.0,            
-            'PHYSICAL_DIFF_R' : 34.0,            
+            'PHYSICAL_DIFF_L' : 5.0,            
+            'PHYSICAL_DIFF_R' : 32.0,            
         },
     'slider1' :
         {
             'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 9.1,            
-            'PHYSICAL_DIFF_R' : 30.4,            
+            'PHYSICAL_DIFF_L' : 6.6,            
+            'PHYSICAL_DIFF_R' : 31.6,            
         },
     'slider2' : 
         {
             'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 7.2,            
-            'PHYSICAL_DIFF_R' : 33.4,            
+            'PHYSICAL_DIFF_L' : 4.7,            
+            'PHYSICAL_DIFF_R' : 30.1,            
         },
     'slider3' :
         {
             'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
             'PHYSICAL_DIFF_L' : 7.0,            
-            'PHYSICAL_DIFF_R' : 33.4,            
+            'PHYSICAL_DIFF_R' : 31.5,            
         },  
 
 }

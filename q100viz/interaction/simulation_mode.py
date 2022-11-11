@@ -240,7 +240,7 @@ class SimulationMode:
         data_view_neighborhood_df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
 
-        session.active_mode = session.total_data_view  # marks total_data_view_mode to be started in main thread
+        session.active_mode = session.individual_data_view  # marks total_data_view_mode to be started in main thread
 
     ########################### frontend input ########################
     def process_event(self, event):

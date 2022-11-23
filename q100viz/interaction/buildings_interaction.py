@@ -140,6 +140,11 @@ class Buildings_Interaction:
 
                                     # filter already selected buildings from list:
                                     session.scenario_selected_buildings = session.scenario_selected_buildings[session.scenario_selected_buildings['group'] < 0]
+                                    for group_df in session.buildings.list_from_groups():
+                                        if group_df is not None:
+                                            for idx in group_df.index:
+                                                if idx in session.scenario_selected_buildings.index:
+                                                    session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
 
                                     # select and connect sampled buildings:
                                     session.scenario_selected_buildings['selected'] = True
@@ -236,8 +241,9 @@ class Buildings_Interaction:
     def update(self):
         for mode in session.modes:
             if mode.waiting_to_start:
-                if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > mode.activation_buffer_time:
-                    mode.waiting_to_start = False
+                if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > mode.activation_buffer_time and (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() < 10:
+                    for mode_ in session.modes:
+                        mode_.waiting_to_start = False
 
                     if mode is session.simulation:
                         session.simulation.setup()

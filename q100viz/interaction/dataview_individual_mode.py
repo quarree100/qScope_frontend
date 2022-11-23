@@ -166,9 +166,10 @@ class DataViewIndividual_Mode():
     def update(self):
         for mode in session.modes:
             if mode.waiting_to_start:
-                if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > mode.activation_buffer_time:
-                    mode.waiting_to_start = False
+                if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > mode.activation_buffer_time and (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() < 10:
+                    for mode_ in session.modes:
+                        mode_.waiting_to_start = False
 
-                    if mode == session.simulation:
+                    if mode is session.simulation:
                         session.simulation.setup()
                     session.active_mode = mode  # marks simulation to be started in main thread

@@ -159,6 +159,18 @@ class SimulationMode:
         if not os.path.isdir(self.current_output_folder):
             os.makedirs(self.current_output_folder)
 
+        # filter already selected buildings from list:
+        try:
+            session.scenario_selected_buildings = session.scenario_selected_buildings[session.scenario_selected_buildings['group'] < 0]
+            for group_df in session.buildings.list_from_groups():
+                if group_df is not None:
+                    for idx in group_df.index:
+                        if idx in session.scenario_selected_buildings.index:
+                            session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
+        except Exception as e:
+            print("cannot filter scenario list", e)
+            session.log += "\nCannot filter scenario list: %s" % e
+
         selected_buildings = pandas.concat([session.buildings.df[session.buildings.df.selected], session.scenario_selected_buildings])
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'group']].to_csv(clusters_outname)
 
@@ -198,10 +210,11 @@ class SimulationMode:
         self.running = False
 
         # update building images with reference data for discussion:
-        for idx in session.buildings.df.index:
-            session.buildings.df.at[idx, 'emissions_graphs'] = "../data/precomputed/simulation_defaults/emissions/CO2_emissions_{0}.png".format(idx)
-            session.buildings.df.at[idx, 'energy_prices_graphs'] = "../data/precomputed/simulation_defaults/energy_prices/energy_prices_{0}.png".format(idx)
-        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
+        if session.environment['current_iteration_round'] == 0:
+            for idx in session.buildings.df.index:
+                session.buildings.df.at[idx, 'emissions_graphs'] = "../data/precomputed/simulation_defaults/emissions/CO2_emissions_{0}.png".format(idx)
+                session.buildings.df.at[idx, 'energy_prices_graphs'] = "../data/precomputed/simulation_defaults/energy_prices/energy_prices_{0}.png".format(idx)
+            session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
 
         self.run_script(self.xml_path)
         session.api.send_message(json.dumps({'step' : self.final_step-1}))  # simulation done
@@ -211,7 +224,11 @@ class SimulationMode:
             session.environment['current_iteration_round'] + 1) % session.num_of_rounds
 
         if self.flag_create_graphs:
-            self.export_graphs()
+            try:
+                self.export_graphs()
+            except Exception as e:
+                print("cannot export graphs", e)
+                session.log += "\nCannot export graphs: %s" % e
 
         # define titles for images and their location
         self.matplotlib_neighborhood_images = {

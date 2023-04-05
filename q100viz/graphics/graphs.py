@@ -375,7 +375,7 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
         # plot:
         if compare_data_folder is not None:
             plt.plot(df['current_date'], df['compare'], color='lightgray')
-        plt.plot(df['current_date'], df['building_household_emissions'], color=df['color'][label_idx])
+        plt.plot(df['current_date'], df['building_household_emissions'], color=df['color'][label_idx], linewidth=5)
 
         # annotate lines:
         group_num = df.loc[df.index[0], 'group_num']

@@ -70,7 +70,7 @@ def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", yl
                 label=label_,
                 color='lightgray',
                 ax=plt.gca(),
-                linewidth=3)
+                linewidth=5)
 
     for it_round, df in enumerate(rounds_data):
         # color = ['black', 'dimgray', 'darkgray', 'lightgray'][it_round]
@@ -93,7 +93,7 @@ def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", yl
                 label=label_,
                 color=colors[column][len(rounds_data) - 1 - it_round] if overwrite_color is None else overwrite_color,
                 ax=plt.gca(),
-                linewidth=3)
+                linewidth=5)
 
         it_round += 1
 
@@ -210,7 +210,7 @@ def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title
                 label=label_,
                 color='lightgray',
                 ax=plt.gca(),
-                linewidth=3)
+                linewidth=5)
 
     for it_round, df in enumerate(rounds_data):
         for col_num, column in enumerate(columns):
@@ -232,7 +232,7 @@ def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title
                 label=label_,
                 color=colors[column][len(rounds_data) - 1 - it_round] if overwrite_color is None else overwrite_color,
                 ax=plt.gca(),
-                linewidth=3)
+                linewidth=5)
 
         it_round += 1
 
@@ -309,7 +309,7 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
                 color='lightgray',
                 ax=plt.gca(),
                 label = '{0}'.format(labels_[col_num]) if labels_ is not None else "unverändert",
-                linewidth=3)
+                linewidth=5)
 
         it_round += 1
 
@@ -375,7 +375,7 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
         # plot:
         if compare_data_folder is not None:
             plt.plot(df['current_date'], df['compare'], color='lightgray')
-        plt.plot(df['current_date'], df['building_household_emissions'], color=df['color'][label_idx])
+        plt.plot(df['current_date'], df['building_household_emissions'], color=df['color'][label_idx], linewidth=5)
 
         # annotate lines:
         group_num = df.loc[df.index[0], 'group_num']
@@ -446,14 +446,14 @@ def export_neighborhood_emissions_connections(connections_file, emissions_file, 
         df_emissions['current_date'],
         df_emissions['emissions_neighborhood_total'],
         color='#00431f',
-        linewidth=3
+        linewidth=5
     )
 
     line_gray, = ax1.plot(
         df_emissions_compare['current_date'],
         df_emissions_compare['emissions_neighborhood_total'],
         color='lightgray',
-        linewidth=3
+        linewidth=5
     )
     plt.gca().set_ylabel("$CO_{2}$-Äquivalente (t)", fontsize='x-large')
     ax1.set_ylim(bottom=0)
@@ -619,7 +619,7 @@ def export_neighborhood_total_data(csv_name, columns, x_, title_="", xlabel_="",
                 label=label_,
                 color='lightgray',
                 ax=plt.gca(),
-                linewidth=3)
+                linewidth=5)
 
     colors = {
         'gas_price' : 'lightblue',
@@ -645,7 +645,7 @@ def export_neighborhood_total_data(csv_name, columns, x_, title_="", xlabel_="",
                 label=label_,
                 color=colors[column],
                 ax=plt.gca(),
-                linewidth=3)
+                linewidth=5)
 
         it_round += 1
 

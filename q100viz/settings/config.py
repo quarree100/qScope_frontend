@@ -16,7 +16,7 @@ config = {
     'GAMA_HEADLESS_FOLDER' : '/opt/gama-platform/headless/',
     'GAMA_OUTPUT_FOLDER': '../data/outputs/output',
     'GAMA_MODEL_FILE' : '../q100_abm_qscope-workshop/q100/models/qscope_ABM.gaml',
-    'SIMULATION_FORCE_MAX_YEAR' : 0,
+    'SIMULATION_FORCE_MAX_YEAR' : 2030,
     'REFERENCE_DATA_FOLDER' : '../data/precomputed/simulation_defaults',
 
     # grid setup

@@ -30,7 +30,7 @@ class SimulationMode:
         self.script = self.headless_folder + 'gama-headless.sh'
         self.current_output_folder = ''  # will be set in activate()
         self.xml_path = ''               # will be set in activate()
-        self.final_step = None           # will be set in activate()
+        self.final_step = 0           # will be set in activate()
         self.max_year = 2045             # will be set in activate()
         self.output_folders = []         # list of output folders of all game rounds
         self.using_timestamp = True

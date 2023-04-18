@@ -1,5 +1,4 @@
 ######################## dev tools ##########################
-import random
 import pandas
 
 def print_verbose(message, VERBOSE_MODE, log):

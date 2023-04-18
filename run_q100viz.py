@@ -11,6 +11,7 @@ import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.interaction.interface import *
 
+################################ STARTUP ##############################
 ##################### parse command line arguments ####################
 parser = argparse.ArgumentParser()
 parser.add_argument('--select_random',
@@ -28,24 +29,23 @@ parser.add_argument('--save_energy', '-e',
 parser.add_argument('--start_at', help="start at specific game mode",
                     type=str, default=session.environment['mode'])
 parser.add_argument(
-    '--test', help="pre-set of functions to test different elements...", type=str)
-parser.add_argument(
     '--main_window', help="runs program in main window", action='store_true')
 parser.add_argument('--research_model',
                     help="use research model instead of q-Scope-interaction model", action='store_true')
 
 args = parser.parse_args()
 
+########################### debug setup ###############################
 session.debug_num_of_random_buildings = args.select_random
 config['SIMULATION_FORCE_MAX_YEAR'] = args.simulate_until
-session.debug_connection_date = args.connect
-session.debug_force_refurbished = args.refurbish
-session.debug_force_save_energy = args.save_energy
-session.active_mode = session.string_to_mode(args.start_at)
-session.TEST_MODE = args.test
-session.VERBOSE_MODE = args.verbose
+session.debug_connection_date = args.connect        # force buildings to opt in 'connection_to_heat_grid'
+session.debug_force_refurbished = args.refurbish    # force buildings to opt in 'refurbish'
+session.debug_force_save_energy = args.save_energy  # force buildings to opt in for 'save_energy'
+session.active_mode = session.string_to_mode(args.start_at)  # force start at this mode
+session.VERBOSE_MODE = args.verbose  # define verbose level
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
 
+# display startup information:
 simulation_steps_string = 'simulate until year {0}'.format(
     config['SIMULATION_FORCE_MAX_YEAR']) if config['SIMULATION_FORCE_MAX_YEAR'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
 connection_date_string = 'connect selected buildings in year {0}'.format(

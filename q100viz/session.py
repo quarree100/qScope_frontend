@@ -24,7 +24,6 @@ from q100viz.graphics.graphictools import Image
 ################################ DECLARATIONS #########################
 #----------------------- dev and debug variables ----------------------
 log = ""
-TEST_MODE = ""
 VERBOSE_MODE = False
 
 debug_num_of_random_buildings = 0

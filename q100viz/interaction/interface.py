@@ -17,13 +17,16 @@ class Slider:
         self.value = 0
         self.previous_value = 0
         self.group = -1
-        self.id = id  # unique identifier for slider
+        self.id = id  # unique STRING identifier for slider
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
         self.x_cell_range = x_cell_range  # limits of slider handles
-        self.physical_slider_area_length = config_slider[id]['PHYSICAL_SLIDER_AREA_LENGTH']  # cm
-        self.physical_diff_L = config_slider[id]['PHYSICAL_DIFF_L']  # diff from left side of area to cspy slider detection, in cm
-        self.physical_diff_R = config_slider[id]['PHYSICAL_DIFF_R']  # diff to right side of area to cspy slider detection, in cm
+        # cm
+        self.physical_slider_area_length = config_slider[id]['PHYSICAL_SLIDER_AREA_LENGTH']
+        # diff from left side of area to cspy slider detection, in cm
+        self.physical_diff_L = config_slider[id]['PHYSICAL_DIFF_L']
+        # diff to right side of area to cspy slider detection, in cm
+        self.physical_diff_R = config_slider[id]['PHYSICAL_DIFF_R']
 
         self.color = pygame.Color(125, 125, 125)  # slider area
 
@@ -71,19 +74,22 @@ class Slider:
         }
 
         self.images = {
-            'start_simulation' : Image("images/start_simulation.png", session.config['CANVAS_SIZE'], session.viewport),
-            'start_buildings_interaction' : Image("images/start_buildings_interaction.png", session.config['CANVAS_SIZE'], session.viewport),
-            'start_individual_data_view' : Image("images/start_individual_data_view.png", session.config['CANVAS_SIZE'], session.viewport),
-            'start_total_data_view' : Image("images/start_total_data_view.png", session.config['CANVAS_SIZE'], session.viewport),
-            'refurbished' : Image("images/refurbished.png", session.config['CANVAS_SIZE'], session.viewport),
-            'connection_to_heat_grid' : Image("images/connection_to_heat_grid.png", session.config['CANVAS_SIZE'], session.viewport),
-            'save_energy' : Image("images/save_energy.png", session.config['CANVAS_SIZE'], session.viewport),
+            'start_simulation': Image("images/start_simulation.png", session.config['CANVAS_SIZE'], session.viewport),
+            'start_buildings_interaction': Image("images/start_buildings_interaction.png", session.config['CANVAS_SIZE'], session.viewport),
+            'start_individual_data_view': Image("images/start_individual_data_view.png", session.config['CANVAS_SIZE'], session.viewport),
+            'start_total_data_view': Image("images/start_total_data_view.png", session.config['CANVAS_SIZE'], session.viewport),
+            'refurbished': Image("images/refurbished.png", session.config['CANVAS_SIZE'], session.viewport),
+            'connection_to_heat_grid': Image("images/connection_to_heat_grid.png", session.config['CANVAS_SIZE'], session.viewport),
+            'save_energy': Image("images/save_energy.png", session.config['CANVAS_SIZE'], session.viewport),
         }
 
         for image in self.images.values():
             image.warp(session.config['CANVAS_SIZE'])
 
-    def render(self, canvas=None):
+    def draw_controls(self, canvas=None):
+        '''
+        renders slider-selectors (options) and tool tipps
+        '''
         # slider controls → set slider color
         # alpha value for unselected cells
         a = 100 + abs(int(np.sin(pygame.time.get_ticks() / 1000) * 105))
@@ -96,7 +102,8 @@ class Slider:
                     stroke = 4 if cell.selected else 0
 
                     if cell.selected:
-                        if cell.handle not in session.MODE_SELECTOR_HANDLES and cell.color is not None:  # do not adopt color of mode selectors
+                        # do not adopt color of mode selectors
+                        if cell.handle not in session.MODE_SELECTOR_HANDLES and cell.color is not None:
                             cell.color = pygame.Color(
                                 cell.color.r, cell.color.g, cell.color.b, 255)
                             self.color = cell.color
@@ -104,18 +111,26 @@ class Slider:
                         cell.color = pygame.Color(
                             cell.color.r, cell.color.g, cell.color.b, a)
 
-                    # draw slider handles:
-                    if cell.color is not None:
+                    # draw slider handles if user has selected building:
+                    if cell.handle in session.VALID_DECISION_HANDLES:
+                        # user selected at least one building
+                        if cell.color is not None and int(self.id[-1]) in session.buildings.df['group'].values:
+                            pygame.draw.polygon(
+                                self.surface, cell.color, rect_points, stroke)
+
+                    # always draw global connections:
+                    elif cell.handle.__contains__("connections"):
                         pygame.draw.polygon(
                             self.surface, cell.color, rect_points, stroke)
 
                 # icons:
                 if cell.handle in ['start_simulation', 'start_individual_data_view', 'start_total_data_view', 'start_buildings_interaction']:
                     nrows = 22
-                    a = 100 + abs(int(np.sin(pygame.time.get_ticks() / 1000) * 105))
+                    a = 100 + \
+                        abs(int(np.sin(pygame.time.get_ticks() / 1000) * 105))
                     canvas.blit(self.images[cell.handle].image,
-                        (self.grid.rects_transformed[cell.x+nrows*cell.y-4][1][0][0] - 5,  #TODO: why must column be x-4 ???
-                        self.grid.rects_transformed[cell.x+nrows*cell.y][1][0][1] - 4))
+                                (self.grid.rects_transformed[cell.x+nrows*cell.y-4][1][0][0] - 5,  # TODO: why must column be x-4 ???
+                                 self.grid.rects_transformed[cell.x+nrows*cell.y][1][0][1] - 4))
 
                 # slider control texts:
                 if self.show_text and cell.y == len(self.grid.grid) - 1:
@@ -127,6 +142,11 @@ class Slider:
                         handle_string = "Sanierung"
                     elif cell.handle == "save_energy":
                         handle_string = "Energiesparen"
+
+                # global texts:
+                if self.show_text and cell.y == len(self.grid.grid) - 1 and int(self.id[-1]) in session.buildings.df['group'].values:
+                    font = pygame.font.SysFont('Arial', 10)
+                    handle_string = ""
                     if cell.handle == "scenario_energy_prices":
                         handle_string = "Energiepreise"
                     if cell.handle == "num_connections":
@@ -138,7 +158,7 @@ class Slider:
 
         font = pygame.font.SysFont('Arial', 18)
 
-        if self.show_text:
+        if self.show_text and int(self.id[-1]) in session.buildings.df['group'].values:
             # display human readable slider name:
             self.surface.blit(font.render(str(self.human_readable_function[self.handle]), True, (255, 255, 255)), [
                               self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
@@ -154,10 +174,17 @@ class Slider:
         canvas.blit(self.surface, (0, 0))
 
     def draw_area(self):
+        '''
+        draws option-specific layout onto the slider area.
+        save_energy: red/green field for binary yes/no option
+        connection/refurbishment: selection of specific year
+        '''
 
+        ############# binary selection #############
         if self.handle == 'save_energy':
             pygame.draw.line(
-                self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1] + 2),
+                self.surface, pygame.Color(255, 255, 255), (self.coords_transformed[0][0] + (
+                    self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[0][1] + 2),
                 (self.coords_transformed[0][0] + (self.coords_transformed[3][0] - self.coords_transformed[0][0]) / 2, self.coords_transformed[1][1] + 2), width=2)
 
             # red field:
@@ -168,7 +195,8 @@ class Slider:
                 [c[2][0] - c[1][0]/2, c[2][1]],  # top right
                 [c[3][0] - c[1][0]/2, c[3][1]]]  # bottom right
             points_transformed = self.surface.transform(points)
-            pygame.draw.polygon(self.surface, pygame.Color(130,20,55), points_transformed)
+            pygame.draw.polygon(self.surface, pygame.Color(
+                130, 20, 55), points_transformed)
 
             # green field:
             c = self.coords
@@ -178,12 +206,13 @@ class Slider:
                 c[2],  # top right
                 c[3]]  # bottom right
             points_transformed = self.surface.transform(points)
-            pygame.draw.polygon(self.surface, pygame.Color(20,130,55), points_transformed)
+            pygame.draw.polygon(self.surface, pygame.Color(
+                20, 130, 55), points_transformed)
 
-        if self.handle in ['connection_to_heat_grid', 'refurbished']:
+        ############# year selection #############
+        elif self.handle in ['connection_to_heat_grid', 'refurbished']:
             min_year = self.min_connection_year if self.handle == 'connection_to_heat_grid' else self.min_refurb_year
             max_year = self.max_connection_year if self.handle == 'connection_to_heat_grid' else self.max_refurb_year
-
 
             x0 = self.coords_transformed[0][0]  # in px
             x3 = self.coords_transformed[3][0]  # in px
@@ -192,8 +221,10 @@ class Slider:
             y3 = self.coords_transformed[3][1]  # in px
 
             # physical slider area dimensions:
-            s0 = x0 + (x3 - x0) * self.physical_diff_L/self.physical_slider_area_length  # in px
-            s1 = x0 + (x3 - x0) * self.physical_diff_R/self.physical_slider_area_length  # in px
+            s0 = x0 + (x3 - x0) * self.physical_diff_L / \
+                self.physical_slider_area_length  # in px
+            s1 = x0 + (x3 - x0) * self.physical_diff_R / \
+                self.physical_slider_area_length  # in px
 
             # red field: no connection
             points = [
@@ -202,7 +233,8 @@ class Slider:
                 (s0 + (s1 - s0) * 0.21, y1),  # top right
                 (s0 + (s1 - s0) * 0.21, y0)  # bottom right
             ]
-            pygame.draw.polygon(self.surface, pygame.Color(130,20,55), points)
+            pygame.draw.polygon(
+                self.surface, pygame.Color(130, 20, 55), points)
 
             font = pygame.font.SysFont('Arial', 10)
 
@@ -212,10 +244,9 @@ class Slider:
                     self.surface, pygame.Color(200, 200, 200),
                     (s0 + (s1 - s0) * x, y0 - 35),
                     (s0 + (s1 - s0) * x, y1 + 13), width=1
-                    )
+                )
                 self.surface.blit(font.render(str(int(np.interp((x), [0.2, 1], [min_year, max_year]))), True, (
                     200, 200, 200)), ((s0 + (s1 - s0) * x) - 10, y0 - 35))
-
 
             if session.VERBOSE_MODE:
                 self.surface.blit(font.render("L", True, (

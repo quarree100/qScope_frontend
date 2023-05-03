@@ -154,6 +154,7 @@ class Grid:
             for y, row in enumerate(self.grid) for x, cell in enumerate(row)]
 
     def update_cell_data(self, df):
+            '''updates every cell's handle and color in grid according to input dataframe (from csv in q100viz/settings folder)'''
             for row in self.grid:
                 for cell in row:
                     cell.handle = None

@@ -239,8 +239,7 @@ class Frontend:
         # slider
         for grid in session.grid_1, session.grid_2:
             for slider in grid.sliders.values():
-                slider.render(session.viewport)
-                slider.render(session.viewport)
+                slider.draw_controls(session.viewport)
 
         # draw grid
         self.canvas.blit(session.grid_1.surface, (0, 0))

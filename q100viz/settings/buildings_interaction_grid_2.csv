@@ -1,10 +1,10 @@
 x,y,handle,color
-0,18,connection_to_heat_grid,aquamarine
-2,18,refurbished,burlywood1
-4,18,save_energy,cadetblue1
-11,18,connection_to_heat_grid,aquamarine
-13,18,refurbished,burlywood1
-15,18,save_energy,cadetblue1
+0,18,connection_to_heat_grid,#b600b6
+2,18,refurbished,#b600b7
+4,18,save_energy,#b600b8
+11,18,connection_to_heat_grid,#00a84e
+13,18,refurbished,#00a84e
+15,18,save_energy,#00a84e
 20,11,start_total_data_view,None
 20,13,start_individual_data_view,None
 20,15,start_simulation,None

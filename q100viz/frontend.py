@@ -128,7 +128,7 @@ class Frontend:
                         for key, val in grid.sliders.items():
                             if grid.sliders[key].value is not None:
                                 grid.sliders[key].value = round(
-                                    slider.value - 0.1, 3)
+                                    grid.sliders[key].value - 0.1, 3)
                             else:
                                 grid.sliders[key].value = 0.1
                             grid.sliders[key].process_value()

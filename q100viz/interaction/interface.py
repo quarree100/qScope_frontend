@@ -71,17 +71,17 @@ class Slider:
         }
 
         self.images = {
-            'start_simulation' : Image("images/start_simulation.png", session.canvas_size, session.viewport),
-            'start_buildings_interaction' : Image("images/start_buildings_interaction.png", session.canvas_size, session.viewport),
-            'start_individual_data_view' : Image("images/start_individual_data_view.png", session.canvas_size, session.viewport),
-            'start_total_data_view' : Image("images/start_total_data_view.png", session.canvas_size, session.viewport),
-            'refurbished' : Image("images/refurbished.png", session.canvas_size, session.viewport),
-            'connection_to_heat_grid' : Image("images/connection_to_heat_grid.png", session.canvas_size, session.viewport),
-            'save_energy' : Image("images/save_energy.png", session.canvas_size, session.viewport),
+            'start_simulation' : Image("images/start_simulation.png", session.config['CANVAS_SIZE'], session.viewport),
+            'start_buildings_interaction' : Image("images/start_buildings_interaction.png", session.config['CANVAS_SIZE'], session.viewport),
+            'start_individual_data_view' : Image("images/start_individual_data_view.png", session.config['CANVAS_SIZE'], session.viewport),
+            'start_total_data_view' : Image("images/start_total_data_view.png", session.config['CANVAS_SIZE'], session.viewport),
+            'refurbished' : Image("images/refurbished.png", session.config['CANVAS_SIZE'], session.viewport),
+            'connection_to_heat_grid' : Image("images/connection_to_heat_grid.png", session.config['CANVAS_SIZE'], session.viewport),
+            'save_energy' : Image("images/save_energy.png", session.config['CANVAS_SIZE'], session.viewport),
         }
 
         for image in self.images.values():
-            image.warp(session.canvas_size)
+            image.warp(session.config['CANVAS_SIZE'])
 
     def render(self, canvas=None):
         # slider controls → set slider color

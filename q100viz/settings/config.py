@@ -1,4 +1,7 @@
 config = {
+    # UDP communication
+    'UDP_SERVER_PORT' : 8081,
+
     # GIS files
     'BASEMAP_FILE': "../data/GIS/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg",
     'GEBAEUDE_BESTAND_FILE': "../data/GIS/Shapefiles/bestandsgebaeude_export.shp",
@@ -11,8 +14,13 @@ config = {
     # graphics setup
     'SAVED_KEYSTONE_FILE': 'keystone.save',
     'SAVED_BUILDINGS_FILE': 'export/buildings_export.shp',
+    'CANVAS_SIZE' : (1920, 1080),
 
-    # simulation files
+    # game rules
+    'NUM_OF_ROUNDS' : 4,
+    'NUM_OF_USERS' : 4,
+
+    # simulation
     'GAMA_HEADLESS_FOLDER' : '/opt/gama-platform/headless/',
     'GAMA_OUTPUT_FOLDER': '../data/outputs/output',
     'GAMA_MODEL_FILE' : '../q100_abm_qscope-workshop/q100/models/qscope_ABM.gaml',
@@ -49,26 +57,26 @@ config_slider = {
     'slider0' :
         {
             'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 5.0,            
-            'PHYSICAL_DIFF_R' : 32.0,            
+            'PHYSICAL_DIFF_L' : 5.0,
+            'PHYSICAL_DIFF_R' : 32.0,
         },
     'slider1' :
         {
             'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 6.6,            
-            'PHYSICAL_DIFF_R' : 31.6,            
+            'PHYSICAL_DIFF_L' : 6.6,
+            'PHYSICAL_DIFF_R' : 31.6,
         },
-    'slider2' : 
+    'slider2' :
         {
             'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 4.7,            
-            'PHYSICAL_DIFF_R' : 30.1,            
+            'PHYSICAL_DIFF_L' : 4.7,
+            'PHYSICAL_DIFF_R' : 30.1,
         },
     'slider3' :
         {
             'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 7.0,            
-            'PHYSICAL_DIFF_R' : 31.5,            
-        },  
+            'PHYSICAL_DIFF_L' : 7.0,
+            'PHYSICAL_DIFF_R' : 31.5,
+        },
 
 }

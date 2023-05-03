@@ -35,8 +35,8 @@ class Buildings:
         bestand.index.names = ['id']
 
         bestand['address'] = bestand['Kataster_S'] + ' ' + bestand['Kataster_H']
-        bestand = bestand.drop('Kataster_S', 1)
-        bestand = bestand.drop('Kataster_H', 1)
+        bestand = bestand.drop('Kataster_S', axis=1)
+        bestand = bestand.drop('Kataster_H', axis=1)
         bestand = bestand.rename(columns = {
             'Kataster13': 'spec_heat_consumption',
             'Kataster15': 'spec_power_consumption',

@@ -5,7 +5,7 @@ import socketio
 import q100viz.session as session
 import q100viz.devtools as devtools
 import datetime
-
+from q100viz.settings.config import config
 
 class API:
     def __init__(self, socket_addr):
@@ -13,8 +13,11 @@ class API:
         self.io = socketio.Client()
 
         def run():
-            self.io.connect(socket_addr)
-            self.io.wait()
+            try:
+                self.io.connect(socket_addr)
+                self.io.wait()
+            except:
+                print("---Warning: cannot connect to localhost:" + str(config['UDP_SERVER_PORT']) + ". Did you start the infoscreen?")
 
         thread = threading.Thread(target=run, daemon=True)
         thread.start()

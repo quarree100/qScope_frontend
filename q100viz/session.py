@@ -10,8 +10,6 @@ import q100viz.api as api
 import q100viz.gis as gis
 import q100viz.grid as grid
 from q100viz.interaction.calibration_mode import CalibrationMode
-from q100viz.interaction.questionnaire_mode import Questionnaire_Mode
-# from q100viz.interaction.input_scenarios_mode import Input_Scenarios
 from q100viz.interaction.buildings_interaction import Buildings_Interaction
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.dataview_individual_mode import DataViewIndividual_Mode
@@ -19,9 +17,8 @@ from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode
 from q100viz.interaction.model_validation_mode import ModelValidation_Mode
 import q100viz.keystone as keystone
 import q100viz.buildings
-from q100viz.graphics.graphictools import Image
+import q100viz.devtools as devtools
 
-################################ DECLARATIONS #########################
 #----------------------- dev and debug variables ----------------------
 log = ""
 VERBOSE_MODE = False
@@ -32,11 +29,38 @@ debug_force_refurbished = False
 debug_force_save_energy = False
 
 # ---------------------- infoscreen communication ---------------------
-io = 'http://localhost:8081'  # Socket.io
+io = 'http://localhost:' + str(config['UDP_SERVER_PORT'])  # Socket.io
 api = api.API(io)
 
 #------------------------------ graphics ------------------------------
-canvas_size = 1920, 1080
+
+# create the main surface, projected to corner points
+# the viewport's coordinates are between 0 and 100 on each axis
+viewport = keystone.Surface(config['CANVAS_SIZE'], pygame.SRCALPHA)
+try:
+    viewport.load(config['SAVED_KEYSTONE_FILE'])
+    devtools.print_verbose('...viewport points loaded from keystone file.', VERBOSE_MODE, log)
+except Exception:
+    devtools.print_verbose("Failed to open keystone file", VERBOSE_MODE, log)
+    viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
+    viewport.dst_points = [[0, 0], [0, config['CANVAS_SIZE'][1]], [
+        config['CANVAS_SIZE'][0], config['CANVAS_SIZE'][1]], [config['CANVAS_SIZE'][0], 0]]
+viewport.calculate()
+
+show_polygons = False
+show_basemap = False
+
+#------------------------------ interaction ---------------------------
+num_of_rounds = config['NUM_OF_ROUNDS']  # max num of rounds; will repeat after this
+num_of_users = config['NUM_OF_USERS']  # num of valid users # TODO: combine with num of valid tags!
+user_colors = [
+    (0, 117, 180),   # Quarree-blue  #0075b4
+    (253, 193, 19),  # Quarree-yellow  #fdc113
+    (182, 0, 182),   # purple  #b600b6
+    (0, 168, 78),    # Quarree-dark-green  #00a84e
+    (186, 212, 50),  # Quarree-light-green
+    (155, 155, 155)
+]
 
 quarree_colors_8bit = [   # corporate design of QUARREE100
     (0, 117, 180),   # Quarree-blue
@@ -51,34 +75,6 @@ quarree_colors_float = [   # corporate design of QUARREE100
     (0/255, 168/255, 78/255),    # Quarree-dark-green
     (186/255, 212/255, 50/255),  # Quarree-light-green
     (103/255, 102/255, 104/255)  # Quarree-gray
-]
-# create the main surface, projected to corner points
-# the viewport's coordinates are between 0 and 100 on each axis
-viewport = keystone.Surface(canvas_size, pygame.SRCALPHA)
-try:
-    viewport.load(config['SAVED_KEYSTONE_FILE'])
-    print('loading src_points:', viewport.src_points)
-    print('loading dst_points:', viewport.dst_points)
-except Exception:
-    print("Failed to open keystone file")
-    viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
-    viewport.dst_points = [[0, 0], [0, canvas_size[1]], [
-        canvas_size[0], canvas_size[1]], [canvas_size[0], 0]]
-viewport.calculate()
-
-show_polygons = False
-show_basemap = False
-
-#------------------------------ interaction ---------------------------
-num_of_rounds = 4  # max num of rounds; will repeat after this
-num_of_users = 4  # num of valid users # TODO: combine with num of valid tags!
-user_colors = [
-    (0, 117, 180),   # Quarree-blue  #0075b4
-    (253, 193, 19),  # Quarree-yellow  #fdc113
-    (182, 0, 182),   # purple  #b600b6
-    (0, 168, 78),    # Quarree-dark-green  #00a84e
-    (186, 212, 50),  # Quarree-light-green
-    (155, 155, 155)
 ]
 
 gama_iteration_images = ['' for n in range(num_of_rounds)]
@@ -131,13 +127,13 @@ num_of_questions = 5  # TODO: this equals length of csv
 #--------------------------------- gis --------------------------------
 # Initialize geographic viewport and basemap
 _gis = gis.GIS(
-    canvas_size,
+    config['CANVAS_SIZE'],
     # northeast          northwest           southwest           southeast
     [[1013631, 7207409], [1012961, 7207198], [1013359, 7205932], [1014029, 7206143]],
     viewport)
 
 basemap = gis.Basemap(
-    canvas_size, config['BASEMAP_FILE'],
+    config['CANVAS_SIZE'], config['BASEMAP_FILE'],
     # northwest          southwest           southeast           northeast
     [[1012695, 7207571], [1012695, 7205976], [1014205, 7205976], [1014205, 7207571]],
     _gis)
@@ -148,7 +144,7 @@ grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))  # TODO: seperate 
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = grid.Grid(
-    canvas_size, ncols, nrows, [
+    config['CANVAS_SIZE'], ncols, nrows, [
         [config['GRID_1_X1'], config['GRID_1_Y1']],
         [config['GRID_1_X1'], config['GRID_1_Y2']],
         [config['GRID_1_X2'], config['GRID_1_Y2']],
@@ -159,7 +155,7 @@ grid_1 = grid.Grid(
         {'slider0' : (0, int(ncols/2)),
         'slider1' : (int(ncols/2), ncols)})
 grid_2 = grid.Grid(
-    canvas_size, ncols, nrows, [
+    config['CANVAS_SIZE'], ncols, nrows, [
         [config['GRID_2_X1'], config['GRID_2_Y1']],
         [config['GRID_2_X1'], config['GRID_2_Y2']],
         [config['GRID_2_X2'], config['GRID_2_Y2']],
@@ -187,8 +183,6 @@ total_data_view_grid_2 = pd.read_csv(config['GRID_2_TOTAL_DATA_VIEW_FILE'])
 previous_mode = None
 
 calibration = CalibrationMode()
-# questionnaire = Questionnaire_Mode()
-# 'input_scenarios': Input_Scenarios(),
 buildings_interaction = Buildings_Interaction()
 simulation = SimulationMode()
 individual_data_view = DataViewIndividual_Mode()
@@ -201,8 +195,6 @@ modes = [buildings_interaction, simulation, individual_data_view, total_data_vie
 def string_to_mode(input_string):
     if input_string == 'calibrate':
         return calibration
-    elif input_string == 'questionnaire':
-        return questionnaire
     elif input_string == 'buildings_interaction':
         return buildings_interaction
     elif input_string == 'simulation':

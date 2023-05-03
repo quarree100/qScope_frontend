@@ -11,7 +11,7 @@ from q100viz.graphics.graphictools import Image
 class Input_Scenarios:
     def __init__(self):
         self.name = 'input_scenarios'
-        self.surface = keystone.Surface(session.canvas_size, pygame.SRCALPHA)
+        self.surface = keystone.Surface(session.config['CANVAS_SIZE'], pygame.SRCALPHA)
         self.surface.src_points = [[0, 0], [0, 1], [1, 1], [1, 0]]
         self.surface.dst_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
 
@@ -151,7 +151,7 @@ class Input_Scenarios:
         for image in self.images:
             canvas.blit(image.image,
                         (x_displace,
-                         (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 2))
+                         (session.config['CANVAS_SIZE'][1] * config['GRID_1_Y2'] / 100 - image.img_h) / 2))
             x_displace += session.viewport.dst_points[2][0] / 5
 
 
@@ -159,7 +159,7 @@ class Input_Scenarios:
         font = pygame.font.SysFont('Arial', 20)
         for identifier, title in session.scenario_titles.items():
             canvas.blit(font.render(title, True, (255, 255, 255)),
-                        (x_displace, (session.canvas_size[1] * config['GRID_1_Y2'] / 100 - image.img_h) / 2))
+                        (x_displace, (session.config['CANVAS_SIZE'][1] * config['GRID_1_Y2'] / 100 - image.img_h) / 2))
             x_displace += session.viewport.dst_points[2][0] / 5
 
 

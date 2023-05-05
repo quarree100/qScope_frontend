@@ -68,7 +68,7 @@ class SimulationMode:
         self.export_neighborhood_graphs_only = export_neighborhood_graphs_only
         self.flag_create_graphs = export_graphs
             # derive final step from defined simulation runtime:
-        if config['SIMULATION_FORCE_MAX_YEAR'] == 0:
+        if config['SIMULATION_FORCE_END_YEAR'] == 0:
             runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
                                       index_col='var').loc['model_runtime_string', 'value']
             self.max_year = int(runtime[-4:])  # last four digits of model_runtime_string
@@ -76,7 +76,7 @@ class SimulationMode:
 
         else:
             # overwrite final step if set via flag --sim_steps:
-            self.max_year = config['SIMULATION_FORCE_MAX_YEAR']
+            self.max_year = config['SIMULATION_FORCE_END_YEAR']
             self.final_step = ((self.max_year + 1 - 2020) * 365) + int((self.max_year - 2020)/4)
         # overwrite by function input:
         if input_max_year is not None:

@@ -13,7 +13,7 @@ parser.add_argument('--select_random',
 parser.add_argument('--verbose', '-v',
                     help="start in verbose mode", action='store_true')
 parser.add_argument(
-    '--simulate_until', help="max_year of simulation", type=int, default=config['SIMULATION_FORCE_MAX_YEAR'])
+    '--simulate_until', help="max_year of simulation", type=int, default=config['SIMULATION_FORCE_END_YEAR'])
 parser.add_argument(
     '--connect', '-c', help="specify year of connection for selected buildings", type=int, default=0)
 parser.add_argument('--refurbish', '-r',
@@ -31,7 +31,7 @@ args = parser.parse_args()
 
 ########################### debug setup ###############################
 session.debug_num_of_random_buildings = args.select_random
-config['SIMULATION_FORCE_MAX_YEAR'] = args.simulate_until
+config['SIMULATION_FORCE_END_YEAR'] = args.simulate_until
 session.debug_connection_date = args.connect        # force buildings to opt in 'connection_to_heat_grid'
 session.debug_force_refurbished = args.refurbish    # force buildings to opt in 'refurbish'
 session.debug_force_save_energy = args.save_energy  # force buildings to opt in for 'save_energy'
@@ -44,7 +44,7 @@ str_num_connections = '\n- random {0} buildings will be selected]'.format(sessio
 str_date_of_connections = '\n- connect selected buildings in year {0}'.format(
     session.debug_connection_date) if session.debug_connection_date > 0 else ''
 str_sim_until = '\n- simulate until year {0}'.format(
-    config['SIMULATION_FORCE_MAX_YEAR']) if config['SIMULATION_FORCE_MAX_YEAR'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
+    config['SIMULATION_FORCE_END_YEAR']) if config['SIMULATION_FORCE_END_YEAR'] != 0 else 'simulation will run as specified via ../data/includes/csv-data_technical/initial_variables.csv'
 str_sim_model_file = '\n- using simulation model file {0}.'.format(
     str(config['GAMA_MODEL_FILE'])
 )

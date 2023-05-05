@@ -34,11 +34,6 @@ class Slider:
         self.previous_handle = None
         self.last_change = session.seconds_elapsed  # time of last slider change
 
-        self.min_connection_year = 2020
-        self.max_connection_year = 2040
-        self.min_refurb_year = 2020
-        self.max_refurb_year = 2040
-
         # this is used for the activation of the next question in questionnaire mode  # TODO: get slider position initially and set toggle accordingly (Slider should not "start at" this position)
         self.toggle_question = False
 
@@ -148,7 +143,7 @@ class Slider:
                     ncols = session.ncols
                     # TODO: why does this have to be shifted 4*cell_width to the left??
                     x = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][3][0]-160
+                                                    ncols*cell.y][1][3][0]-180
                     y = self.grid.rects_transformed[cell.x +
                                                     ncols*cell.y][1][0][1]
                     self.surface.blit(self.images[cell.handle].image, (x, y))
@@ -244,8 +239,8 @@ class Slider:
 
         ############# year selection #############
         elif self.handle in ['connection_to_heat_grid', 'refurbished']:
-            min_year = self.min_connection_year if self.handle == 'connection_to_heat_grid' else self.min_refurb_year
-            max_year = self.max_connection_year if self.handle == 'connection_to_heat_grid' else self.max_refurb_year
+            min_year = session.min_connection_year if self.handle == 'connection_to_heat_grid' else session.min_refurb_year
+            max_year = session.max_connection_year if self.handle == 'connection_to_heat_grid' else session.max_refurb_year
 
             x0 = self.coords_transformed[0][0]  # in px
             x3 = self.coords_transformed[3][0]  # in px
@@ -305,15 +300,15 @@ class Slider:
             # household-specific:
             if self.handle == 'connection_to_heat_grid':
                 session.buildings.df.loc[((
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [self.min_connection_year, self.max_connection_year]))
+                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_connection_year, session.max_connection_year]))
                 self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
-                    np.interp(float(self.value), [0.2, 1], [self.min_connection_year, self.max_connection_year]))
+                    np.interp(float(self.value), [0.2, 1], [session.min_connection_year, session.max_connection_year]))
 
             elif self.handle == 'refurbished':
                 session.buildings.df.loc[((
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [self.min_refurb_year, self.max_refurb_year]))
+                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_refurb_year, session.max_refurb_year]))
                 self.human_readable_value['refurbished'] = "n.a." if self.value <= 0.2 else int(
-                    np.interp(float(self.value), [0.2, 1], [self.min_refurb_year, self.max_refurb_year]))
+                    np.interp(float(self.value), [0.2, 1], [session.min_refurb_year, session.max_refurb_year]))
 
             elif self.handle == 'save_energy':
                 session.buildings.df.loc[(

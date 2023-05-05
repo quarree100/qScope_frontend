@@ -123,6 +123,13 @@ scenario_titles = {
 
 num_of_questions = 5  # TODO: this equals length of csv
 
+# ---------------------------- simulation -----------------------------
+min_connection_year = config['SIMULATION_FORCE_START_YEAR']
+max_connection_year = config['SIMULATION_FORCE_END_YEAR']
+min_refurb_year = config['SIMULATION_FORCE_START_YEAR']
+max_refurb_year = config['SIMULATION_FORCE_END_YEAR']
+
+
 ############################## INITIALIZATION #########################
 #--------------------------------- gis --------------------------------
 # Initialize geographic viewport and basemap

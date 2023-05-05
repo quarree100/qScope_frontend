@@ -38,11 +38,12 @@ class Grid:
 
     def draw(self, show_grid):
 
-        font = pygame.font.SysFont('Arial', 20)
 
         # draw grid data
         if show_grid:
             for cell, rect_points in self.rects_transformed:
+                font = pygame.font.SysFont('Arial', 20)
+
                 self.surface.blit(
                     font.render(str(cell.id), True, (255, 255, 255)),
                     rect_points[0]
@@ -51,10 +52,17 @@ class Grid:
                     font.render(str(cell.rot), True, (255, 255, 0)),
                     [rect_points[0][0] + 20, rect_points[0][1]]
                 )
+
+                font = pygame.font.SysFont('Arial', 10)
+
                 self.surface.blit(
-                    font.render(str(cell.rel_rot), True, (255, 127, 0)),
-                    [rect_points[0][0] + 20, rect_points[0][1] + 20]
+                    font.render(str(cell.x) + "," + str(cell.y), True, (230, 230, 230)),
+                    [rect_points[0][0], rect_points[0][1] + 20]
                 )
+                # self.surface.blit(
+                #     font.render(str(cell.rel_rot), True, (255, 127, 0)),
+                #     [rect_points[0][0] + 20, rect_points[0][1] + 20]
+                # )
 
         # draw rectangle outlines
         for cell, rect_points in self.rects_transformed:

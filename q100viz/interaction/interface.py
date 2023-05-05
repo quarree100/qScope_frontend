@@ -92,7 +92,8 @@ class Slider:
         '''
         # slider controls → set slider color
         # alpha value for unselected cells
-        global_alpha = 100 + abs(int(np.sin(pygame.time.get_ticks() / 1000) * 105))
+        global_alpha = 100 + \
+            abs(int(np.sin(pygame.time.get_ticks() / 1000) * 105))
 
         self.color = pygame.Color(0, 0, 0, 0)
         for cell, rect_points in self.grid.rects_transformed:
@@ -111,24 +112,20 @@ class Slider:
                         cell.color = pygame.Color(
                             cell.color.r, cell.color.g, cell.color.b, global_alpha)
 
-                    # draw slider handles if user has selected building:
-                    if cell.handle in session.VALID_DECISION_HANDLES:
-                        # user selected at least one building
-                        if cell.color is not None and int(self.id[-1]) in session.buildings.df['group'].values:
-                            pygame.draw.circle(
-                                self.surface, cell.color, (rect_points[0][0] + 18, rect_points[0][1] + 22), global_alpha/10)
-
                     # always draw global connections:
-                    elif cell.handle.__contains__("connections"):
+                    if cell.handle.__contains__("connections"):
                         pygame.draw.polygon(
                             self.surface, cell.color, rect_points, stroke)
 
                 # icons:
                 if cell.handle in ['connection_to_heat_grid', 'refurbished', 'save_energy'] and int(self.id[-1]) in session.buildings.df['group'].values:
                     ncols = session.ncols
-                    x = self.grid.rects_transformed[cell.x+ncols*cell.y][1][3][0]-170  # TODO: why does this have to be shifted ~4*cell_width to the left??
-                    y = self.grid.rects_transformed[cell.x+ncols*cell.y][1][0][1]
-                    self.surface.blit(self.images[cell.handle].image, (x,y))
+                    # TODO: why does this have to be shifted ~4*cell_width to the left??
+                    x = self.grid.rects_transformed[cell.x +
+                                                    ncols*cell.y][1][3][0]-170
+                    y = self.grid.rects_transformed[cell.x +
+                                                    ncols*cell.y][1][0][1]
+                    self.surface.blit(self.images[cell.handle].image, (x, y))
 
                 handle_string = None
                 # slider control texts:
@@ -144,10 +141,12 @@ class Slider:
                 # global icons:
                 if cell.handle in ['start_simulation', 'start_individual_data_view', 'start_total_data_view', 'start_buildings_interaction']:
                     ncols = session.ncols
-                    x = self.grid.rects_transformed[cell.x+ncols*cell.y][1][3][0]-160  # TODO: why does this have to be shifted 4*cell_width to the left??
-                    y = self.grid.rects_transformed[cell.x+ncols*cell.y][1][0][1]
-                    self.surface.blit(self.images[cell.handle].image, (x,y))
-
+                    # TODO: why does this have to be shifted 4*cell_width to the left??
+                    x = self.grid.rects_transformed[cell.x +
+                                                    ncols*cell.y][1][3][0]-160
+                    y = self.grid.rects_transformed[cell.x +
+                                                    ncols*cell.y][1][0][1]
+                    self.surface.blit(self.images[cell.handle].image, (x, y))
 
                 # global texts:
                 if self.show_text and cell.y == len(self.grid.grid) - 1:
@@ -186,6 +185,25 @@ class Slider:
         save_energy: red/green field for binary yes/no option
         connection/refurbishment: selection of specific year
         '''
+
+        global_alpha = 100 + \
+            abs(int(np.sin(pygame.time.get_ticks() / 1000) * 105))
+
+        # draw slider handles if user has selected building:
+        # user selected at least one building
+        if int(self.id[-1]) in session.buildings.df['group'].values:
+            # green field:
+            c = self.coords
+            points = [c[0], c[1], c[2], c[3]]
+            points_transformed = self.surface.transform(points)
+            pygame.draw.polygon(
+                self.surface,
+                pygame.Color(
+                    session.user_colors[int(self.id[-1])][0],
+                    session.user_colors[int(self.id[-1])][1],
+                    session.user_colors[int(self.id[-1])][2],
+                    global_alpha),
+                points_transformed)
 
         ############# binary selection #############
         if self.handle == 'save_energy':

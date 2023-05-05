@@ -165,13 +165,16 @@ class Slider:
         font = pygame.font.SysFont('Arial', 18)
 
         if self.show_text and int(self.id[-1]) in session.buildings.df['group'].values:
-            # display human readable slider name:
-            self.surface.blit(font.render(str(self.human_readable_function[self.handle]), True, (255, 255, 255)), [
-                              self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
 
-            # display human readable slider value:
-            self.surface.blit(font.render(str(self.human_readable_value[self.handle]), True, (
-                255, 255, 255)), (self.coords_transformed[3][0] - 100, self.coords_transformed[3][1]-20))
+            # display human readable slider name:
+            # string is either "function..........val" or "please select"
+            slider_func_and_val = str(self.human_readable_function[self.handle]) \
+                + "." * (40 - len(self.human_readable_function[self.handle])) \
+                + str(self.human_readable_value[self.handle]) \
+                if self.handle is not None else self.human_readable_function[self.handle]
+
+            self.surface.blit(font.render(slider_func_and_val, True, (255, 255, 255)),
+                [self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
 
         if session.VERBOSE_MODE:
             self.surface.blit(font.render(str(self.value), True, (

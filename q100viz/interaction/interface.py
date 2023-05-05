@@ -97,8 +97,9 @@ class Slider:
 
         self.color = pygame.Color(0, 0, 0, 0)
         for cell, rect_points in self.grid.rects_transformed:
-            # cells have handles if set in csv
-            if cell.handle is not None and cell.x in range(self.x_cell_range[0], self.x_cell_range[1]):
+            if cell.handle is None: # cells have handles if set in csv
+                continue
+            elif cell.x in range(self.x_cell_range[0], self.x_cell_range[1]):
                 if self.show_controls:
                     stroke = 4 if cell.selected else 0
 
@@ -108,11 +109,15 @@ class Slider:
                             cell.color = pygame.Color(
                                 cell.color.r, cell.color.g, cell.color.b, 255)
                             self.color = cell.color
-                    elif cell.color is not None:
+
+                    if cell.handle.__contains__("active_user_focus"):
                         cell.color = pygame.Color(
                             cell.color.r, cell.color.g, cell.color.b, global_alpha)
+                        pygame.draw.polygon(
+                            self.surface, cell.color, rect_points, stroke
+                        )
 
-                    # always draw global connections:
+                    # always draw globals:
                     if cell.handle.__contains__("connections"):
                         pygame.draw.polygon(
                             self.surface, cell.color, rect_points, stroke)

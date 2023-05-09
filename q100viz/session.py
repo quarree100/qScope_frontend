@@ -3,7 +3,6 @@
 import pandas as pd
 import pygame
 import json
-from q100viz.interaction.model_validation_mode import ModelValidation_Mode
 
 from q100viz.settings.config import config
 import q100viz.api as api
@@ -12,9 +11,8 @@ import q100viz.grid as grid
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.buildings_interaction import Buildings_Interaction
 from q100viz.interaction.simulation_mode import SimulationMode
-from q100viz.interaction.dataview_individual_mode import DataViewIndividual_Mode
-from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode
-from q100viz.interaction.model_validation_mode import ModelValidation_Mode
+from q100viz.interaction.individual_data_view import DataViewIndividual_Mode
+from q100viz.interaction.total_data_view import DataViewTotal_Mode
 import q100viz.keystone as keystone
 import q100viz.buildings
 import q100viz.devtools as devtools
@@ -117,12 +115,6 @@ scenario_data = {
         '../data/scenario_Ref.csv').set_index('name')
 }
 
-scenario_titles = {
-    identifier : pd.read_csv('../data/scenario_titles.csv').set_index('scenario').at[identifier, 'name'] for identifier in scenario_data.keys()
-}
-
-num_of_questions = 5  # TODO: this equals length of csv
-
 # ---------------------------- simulation -----------------------------
 min_connection_year = config['SIMULATION_FORCE_START_YEAR']
 max_connection_year = config['SIMULATION_FORCE_END_YEAR']
@@ -194,7 +186,6 @@ buildings_interaction = Buildings_Interaction()
 simulation = SimulationMode()
 individual_data_view = DataViewIndividual_Mode()
 total_data_view = DataViewTotal_Mode()
-model_validation = ModelValidation_Mode()
 
 modes = [buildings_interaction, simulation, individual_data_view, total_data_view]
 
@@ -210,8 +201,6 @@ def string_to_mode(input_string):
         return individual_data_view
     elif input_string == 'total_data_view':
         return total_data_view
-    elif input_string == 'model_validation':
-        return model_validation
 
 flag_export_canvas = False
 active_mode = string_to_mode(environment['mode'])

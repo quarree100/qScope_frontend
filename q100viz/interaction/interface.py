@@ -185,7 +185,7 @@ class Slider:
     def draw_area(self):
         '''
         draws option-specific layout onto the slider area.
-        save_energy: red/green field for binary yes/no option
+        save_energy: red/[user_color] field for binary yes/no option
         connection/refurbishment: selection of specific year
         '''
 
@@ -234,8 +234,13 @@ class Slider:
                 c[2],  # top right
                 c[3]]  # bottom right
             points_transformed = self.surface.transform(points)
-            pygame.draw.polygon(self.surface, pygame.Color(
-                20, 130, 55), points_transformed)
+            pygame.draw.polygon(
+                self.surface, pygame.Color(
+                    session.user_colors[int(self.id[-1])][0],
+                    session.user_colors[int(self.id[-1])][1],
+                    session.user_colors[int(self.id[-1])][2],
+                    global_alpha),
+                points_transformed)
 
         ############# year selection #############
         elif self.handle in ['connection_to_heat_grid', 'refurbished']:

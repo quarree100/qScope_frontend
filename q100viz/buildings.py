@@ -92,7 +92,7 @@ class Buildings:
 
         # generic data
         for idx, row in self.df.iterrows():
-            self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else False
+            self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else False  # note: we decided that all buildings without any energy_source in the source data are set pre-connected.
         self.df['connection_to_heat_grid_prior'] = self.df['connection_to_heat_grid']
         self.df['refurbished'] = self.df['connection_to_heat_grid']
         self.df['refurbished_prior'] = self.df['refurbished']

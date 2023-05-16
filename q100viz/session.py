@@ -138,6 +138,7 @@ basemap = gis.Basemap(
     _gis)
 basemap.warp()
 
+# ------------------------------ grid ---------------------------------
 ###### Initialize grid, projected onto the viewport #########
 grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))  # TODO: seperate files for the two grids
 nrows = grid_settings['nrows']

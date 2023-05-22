@@ -68,19 +68,6 @@ class GIS:
             session.log += "\n%s" % e
             print("cannot draw polygon layer: ", e)
 
-    def draw_polygon_layer_connection_year(self, df, stroke, fill_true, fill_false=None, fill_attr=None):
-        '''draw polygon layer, lerp using bool value'''
-        try:
-            for polygon in df.to_dict('records'):
-                fill_color = pygame.Color(fill_true) if polygon[fill_attr] > -1 else fill_false
-
-                points = self.surface.transform(polygon['geometry'].exterior.coords)
-                pygame.draw.polygon(self.surface, fill_color, points, stroke)
-
-        except Exception as e:
-            session.log += "\n%s" % e
-            print("cannot draw polygon layer: ", e)
-
     def draw_polygon_layer_float(self, surface, df, stroke, fill, lerp_target=None, lerp_attr=None):
         '''draw polygon layer and lerp using float'''
         try:

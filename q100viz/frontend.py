@@ -11,12 +11,13 @@ import q100viz.session as session
 from q100viz.settings.config import config
 from q100viz.interaction.interface import *
 
-class Frontend:
-############################## PYGAME SETUP ###########################
-    def __init__(self, run_in_main_window=False):
-        self.FPS = session.FPS = 12 # framerate
 
-        # set window position
+class Frontend:
+    ############################## PYGAME SETUP ###########################
+    def __init__(self, run_in_main_window=False):
+        self.FPS = session.FPS = 12  # framerate
+
+        # window position (must be set before pygame.init!)
         if not run_in_main_window:
             os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (
                 0, 2560)  # projection to the left
@@ -26,12 +27,8 @@ class Frontend:
 
         self.clock = pygame.time.Clock()
 
-        # UDP receive
-        grid_udp_1 = ('localhost', 5001)
-        grid_udp_2 = ('localhost', 5000)
-        self.udp_gama = ('localhost', 8081)
-
-        # Set up display
+        ######################### pygame canvas #######################
+        # window size:
         canvas_size = session.config['CANVAS_SIZE']
         self.canvas = pygame.display.set_mode(canvas_size, NOFRAME)
         pygame.display.set_caption("q100viz")
@@ -41,27 +38,34 @@ class Frontend:
         self.show_nahwaermenetz = True  # display heat grid as red lines
         self.display_viewport = True  # displays the area that is being drawn on. used for debugging
 
-        ################### mask viewport with black surface ##################
+        # mask viewport with black surface
         self.mask_points = [[0, 0], [85.5, 0], [85.5, 82], [0, 82], [0, -50],
-                    [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
+                            [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
-        ################# UDP server for incoming cspy messages ###############
+        ############# UDP server for incoming cspy messages ###########
+        # UDP receive
+        grid_udp_1 = ('localhost', config['UDP_TABLE_1'])
+        grid_udp_2 = ('localhost', config['UDP_TABLE_2'])
+        self.udp_gama = ('localhost', config['UDP_SERVER_PORT'])
+
         for grid_, grid_udp in [[session.grid_1, grid_udp_1], [session.grid_2, grid_udp_2]]:
             udp_server = udp.UDPServer(*grid_udp, 4096)
             udp_thread = threading.Thread(target=udp_server.listen,
-                                        args=(grid_.read_scanner_data,),
-                                        daemon=True)
+                                          args=(grid_.read_scanner_data,),
+                                          daemon=True)
             udp_thread.start()
 
         # receive and forward GAMA messages during simulation:
-        udp_server = udp.UDPServer('localhost', config['UDP_SERVER_PORT'], 4096)
+        udp_server = udp.UDPServer(
+            'localhost', config['UDP_SERVER_PORT'], 4096)
         udp_thread = threading.Thread(target=udp_server.listen,
-                                    args=(session.api.forward_gama_message,),
-                                    daemon=True)
+                                      args=(session.api.forward_gama_message,),
+                                      daemon=True)
         udp_thread.start()
 
 
 ############################ Begin Game Loop ##########################
+
     def run(self):
 
         if session.previous_mode is not session.active_mode:
@@ -166,7 +170,7 @@ class Frontend:
             session._gis.draw_linestring_layer(
                 self.canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
             # session._gis.draw_polygon_layer(
-                # canvas, session._gis.waermezentrale, 0, (252, 137, 0))
+            # canvas, session._gis.waermezentrale, 0, (252, 137, 0))
             session._gis.draw_buildings_connections(
                 session.buildings.df)  # draw lines to closest heat grid
             if session.VERBOSE_MODE:
@@ -219,7 +223,7 @@ class Frontend:
             crop_width = 4644
             crop_height = 800
             self.canvas.blit(session.basemap.image, (0, 0),
-                        (0, 0, crop_width, crop_height))
+                             (0, 0, crop_width, crop_height))
 
         # GIS layer
         if session.show_polygons:

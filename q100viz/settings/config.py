@@ -1,6 +1,8 @@
 config = {
     # UDP communication
     'UDP_SERVER_PORT' : 8081,
+    'UDP_TABLE_1' : 5001,
+    'UDP_TABLE_2' : 5000,
 
     # GIS files
     'BASEMAP_FILE': "../data/GIS/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg",

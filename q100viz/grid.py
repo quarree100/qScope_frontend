@@ -115,8 +115,7 @@ class Grid:
                     cell.selected = cell.id != 5  # any non-white object selects cells
 
                     # calculate relative rotation
-                    # an inactive cell has a rotation value of -1
-                    if cell.rot == -1:
+                    if cell.rot == -1:  # an inactive cell has a rotation value of -1
                         cell.rel_rot = 0
                     elif cell.prev_rot != cell.rot:
                         cell.rel_rot = cell.rot - cell.prev_rot if cell.prev_rot > -1 else 0

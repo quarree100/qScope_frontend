@@ -101,7 +101,7 @@ environment = {
     }
 
 # scenario data:
-environment['active_scenario_handle'] = 'Ref'
+environment['active_scenario_handle'] = 'A'
 scenario_data = {
     'A': pd.read_csv(
         '../data/scenario_A.csv').set_index('name'),

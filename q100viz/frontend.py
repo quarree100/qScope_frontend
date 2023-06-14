@@ -106,7 +106,6 @@ class Frontend:
                     session.active_mode = session.buildings_interaction
                 # enter simulation mode:
                 elif event.key == K_4:
-                    session.environment['active_scenario_handle'] = 'A'
                     session.simulation.setup()
                     session.active_mode = session.simulation
                 elif event.key == K_5:

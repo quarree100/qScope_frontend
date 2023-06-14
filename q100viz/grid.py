@@ -121,7 +121,7 @@ class Grid:
                         cell.rel_rot = cell.rot - cell.prev_rot if cell.prev_rot > -1 else 0
                     cell.prev_rot = cell.rot
 
-            session.flag_export_canvas = True
+            session.flag_export_canvas = True  # this will export an image of the current canvas, when in verbose mode
             session.active_mode.process_grid_change()
 
             # update slider values

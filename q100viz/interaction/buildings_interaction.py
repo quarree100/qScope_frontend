@@ -12,7 +12,7 @@ class Buildings_Interaction:
     def __init__(self):
         self.name = 'buildings_interaction'
         self.selection_mode = config['buildings_selection_mode'] # decides how to select intersected buildings. can be 'all' or 'rotation'
-        self.previous_connections_selector = ''
+        self.previous_connections_selector = ''  # stores the 'global scenario token' that was used to manually set the number of generic connections to heat grid
         self.waiting_to_start = False
         self.mode_token_selection_time = datetime.datetime.now()
         self.activation_buffer_time = 2  # seconds before simulation begins

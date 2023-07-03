@@ -82,8 +82,6 @@ emissions_data_paths = ['' for n in range(num_of_rounds)]
 buildings = q100viz.buildings.Buildings()
 
 scenario_selected_buildings = pd.DataFrame()
-seconds_elapsed = 0
-ticks_elapsed = 0
 
 # list of possible handles
 MODE_SELECTOR_HANDLES = ['start_individual_data_view', 'start_total_data_view', 'start_buildings_interaction', 'start_simulation']

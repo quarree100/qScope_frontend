@@ -9,9 +9,7 @@ config = {
     'GEBAEUDE_BESTAND_FILE': "../data/GIS/Shapefiles/bestandsgebaeude_export.shp",
     'GEBAEUDE_NEUBAU_FILE': "../data/GIS/Shapefiles/Neubau Gebaeude Kataster.shp",
     'WAERMESPEICHER_FILE': "../data/GIS/Shapefiles/Waermespeicher.shp",
-    'HEIZZENTRALE_FILE': "../data/GIS/Shapefiles/Heizzentrale.shp",
     'NAHWAERMENETZ_FILE': "../data/GIS/Shapefiles/Nahwaermenetz.shp",
-    'TYPOLOGIEZONEN_FILE': "../data/GIS/Shapefiles/Typologiezonen.shp",
 
     # graphics setup
     'SAVED_KEYSTONE_FILE': 'keystone.save',

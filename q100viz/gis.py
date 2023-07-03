@@ -9,7 +9,7 @@ import q100viz.session as session
 
 crs = "EPSG:3857"
 
-
+################################# GIS #################################
 class GIS:
     def __init__(self, canvas_size, src_points, viewport):
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
@@ -20,10 +20,7 @@ class GIS:
         self.surface.calculate(viewport.transform_mat)
 
         # GIS layers
-        self.typologiezonen = read_shapefile(config['TYPOLOGIEZONEN_FILE'])
         self.nahwaermenetz = read_shapefile(config['NAHWAERMENETZ_FILE'])
-        # self.waermezentrale = read_shapefile(config['WAERMESPEICHER_FILE'], 'Waermespeicher').append(
-            # read_shapefile(config['HEIZZENTRALE_FILE']))
 
     def get_intersection_indexer(self, df, v_polygon):
         polygon = self.surface.inverse_transform(v_polygon)
@@ -31,11 +28,38 @@ class GIS:
 
         return df.intersects(shape)
 
+    ############################## DRAW ###############################
+
+    # ---------------------------- lines ------------------------------
+
     def draw_linestring_layer(self, surface, df, color, stroke):
         for linestring in df.to_dict('records'):
             points = self.surface.transform(linestring['geometry'].coords)
             pygame.draw.lines(self.surface, pygame.Color(color), False, points, stroke)
 
+    def draw_buildings_connections(self, df):
+        try:
+            for row in df.to_dict('records'):
+
+                points = self.surface.transform(row['geometry'].exterior.coords)
+                centroid = shapely.geometry.Polygon(points).centroid
+
+                target = row['target_point']
+
+                if row['connection_to_heat_grid']:
+                    pygame.draw.line(
+                        self.surface,
+                        color=pygame.Color(0, 168, 78),
+                        start_pos=((centroid.x, centroid.y)),
+                        end_pos=((target.x, target.y)),
+                        width=4
+                        )
+
+        except Exception as e:
+            session.log += "\n%s" % e
+            print("cannot draw building connection layer: ", e)
+
+    # --------------------------- polygons ----------------------------
 
     def draw_polygon_layer(self, surface, df, stroke, fill):
         '''draw polygon layer, do not lerp'''
@@ -86,28 +110,7 @@ class GIS:
             session.log += "\n%s" % e
             print("cannot draw polygon layer: ", e)
 
-    def draw_buildings_connections(self, df):
-        try:
-            for row in df.to_dict('records'):
-
-                points = self.surface.transform(row['geometry'].exterior.coords)
-                centroid = shapely.geometry.Polygon(points).centroid
-
-                target = row['target_point']
-
-                if row['connection_to_heat_grid']:
-                    pygame.draw.line(
-                        self.surface,
-                        color=pygame.Color(0, 168, 78),
-                        start_pos=((centroid.x, centroid.y)),
-                        end_pos=((target.x, target.y)),
-                        width=4
-                        )
-
-        except Exception as e:
-            session.log += "\n%s" % e
-            print("cannot draw building connection layer: ", e)
-
+############################### BASEMAP ###############################
 
 class Basemap:
     def __init__(self, canvas_size, file, dst_points, gis):

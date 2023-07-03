@@ -32,7 +32,6 @@ class Slider:
 
         self.handle = None
         self.previous_handle = None
-        self.last_change = session.seconds_elapsed  # time of last slider change
 
         # this is used for the activation of the next question in questionnaire mode  # TODO: get slider position initially and set toggle accordingly (Slider should not "start at" this position)
         self.toggle_question = False
@@ -314,25 +313,6 @@ class Slider:
                 session.buildings.df.loc[(
                     session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'save_energy'] = self.value > 0.5
                 self.human_readable_value['save_energy'] = 'ja' if self.value > 0.5 else 'nein'
-
-            # questionnaire:
-            elif self.handle == 'answer':
-                session.questionnaire.answer = 'no' if self.value >= 0.5 else 'yes'
-
-            elif self.handle == 'next_question':
-                if session.seconds_elapsed > self.last_change + 1:  # some delay for stable interaction
-                    if self.toggle_question:
-                        if self.value >= 0.5:
-                            self.toggle_question = not self.toggle_question
-                            if session.active_mode is session.questionnaire:
-                                session.active_mode.get_next_question()
-                            self.last_change = session.seconds_elapsed
-                    else:
-                        if self.value < 0.5:
-                            self.toggle_question = not self.toggle_question
-                            if session.active_mode is session.questionnaire:
-                                session.active_mode.get_next_question()
-                            self.last_change = session.seconds_elapsed
 
             session.api.send_message(json.dumps(session.environment))
             session.api.send_message(json.dumps(

@@ -203,3 +203,7 @@ def string_to_mode(input_string):
 
 flag_export_canvas = False
 active_mode = string_to_mode(environment['mode'])
+
+def iterate_grids():
+
+    return [(x, y, cell) for grid in [grid_1, grid_2] for y, row in enumerate(grid.grid) for x, cell in enumerate(row)]

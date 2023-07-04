@@ -167,21 +167,34 @@ class Frontend:
             session._gis.draw_buildings_connections(
                 session.buildings.df)  # draw lines to closest heat grid
 
-            # fill:
+            # fill and lerp:
             if session.VERBOSE_MODE:
                 session._gis.draw_polygon_layer_float(
-                    self.canvas, session.buildings.df, 0, (96, 205, 21), (213, 50, 21), 'spec_heat_consumption')  # fill and lerp
+                    self.canvas, session.buildings.df, 0,
+                    (96, 205, 21),
+                    (213, 50, 21),
+                    'spec_heat_consumption')
             else:
                 session._gis.draw_polygon_layer_bool(
-                    self.canvas, session.buildings.df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
+                    self.canvas, session.buildings.df, 0,
+                    (213, 50, 21),
+                    (96, 205, 21),
+                    'connection_to_heat_grid')
 
-            # stroke:
+            # stroke simple black:
             session._gis.draw_polygon_layer_bool(
-                self.canvas, session.buildings.df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
+                self.canvas, session.buildings.df, 1,
+                (0, 0, 0),
+                (0, 0, 0),
+                'connection_to_heat_grid')
 
             # stroke according to connection status:
             session._gis.draw_polygon_layer_bool(
-                surface=self.canvas, df=session.buildings.df, stroke=1, fill_false=(0, 0, 0), fill_true=(0, 168, 78), fill_attr='connection_to_heat_grid')
+                surface=self.canvas, df=session.buildings.df,
+                stroke=1,
+                fill_false=(0, 0, 0),
+                fill_true=(0, 168, 78),
+                fill_attr='connection_to_heat_grid')
 
         # draw grid outline
         session.grid_1.draw(self.show_grid) # draws polygons to grid.surface

@@ -62,108 +62,109 @@ class Buildings_Interaction:
                 slider.handle = None
 
         # iterate grid:
-        for grid in [session.grid_1, session.grid_2]:
-            for y, row in enumerate(grid.grid):
-                for x, cell in enumerate(row):
-                    if not cell.selected:
-                        if cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt buffer when deselected
-                            mode = session.string_to_mode(cell.handle[6:])
-                            mode.waiting_to_start = False
-                        continue
-                    # high performance impact, use sparingly
-                    i = grid.get_intersection(session.buildings.df, x, y)
+        for x,y,cell in session.iterate_grids():
 
-                    # use rotation value to cycle through buildings located in cell
-                    if self.selection_mode == 'rotation':
-                        n = len(session.buildings.df[i])
-                        if n > 0:
-                            selection = session.buildings.df[i].iloc[cell.rot % n]
-                            session.buildings.df.loc[selection.name,
-                                                'selected'] = True  # select cell
-                            session.buildings.df.loc[selection.name,
-                                                'group'] = cell.id  # pass cell ID to building
+            if not cell.selected:
+                if cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt buffer when deselected
+                    mode = session.string_to_mode(cell.handle[6:])
+                    mode.waiting_to_start = False
+                continue
+            # high performance impact, use sparingly
+            i = grid.get_intersection(session.buildings.df, x, y)
 
-                    # select all buildings within range
-                    elif self.selection_mode == 'all':
-                        for n in range(0, len(session.buildings.df[i])):
-                            selection = session.buildings.df[i].iloc[n]
-                            session.buildings.df.loc[selection.name,
-                                                    'selected'] = True
-                            session.buildings.df.loc[selection.name,
-                                                'group'] = cell.id  # pass cell ID to building
+            # use rotation value to cycle through buildings located in cell
+            if self.selection_mode == 'rotation':
+                n = len(session.buildings.df[i])
+                if n > 0:
+                    selection = session.buildings.df[i].iloc[cell.rot % n]
+                    session.buildings.df.loc[selection.name,
+                                        'selected'] = True  # select cell
+                    session.buildings.df.loc[selection.name,
+                                        'group'] = cell.id  # pass cell ID to building
 
-                    # set slider handles via selected cell:
-                    if cell.handle is not None:
-                        if cell.handle in session.VALID_DECISION_HANDLES:
-                            for slider in grid.sliders.values():
-                                if cell.x in range(slider.x_cell_range[0], slider.x_cell_range[1]) and session.active_mode != session.simulation:
-                                    slider.update_handle(cell.handle, cell.id)
+            # select all buildings within range
+            elif self.selection_mode == 'all':
+                for n in range(0, len(session.buildings.df[i])):
+                    selection = session.buildings.df[i].iloc[n]
+                    session.buildings.df.loc[selection.name,
+                                            'selected'] = True
+                    session.buildings.df.loc[selection.name,
+                                        'group'] = cell.id  # pass cell ID to building
 
-                        # mode selectors:
-                        elif cell.handle in session.MODE_SELECTOR_HANDLES:
-                            mode = session.string_to_mode(cell.handle[6:])
-                            if not mode.waiting_to_start:
-                                self.mode_token_selection_time = datetime.datetime.now()
-                                mode.waiting_to_start = True
+            # set slider handles via selected cell:
+            if cell.handle is None:
+                continue
 
-                        # connect buildings globally:
-                        elif cell.handle in ['connections_0', 'connections_20', 'connections_40', 'connections_60', 'connections_80', 'connections_100'] and cell.handle != self.previous_connections_selector:
+            if cell.handle in session.VALID_DECISION_HANDLES:
+                for slider in grid.sliders.values():
+                    if cell.x in range(slider.x_cell_range[0], slider.x_cell_range[1]) and session.active_mode != session.simulation:
+                        slider.update_handle(cell.handle, cell.id)
 
-                            self.previous_connections_selector = cell.handle
-                            dec_connections = 0
-                            if cell.handle == "connections_20":
-                                dec_connections = 0.2
-                            elif cell.handle == "connections_40":
-                                dec_connections = 0.4
-                            elif cell.handle == "connections_60":
-                                dec_connections = 0.6
-                            elif cell.handle == "connections_80":
-                                dec_connections = 0.8
-                            elif cell.handle == "connections_100":
-                                dec_connections = 1
+            # mode selectors:
+            elif cell.handle in session.MODE_SELECTOR_HANDLES:
+                mode = session.string_to_mode(cell.handle[6:])
+                if not mode.waiting_to_start:
+                    self.mode_token_selection_time = datetime.datetime.now()
+                    mode.waiting_to_start = True
 
-                            session.environment['scenario_num_connections'] = int(
-                                dec_connections * len(session.buildings.df.index))
+            # connect buildings globally:
+            elif cell.handle in ['connections_0', 'connections_20', 'connections_40', 'connections_60', 'connections_80', 'connections_100'] and cell.handle != self.previous_connections_selector:
 
-                            # connect additional buildings as set in scenario:
-                            if session.environment['scenario_num_connections'] > 0:
-                                # reset:
-                                if len(session.scenario_selected_buildings.index) > 0:
-                                    session.scenario_selected_buildings['selected'] = False
-                                    session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                                    session.buildings.df.update(
-                                        session.scenario_selected_buildings)
+                self.previous_connections_selector = cell.handle
+                dec_connections = 0
+                if cell.handle == "connections_20":
+                    dec_connections = 0.2
+                elif cell.handle == "connections_40":
+                    dec_connections = 0.4
+                elif cell.handle == "connections_60":
+                    dec_connections = 0.6
+                elif cell.handle == "connections_80":
+                    dec_connections = 0.8
+                elif cell.handle == "connections_100":
+                    dec_connections = 1
 
-                                # sample data:
-                                try:
-                                    session.scenario_selected_buildings = session.buildings.df.sample(
-                                        n=session.environment['scenario_num_connections'])
-                                except Exception as e:
-                                    print("max number of possible samples reached. " + str(e))
-                                    session.log += "\n%s" % e
+                session.environment['scenario_num_connections'] = int(
+                    dec_connections * len(session.buildings.df.index))
 
-                                # filter already selected buildings from list:
-                                session.scenario_selected_buildings = session.scenario_selected_buildings[session.scenario_selected_buildings['group'] < 0]
-                                for group_df in session.buildings.list_from_groups():
-                                    if group_df is not None:
-                                        for idx in group_df.index:
-                                            if idx in session.scenario_selected_buildings.index:
-                                                session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
+                # connect additional buildings as set in scenario:
+                if session.environment['scenario_num_connections'] > 0:
+                    # reset:
+                    if len(session.scenario_selected_buildings.index) > 0:
+                        session.scenario_selected_buildings['selected'] = False
+                        session.scenario_selected_buildings['connection_to_heat_grid'] = False
+                        session.buildings.df.update(
+                            session.scenario_selected_buildings)
 
-                                # select and connect sampled buildings:
-                                session.scenario_selected_buildings['selected'] = True
-                                session.scenario_selected_buildings['connection_to_heat_grid'] = 2020
-                                print("selecting random {0} buildings:".format(
-                                    session.environment['scenario_num_connections']))
-                                session.buildings.df.update(
-                                session.scenario_selected_buildings)
+                    # sample data:
+                    try:
+                        session.scenario_selected_buildings = session.buildings.df.sample(
+                            n=session.environment['scenario_num_connections'])
+                    except Exception as e:
+                        print("max number of possible samples reached. " + str(e))
+                        session.log += "\n%s" % e
 
-                            else:  # value is 0: deselect all
-                                session.scenario_selected_buildings['selected'] = False
-                                session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                                session.buildings.df.update(
-                                session.scenario_selected_buildings)
-                                session.scenario_selected_buildings = session.scenario_selected_buildings[0:0] # empty dataframe
+                    # filter already selected buildings from list:
+                    session.scenario_selected_buildings = session.scenario_selected_buildings[session.scenario_selected_buildings['group'] < 0]
+                    for group_df in session.buildings.list_from_groups():
+                        if group_df is not None:
+                            for idx in group_df.index:
+                                if idx in session.scenario_selected_buildings.index:
+                                    session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
+
+                    # select and connect sampled buildings:
+                    session.scenario_selected_buildings['selected'] = True
+                    session.scenario_selected_buildings['connection_to_heat_grid'] = 2020
+                    print("selecting random {0} buildings:".format(
+                        session.environment['scenario_num_connections']))
+                    session.buildings.df.update(
+                    session.scenario_selected_buildings)
+
+                else:  # value is 0: deselect all
+                    session.scenario_selected_buildings['selected'] = False
+                    session.scenario_selected_buildings['connection_to_heat_grid'] = False
+                    session.buildings.df.update(
+                    session.scenario_selected_buildings)
+                    session.scenario_selected_buildings = session.scenario_selected_buildings[0:0] # empty dataframe
 
         session.api.send_message(json.dumps(session.environment))
         session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
@@ -189,6 +190,8 @@ class Buildings_Interaction:
         except Exception as e:
                 print("Cannot draw frontend:", e)
                 session.log += "\nCannot draw frontend: %s" % e
+
+        # ------------------------- TEXT DISPLAY ----------------------
 
         font = pygame.font.SysFont('Arial', 18)
         nrows = 22

@@ -122,7 +122,7 @@ class Slider:
                     ncols = session.ncols
                     # TODO: why does this have to be shifted ~4*cell_width to the left??
                     x = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][3][0]-170
+                                                    ncols*cell.y][1][3][0]-190
                     y = self.grid.rects_transformed[cell.x +
                                                     ncols*cell.y][1][0][1]
                     self.surface.blit(self.images[cell.handle].image, (x, y))
@@ -159,7 +159,7 @@ class Slider:
                 if handle_string is not None:
                     self.surface.blit(
                         font.render(handle_string, True, (255, 255, 255)),
-                        [rect_points[0][0], rect_points[0][1] + 35]
+                        [rect_points[0][0], rect_points[0][1] + 45]
                     )
 
         font = pygame.font.SysFont('Arial', 18)

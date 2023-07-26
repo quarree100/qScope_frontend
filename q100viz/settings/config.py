@@ -29,7 +29,7 @@ config = {
     'REFERENCE_DATA_FOLDER' : '../data/precomputed/simulation_defaults',
 
     # grid setup
-    'CSPY_SETTINGS_FILE': '../cspy_L/settings/qscope_L.json',
+    'CSPY_SETTINGS_FILE': '../cspy/settings/qscope_L.json',
     'GRID_1_SETUP_FILE': 'q100viz/settings/buildings_interaction_grid_1.csv',
     'GRID_2_SETUP_FILE': 'q100viz/settings/buildings_interaction_grid_2.csv',
     'GRID_1_INPUT_SCENARIOS_FILE': 'q100viz/settings/buildings_interaction_grid_1.csv',

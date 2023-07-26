@@ -125,7 +125,7 @@ class Slider:
                     y = self.grid.rects_transformed[cell.x +
                                                     ncols*cell.y][1][0][1]
                     pygame.draw.polygon(
-                        self.surface, (255,255,255,global_alpha), rect_points, stroke)
+                        self.surface, (255,255,255,global_alpha), rect_points, 0)
 
                     self.surface.blit(self.images[cell.handle].image, (x, y))
 

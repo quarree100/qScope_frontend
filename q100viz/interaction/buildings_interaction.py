@@ -62,34 +62,25 @@ class Buildings_Interaction:
                 slider.handle = None
 
         # iterate grid:
-        for x,y,cell in session.iterate_grids():
+        for x,y,cell,grid in session.iterate_grids():
 
             if not cell.selected:
-                if cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt buffer when deselected
+                if cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt time buffer when deselected
                     mode = session.string_to_mode(cell.handle[6:])
                     mode.waiting_to_start = False
                 continue
+
             # high performance impact, use sparingly
             i = grid.get_intersection(session.buildings.df, x, y)
 
             # use rotation value to cycle through buildings located in cell
-            if self.selection_mode == 'rotation':
-                n = len(session.buildings.df[i])
-                if n > 0:
-                    selection = session.buildings.df[i].iloc[cell.rot % n]
-                    session.buildings.df.loc[selection.name,
-                                        'selected'] = True  # select cell
-                    session.buildings.df.loc[selection.name,
-                                        'group'] = cell.id  # pass cell ID to building
-
-            # select all buildings within range
-            elif self.selection_mode == 'all':
-                for n in range(0, len(session.buildings.df[i])):
-                    selection = session.buildings.df[i].iloc[n]
-                    session.buildings.df.loc[selection.name,
-                                            'selected'] = True
-                    session.buildings.df.loc[selection.name,
-                                        'group'] = cell.id  # pass cell ID to building
+            n = len(session.buildings.df[i])
+            if n > 0:
+                selection = session.buildings.df[i].iloc[cell.rot % n]
+                session.buildings.df.loc[selection.name,
+                                    'selected'] = True  # select cell
+                session.buildings.df.loc[selection.name,
+                                    'group'] = cell.id  # pass cell ID to building
 
             # set slider handles via selected cell:
             if cell.handle is None:

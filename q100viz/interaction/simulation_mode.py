@@ -28,10 +28,10 @@ class SimulationMode:
         self.reference_data_folder = os.path.normpath(
             os.path.join(self.cwd, config['REFERENCE_DATA_FOLDER']))
         self.script = self.headless_folder + 'gama-headless.sh'
-        self.current_output_folder = ''  # will be set in activate()
-        self.xml_path = ''               # will be set in activate()
-        self.final_step = 0              # will be set in activate()
-        self.max_year = 2045             # will be set in activate()
+        self.current_output_folder = ''  # will be set in setup()
+        self.xml_path = ''               # will be set in setup()
+        self.final_step = 0              # will be set in setup()
+        self.max_year = 2045             # will be set in setup()
         self.output_folders = []         # list of output folders of all game rounds
         self.using_timestamp = True
         self.seed = 1.0

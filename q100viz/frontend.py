@@ -10,6 +10,7 @@ import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.settings.config import config
 from q100viz.interaction.interface import *
+import q100viz.devtools as devtools
 
 
 class Frontend:
@@ -140,8 +141,12 @@ class Frontend:
                     session.VERBOSE_MODE = not session.VERBOSE_MODE
 
             elif event.type == QUIT:
+                print("-" * 72)
+                print("Closing application.")
                 if session.log != "":
-                    with open("qScope-log_%s.txt" % datetime.datetime.now(), "w") as f:
+                    print("Full log exported to qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
+                    # TODO: move log file to output folder
+                    with open("qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
                         f.write(session.log)
                         f.close()
                 pygame.quit()

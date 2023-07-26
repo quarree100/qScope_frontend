@@ -5,7 +5,6 @@ import datetime
 import json
 
 import q100viz.session as session
-from q100viz.graphics.graphictools import Image
 
 class DataViewIndividual_Mode():
     def __init__(self):
@@ -13,22 +12,6 @@ class DataViewIndividual_Mode():
         self.waiting_to_start = False
         self.mode_token_selection_time = datetime.datetime.now()
         self.activation_buffer_time = 2  # seconds before simulation begins
-
-        # self.images_active = [
-        #     Image("images/piechart.tif"),
-        #     Image("images/predator-prey.tif"),
-        #     Image("images/sankey.tif")
-        #     ]
-        # self.images_disabled = [
-        #     Image("images/piechart_disabled.tif"),
-        #     Image("images/predator-prey_disabled.tif"),
-        #     Image("images/sankey_disabled.tif")
-        #     ]
-        # self.images = [image for image in self.images_disabled]
-
-        # for lst in [self.images_active, self.images_disabled]:
-        #     for image in lst:
-        #         image.warp()
 
     def activate(self):
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
@@ -64,34 +47,21 @@ class DataViewIndividual_Mode():
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
             session.grid_1.mouse_pressed(event.button)
             session.grid_2.mouse_pressed(event.button)
-            session.api.send_simplified_dataframe_with_environment_variables(
-                session.buildings.df[session.buildings.df.selected],
-                session.environment)
+            session.api.send_df_with_session_env(
+                session.buildings.df[session.buildings.df.selected])
 
             self.process_grid_change()
 
     def process_grid_change(self):
 
         session.buildings.df['selected'] = False
-        for x,y,cell in session.iterate_grids():
+        for x,y,cell,grid in session.iterate_grids():
 
             if cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt buffer when deselected
                 mode = session.string_to_mode(cell.handle[6:])
                 mode.waiting_to_start = False
 
             if cell.selected:
-
-                # high performance impact, use sparingly
-                i = grid.get_intersection(session.buildings.df, x, y)
-
-                # use rotation value to cycle through buildings located in cell
-                n = len(session.buildings.df[i])
-                if n > 0:
-                    selection = session.buildings.df[i].iloc[cell.rot % n]
-                    session.buildings.df.loc[selection.name,
-                                        'selected'] = True  # select cell
-                    session.buildings.df.loc[selection.name,
-                                        'group'] = cell.id  # pass cell ID to building
 
                 # focus user data:
                 if cell.handle in ['active_user_focus_data_0', 'active_user_focus_data_1', 'active_user_focus_data_2', 'active_user_focus_data_3']:

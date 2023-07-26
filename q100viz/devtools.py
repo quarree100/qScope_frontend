@@ -1,10 +1,12 @@
 ######################## dev tools ##########################
 import pandas
 
-def print_verbose(message, VERBOSE_MODE, log):
+def print_verbose(message, VERBOSE_MODE):
     if VERBOSE_MODE:
         print(message)
-        if log: log += ("\n" + message)
+        return message
+    else:
+        return ""
 
 def mark_random_buildings_for_simulation(buildings_df, num_buildings=1, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
         '''pick random n buildings, activate for simulation and update buildings list'''
@@ -28,8 +30,8 @@ def mark_buildings_for_simulation(buildings_df, list_of_buildings_indices, max_b
         df = buildings_df.loc[list_of_buildings_indices]
         for i, idx in enumerate(df.index):
                 df.at[idx, 'group'] = i % max_buildings_group  # values from 0 to 4, group determines allocation to quarterSection on infoscreen
-                df.at[idx, 'connection_to_heat_grid'] = connection_to_heat_grid.astype(int)
-                df.at[idx, 'refurbished'] = refurbished.astype(int)
+                df.at[idx, 'connection_to_heat_grid'] = connection_to_heat_grid
+                df.at[idx, 'refurbished'] = refurbished
         df['selected'] = True  # only selected buildings are exported for simulation
         # optional decision adjustments:
         df['save_energy'] = save_energy

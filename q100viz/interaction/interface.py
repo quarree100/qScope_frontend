@@ -23,9 +23,9 @@ class Slider:
         self.x_cell_range = x_cell_range  # limits of slider handles
         # cm
         self.physical_slider_area_length = config_slider[id]['PHYSICAL_SLIDER_AREA_LENGTH']
-        # diff from left side of area to cspy slider detection, in cm
+        # dist to left margin of area used for slider detection in cpsy
         self.physical_diff_L = config_slider[id]['PHYSICAL_DIFF_L']
-        # diff to right side of area to cspy slider detection, in cm
+        # dist to right side of area to cspy slider detection, in cm
         self.physical_diff_R = config_slider[id]['PHYSICAL_DIFF_R']
 
         self.color = pygame.Color(125, 125, 125)  # slider area
@@ -82,7 +82,7 @@ class Slider:
 
     def draw_controls(self, canvas=None):
         '''
-        renders slider-selectors (options) and tool tipps
+        renders slider-selector texts (options) and tool tipps
         '''
         # slider controls → set slider color
         # alpha value for unselected cells
@@ -294,31 +294,32 @@ class Slider:
         if self.handle == 'name':
             session.environment['name'] = val_from_struct * slider_val
         '''
-        if self.value is not self.previous_value and session.active_mode != session.simulation:
+        if self.value is self.previous_value or session.active_mode is session.simulation:
+            return
 
-            # household-specific:
-            if self.handle == 'connection_to_heat_grid':
-                session.buildings.df.loc[((
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_connection_year, session.max_connection_year]))
-                self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
-                    np.interp(float(self.value), [0.2, 1], [session.min_connection_year, session.max_connection_year]))
+        # household-specific:
+        if self.handle == 'connection_to_heat_grid':
+            session.buildings.df.loc[((
+                session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_connection_year, session.max_connection_year]))
+            self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
+                np.interp(float(self.value), [0.2, 1], [session.min_connection_year, session.max_connection_year]))
 
-            elif self.handle == 'refurbished':
-                session.buildings.df.loc[((
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_refurb_year, session.max_refurb_year]))
-                self.human_readable_value['refurbished'] = "n.a." if self.value <= 0.2 else int(
-                    np.interp(float(self.value), [0.2, 1], [session.min_refurb_year, session.max_refurb_year]))
+        elif self.handle == 'refurbished':
+            session.buildings.df.loc[((
+                session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_refurb_year, session.max_refurb_year]))
+            self.human_readable_value['refurbished'] = "n.a." if self.value <= 0.2 else int(
+                np.interp(float(self.value), [0.2, 1], [session.min_refurb_year, session.max_refurb_year]))
 
-            elif self.handle == 'save_energy':
-                session.buildings.df.loc[(
-                    session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'save_energy'] = self.value > 0.5
-                self.human_readable_value['save_energy'] = 'ja' if self.value > 0.5 else 'nein'
+        elif self.handle == 'save_energy':
+            session.buildings.df.loc[(
+                session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'save_energy'] = self.value > 0.5
+            self.human_readable_value['save_energy'] = 'ja' if self.value > 0.5 else 'nein'
 
-            session.api.send_message(json.dumps(session.environment))
-            session.api.send_message(json.dumps(
-                session.buildings.get_dict_with_api_wrapper()))
+        session.api.send_message(json.dumps(session.environment))
+        session.api.send_message(json.dumps(
+            session.buildings.get_dict_with_api_wrapper()))
 
-            self.previous_value = self.value
+        self.previous_value = self.value
 
     def update_handle(self, cell_handle, cell_id):
         if self.show_controls:

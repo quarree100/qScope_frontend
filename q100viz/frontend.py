@@ -10,13 +10,15 @@ import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.settings.config import config
 from q100viz.interaction.interface import *
+import q100viz.devtools as devtools
+
 
 class Frontend:
-############################## PYGAME SETUP ###########################
+    ############################## PYGAME SETUP ###########################
     def __init__(self, run_in_main_window=False):
-        self.FPS = session.FPS = 12 # framerate
+        self.FPS = session.FPS = 12  # framerate
 
-        # set window position
+        # window position (must be set before pygame.init!)
         if not run_in_main_window:
             os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (
                 0, 2560)  # projection to the left
@@ -26,42 +28,44 @@ class Frontend:
 
         self.clock = pygame.time.Clock()
 
-        # UDP receive
-        grid_udp_1 = ('localhost', 5001)
-        grid_udp_2 = ('localhost', 5000)
-        self.udp_gama = ('localhost', 8081)
-
-        # Set up display
+        ######################### pygame canvas #######################
+        # window size:
         canvas_size = session.config['CANVAS_SIZE']
         self.canvas = pygame.display.set_mode(canvas_size, NOFRAME)
         pygame.display.set_caption("q100viz")
 
         self.show_grid = False  # draws a representation of the physical grid of tiles onto the canvas
-        self.show_typologiezonen = False  # deprecated. shows specific polygons, if enabled.
         self.show_nahwaermenetz = True  # display heat grid as red lines
         self.display_viewport = True  # displays the area that is being drawn on. used for debugging
 
-        ################### mask viewport with black surface ##################
+        # mask viewport with black surface
         self.mask_points = [[0, 0], [85.5, 0], [85.5, 82], [0, 82], [0, -50],
-                    [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
+                            [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
 
-        ################# UDP server for incoming cspy messages ###############
+        ############# UDP server for incoming cspy messages ###########
+        # UDP receive
+        grid_udp_1 = ('localhost', config['UDP_TABLE_1'])
+        grid_udp_2 = ('localhost', config['UDP_TABLE_2'])
+        self.udp_gama = ('localhost', config['UDP_SERVER_PORT'])
+
         for grid_, grid_udp in [[session.grid_1, grid_udp_1], [session.grid_2, grid_udp_2]]:
             udp_server = udp.UDPServer(*grid_udp, 4096)
             udp_thread = threading.Thread(target=udp_server.listen,
-                                        args=(grid_.read_scanner_data,),
-                                        daemon=True)
+                                          args=(grid_.read_scanner_data,),
+                                          daemon=True)
             udp_thread.start()
 
         # receive and forward GAMA messages during simulation:
-        udp_server = udp.UDPServer('localhost', config['UDP_SERVER_PORT'], 4096)
+        udp_server = udp.UDPServer(
+            'localhost', config['UDP_SERVER_PORT'], 4096)
         udp_thread = threading.Thread(target=udp_server.listen,
-                                    args=(session.api.forward_gama_message,),
-                                    daemon=True)
+                                      args=(session.api.forward_gama_message,),
+                                      daemon=True)
         udp_thread.start()
 
 
 ############################ Begin Game Loop ##########################
+
     def run(self):
 
         if session.previous_mode is not session.active_mode:
@@ -102,7 +106,6 @@ class Frontend:
                     session.active_mode = session.buildings_interaction
                 # enter simulation mode:
                 elif event.key == K_4:
-                    session.environment['active_scenario_handle'] = 'A'
                     session.simulation.setup()
                     session.active_mode = session.simulation
                 elif event.key == K_5:
@@ -138,8 +141,12 @@ class Frontend:
                     session.VERBOSE_MODE = not session.VERBOSE_MODE
 
             elif event.type == QUIT:
+                print("-" * 72)
+                print("Closing application.")
                 if session.log != "":
-                    with open("qScope-log_%s.txt" % datetime.datetime.now(), "w") as f:
+                    print("Full log exported to qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
+                    # TODO: move log file to output folder
+                    with open("qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
                         f.write(session.log)
                         f.close()
                 pygame.quit()
@@ -159,51 +166,43 @@ class Frontend:
                 slider.surface.fill(0)
 
         # draw GIS layers:
-        if self.show_typologiezonen:
-            session._gis.draw_polygon_layer(
-                self.canvas, session._gis.typologiezonen, 0, (123, 201, 230, 50))
         if session.show_polygons:
             session._gis.draw_linestring_layer(
                 self.canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
-            # session._gis.draw_polygon_layer(
-                # canvas, session._gis.waermezentrale, 0, (252, 137, 0))
             session._gis.draw_buildings_connections(
                 session.buildings.df)  # draw lines to closest heat grid
+
+            # fill and lerp:
             if session.VERBOSE_MODE:
                 session._gis.draw_polygon_layer_float(
-                    self.canvas, session.buildings.df, 0, (96, 205, 21), (213, 50, 21), 'spec_heat_consumption')  # fill and lerp
+                    self.canvas, session.buildings.df, 0,
+                    (96, 205, 21),
+                    (213, 50, 21),
+                    'spec_heat_consumption')
             else:
                 session._gis.draw_polygon_layer_bool(
-                    self.canvas, session.buildings.df, 0, (213, 50, 21), (96, 205, 21), 'connection_to_heat_grid')  # fill and lerp
+                    self.canvas, session.buildings.df, 0,
+                    (213, 50, 21),
+                    (96, 205, 21),
+                    'connection_to_heat_grid')
+
+            # stroke simple black:
             session._gis.draw_polygon_layer_bool(
-                self.canvas, session.buildings.df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')  # stroke simple black
+                self.canvas, session.buildings.df, 1,
+                (0, 0, 0),
+                (0, 0, 0),
+                'connection_to_heat_grid')
 
             # stroke according to connection status:
             session._gis.draw_polygon_layer_bool(
-                surface=self.canvas, df=session.buildings.df, stroke=1, fill_false=(0, 0, 0), fill_true=(0, 168, 78), fill_attr='connection_to_heat_grid')
+                surface=self.canvas, df=session.buildings.df,
+                stroke=1,
+                fill_false=(0, 0, 0),
+                fill_true=(0, 168, 78),
+                fill_attr='connection_to_heat_grid')
 
-            # color buildings if connection is not -1:
-            # session.gis.draw_polygon_layer_connection_year(
-            #     session.buildings.df,
-            #     stroke=0,
-            #     fill_true=(96, 205, 21),
-            #     fill_false=(213, 50, 21),
-            #     fill_attr='connection_to_heat_grid')
-
-            # # stroke simple black:
-            # session.gis.draw_polygon_layer_bool(
-            #     canvas, session.buildings.df, 1, (0, 0, 0), (0, 0, 0), 'connection_to_heat_grid')
-
-            # # stroke according to connection status:
-            # session.gis.draw_polygon_layer_connection_year(
-            #     session.buildings.df,
-            #     stroke=2,
-            #     fill_true=(0, 168, 78),
-            #     fill_false=(0),
-            #     fill_attr='connection_to_heat_grid')
-
-        # draw grid
-        session.grid_1.draw(self.show_grid)
+        # draw grid outline
+        session.grid_1.draw(self.show_grid) # draws polygons to grid.surface
         session.grid_2.draw(self.show_grid)
 
         # draw mask
@@ -214,27 +213,18 @@ class Frontend:
         if session.active_mode:
             session.active_mode.draw(session.viewport)
 
-        # render surfaces
+        # basemap
         if session.show_basemap:
             crop_width = 4644
             crop_height = 800
             self.canvas.blit(session.basemap.image, (0, 0),
-                        (0, 0, crop_width, crop_height))
+                             (0, 0, crop_width, crop_height))
 
-        # GIS layer
+        # render GIS layer
         if session.show_polygons:
             self.canvas.blit(session._gis.surface, (0, 0))
 
         ########################## DATA PROCESSING ########################
-
-        # export canvas:
-        # if session.flag_export_canvas:
-        #     # create a cropped output canvas and export:
-        #     temp = pygame.Surface((1460, 630))
-        #     temp.blit(session.gis.surface, (0,0))
-        #     temp = pygame.transform.rotate(temp, 270)
-        #     pygame.image.save(temp, '../data/canvas.png')
-        #     session.flag_export_canvas = False
 
         # slider
         for grid in session.grid_1, session.grid_2:
@@ -250,17 +240,10 @@ class Frontend:
 
         ############ render everything beyond/on top of canvas: ###########
 
-        font = pygame.font.SysFont('Arial', 20)
-        # mouse position
-        # if session.VERBOSE_MODE:
-        # mouse_pos = pygame.mouse.get_pos()
-        # canvas.blit(font.render(str(mouse_pos), True, (255,255,255)), (200,700))
+        pass
 
         ############################# pygame time #########################
 
         pygame.display.update()
 
         self.clock.tick(self.FPS)
-
-        session.ticks_elapsed = (session.ticks_elapsed + 1)
-        session.seconds_elapsed = int(session.ticks_elapsed / 12)

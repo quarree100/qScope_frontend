@@ -92,7 +92,7 @@ class Buildings:
 
         # generic data
         for idx, row in self.df.iterrows():
-            self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else False
+            self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else False  # note: we decided that all buildings without any energy_source in the source data are set pre-connected.
         self.df['connection_to_heat_grid_prior'] = self.df['connection_to_heat_grid']
         self.df['refurbished'] = self.df['connection_to_heat_grid']
         self.df['refurbished_prior'] = self.df['refurbished']
@@ -200,8 +200,9 @@ class Buildings:
                 interval += 0.1  # increase range, try again if necessary
 
             cluster_list.append(cluster)
-            devtools.print_verbose(
-                "building {0} is in a group of to {1} buildings with similar specs:".format(self.df.index[idx], len(cluster)), session.VERBOSE_MODE, session.log)
+            session.log += ("\n" +
+                devtools.print_verbose(
+                "building {0} is in a group of to {1} buildings with similar specs:".format(self.df.index[idx], len(cluster)), session.VERBOSE_MODE))
             # devtools.print_verbose(cluster[['spec_heat_consumption', 'spec_power_consumption']].describe(), session.VERBOSE_MODE)
 
         return cluster_list

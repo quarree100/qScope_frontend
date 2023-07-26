@@ -1,15 +1,15 @@
 config = {
     # UDP communication
     'UDP_SERVER_PORT' : 8081,
+    'UDP_TABLE_1' : 5001,
+    'UDP_TABLE_2' : 5000,
 
     # GIS files
     'BASEMAP_FILE': "../data/GIS/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg",
     'GEBAEUDE_BESTAND_FILE': "../data/GIS/Shapefiles/bestandsgebaeude_export.shp",
     'GEBAEUDE_NEUBAU_FILE': "../data/GIS/Shapefiles/Neubau Gebaeude Kataster.shp",
     'WAERMESPEICHER_FILE': "../data/GIS/Shapefiles/Waermespeicher.shp",
-    'HEIZZENTRALE_FILE': "../data/GIS/Shapefiles/Heizzentrale.shp",
     'NAHWAERMENETZ_FILE': "../data/GIS/Shapefiles/Nahwaermenetz.shp",
-    'TYPOLOGIEZONEN_FILE': "../data/GIS/Shapefiles/Typologiezonen.shp",
 
     # graphics setup
     'SAVED_KEYSTONE_FILE': 'keystone.save',
@@ -29,7 +29,7 @@ config = {
     'REFERENCE_DATA_FOLDER' : '../data/precomputed/simulation_defaults',
 
     # grid setup
-    'CSPY_SETTINGS_FILE': '../cspy_L/settings/qscope_L.json',
+    'CSPY_SETTINGS_FILE': '../cspy/settings/qscope_L.json',
     'GRID_1_SETUP_FILE': 'q100viz/settings/buildings_interaction_grid_1.csv',
     'GRID_2_SETUP_FILE': 'q100viz/settings/buildings_interaction_grid_2.csv',
     'GRID_1_INPUT_SCENARIOS_FILE': 'q100viz/settings/buildings_interaction_grid_1.csv',

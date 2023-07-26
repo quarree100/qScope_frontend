@@ -3,7 +3,6 @@
 import pandas as pd
 import pygame
 import json
-from q100viz.interaction.model_validation_mode import ModelValidation_Mode
 
 from q100viz.settings.config import config
 import q100viz.api as api
@@ -12,9 +11,8 @@ import q100viz.grid as grid
 from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.buildings_interaction import Buildings_Interaction
 from q100viz.interaction.simulation_mode import SimulationMode
-from q100viz.interaction.dataview_individual_mode import DataViewIndividual_Mode
-from q100viz.interaction.dataview_total_mode import DataViewTotal_Mode
-from q100viz.interaction.model_validation_mode import ModelValidation_Mode
+from q100viz.interaction.individual_data_view import DataViewIndividual_Mode
+from q100viz.interaction.total_data_view import DataViewTotal_Mode
 import q100viz.keystone as keystone
 import q100viz.buildings
 import q100viz.devtools as devtools
@@ -39,9 +37,9 @@ api = api.API(io)
 viewport = keystone.Surface(config['CANVAS_SIZE'], pygame.SRCALPHA)
 try:
     viewport.load(config['SAVED_KEYSTONE_FILE'])
-    devtools.print_verbose('...viewport points loaded from keystone file.', VERBOSE_MODE, log)
+    log += ("\n" + devtools.print_verbose('...viewport points loaded from keystone file.', VERBOSE_MODE))
 except Exception:
-    devtools.print_verbose("Failed to open keystone file", VERBOSE_MODE, log)
+    log += ("\n" + devtools.print_verbose("Failed to open keystone file", VERBOSE_MODE))
     viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
     viewport.dst_points = [[0, 0], [0, config['CANVAS_SIZE'][1]], [
         config['CANVAS_SIZE'][0], config['CANVAS_SIZE'][1]], [config['CANVAS_SIZE'][0], 0]]
@@ -84,8 +82,6 @@ emissions_data_paths = ['' for n in range(num_of_rounds)]
 buildings = q100viz.buildings.Buildings()
 
 scenario_selected_buildings = pd.DataFrame()
-seconds_elapsed = 0
-ticks_elapsed = 0
 
 # list of possible handles
 MODE_SELECTOR_HANDLES = ['start_individual_data_view', 'start_total_data_view', 'start_buildings_interaction', 'start_simulation']
@@ -103,7 +99,7 @@ environment = {
     }
 
 # scenario data:
-environment['active_scenario_handle'] = 'Ref'
+environment['active_scenario_handle'] = 'A'
 scenario_data = {
     'A': pd.read_csv(
         '../data/scenario_A.csv').set_index('name'),
@@ -116,12 +112,6 @@ scenario_data = {
     'Ref': pd.read_csv(
         '../data/scenario_Ref.csv').set_index('name')
 }
-
-scenario_titles = {
-    identifier : pd.read_csv('../data/scenario_titles.csv').set_index('scenario').at[identifier, 'name'] for identifier in scenario_data.keys()
-}
-
-num_of_questions = 5  # TODO: this equals length of csv
 
 # ---------------------------- simulation -----------------------------
 min_connection_year = config['SIMULATION_FORCE_START_YEAR']
@@ -146,6 +136,7 @@ basemap = gis.Basemap(
     _gis)
 basemap.warp()
 
+# ------------------------------ grid ---------------------------------
 ###### Initialize grid, projected onto the viewport #########
 grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))  # TODO: seperate files for the two grids
 nrows = grid_settings['nrows']
@@ -194,7 +185,6 @@ buildings_interaction = Buildings_Interaction()
 simulation = SimulationMode()
 individual_data_view = DataViewIndividual_Mode()
 total_data_view = DataViewTotal_Mode()
-model_validation = ModelValidation_Mode()
 
 modes = [buildings_interaction, simulation, individual_data_view, total_data_view]
 
@@ -210,8 +200,10 @@ def string_to_mode(input_string):
         return individual_data_view
     elif input_string == 'total_data_view':
         return total_data_view
-    elif input_string == 'model_validation':
-        return model_validation
 
 flag_export_canvas = False
 active_mode = string_to_mode(environment['mode'])
+
+def iterate_grids():
+
+    return [(x, y, cell, grid) for grid in [grid_1, grid_2] for y, row in enumerate(grid.grid) for x, cell in enumerate(row)]

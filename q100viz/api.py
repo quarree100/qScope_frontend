@@ -25,25 +25,25 @@ class API:
         self.previous_message = None
 
     def send_message(self, msg):
+        '''simple function to finally send a message via UDP. It should have json format for the infoscreen to process it properly.'''
         if msg != self.previous_message:
-            devtools.print_verbose(datetime.datetime.now().strftime(
-                " %H:%M:%S ") + "sending data:\n" + str(msg), session.VERBOSE_MODE, session.log)
+            session.log += ("\n" +
+                devtools.print_verbose(datetime.datetime.now().strftime(
+                " %H:%M:%S ") + "sending data:\n" + str(msg), session.VERBOSE_MODE))
             try:
                 self.io.emit('message', msg)
                 self.previous_message = msg
             except Exception:
                 pass
 
-    def send_max_values(self, max_values, min_values):
-        self.send_message(
-            "init\n" + "\n".join(map(str, max_values + min_values)))
-
     def send_dataframe_as_json(self, df):
+        '''make a json struct from a pandas DataFrame object and send it via send_message()'''
         data = json.loads(export_json(df, None))
         result = data[0] if len(data) > 0 else {}
         self.send_message(json.dumps(result, ensure_ascii=False))
 
     def send_df_with_session_env(self, df):
+        '''translates a pandas DataFrame to json format and appends the session.environment dict'''
         data = json.loads(export_json(df, None))
         result = data[0] if len(data) > 0 else {}
         for key, value in session.environment.items():
@@ -51,42 +51,18 @@ class API:
         self.send_message(json.dumps(result, ensure_ascii=False))
 
     def send_session_env(self):
+        '''simply send the session.environment dict as json format'''
         result = {}
         for key, value in session.environment.items():
             result[key] = value
         self.send_message(json.dumps(result, ensure_ascii=False))
 
-    def send_dataframe_using_keys(self, df, keys):
-        sum = df.groupby(by='cell').sum()
-        data = json.loads(export_json(sum, None))
-        if len(data) > 0:
-            result = data[0]
-            clusterData = json.loads(export_json(df[keys], None))
-            result["clusters"] = clusterData
-            self.send_message(json.dumps(result))
-
     def forward_gama_message(self, msg):
+        '''formats gama simulation status message to percentage and forwards it to the infoscreen via send_message()'''
         msg = msg.replace("'", "\"")
         json_object = json.loads(msg)
         session.simulation.progress = "{0}%".format(int(0.5 + json_object['step'] / session.simulation.final_step * 100))
         self.send_message(json.dumps(json.loads(msg)))
-
-    def send_simplified_dataframe_with_environment_variables(self, df, env):
-        sum = df.groupby(by='cell').sum()
-        data = json.loads(export_json(sum, None))
-        if len(data) > 0:
-            result = data[0]
-            for key, value in env.items():
-                result[key] = value
-            clusterData = json.loads(export_json(
-                df[["address", "connection_to_heat_grid", "refurbished", "save_energy"]], None))
-            result["clusters"] = clusterData
-            self.send_message(json.dumps(result))
-
-    def send_dataframe(self, dfs):
-        self.send_message(json.dumps(
-            [json.loads(export_json(df, None)) for df in dfs]))
-
 
 def append_csv(file, df, cols):
     """Open data from CSV and join them with a GeoDataFrame based on osm_id."""

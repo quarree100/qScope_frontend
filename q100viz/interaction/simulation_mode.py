@@ -28,10 +28,10 @@ class SimulationMode:
         self.reference_data_folder = os.path.normpath(
             os.path.join(self.cwd, config['REFERENCE_DATA_FOLDER']))
         self.script = self.headless_folder + 'gama-headless.sh'
-        self.current_output_folder = ''  # will be set in activate()
-        self.xml_path = ''               # will be set in activate()
-        self.final_step = 0           # will be set in activate()
-        self.max_year = 2045             # will be set in activate()
+        self.current_output_folder = ''  # will be set in setup()
+        self.xml_path = ''               # will be set in setup()
+        self.final_step = 0              # will be set in setup()
+        self.max_year = 2045             # will be set in setup()
         self.output_folders = []         # list of output folders of all game rounds
         self.using_timestamp = True
         self.seed = 1.0
@@ -64,16 +64,20 @@ class SimulationMode:
         simulation_thread = threading.Thread(target=session.simulation.run, daemon=True)
         simulation_thread.start()
 
+    ################### SIMULATION SETUP FUNCTION #####################
+
     def setup(self, input_max_year=None, export_neighborhood_graphs_only=False, export_graphs=True):
-        self.export_neighborhood_graphs_only = export_neighborhood_graphs_only
+
+        self.export_neighborhood_graphs_only = export_neighborhood_graphs_only  # disable export of individual graphs, for debugging purposes
         self.flag_create_graphs = export_graphs
-            # derive final step from defined simulation runtime:
+
+        # --------------------- final simulation step -----------------
+        # derive final step from defined simulation runtime:
         if config['SIMULATION_FORCE_END_YEAR'] == 0:
             runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
                                       index_col='var').loc['model_runtime_string', 'value']
             self.max_year = int(runtime[-4:])  # last four digits of model_runtime_string
             self.final_step = ((self.max_year + 1 - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
-
         else:
             # overwrite final step if set via flag --sim_steps:
             self.max_year = config['SIMULATION_FORCE_END_YEAR']
@@ -85,6 +89,7 @@ class SimulationMode:
 
         print('simulation will run until {0}-12-31 ({1} steps)'.format(self.max_year-1, self.final_step))
 
+        # ------------------------- model file setup ------------------
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
 
@@ -103,6 +108,8 @@ class SimulationMode:
             '/simulation_parameters_' + self.timestamp + '.xml'
 
         self.output_folders.append(self.current_output_folder)
+
+        # -------------------------- model input data -----------------
 
         # load parameters from csv file:
         # session.scenario_data[session.environment['active_scenario_handle']] = pandas.read_csv(
@@ -131,7 +138,7 @@ class SimulationMode:
         # TODO:
         # params.loc[len(params)] = ['keep_seed', 'bool', 'true']
 
-        # provide outputs:
+        # model outputs:
         outputs = pandas.DataFrame(columns=['id', 'name', 'framerate'])
         outputs.loc[len(outputs)] = ['0', 'neighborhood',
                                      str(self.final_step - 1)]
@@ -174,22 +181,6 @@ class SimulationMode:
         selected_buildings = pandas.concat([session.buildings.df[session.buildings.df.selected], session.scenario_selected_buildings])
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'group']].to_csv(clusters_outname)
 
-        # compose image paths as required by infoscreen
-        # session.gama_iteration_images[session.environment['current_iteration_round']] = [
-        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/Chartsnull-{1}.png'.format(
-        #         self.timestamp, str(self.final_step - 1)))),
-        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/Emissions cumulativenull-{1}.png'.format(
-        #         self.timestamp, str(self.final_step - 1)))),
-        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/Monthly Emissionsnull-{1}.png'.format(
-        #         self.timestamp, str(self.final_step - 1)))),
-        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/households_employment_pienull-{1}.png'.format(
-        #         self.timestamp, str(self.final_step - 1)))),
-        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/Modernizationnull-{1}.png'.format(
-        #         self.timestamp, str(self.final_step - 1)))),
-        #     str(os.path.normpath('data/outputs/output_{0}/snapshot/neighborhoodnull-{1}.png'.format(
-        #         self.timestamp, str(self.final_step - 1))))
-        # ]
-
         # send final_step to infoscreen:
         session.api.send_dataframe_as_json(pandas.DataFrame(data={"final_step": [self.final_step]}))
 
@@ -199,6 +190,7 @@ class SimulationMode:
 
         self.running = True
 
+    ######################## SIMULATION RUN THREAD ####################
 
     def run(self):
         while not self.running:
@@ -277,14 +269,9 @@ class SimulationMode:
 
     ############################# grid changes ########################
     def process_grid_change(self):
-        for grid in [session.grid_1, session.grid_2]:
-            for y, row in enumerate(grid.grid):
-                for x, cell in enumerate(row):
-                    if cell.selected:
-                        pass
+        pass
 
     def update(self):
-
         pass
 
     ################################ draw #############################
@@ -437,68 +424,69 @@ class SimulationMode:
             return
 
         for group_df in session.buildings.list_from_groups():
-            if group_df is not None:
-                for idx in group_df.index:
+            if group_df is None:
+                continue
 
-                    # export emissions graph:
-                    graphs.export_individual_emissions(
-                        csv_name="/emissions/CO2_emissions_{0}.csv".format(
-                            idx),
-                        data_folders=self.output_folders,
-                        columns=['building_household_emissions'],
-                        title_="Emissionen",
-                        outfile=self.current_output_folder +
-                        "/emissions/CO2_emissions_{0}.png".format(idx),
-                        xlabel_="Jahr",
-                        ylabel_="$CO_{2}$-Äquivalente (kg/Monat)",  # TODO: t/Jahr
-                        x_='current_date',
-                        convert_grams_to_kg=True,
-                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
-                        figtext=
-                            str(idx) + " "
-                            + str(group_df.loc[idx, 'address']) + " "
-                            + str(group_df.loc[idx, 'type'])
-                            + "\nø-spez. Wärmeverbrauch: "
-                            + str(group_df.loc[idx, 'spec_heat_consumption'])
-                            + ", ø-spez. Stromverbrauch: "
-                            + str(group_df.loc[idx, 'spec_heat_consumption'])
-                            if session.VERBOSE_MODE else "",
-                        figsize=(16,12),  # inches
-                    )
+            for idx in group_df.index:
+                # export emissions graph:
+                graphs.export_individual_emissions(
+                    csv_name="/emissions/CO2_emissions_{0}.csv".format(
+                        idx),
+                    data_folders=self.output_folders,
+                    columns=['building_household_emissions'],
+                    title_="Emissionen",
+                    outfile=self.current_output_folder +
+                    "/emissions/CO2_emissions_{0}.png".format(idx),
+                    xlabel_="Jahr",
+                    ylabel_="$CO_{2}$-Äquivalente (kg/Monat)",  # TODO: t/Jahr
+                    x_='current_date',
+                    convert_grams_to_kg=True,
+                    compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
+                    figtext=
+                        str(idx) + " "
+                        + str(group_df.loc[idx, 'address']) + " "
+                        + str(group_df.loc[idx, 'type'])
+                        + "\nø-spez. Wärmeverbrauch: "
+                        + str(group_df.loc[idx, 'spec_heat_consumption'])
+                        + ", ø-spez. Stromverbrauch: "
+                        + str(group_df.loc[idx, 'spec_heat_consumption'])
+                        if session.VERBOSE_MODE else "",
+                    figsize=(16,12),  # inches
+                )
 
-                    # export energy prices graph:
-                    graphs.export_individual_energy_expenses(
-                        building_idx = idx,
-                        csv_name="/energy_prices/energy_prices_{0}.csv".format(
-                            idx),
-                        data_folders=self.output_folders,
-                        columns=['building_household_expenses_heat',
-                                'building_household_expenses_power'],
-                        labels_=['Wärmekosten', 'Stromkosten'],
-                        outfile=self.current_output_folder +
-                        "/energy_prices/energy_prices_{0}.png".format(idx),
-                        title_="Energiekosten pro Haushalt",
-                        xlabel_="Jahr",
-                        ylabel_="€/Monat",
-                        x_='current_date',
-                        compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
-                        figtext=
-                            str(idx) + " "
-                            + str(group_df.loc[idx, 'address']) + " "
-                            + str(group_df.loc[idx, 'type'])
-                            + "\nø-spez. Wärmeverbrauch: "
-                            + str(group_df.loc[idx, 'spec_heat_consumption'])
-                            + ", ø-spez. Stromverbrauch: "
-                            + str(group_df.loc[idx, 'spec_heat_consumption'])
-                            if session.VERBOSE_MODE else "",
-                        figsize=(16,12),  # inches
-                        prepend_historic_data=True,
-                    )
+                # export energy prices graph:
+                graphs.export_individual_energy_expenses(
+                    building_idx = idx,
+                    csv_name="/energy_prices/energy_prices_{0}.csv".format(
+                        idx),
+                    data_folders=self.output_folders,
+                    columns=['building_household_expenses_heat',
+                            'building_household_expenses_power'],
+                    labels_=['Wärmekosten', 'Stromkosten'],
+                    outfile=self.current_output_folder +
+                    "/energy_prices/energy_prices_{0}.png".format(idx),
+                    title_="Energiekosten pro Haushalt",
+                    xlabel_="Jahr",
+                    ylabel_="€/Monat",
+                    x_='current_date',
+                    compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
+                    figtext=
+                        str(idx) + " "
+                        + str(group_df.loc[idx, 'address']) + " "
+                        + str(group_df.loc[idx, 'type'])
+                        + "\nø-spez. Wärmeverbrauch: "
+                        + str(group_df.loc[idx, 'spec_heat_consumption'])
+                        + ", ø-spez. Stromverbrauch: "
+                        + str(group_df.loc[idx, 'spec_heat_consumption'])
+                        if session.VERBOSE_MODE else "",
+                    figsize=(16,12),  # inches
+                    prepend_historic_data=True,
+                )
 
-                    # pass path to buildings in infoscreen-compatible format
-                    group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath(
-                        'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
-                    group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
-                        'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
+                # pass path to buildings in infoscreen-compatible format
+                group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath(
+                    'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
+                group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
+                    'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
 
                 session.buildings.df.update(group_df)

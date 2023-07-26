@@ -6,7 +6,7 @@ import q100viz.session as session
 
 ############################### export graphs #####################
 def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True):
-    '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
+    '''exports emissions from csv-data-file for every iteration round to graph and exports png'''
 
     plt.rc('font', size=18)
     # read exported results:
@@ -52,25 +52,27 @@ def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", yl
 
     for col_num, column in enumerate(columns):
         # plot pre-calculated reference data:
-        if compare_data_folder is not None:
-            label_ = 'unverändert' if labels_ is None else '{0} (unverändert)'.format(labels_[col_num])
-            compare_df = pandas.read_csv(compare_data_folder + csv_name)
-            compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
-            for col in columns:
-                if convert_grams_to_tons:
-                    compare_df[col] = compare_df[col].apply(grams_to_tons)
-                elif convert_grams_to_kg:
-                    compare_df[col] = compare_df[col].apply(grams_to_kg)
+        if compare_data_folder is None:
+            continue
 
-            compare_df.plot(
-                kind='line',
-                linestyle=linestyles[column],
-                x=x_,
-                y=column,
-                label=label_,
-                color='lightgray',
-                ax=plt.gca(),
-                linewidth=5)
+        label_ = 'unverändert' if labels_ is None else '{0} (unverändert)'.format(labels_[col_num])
+        compare_df = pandas.read_csv(compare_data_folder + csv_name)
+        compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
+        for col in columns:
+            if convert_grams_to_tons:
+                compare_df[col] = compare_df[col].apply(grams_to_tons)
+            elif convert_grams_to_kg:
+                compare_df[col] = compare_df[col].apply(grams_to_kg)
+
+        compare_df.plot(
+            kind='line',
+            linestyle=linestyles[column],
+            x=x_,
+            y=column,
+            label=label_,
+            color='lightgray',
+            ax=plt.gca(),
+            linewidth=5)
 
     for it_round, df in enumerate(rounds_data):
         # color = ['black', 'dimgray', 'darkgray', 'lightgray'][it_round]
@@ -114,9 +116,9 @@ def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", yl
     if outfile is not None:
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
-######################### individual energy expenses ############################
+####################### individual energy expenses ####################
 def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True, prepend_historic_data=False):
-    '''exports specified column of csv-data-file for every iteration round to graph and exports png'''
+    '''exports energy expenses column of csv-data-file for every iteration round to graph, prepending historic energy prices. Finally, exports png'''
 
     plt.rc('font', size=18)
     # read exported results:
@@ -139,32 +141,35 @@ def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title
                 # max value will set upper y limit:
                 max_val = csv_data[col].max() if csv_data[col].max() > max_val else max_val
 
-                if prepend_historic_data:
-                    historic_prices = pandas.read_csv("../data/data_pre-simulation/energy-prices_hh_2011-2022.csv")
-                    historic_prices.rename(
-                        columns={
-                            'Year' : 'current_date',
-                            'Power' : 'power_price',
-                            'Gas' : 'gas_price',
-                            'Oil' : 'oil_price'
-                            }, inplace=True)
-                    historic_prices = historic_prices[historic_prices['current_date'] < 2020]
+                # ---------------- historic data ------------------
+                if not prepend_historic_data:
+                    continue
 
-                    # heat:
-                    for energy_source in zip(['gas', 'oil', 'power'], ['Gas', 'Öl', 'Strom']):
-                        if session.buildings.df.loc[building_idx, 'energy_source'] == energy_source[1]:
-                            historic_prices['building_household_expenses_heat'] = \
-                                historic_prices[energy_source[0]+'_price'] / 100 * session.buildings.df.loc[building_idx, 'area'] * session.buildings.df.loc[building_idx, 'spec_heat_consumption'] / 12 / session.buildings.df.loc[building_idx, 'units']
+                historic_prices = pandas.read_csv("../data/data_pre-simulation/energy-prices_hh_2011-2022.csv")
+                historic_prices.rename(
+                    columns={
+                        'Year' : 'current_date',
+                        'Power' : 'power_price',
+                        'Gas' : 'gas_price',
+                        'Oil' : 'oil_price'
+                        }, inplace=True)
+                historic_prices = historic_prices[historic_prices['current_date'] < 2020]
 
-                    # power:
-                    historic_prices['building_household_expenses_power'] = \
-                        historic_prices['power_price'] / 100 * session.buildings.df.loc[building_idx, 'area'] * session.buildings.df.loc[building_idx, 'spec_power_consumption'] / 12 / session.buildings.df.loc[building_idx, 'units']
+                # historic heat:
+                for energy_source in zip(['gas', 'oil', 'power'], ['Gas', 'Öl', 'Strom']):
+                    if session.buildings.df.loc[building_idx, 'energy_source'] == energy_source[1]:
+                        historic_prices['building_household_expenses_heat'] = \
+                            historic_prices[energy_source[0]+'_price'] / 100 * session.buildings.df.loc[building_idx, 'area'] * session.buildings.df.loc[building_idx, 'spec_heat_consumption'] / 12 / session.buildings.df.loc[building_idx, 'units']
+
+                # historic power:
+                historic_prices['building_household_expenses_power'] = \
+                    historic_prices['power_price'] / 100 * session.buildings.df.loc[building_idx, 'area'] * session.buildings.df.loc[building_idx, 'spec_power_consumption'] / 12 / session.buildings.df.loc[building_idx, 'units']
 
 
-                    csv_data = pandas.read_csv(output_folder + csv_name)
-                    csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
+                csv_data = pandas.read_csv(output_folder + csv_name)
+                csv_data['current_date'] = csv_data['current_date'].apply(GAMA_time_to_datetime)
 
-                    csv_data = pandas.concat([historic_prices, csv_data])
+                csv_data = pandas.concat([historic_prices, csv_data])
 
             rounds_data.append(csv_data)
 
@@ -190,27 +195,29 @@ def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title
 
     for col_num, column in enumerate(columns):
         # plot pre-calculated reference data:
-        if compare_data_folder is not None:
-            label_ = 'unverändert' if labels_ is None else '{0} (unverändert)'.format(labels_[col_num])
-            compare_df = pandas.read_csv(compare_data_folder + csv_name)
-            compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
-            for col in columns:
-                if convert_grams_to_tons:
-                    compare_df[col] = compare_df[col].apply(grams_to_tons)
-                elif convert_grams_to_kg:
-                    compare_df[col] = compare_df[col].apply(grams_to_kg)
+        if compare_data_folder is None:
+            continue
 
-            compare_df = pandas.concat([historic_prices, compare_df])
+        label_ = 'unverändert' if labels_ is None else '{0} (unverändert)'.format(labels_[col_num])
+        compare_df = pandas.read_csv(compare_data_folder + csv_name)
+        compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
+        for col in columns:
+            if convert_grams_to_tons:
+                compare_df[col] = compare_df[col].apply(grams_to_tons)
+            elif convert_grams_to_kg:
+                compare_df[col] = compare_df[col].apply(grams_to_kg)
 
-            compare_df.plot(
-                kind='line',
-                linestyle=linestyles[column],
-                x=x_,
-                y=column,
-                label=label_,
-                color='lightgray',
-                ax=plt.gca(),
-                linewidth=5)
+        compare_df = pandas.concat([historic_prices, compare_df])
+
+        compare_df.plot(
+            kind='line',
+            linestyle=linestyles[column],
+            x=x_,
+            y=column,
+            label=label_,
+            color='lightgray',
+            ax=plt.gca(),
+            linewidth=5)
 
     for it_round, df in enumerate(rounds_data):
         for col_num, column in enumerate(columns):
@@ -406,6 +413,7 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
 
 ################## neighborhood emissions vs connections ##############
 def export_neighborhood_emissions_connections(connections_file, emissions_file, emissions_compare_file, outfile=None, figsize=(16,9)):
+    '''creates a bar plot for the total number of connections to the heat grid with an overlaying line plot of total emissions'''
 
     # source data:
     df_emissions = pandas.read_csv(emissions_file)
@@ -476,28 +484,30 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
     addresses = []
     decisions = []
     for group_num, group_df in enumerate(session.buildings.list_from_groups()):
-        if group_df is not None:
-            for idx in group_df.index:
-                # load from csv:
-                this_csv_df = pandas.read_csv(search_in_folder + "/energy_prices/energy_prices_{0}.csv".format(idx))
-                this_csv_df['current_date'] = this_csv_df['current_date'].apply(GAMA_time_to_datetime)
-                this_csv_df['group_num'] = [group_num for i in this_csv_df.values]
-                list_of_csv_dfs.append(this_csv_df)
+        if group_df is None:
+            continue
 
-                # add labels:
-                decisions.append(
-                    "(S={0}, A={1}, {2})".format(
-                    int(group_df.loc[idx, 'refurbished']) if group_df.loc[idx, 'refurbished'] != False else 'unsaniert',
-                    int(group_df.loc[idx, 'connection_to_heat_grid']) if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
-                    "ES" if group_df.loc[idx, 'save_energy'] else "NV")
-                )
+        for idx in group_df.index:
+            # load from csv:
+            this_csv_df = pandas.read_csv(search_in_folder + "/energy_prices/energy_prices_{0}.csv".format(idx))
+            this_csv_df['current_date'] = this_csv_df['current_date'].apply(GAMA_time_to_datetime)
+            this_csv_df['group_num'] = [group_num for i in this_csv_df.values]
+            list_of_csv_dfs.append(this_csv_df)
 
-                addresses.append(group_df.loc[idx, 'address'])
+            # add labels:
+            decisions.append(
+                "(S={0}, A={1}, {2})".format(
+                int(group_df.loc[idx, 'refurbished']) if group_df.loc[idx, 'refurbished'] != False else 'unsaniert',
+                int(group_df.loc[idx, 'connection_to_heat_grid']) if group_df.loc[idx, 'connection_to_heat_grid'] != False else "k.A.",
+                "ES" if group_df.loc[idx, 'save_energy'] else "NV")
+            )
 
-                if compare_data_folder is not None:
-                    comp = pandas.read_csv(compare_data_folder + '/energy_prices/energy_prices_{0}.csv'.format(idx))
-                    comp['current_date'] = comp['current_date'].apply(GAMA_time_to_datetime)
-                    compare_data.append(comp)
+            addresses.append(group_df.loc[idx, 'address'])
+
+            if compare_data_folder is not None:
+                comp = pandas.read_csv(compare_data_folder + '/energy_prices/energy_prices_{0}.csv'.format(idx))
+                comp['current_date'] = comp['current_date'].apply(GAMA_time_to_datetime)
+                compare_data.append(comp)
 
     # make graph
     plt.figure(figsize=figsize)  # inches
@@ -602,24 +612,26 @@ def export_neighborhood_total_data(csv_name, columns, x_, title_="", xlabel_="",
 
     for col_num, column in enumerate(columns):
         # plot pre-calculated reference data:
-        if compare_data_folder is not None:
-            label_ = 'unverändert' if labels_ is None else '{0} (unverändert)'.format(labels_[col_num])
-            compare_df = pandas.read_csv(compare_data_folder + csv_name)
-            compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
-            for col in columns:
-                if convert_grams_to_tons:
-                    compare_df[col] = compare_df[col].apply(grams_to_tons)
-                elif convert_grams_to_kg:
-                    compare_df[col] = compare_df[col].apply(grams_to_kg)
+        if compare_data_folder is None:
+            continue
 
-            compare_df.plot(
-                kind='line',
-                x=x_,
-                y=column,
-                label=label_,
-                color='lightgray',
-                ax=plt.gca(),
-                linewidth=5)
+        label_ = 'unverändert' if labels_ is None else '{0} (unverändert)'.format(labels_[col_num])
+        compare_df = pandas.read_csv(compare_data_folder + csv_name)
+        compare_df['current_date'] = compare_df['current_date'].apply(GAMA_time_to_datetime)
+        for col in columns:
+            if convert_grams_to_tons:
+                compare_df[col] = compare_df[col].apply(grams_to_tons)
+            elif convert_grams_to_kg:
+                compare_df[col] = compare_df[col].apply(grams_to_kg)
+
+        compare_df.plot(
+            kind='line',
+            x=x_,
+            y=column,
+            label=label_,
+            color='lightgray',
+            ax=plt.gca(),
+            linewidth=5)
 
     colors = {
         'gas_price' : 'lightblue',

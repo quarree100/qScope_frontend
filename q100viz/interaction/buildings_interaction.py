@@ -13,7 +13,6 @@ class Buildings_Interaction:
         self.name = 'buildings_interaction'
         self.selection_mode = config['buildings_selection_mode'] # decides how to select intersected buildings. can be 'all' or 'rotation'
         self.previous_connections_selector = ''  # stores the 'global scenario token' that was used to manually set the number of generic connections to heat grid
-        self.waiting_to_start = False
         self.mode_token_selection_time = datetime.datetime.now()
         self.activation_buffer_time = 2  # seconds before simulation begins
 
@@ -21,8 +20,7 @@ class Buildings_Interaction:
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
 
         session.environment['mode'] = self.name
-        for mode in session.modes:
-            mode.waiting_to_start = False
+        session.pending_mode = None
 
         # graphics:
         session.show_polygons = True
@@ -67,7 +65,7 @@ class Buildings_Interaction:
             if not cell.selected:
                 if cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt time buffer when deselected
                     mode = session.string_to_mode(cell.handle[6:])
-                    mode.waiting_to_start = False
+                    session.pending_mode = None
                 continue
 
             # high performance impact, use sparingly
@@ -88,15 +86,15 @@ class Buildings_Interaction:
 
             if cell.handle in session.VALID_DECISION_HANDLES:
                 for slider in grid.sliders.values():
-                    if cell.x in range(slider.x_cell_range[0], slider.x_cell_range[1]) and session.active_mode != session.simulation:
+                    if cell.x in range(slider.x_cell_range[0], slider.x_cell_range[1]):
                         slider.update_handle(cell.handle, cell.id)
 
             # mode selectors:
             elif cell.handle in session.MODE_SELECTOR_HANDLES:
                 mode = session.string_to_mode(cell.handle[6:])
-                if not mode.waiting_to_start:
+                if not mode == session.pending_mode:
                     self.mode_token_selection_time = datetime.datetime.now()
-                    mode.waiting_to_start = True
+                    session.pending_mode = mode
 
             # connect buildings globally:
             elif cell.handle in ['connections_0', 'connections_20', 'connections_40', 'connections_60', 'connections_80', 'connections_100'] and cell.handle != self.previous_connections_selector:
@@ -226,18 +224,18 @@ class Buildings_Interaction:
 
         # draw mode buffer:
         column = 20
-        for mode, row in zip(session.modes, [18, 16, 14, 12]):
-            if mode.waiting_to_start:
-                sim_string = str(round(mode.activation_buffer_time -(datetime.datetime.now() - self.mode_token_selection_time).total_seconds(), 2))
-                canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+nrows*row][1][0])
+        if session.pending_mode is not None:
+            sim_string = str(round(session.pending_mode.activation_buffer_time -(datetime.datetime.now() - self.mode_token_selection_time).total_seconds(), 2))
+            canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+nrows*row][1][0])
 
     def update(self):
-        for mode in session.modes:
-            if mode.waiting_to_start:
-                if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > mode.activation_buffer_time and (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() < 10:
-                    for mode_ in session.modes:
-                        mode_.waiting_to_start = False
+        if session.pending_mode is None:
+            return
 
-                    if mode is session.simulation:
-                        session.simulation.setup()
-                    session.active_mode = mode  # marks simulation to be started in main thread
+        if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > session.pending_mode.activation_buffer_time and (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() < 10:
+            session.active_mode = session.pending_mode  # marks simulation to be started in main thread
+
+            if session.pending_mode is session.simulation:
+                session.simulation.setup()
+
+            session.pending_mode = None

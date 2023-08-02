@@ -226,7 +226,7 @@ class Buildings_Interaction:
         column = 20
         if session.pending_mode is not None:
             sim_string = str(round(session.pending_mode.activation_buffer_time -(datetime.datetime.now() - self.mode_token_selection_time).total_seconds(), 2))
-            canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+nrows*row][1][0])
+            canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), (session.grid_2.rects_transformed[column+nrows*row][1][0][0], session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 40))
 
     def update(self):
         if session.pending_mode is None:

@@ -234,6 +234,7 @@ class Buildings_Interaction:
 
         if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > session.pending_mode.activation_buffer_time and (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() < 10:
             session.active_mode = session.pending_mode  # marks simulation to be started in main thread
+            self.mode_token_selection_time = datetime.datetime.now()
 
             if session.pending_mode is session.simulation:
                 session.simulation.setup()

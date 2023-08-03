@@ -176,6 +176,7 @@ total_data_view_grid_2 = pd.read_csv(config['GRID_2_TOTAL_DATA_VIEW_FILE'])
 
 # -------------------------------- modes ------------------------------
 previous_mode = None
+pending_mode = None  # next mode to run after countdown
 
 calibration = CalibrationMode()
 buildings_interaction = Buildings_Interaction()

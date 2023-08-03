@@ -121,9 +121,10 @@ class Slider:
                     ncols = session.ncols
                     # TODO: why does this have to be shifted ~4*cell_width to the left??
                     x = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][3][0]-175
+                                                    ncols*cell.y][1][3][0] - 170
                     y = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][0][1]
+                                                    ncols*cell.y][1][0][1] - 10
+                    # grey background color:
                     pygame.draw.polygon(
                         self.surface, (255,255,255,global_alpha), rect_points, 0)
 
@@ -145,9 +146,13 @@ class Slider:
                     ncols = session.ncols
                     # TODO: why does this have to be shifted 4*cell_width to the left??
                     x = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][3][0]-180
+                                                    ncols*cell.y][1][3][0] - 170
                     y = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][0][1]
+                                                    ncols*cell.y][1][0][1] - 10
+                    # grey background color:
+                    pygame.draw.polygon(
+                        self.surface, (255,255,255,global_alpha), rect_points, 0)
+
                     self.surface.blit(self.images[cell.handle].image, (x, y))
 
                 # global texts:

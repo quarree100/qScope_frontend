@@ -16,7 +16,6 @@ class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
         self.activation_buffer_time = 4  # seconds before simulation begins
-        self.waiting_to_start = False
 
         self.running = False
         self.progress = "0%"
@@ -50,16 +49,18 @@ class SimulationMode:
 
         self.progress = "0%"
 
-        # display setup:
+        # disable interface:
         for grid in session.grid_1, session.grid_2:
             for slider in grid.sliders.values():
                 slider.show_text = False
                 slider.show_controls = False
+        # show GIS layer:
         session.show_basemap = True
         session.show_polygons = True
 
         session.api.send_session_env()
 
+        # start simulation:
         self.running = True
         simulation_thread = threading.Thread(target=session.simulation.run, daemon=True)
         simulation_thread.start()

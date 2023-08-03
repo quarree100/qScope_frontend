@@ -9,7 +9,6 @@ import q100viz.session as session
 class DataViewIndividual_Mode():
     def __init__(self):
         self.name = 'individual_data_view'
-        self.waiting_to_start = False
         self.mode_token_selection_time = datetime.datetime.now()
         self.activation_buffer_time = 2  # seconds before simulation begins
 

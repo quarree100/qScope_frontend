@@ -115,10 +115,7 @@ scenario_data = {
 
 # ---------------------------- simulation -----------------------------
 min_connection_year = config['SIMULATION_FORCE_START_YEAR']
-max_connection_year = config['SIMULATION_FORCE_END_YEAR']
 min_refurb_year = config['SIMULATION_FORCE_START_YEAR']
-max_refurb_year = config['SIMULATION_FORCE_END_YEAR']
-
 
 ############################## INITIALIZATION #########################
 #--------------------------------- gis --------------------------------

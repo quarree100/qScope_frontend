@@ -247,7 +247,7 @@ class Slider:
         ############# year selection #############
         elif self.handle in ['connection_to_heat_grid', 'refurbished']:
             min_year = session.min_connection_year if self.handle == 'connection_to_heat_grid' else session.min_refurb_year
-            max_year = session.max_connection_year if self.handle == 'connection_to_heat_grid' else session.max_refurb_year
+            max_year = session.simulation.max_year if self.handle == 'connection_to_heat_grid' else session.simulation.max_year
 
             x0 = self.coords_transformed[0][0]  # in px
             x3 = self.coords_transformed[3][0]  # in px
@@ -308,15 +308,15 @@ class Slider:
         # household-specific:
         if self.handle == 'connection_to_heat_grid':
             session.buildings.df.loc[((
-                session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_connection_year, session.max_connection_year]))
+                session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_connection_year, session.simulation.max_year]))
             self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
-                np.interp(float(self.value), [0.2, 1], [session.min_connection_year, session.max_connection_year]))
+                np.interp(float(self.value), [0.2, 1], [session.min_connection_year, session.simulation.max_year]))
 
         elif self.handle == 'refurbished':
             session.buildings.df.loc[((
-                session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_refurb_year, session.max_refurb_year]))
+                session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_refurb_year, session.simulation.max_year]))
             self.human_readable_value['refurbished'] = "n.a." if self.value <= 0.2 else int(
-                np.interp(float(self.value), [0.2, 1], [session.min_refurb_year, session.max_refurb_year]))
+                np.interp(float(self.value), [0.2, 1], [session.min_refurb_year, session.simulation.max_year]))
 
         elif self.handle == 'save_energy':
             session.buildings.df.loc[(

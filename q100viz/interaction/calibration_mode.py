@@ -1,5 +1,5 @@
 import pygame
-from pygame.locals import KEYDOWN, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_s
+from pygame.locals import KEYDOWN, K_TAB, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, K_s, K_1, K_2, K_3, K_4
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -17,8 +17,15 @@ class CalibrationMode:
         keystone_file = config['SAVED_KEYSTONE_FILE']
 
         if event.type == KEYDOWN:
-            if event.key == K_TAB:
-                self.active_anchor = 0 if self.active_anchor == 3 else self.active_anchor + 1
+            if event.key == K_1:
+                self.active_anchor = 0
+            elif event.key == K_2:
+                self.active_anchor = 1
+            elif event.key == K_3:
+                self.active_anchor = 2
+            elif event.key == K_4:
+                self.active_anchor = 3
+
             elif event.key == K_SPACE:
                 self.magnitude = 0.1 if (self.magnitude == 1) else 1
                 print("magnitude = ", self.magnitude)
@@ -71,3 +78,12 @@ class CalibrationMode:
         pygame.draw.line(session.viewport, fill_color, [p1[0], p1[1]], [p2[0], p2[1]], 2)
         pygame.draw.line(session.viewport, fill_color, [p3[0], p3[1]], [p2[0], p2[1]], 2)
         pygame.draw.line(session.viewport, fill_color, [p3[0], p3[1]], [p4[0], p4[1]], 2)
+
+        font = pygame.font.SysFont('Arial', 30)
+        session.viewport.blit(
+            font.render(
+                "[1, 2, 3, 4]: choose corner \
+                [s]: save corner points to keystone file",
+                True, (255, 255, 255)),
+                (500, 700)
+                )

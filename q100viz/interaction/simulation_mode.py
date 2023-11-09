@@ -7,6 +7,7 @@ import pygame
 import datetime
 import random
 import json
+import shutil
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -156,7 +157,7 @@ class SimulationMode:
         ############### debug: select random of 100 buildings: ########
         if session.debug_num_of_random_buildings > 0:
             connection_date = random.randint(2020, self.max_year) if session.debug_connection_date > 0 else False
-            devtools.mark_random_buildings_for_simulation(session.buildings.df, session.debug_num_of_random_buildings, connection_to_heat_grid=connection_date, refurbished=session.debug_force_refurbished, save_energy=session.debug_force_save_energy)
+            devtools.mark_random_buildings_for_simulation(session.buildings.df, session.debug_num_of_random_buildings, connection_to_heat_grid=connection_date, refurbished=session.debug_refurb_year, save_energy=session.debug_force_save_energy)
 
         session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
 
@@ -193,7 +194,7 @@ class SimulationMode:
 
     ######################## SIMULATION RUN THREAD ####################
 
-    def run(self):
+    def run(self, test_run=False):
         while not self.running:
             time.sleep(1)
             if threading.current_thread().__class__.__name__ == '_MainThread':
@@ -258,6 +259,9 @@ class SimulationMode:
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
 
         session.active_mode = session.individual_data_view  # marks total_data_view_mode to be started in main thread
+
+        if test_run:
+            shutil.rmtree(self.current_output_folder)
 
     ########################### frontend input ########################
     def process_event(self, event):
@@ -360,10 +364,10 @@ class SimulationMode:
         command = self.script + " " + xml_path + " " + self.current_output_folder
 
         sim_start = datetime.datetime.now()
+        print("simulation starting using model file", self.model_file)
         subprocess.call(command, shell=True)
         print("simulation finished. duration = ",
               datetime.datetime.now() - sim_start)
-        # self.open_and_call(command, session.individual_data_view.activate())
 
         os.chdir(self.cwd)  # return to previous cwd
 

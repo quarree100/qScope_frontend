@@ -22,9 +22,14 @@ python run_q100viz.py
 ### Flags
 
 - `--main_window`: runs canvas in current window
-- `--start_at [mode]`: which mode to start in? can be any of buildings_interaction, simulation, individual_data_view, total_data_view
-- `--sim_steps [num]`: how may steps should the simulation do? max num=9496 (year 2045)
 - `--verbose`: start in verbose mode
+- `--start_at [mode]`: which mode to start in? can be any of buildings_interaction, simulation, individual_data_view, total_data_view
+- `--simulate_until [YEAR]`: define max year of simulation
+- `--select_random [N]`: select random n buildings...
+- `--connect [YEAR]`: ... and connect selected buildings to heat grid
+- `--refurbish [YEAR]`: ... set date for refurbishment of selected buildings
+- `--save_energy`: ... require selected buildings to enable energy saving
+- `--research_model`: use research agent-based-model (defined in [config.py](q100viz/settings/config.py) instead of the standard designated workshop-abm)
 
 ### Interactions
 

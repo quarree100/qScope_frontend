@@ -102,15 +102,15 @@ class Frontend:
                 # elif event.key == K_2:
                     # session.active_mode = session.input_scenarios
                 # activate Input Households Mode:
-                elif event.key == K_3:
+                elif event.key == K_0:
                     session.active_mode = session.buildings_interaction
                 # enter simulation mode:
-                elif event.key == K_4:
+                elif event.key == K_9:
                     session.simulation.setup()
                     session.active_mode = session.simulation
-                elif event.key == K_5:
+                elif event.key == K_8:
                     session.active_mode = session.individual_data_view
-                elif event.key == K_6:
+                elif event.key == K_7:
                     session.active_mode = session.total_data_view
 
                 # toggle calibration:

@@ -23,7 +23,7 @@ VERBOSE_MODE = False
 
 debug_num_of_random_buildings = 0
 debug_connection_date = 0
-debug_force_refurbished = False
+debug_refurb_year = 0
 debug_force_save_energy = False
 
 # ---------------------- infoscreen communication ---------------------
@@ -198,6 +198,9 @@ def string_to_mode(input_string):
         return individual_data_view
     elif input_string == 'total_data_view':
         return total_data_view
+    else:
+        print(input_string, "is not a defined game mode. starting at buildings_interaction..")
+        return buildings_interaction
 
 flag_export_canvas = False
 active_mode = string_to_mode(environment['mode'])

@@ -4,7 +4,7 @@ import threading
 import datetime
 
 import pygame
-from pygame.locals import NOFRAME, KEYDOWN, K_3, K_4, K_5, K_6, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_0, K_9, K_8, K_7, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
 
 import q100viz.udp as udp
 import q100viz.session as session

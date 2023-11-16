@@ -2,6 +2,7 @@ import sys
 import os
 import threading
 import datetime
+import shutil
 
 import pygame
 from pygame.locals import NOFRAME, KEYDOWN, K_0, K_9, K_8, K_7, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
@@ -150,12 +151,13 @@ class Frontend:
                 print("Closing application.")
                 if devtools.log != "":
                     print("Full log exported to qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
-                    if devtools.test_run:
-                        print("data output folder was deleted, because q100viz was run with --test_run flag")
-                    # TODO: move log file to output folder
-                    with open("qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
+                    with open(session.simulation.output_folder + "/qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
                         f.write(devtools.log)
                         f.close()
+                if devtools.test_run:
+                    shutil.rmtree(session.simulation.output_folder)
+                    print("data output folder was deleted, because q100viz was run with --test_run flag")
+
                 pygame.quit()
                 sys.exit()
 

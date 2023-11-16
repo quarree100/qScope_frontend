@@ -7,7 +7,6 @@ import pygame
 import datetime
 import random
 import json
-import shutil
 
 import q100viz.session as session
 from q100viz.settings.config import config
@@ -260,9 +259,6 @@ class SimulationMode:
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
 
         session.active_mode = session.individual_data_view  # marks total_data_view_mode to be started in main thread
-
-        if test_run:
-            shutil.rmtree(self.output_folder)
 
     ########################### frontend input ########################
     def process_event(self, event):

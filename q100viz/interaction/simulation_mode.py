@@ -12,7 +12,7 @@ import shutil
 import q100viz.session as session
 from q100viz.settings.config import config
 import q100viz.graphics.graphs as graphs
-import q100viz.devtools as devtools
+from q100viz.devtools import devtools as devtools
 class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
@@ -33,7 +33,12 @@ class SimulationMode:
         self.final_step = 0              # will be set in setup()
         self.max_year = 2045             # will be set in setup()
         self.output_folders = []         # list of output folders of all game rounds
-        self.using_timestamp = True
+        # game start time
+        self.timestamp = str(
+            datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))
+        self.output_folder = os.path.normpath(os.path.join(
+                self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.timestamp))
+
         self.seed = 1.0
 
         self.matplotlib_neighborhood_images = {}
@@ -63,7 +68,7 @@ class SimulationMode:
 
         # start simulation:
         self.running = True
-        simulation_thread = threading.Thread(target=session.simulation.run, daemon=True)
+        simulation_thread = threading.Thread(target=session.simulation.run, args=[devtools.test_run], daemon=True)
         simulation_thread.start()
 
     ################### SIMULATION SETUP FUNCTION #####################
@@ -95,17 +100,8 @@ class SimulationMode:
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
 
-        # simulation start time
-        self.timestamp = str(
-            datetime.datetime.now().strftime("%Y%m%d_%H-%M-%S"))
-
-        # set output folder:
-        if self.using_timestamp:
-            self.current_output_folder = os.path.normpath(os.path.join(
-                self.cwd, config['GAMA_OUTPUT_FOLDER'] + '_' + self.timestamp))
-        else:
-            self.current_output_folder = os.path.normpath(
-                os.path.join(self.cwd, config['GAMA_OUTPUT_FOLDER']))
+        # --------------------- set output folder: --------------------
+        self.current_output_folder = os.path.normpath(self.output_folder + '/round' + str(session.environment['current_iteration_round']))
         self.xml_path = self.current_output_folder + \
             '/simulation_parameters_' + self.timestamp + '.xml'
 
@@ -119,8 +115,12 @@ class SimulationMode:
 
         # provide parameters:
         params = pandas.DataFrame(columns=['name', 'type', 'value', 'var'])
+
+        # timestamp and round define output folder:
         params.loc[len(params)] = ['timestamp', 'STRING',
                                    self.timestamp, 'timestamp']
+        params.loc[len(params)] = ['round', 'STRING',
+                                   session.environment['current_iteration_round'], 'round']
 
         # values to be used in trend model:
         params.loc[len(params)] = ['Alpha scenario', 'STRING',
@@ -162,8 +162,7 @@ class SimulationMode:
         session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
 
         ################# export buildings_clusters to csv ############
-        clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(
-            self.timestamp)) if self.using_timestamp else '../data/output/buildings_clusters_{0}.csv'.format(str(self.timestamp))
+        clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(self.timestamp))  # TODO: remove timestamp
 
         if not os.path.isdir(self.current_output_folder):
             os.makedirs(self.current_output_folder)
@@ -178,7 +177,7 @@ class SimulationMode:
                             session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
         except Exception as e:
             print("cannot filter scenario list", e)
-            session.log += "\nCannot filter scenario list: %s" % e
+            devtools.log += "\nCannot filter scenario list: %s" % e
 
         selected_buildings = pandas.concat([session.buildings.df[session.buildings.df.selected], session.scenario_selected_buildings])
         selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'group']].to_csv(clusters_outname)
@@ -222,7 +221,7 @@ class SimulationMode:
                 self.export_graphs()
             except Exception as e:
                 print("cannot export graphs", e)
-                session.log += "\nCannot export graphs: %s" % e
+                devtools.log += "\nCannot export graphs: %s" % e
 
         # define titles for images and their location
         self.matplotlib_neighborhood_images = {
@@ -239,7 +238,9 @@ class SimulationMode:
 
         # compose csv paths for infoscreen to make graphs
         session.emissions_data_paths[session.environment['current_iteration_round']] = [
-            str(os.path.normpath('data/outputs/output_{0}/emissions/{1}'.format(self.timestamp, file_name))) for file_name in os.listdir('../data/outputs/output_{0}/emissions'.format(str(self.timestamp)))
+            str(
+                os.path.normpath(session.simulation.current_output_folder[session.simulation.current_output_folder.find('data'):] + '/emissions/{0}'.format(file_name)))
+                for file_name in os.listdir(session.simulation.current_output_folder + '/emissions')
         ]
 
         ## send GAMA image paths to infoscreen (per iteration round!) #
@@ -261,7 +262,7 @@ class SimulationMode:
         session.active_mode = session.individual_data_view  # marks total_data_view_mode to be started in main thread
 
         if test_run:
-            shutil.rmtree(self.current_output_folder)
+            shutil.rmtree(self.output_folder)
 
     ########################### frontend input ########################
     def process_event(self, event):
@@ -298,7 +299,7 @@ class SimulationMode:
 
         except Exception as e:
                 print("Cannot draw frontend:", e)
-                session.log += "\nCannot draw frontend: %s" % e
+                devtools.log += "\nCannot draw frontend: %s" % e
 
         font = pygame.font.SysFont('Arial', 18)
         nrows = 22
@@ -420,7 +421,7 @@ class SimulationMode:
             ylabel_="Preis (ct/kWh)",
             x_='current_date',
             label_show_iteration_round=False,
-            prepend_data=self.current_output_folder + "/../../data_pre-simulation/energy-prices_hh_2011-2022.csv"
+            prepend_data=self.output_folder + "/../../data_pre-simulation/energy-prices_hh_2011-2022.csv"
             # compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
         )
 
@@ -455,7 +456,7 @@ class SimulationMode:
                         + str(group_df.loc[idx, 'spec_heat_consumption'])
                         + ", ø-spez. Stromverbrauch: "
                         + str(group_df.loc[idx, 'spec_heat_consumption'])
-                        if session.VERBOSE_MODE else "",
+                        if devtools.VERBOSE_MODE else "",
                     figsize=(16,12),  # inches
                 )
 
@@ -483,15 +484,18 @@ class SimulationMode:
                         + str(group_df.loc[idx, 'spec_heat_consumption'])
                         + ", ø-spez. Stromverbrauch: "
                         + str(group_df.loc[idx, 'spec_heat_consumption'])
-                        if session.VERBOSE_MODE else "",
+                        if devtools.VERBOSE_MODE else "",
                     figsize=(16,12),  # inches
                     prepend_historic_data=True,
                 )
 
                 # pass path to buildings in infoscreen-compatible format
-                group_df.at[idx, 'emissions_graphs'] = str(os.path.normpath(
-                    'data/outputs/output_{0}/emissions/CO2_emissions_{1}.png'.format(self.timestamp, idx)))
-                group_df.at[idx, 'energy_prices_graphs'] = str(os.path.normpath(
-                    'data/outputs/output_{0}/energy_prices/energy_prices_{1}.png'.format(self.timestamp, idx)))
+                group_df.at[idx, 'emissions_graphs'] = str(
+                    os.path.normpath(
+                       session.simulation.current_output_folder[session.simulation.current_output_folder.find('data'):]
+                    + '/emissions/CO2_emissions_{0}.png').format(idx))
+                group_df.at[idx, 'energy_prices_graphs'] = str(
+                   session.simulation.current_output_folder[session.simulation.current_output_folder.find('data'):]
+                    + '/energy_prices/energy_prices_{0}.png'.format(idx))
 
                 session.buildings.df.update(group_df)

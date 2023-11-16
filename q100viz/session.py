@@ -15,12 +15,9 @@ from q100viz.interaction.individual_data_view import DataViewIndividual_Mode
 from q100viz.interaction.total_data_view import DataViewTotal_Mode
 import q100viz.keystone as keystone
 import q100viz.buildings
-import q100viz.devtools as devtools
+from q100viz.devtools import devtools as devtools
 
 #----------------------- dev and debug variables ----------------------
-log = ""
-VERBOSE_MODE = False
-
 debug_num_of_random_buildings = 0
 debug_connection_date = 0
 debug_refurb_year = 0
@@ -37,9 +34,9 @@ api = api.API(io)
 viewport = keystone.Surface(config['CANVAS_SIZE'], pygame.SRCALPHA)
 try:
     viewport.load(config['SAVED_KEYSTONE_FILE'])
-    log += ("\n" + devtools.print_verbose('...viewport points loaded from keystone file.', VERBOSE_MODE))
+    devtools.print_verbose('...viewport points loaded from keystone file.')
 except Exception:
-    log += ("\n" + devtools.print_verbose("Failed to open keystone file", VERBOSE_MODE))
+    devtools.print_verbose("Failed to open keystone file")
     viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
     viewport.dst_points = [[0, 0], [0, config['CANVAS_SIZE'][1]], [
         config['CANVAS_SIZE'][0], config['CANVAS_SIZE'][1]], [config['CANVAS_SIZE'][0], 0]]
@@ -208,3 +205,5 @@ active_mode = string_to_mode(environment['mode'])
 def iterate_grids():
 
     return [(x, y, cell, grid) for grid in [grid_1, grid_2] for y, row in enumerate(grid.grid) for x, cell in enumerate(row)]
+
+frontend = None  # will be set in run_q100viz.py

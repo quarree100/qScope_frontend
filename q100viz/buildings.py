@@ -5,7 +5,7 @@ import pygame
 import json
 
 import q100viz.session as session
-import q100viz.devtools as devtools
+from q100viz.devtools import devtools as devtools
 import q100viz.gis as gis
 import q100viz.api as api
 from q100viz.settings.config import config
@@ -200,10 +200,9 @@ class Buildings:
                 interval += 0.1  # increase range, try again if necessary
 
             cluster_list.append(cluster)
-            session.log += ("\n" +
-                devtools.print_verbose(
-                "building {0} is in a group of to {1} buildings with similar specs:".format(self.df.index[idx], len(cluster)), session.VERBOSE_MODE))
-            # devtools.print_verbose(cluster[['spec_heat_consumption', 'spec_power_consumption']].describe(), session.VERBOSE_MODE)
+            devtools.print_verbose(
+                "building {0} is in a group of to {1} buildings with similar specs:".format(self.df.index[idx], len(cluster)))
+            # devtools.print_verbose(cluster[['spec_heat_consumption', 'spec_power_consumption']].describe(), devtools.VERBOSE_MODE)
 
         return cluster_list
 

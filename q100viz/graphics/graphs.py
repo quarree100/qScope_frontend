@@ -3,6 +3,7 @@ import pandas
 import datetime
 
 import q100viz.session as session
+from q100viz.devtools import devtools as devtools
 
 ############################### export graphs #####################
 def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True):
@@ -32,7 +33,7 @@ def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", yl
 
         except Exception as e:
             print(e, "\ncsv not found in data folders... probably the selected buildings have changed between the rounds")
-            session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
+            devtools.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
 
     plt.figure(figsize=figsize)  # inches
@@ -175,7 +176,7 @@ def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title
 
         except Exception as e:
             print(e, "\n...probably the selected buildings have changed between the rounds and the according csv could not be found")
-            session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
+            devtools.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
 
     plt.figure(figsize=figsize)  # inches
@@ -299,7 +300,7 @@ def export_default_graph(csv_name, csv_columns, x_, title_="", xlabel_="", ylabe
 
         except Exception as e:
             print(e, "... probably the selected buildings have changed between the rounds")
-            session.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
+            devtools.log += ("\n%s" % e + "... probably the selected buildings have changed between the rounds")
 
     plt.figure(figsize=figsize)  # inches
 

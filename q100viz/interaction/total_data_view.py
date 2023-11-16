@@ -5,6 +5,7 @@ import pandas as pd
 import datetime
 
 import q100viz.session as session
+from q100viz.devtools import devtools as devtools
 
 class DataViewTotal_Mode():
     def __init__(self):
@@ -87,7 +88,7 @@ class DataViewTotal_Mode():
 
         except Exception as e:
                 print("Cannot draw frontend:", e)
-                session.log += "\nCannot draw frontend: %s" % e
+                devtools.log += "\nCannot draw frontend: %s" % e
 
         font = pygame.font.SysFont('Arial', 18)
         nrows = 22

@@ -6,6 +6,7 @@ import pygame
 import q100viz.keystone as keystone
 from q100viz.settings.config import config
 import q100viz.session as session
+from q100viz.devtools import devtools as devtools
 
 crs = "EPSG:3857"
 
@@ -56,7 +57,7 @@ class GIS:
                         )
 
         except Exception as e:
-            session.log += "\n%s" % e
+            devtools.log += "\n%s" % e
             print("cannot draw building connection layer: ", e)
 
     # --------------------------- polygons ----------------------------
@@ -72,7 +73,7 @@ class GIS:
                 pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
         except Exception as e:
-            session.log += "\n%s" % e
+            devtools.log += "\n%s" % e
             print("cannot draw polygon layer: ", e)
 
     def draw_polygon_layer_bool(self, surface, df, stroke, fill_false, fill_true=None, fill_attr=None):
@@ -89,7 +90,7 @@ class GIS:
                 pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
         except Exception as e:
-            session.log += "\n%s" % e
+            devtools.log += "\n%s" % e
             print("cannot draw polygon layer: ", e)
 
     def draw_polygon_layer_float(self, surface, df, stroke, fill, lerp_target=None, lerp_attr=None):
@@ -107,7 +108,7 @@ class GIS:
                 pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
         except Exception as e:
-            session.log += "\n%s" % e
+            devtools.log += "\n%s" % e
             print("cannot draw polygon layer: ", e)
 
 ############################### BASEMAP ###############################

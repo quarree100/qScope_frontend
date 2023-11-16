@@ -10,7 +10,7 @@ import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.settings.config import config
 from q100viz.interaction.interface import *
-import q100viz.devtools as devtools
+from q100viz.devtools import devtools as devtools
 
 
 class Frontend:
@@ -115,7 +115,12 @@ class Frontend:
 
                 # toggle calibration:
                 elif event.key == K_c:
-                    session.active_mode = session.calibration if session.active_mode != session.calibration else session.buildings_interaction
+                    if session.active_mode != session.calibration:
+                        session.active_mode = session.calibration
+                        self.show_grid = True
+                    else:
+                        session.active_mode = session.buildings_interaction
+                        self.show_grid = False
 
                 ########## manual slider control for test purposes: #######
                 elif event.key == K_PLUS:
@@ -138,16 +143,18 @@ class Frontend:
 
                 # verbose mode:
                 elif event.key == K_v:
-                    session.VERBOSE_MODE = not session.VERBOSE_MODE
+                    devtools.VERBOSE_MODE = not devtools.VERBOSE_MODE
 
             elif event.type == QUIT:
                 print("-" * 72)
                 print("Closing application.")
-                if session.log != "":
+                if devtools.log != "":
                     print("Full log exported to qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
+                    if devtools.test_run:
+                        print("data output folder was deleted, because q100viz was run with --test_run flag")
                     # TODO: move log file to output folder
                     with open("qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
-                        f.write(session.log)
+                        f.write(devtools.log)
                         f.close()
                 pygame.quit()
                 sys.exit()
@@ -173,7 +180,7 @@ class Frontend:
                 session.buildings.df)  # draw lines to closest heat grid
 
             # fill and lerp:
-            if session.VERBOSE_MODE:
+            if devtools.VERBOSE_MODE:
                 session._gis.draw_polygon_layer_float(
                     self.canvas, session.buildings.df, 0,
                     (96, 205, 21),

@@ -55,6 +55,8 @@ class CalibrationMode:
             elif event.key == K_s:
                 session.viewport.save(keystone_file)
                 print("corner points saved in keystone.save")
+                session.active_mode = session.buildings_interaction
+                session.frontend.show_grid = False
 
     def process_grid_change(self):
         pass

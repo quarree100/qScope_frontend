@@ -2,6 +2,7 @@ import argparse
 
 from q100viz.settings.config import config
 import q100viz.session as session
+from q100viz.devtools import devtools as devtools
 
 from q100viz.frontend import Frontend
 
@@ -26,6 +27,8 @@ parser.add_argument(
     '--main_window', help="runs program in main window", action='store_true')
 parser.add_argument('--research_model',
                     help="use research model instead of q-Scope-interaction model (bool)", action='store_true')
+parser.add_argument('--test_run',
+                    help="data output folder will be deleted after session (bool)", action='store_true')
 
 args = parser.parse_args()
 
@@ -35,9 +38,14 @@ config['SIMULATION_FORCE_END_YEAR'] = args.simulate_until
 session.debug_connection_date = args.connect        # force buildings to opt in 'connection_to_heat_grid'
 session.debug_refurb_year = args.refurbish    # force buildings to opt in 'refurbish'
 session.debug_force_save_energy = args.save_energy  # force buildings to opt in for 'save_energy'
+
 session.active_mode = session.string_to_mode(args.start_at)  # force start at this mode
-session.VERBOSE_MODE = args.verbose  # define verbose level
+if session.active_mode == session.simulation:
+    session.active_mode.setup()
+
+devtools.VERBOSE_MODE = args.verbose  # define verbose level
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']
+devtools.test_run = args.test_run
 
 # compose startup information:
 str_num_connections = '\n- random {0} buildings will be selected'.format(session.debug_num_of_random_buildings) if session.debug_num_of_random_buildings > 0 else ''
@@ -48,7 +56,7 @@ str_sim_until = '\n- simulate until year {0}'.format(
 str_sim_model_file = '\n- using simulation model file {0}.'.format(
     str(config['GAMA_MODEL_FILE'])
 )
-str_verbose_mode = '\n- Verbose Mode: ' + str(session.VERBOSE_MODE)
+str_verbose_mode = '\n- Verbose Mode: ' + str(devtools.VERBOSE_MODE)
 # print startup information:
 print('\n', '#' * 28, " RUNTIME SETUP ", '#' * 28)
 print(
@@ -61,7 +69,7 @@ print(
 print('\n', '#' * 72, '\n')
 
 ############################# game loop ###############################
-frontend = Frontend(args.main_window)
+session.frontend = Frontend(args.main_window)
 
 while True:
-    frontend.run()
+    session.frontend.run()

@@ -95,7 +95,7 @@ class DataViewIndividual_Mode():
 
         except Exception as e:
                 print("Cannot draw frontend:", e)
-                session.log += "\nCannot draw frontend: %s" % e
+                devtools.log += "\nCannot draw frontend: %s" % e
 
         nrows = 22
         font = pygame.font.SysFont('Arial', 18)

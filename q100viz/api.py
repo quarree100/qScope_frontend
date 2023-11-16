@@ -3,7 +3,7 @@ import pandas
 import threading
 import socketio
 import q100viz.session as session
-import q100viz.devtools as devtools
+from q100viz.devtools import devtools
 import datetime
 from q100viz.settings.config import config
 
@@ -27,9 +27,8 @@ class API:
     def send_message(self, msg):
         '''simple function to finally send a message via UDP. It should have json format for the infoscreen to process it properly.'''
         if msg != self.previous_message:
-            session.log += ("\n" +
-                devtools.print_verbose(datetime.datetime.now().strftime(
-                " %H:%M:%S ") + "sending data:\n" + str(msg), session.VERBOSE_MODE))
+            devtools.print_verbose(datetime.datetime.now().strftime(
+                " %H:%M:%S ") + "sending data:\n" + str(msg))
             try:
                 self.io.emit('message', msg)
                 self.previous_message = msg

@@ -3,7 +3,7 @@ import random
 import sys
 
 import q100viz.session as session
-import q100viz.devtools as devtools
+from q100viz.devtools import devtools as devtools
 ############################ Model Validation #########################
 
 class ModelValidation_Mode():
@@ -16,7 +16,7 @@ class ModelValidation_Mode():
             datetime.datetime.now() - batch_sim_start)
 
         with open("qScope-log_%s.txt" % datetime.datetime.now(), "w") as f:
-            f.write(session.log)
+            f.write(devtools.log)
             f.close()
 
         sys.exit()

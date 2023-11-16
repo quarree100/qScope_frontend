@@ -6,6 +6,7 @@ import numpy as np
 
 import q100viz.keystone as keystone
 import q100viz.session as session
+from q100viz.devtools import devtools as devtools
 from q100viz.settings.config import config_slider
 from q100viz.graphics.graphictools import Image
 
@@ -183,7 +184,7 @@ class Slider:
             self.surface.blit(font.render(slider_func_and_val, True, (255, 255, 255)),
                 [self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
 
-        if session.VERBOSE_MODE:
+        if devtools.VERBOSE_MODE:
             self.surface.blit(font.render(str(self.value), True, (
                 255, 255, 255)), (self.coords_transformed[3][0] - 20, self.coords_transformed[3][1]-20))
 
@@ -233,7 +234,7 @@ class Slider:
             pygame.draw.polygon(self.surface, pygame.Color(
                 130, 20, 55), points_transformed)
 
-            # green field:
+            # user-color field:
             c = self.coords
             points = [
                 [c[0][0] + (c[3][0] - c[0][0]) / 2, c[0][1]],  # bottom left
@@ -245,8 +246,7 @@ class Slider:
                 self.surface, pygame.Color(
                     session.user_colors[int(self.id[-1])][0],
                     session.user_colors[int(self.id[-1])][1],
-                    session.user_colors[int(self.id[-1])][2],
-                    global_alpha),
+                    session.user_colors[int(self.id[-1])][2]),
                 points_transformed)
 
         ############# year selection #############
@@ -265,6 +265,21 @@ class Slider:
                 self.physical_slider_area_length  # in px
             s1 = x0 + (x3 - x0) * self.physical_diff_R / \
                 self.physical_slider_area_length  # in px
+
+            # user-color field:
+            c = self.coords
+            points = [
+                [c[0][0] + (c[3][0] - c[0][0]), c[0][1]],  # bottom left
+                [c[1][0] + (c[2][0] - c[1][0]), c[1][1]],  # top left
+                c[2],  # top right
+                c[3]]  # bottom right
+            points_transformed = self.surface.transform(points)
+            pygame.draw.polygon(
+                self.surface, pygame.Color(
+                    session.user_colors[int(self.id[-1])][0],
+                    session.user_colors[int(self.id[-1])][1],
+                    session.user_colors[int(self.id[-1])][2]),
+                points_transformed)
 
             # red field: no connection
             points = [
@@ -288,7 +303,7 @@ class Slider:
                 self.surface.blit(font.render(str(int(np.interp((x), [0.2, 1], [min_year, max_year]))), True, (
                     200, 200, 200)), ((s0 + (s1 - s0) * x) - 10, y0 - 35))
 
-            if session.VERBOSE_MODE:
+            if devtools.VERBOSE_MODE:
                 self.surface.blit(font.render("L", True, (
                     255, 255, 255)), (s0, y3-20))
                 self.surface.blit(font.render("|", True, (

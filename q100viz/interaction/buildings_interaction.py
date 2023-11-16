@@ -130,7 +130,7 @@ class Buildings_Interaction:
                             n=session.environment['scenario_num_connections'])
                     except Exception as e:
                         print("max number of possible samples reached. " + str(e))
-                        session.log += "\n%s" % e
+                        devtools.log += "\n%s" % e
 
                     # filter already selected buildings from list:
                     session.scenario_selected_buildings = session.scenario_selected_buildings[session.scenario_selected_buildings['group'] < 0]
@@ -178,7 +178,7 @@ class Buildings_Interaction:
 
         except Exception as e:
                 print("Cannot draw frontend:", e)
-                session.log += "\nCannot draw frontend: %s" % e
+                devtools.log += "\nCannot draw frontend: %s" % e
 
         # ------------------------- TEXT DISPLAY ----------------------
 

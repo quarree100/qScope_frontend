@@ -1,14 +1,20 @@
 ######################## dev tools ##########################
 import pandas
 
-def print_verbose(message, VERBOSE_MODE):
-    if VERBOSE_MODE:
-        print(message)
-        return message
-    else:
-        return ""
+class Devtools:
 
-def mark_random_buildings_for_simulation(buildings_df, num_buildings=1, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
+    def __init__(self):
+        self.VERBOSE_MODE = False
+        self.test_run = False  # if True: simulation output folder will be deleted after session. can be set via startup flag --test_run
+        self.log = ""
+
+    def print_verbose(self, message):
+        if self.VERBOSE_MODE:
+                print(message)
+                self.log += "\n" + message
+                return message
+
+def mark_random_buildings_for_simulation(self, buildings_df, num_buildings=1, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
         '''pick random n buildings, activate for simulation and update buildings list'''
 
         # get n buildings from buildings dataframe:
@@ -23,7 +29,7 @@ def mark_random_buildings_for_simulation(buildings_df, num_buildings=1, max_buil
 
         buildings_df.update(df)
 
-def mark_buildings_for_simulation(buildings_df, list_of_buildings_indices, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
+def mark_buildings_for_simulation(self, buildings_df, list_of_buildings_indices, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
         '''update buildings list with specific selected buildings adjusted for simulation'''
 
         # get n buildings from buildings dataframe:
@@ -38,9 +44,11 @@ def mark_buildings_for_simulation(buildings_df, list_of_buildings_indices, max_b
 
         buildings_df.update(df)
 
-def print_full_df(df):
-    with pandas.option_context('display.max_rows', None,
-                               'display.max_columns', None,
-                               'display.precision', 3,
-                               ):
-        print(df)
+def print_full_df(self, df):
+        with pandas.option_context('display.max_rows', None,
+                                'display.max_columns', None,
+                                'display.precision', 3,
+                                ):
+                print(df)
+
+devtools = Devtools()

@@ -19,6 +19,7 @@ class Slider:
         self.previous_value = 0
         self.group = -1
         self.id = id  # unique STRING identifier for slider
+        self.id_int = id[-1]
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
         self.x_cell_range = x_cell_range  # limits of slider handles
@@ -98,8 +99,9 @@ class Slider:
                 if self.show_controls:
                     stroke = 4 if cell.selected else 0
 
+                    # selected cells: stroke with user color
                     if cell.selected:
-                        # do not adopt color of mode selectors
+                        # (do not adopt color of mode selectors)
                         if cell.handle not in session.MODE_SELECTOR_HANDLES and cell.color is not None:
                             cell.color = pygame.Color(
                                 cell.color.r, cell.color.g, cell.color.b, 255)
@@ -170,18 +172,20 @@ class Slider:
                         [rect_points[0][0], rect_points[0][1] + 35]
                     )
 
+        ###################### slider text: ###########################
         font = pygame.font.SysFont('Arial', 18)
 
-        if self.show_text and int(self.id[-1]) in session.buildings.df['group'].values:
+        if self.show_text and int(self.id_int) in session.buildings.df['group'].values:
 
             # display human readable slider name:
             # string is either "function..........val" or "please select"
-            slider_func_and_val = str(self.human_readable_function[self.handle]) \
+            slider_text = str(self.human_readable_function[self.handle]) \
                 + "." * (40 - len(self.human_readable_function[self.handle])) \
                 + str(self.human_readable_value[self.handle]) \
-                if self.handle is not None else self.human_readable_function[self.handle]
+                if self.handle is not None \
+                else session.buildings.df[session.buildings.df['group'] == -1].iloc[0].address
 
-            self.surface.blit(font.render(slider_func_and_val, True, (255, 255, 255)),
+            self.surface.blit(font.render(slider_text, True, (255, 255, 255)),
                 [self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])
 
         if devtools.VERBOSE_MODE:

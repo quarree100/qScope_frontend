@@ -158,6 +158,11 @@ grid_2 = grid.Grid(
         {'slider2' : (0, int(ncols/2)),
         'slider3' : (int(ncols/2), ncols)})
 
+slider0 = grid_1.sliders['slider0']
+slider1 = grid_1.sliders['slider1']
+slider2 = grid_2.sliders['slider2']
+slider3 = grid_2.sliders['slider3']
+
 # --------------------------- init buildings: -------------------------
 buildings.load_data()
 

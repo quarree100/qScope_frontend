@@ -5,7 +5,7 @@ import datetime
 import shutil
 
 import pygame
-from pygame.locals import NOFRAME, KEYDOWN, K_0, K_9, K_8, K_7, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_PLUS, K_MINUS, QUIT
+from pygame.locals import NOFRAME, KEYDOWN, K_0, K_9, K_8, K_7, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_w, K_PLUS, K_MINUS, QUIT
 
 import q100viz.udp as udp
 import q100viz.session as session
@@ -94,6 +94,11 @@ class Frontend:
                     self.show_nahwaermenetz = not self.show_nahwaermenetz
                 elif event.key == K_b:
                     self.display_viewport = not self.display_viewport
+
+
+                elif event.key == K_w:
+                    print(session.buildings.df[session.buildings.df['group'] >= 0])
+
 
                 ##################### mode selection ######################
                 # enter questionnaire mode:

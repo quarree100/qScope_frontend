@@ -124,9 +124,9 @@ class Slider:
                     ncols = session.ncols
                     # TODO: why does this have to be shifted ~4*cell_width to the left??
                     x = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][3][0] - 170
+                                                    ncols*cell.y][1][3][0] - 185
                     y = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][0][1] - 10
+                                                    ncols*cell.y][1][0][1] - 0
                     # grey background color:
                     pygame.draw.polygon(
                         self.surface, (255,255,255,global_alpha), rect_points, 0)
@@ -149,9 +149,9 @@ class Slider:
                     ncols = session.ncols
                     # TODO: why does this have to be shifted 4*cell_width to the left??
                     x = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][3][0] - 170
+                                                    ncols*cell.y][1][3][0] - 185
                     y = self.grid.rects_transformed[cell.x +
-                                                    ncols*cell.y][1][0][1] - 10
+                                                    ncols*cell.y][1][0][1] - 0
                     # grey background color:
                     pygame.draw.polygon(
                         self.surface, (255,255,255,global_alpha), rect_points, 0)
@@ -206,19 +206,20 @@ class Slider:
 
         # draw slider handles if user has selected building:
         # user selected at least one building
-        if int(self.id[-1]) in session.buildings.df['group'].values:
-            # green field:
-            c = self.coords
-            points = [c[0], c[1], c[2], c[3]]
-            points_transformed = self.surface.transform(points)
-            pygame.draw.polygon(
-                self.surface,
-                pygame.Color(
-                    session.user_colors[int(self.id[-1])][0],
-                    session.user_colors[int(self.id[-1])][1],
-                    session.user_colors[int(self.id[-1])][2],
-                    global_alpha),
-                points_transformed)
+        if not int(self.id[-1]) in session.buildings.df['group'].values:
+            return
+        # green field:
+        c = self.coords
+        points = [c[0], c[1], c[2], c[3]]
+        points_transformed = self.surface.transform(points)
+        pygame.draw.polygon(
+            self.surface,
+            pygame.Color(
+                session.user_colors[int(self.id[-1])][0],
+                session.user_colors[int(self.id[-1])][1],
+                session.user_colors[int(self.id[-1])][2],
+                global_alpha),
+            points_transformed)
 
         ############# binary selection #############
         if self.handle == 'save_energy':
@@ -292,6 +293,7 @@ class Slider:
                 (s0 + (s1 - s0) * 0.21, y1),  # top right
                 (s0 + (s1 - s0) * 0.21, y0)  # bottom right
             ]
+
             pygame.draw.polygon(
                 self.surface, pygame.Color(130, 20, 55), points)
 

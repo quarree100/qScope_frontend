@@ -39,6 +39,7 @@ config = {
     'GRID_1_TOTAL_DATA_VIEW_FILE': 'q100viz/settings/total_data_view_grid_1.csv',
     'GRID_2_TOTAL_DATA_VIEW_FILE': 'q100viz/settings/total_data_view_grid_2.csv',
 
+    # physical grid extents, in percent:
     'GRID_2_X1' : 50,
     'GRID_2_X2' : 100,
     'GRID_2_Y1' : 0,

@@ -95,6 +95,10 @@ class SimulationMode:
 
         print('simulation will run until {0}-12-31 ({1} steps)'.format(self.max_year-1, self.final_step))
 
+        # increase round counter to globally log q-scope iterations:
+        session.environment['current_iteration_round'] = (
+            session.environment['current_iteration_round'] + 1) % session.num_of_rounds
+
         # ------------------------- model file setup ------------------
         self.model_file = os.path.normpath(
             os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
@@ -211,10 +215,6 @@ class SimulationMode:
         self.run_script(self.xml_path)
         session.api.send_message(json.dumps({'step' : self.final_step-1}))  # simulation done
 
-        # increase round counter to globally log q-scope iterations:
-        session.environment['current_iteration_round'] = (
-            session.environment['current_iteration_round'] + 1) % session.num_of_rounds
-
         if self.flag_create_graphs:
             try:
                 self.export_graphs()
@@ -224,10 +224,10 @@ class SimulationMode:
 
         # define titles for images and their location
         self.matplotlib_neighborhood_images = {
-            "emissions_neighborhood_accu": "data/outputs/output_{0}/emissions/CO2_emissions_neighborhood.png".format(str(self.timestamp)),
-            "energy_prices": "data/outputs/output_{0}/energy_prices/energy_prices_total.png".format(str(self.timestamp)),
-            "emissions_groups": "data/outputs/output_{0}/emissions/CO2_emissions_groups.png".format(str(self.timestamp)),
-            "energy_prices_groups": "data/outputs/output_{0}/energy_prices/energy_prices_groups.png".format(str(self.timestamp))
+            "emissions_neighborhood_accu": "data/outputs/output_{0}/round{1}/emissions/CO2_emissions_neighborhood.png".format(str(self.timestamp), session.environment['current_iteration_round']),
+            "energy_prices": "data/outputs/output_{0}/round{1}/energy_prices/energy_prices_total.png".format(str(self.timestamp), session.environment['current_iteration_round']),
+            "emissions_groups": "data/outputs/output_{0}/round{1}/emissions/CO2_emissions_groups.png".format(str(self.timestamp), session.environment['current_iteration_round']),
+            "energy_prices_groups": "data/outputs/output_{0}/round{1}/energy_prices/energy_prices_groups.png".format(str(self.timestamp), session.environment['current_iteration_round'])
         }
 
         # send matplotlib created images to infoscreen
@@ -238,8 +238,8 @@ class SimulationMode:
         # compose csv paths for infoscreen to make graphs
         session.emissions_data_paths[session.environment['current_iteration_round']] = [
             str(
-                os.path.normpath(session.simulation.current_output_folder[session.simulation.current_output_folder.find('data'):] + '/emissions/{0}'.format(file_name)))
-                for file_name in os.listdir(session.simulation.current_output_folder + '/emissions')
+                os.path.normpath(self.current_output_folder[self.current_output_folder.find('data'):] + '/emissions/{1}'.format(session.environment['current_iteration_round'], file_name)))
+                for file_name in os.listdir(self.current_output_folder + '/emissions')
         ]
 
         ## send GAMA image paths to infoscreen (per iteration round!) #

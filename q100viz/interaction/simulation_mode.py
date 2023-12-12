@@ -396,7 +396,7 @@ class SimulationMode:
         #     ylabel_="$CO_{2}$-Äquivalente (t)",
         #     x_='current_date',
         #     convert_grams_to_tons=True,
-        #     compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
+        #     compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults"
         # )
         graphs.export_neighborhood_emissions_connections(
             emissions_file=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.csv",
@@ -418,7 +418,7 @@ class SimulationMode:
             x_='current_date',
             label_show_iteration_round=False,
             prepend_data=self.output_folder + "/../../data_pre-simulation/energy-prices_hh_2011-2022.csv"
-            # compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults"
+            # compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults"
         )
 
         ########## individual buildings data ########
@@ -443,7 +443,7 @@ class SimulationMode:
                     ylabel_="$CO_{2}$-Äquivalente (kg/Monat)",  # TODO: t/Jahr
                     x_='current_date',
                     convert_grams_to_kg=True,
-                    compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
+                    compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults",
                     figtext=
                         str(idx) + " "
                         + str(group_df.loc[idx, 'address']) + " "
@@ -471,7 +471,7 @@ class SimulationMode:
                     xlabel_="Jahr",
                     ylabel_="€/Monat",
                     x_='current_date',
-                    compare_data_folder=self.current_output_folder + "/../../precomputed/simulation_defaults",
+                    compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults",
                     figtext=
                         str(idx) + " "
                         + str(group_df.loc[idx, 'address']) + " "

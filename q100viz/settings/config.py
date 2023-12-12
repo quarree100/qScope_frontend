@@ -21,7 +21,8 @@ config = {
     'NUM_OF_USERS' : 4,
 
     # simulation
-    'GAMA_HEADLESS_FOLDER' : '/opt/gama-platform/headless/',
+    # 'GAMA_HEADLESS_FOLDER' : '/opt/gama-platform/headless/',
+    'GAMA_HEADLESS_FOLDER' : '/home/qscope/opt/GAMA_1.9.2/headless/',
     'GAMA_OUTPUT_FOLDER': '../data/outputs/output',
     'GAMA_MODEL_FILE' : '../q100_abm_qscope-workshop/q100/models/qscope_ABM.gaml',
     'SIMULATION_FORCE_START_YEAR' : 2020,

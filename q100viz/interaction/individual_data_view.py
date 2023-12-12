@@ -67,7 +67,7 @@ class DataViewIndividual_Mode():
                     session.environment['active_user_focus_data'] = int(cell.handle[-1])
 
                 # mode selectors:
-                if cell.handle in session.MODE_SELECTOR_HANDLES:
+                if cell.handle in session.MODE_SELECTOR_HANDLES and cell.handle is not 'start_simulation':
                     mode = session.string_to_mode(cell.handle[6:])
                     if not mode.waiting_to_start:
                         self.mode_token_selection_time = datetime.datetime.now()
@@ -142,4 +142,4 @@ class DataViewIndividual_Mode():
 
                     if mode is session.simulation:
                         session.simulation.setup()
-                    session.active_mode = mode  # marks simulation to be started in main thread
+                    session.active_mode = mode  # marks simulation to be started in main sthread

@@ -6,6 +6,7 @@ import pygame
 import datetime
 
 import q100viz.session as session
+from q100viz.devtools import devtools
 from q100viz.settings.config import config
 from q100viz.graphics.graphictools import Image
 class Buildings_Interaction:

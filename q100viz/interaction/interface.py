@@ -19,7 +19,7 @@ class Slider:
         self.previous_value = 0
         self.group = -1
         self.id = id  # unique STRING identifier for slider
-        self.id_int = id[-1]
+        self.id_int = int(id[-1])
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
         self.x_cell_range = x_cell_range  # limits of slider handles
@@ -179,11 +179,12 @@ class Slider:
 
             # display human readable slider name:
             # string is either "function..........val" or "please select"
-            slider_text = str(self.human_readable_function[self.handle]) \
+            if self.handle is not None:
+                slider_text = str(self.human_readable_function[self.handle]) \
                 + "." * (40 - len(self.human_readable_function[self.handle])) \
-                + str(self.human_readable_value[self.handle]) \
-                if self.handle is not None \
-                else session.buildings.df[session.buildings.df['group'] == -1].iloc[0].address
+                + str(self.human_readable_value[self.handle])
+            elif len(session.buildings.df[session.buildings.df['group'] == self.id_int].index) > 0:
+                slider_text = session.buildings.df[session.buildings.df['group'] == self.id_int].iloc[0].address
 
             self.surface.blit(font.render(slider_text, True, (255, 255, 255)),
                 [self.coords_transformed[0][0], self.coords_transformed[0][1] - 20])

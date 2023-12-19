@@ -67,13 +67,11 @@ class DataViewIndividual_Mode():
                     session.environment['active_user_focus_data'] = int(cell.handle[-1])
 
                 # mode selectors:
-                if cell.handle in session.MODE_SELECTOR_HANDLES and cell.handle is not 'start_simulation':
+                if cell.handle in session.MODE_SELECTOR_HANDLES and cell.handle != 'start_simulation':
                     mode = session.string_to_mode(cell.handle[6:])
                     if not mode.waiting_to_start:
                         self.mode_token_selection_time = datetime.datetime.now()
                         mode.waiting_to_start = True
-
-
 
         session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
         session.api.send_session_env()

@@ -2,17 +2,36 @@
 
 Code für die Projektion und Interaktion via _Tangible User Interface_ des Q-Scope-Setups (basierend auf dem MIT-CityScope-Projekt) in QUARREE100.
 
-## q100viz
-*q100viz* is based on [pygame](https://www.pygame.org/).
+The Q-Scope frontend is based on [pygame](https://www.pygame.org/).
 
-Find some documentation at q-scope.readthedocs.io/
+Read the docs at [q-scope.readthedocs.io/](q-scope.readthedocs.io) !
+
+## installation
 
 Before you can run the sketch, you need to install required packages:
-```
-pip install -r requirements.txt
+
+``` bash
+pip3 install -r requirements.txt
 ```
 
-Geodata sources are expected to be found in the `data` directory. Create it (if it does not exist) and make the basemap image and shapefiles available. Check the file paths in `config.py`.
+hint: As of 2023, the global python environment prevents installation of packages made this way. Instead, you need to either install the packages via `apt install python3-xyz` (linux) or create and use a virtual environment:
+
+``` bash
+python3 -m venv new/path/to/virtual/environment
+source new/path/to/virtual/environment/bin/activate
+pip3 install -r requirements.txt
+```
+
+>If you wish to install a non-Debian-packaged Python package,
+ create a virtual environment using python3 -m venv path/to/venv.
+ Then use path/to/venv/bin/python and path/to/venv/bin/pip. Make
+ sure you have python3-full installed.
+
+## setup 
+
+Geodata sources are expected to be found in the `data` directory. Create it (if it does not exist) and make the basemap image and shapefiles available. Check the file paths in `config.py` and adjust them as [explained in the documentation](https://q-scope.readthedocs.io/en/latest/frontend/02_init.html#config-file).
+
+## usage 
 
 Run the sketch:
 ```
@@ -53,18 +72,20 @@ project qScope
 │   └───modified MIT CityScoPy Token Tag Decoder
 └───data
 |   └───outputs
-|      └───output_[timestamp]
-|         (simulation-specific output)
-|         └───buildings_clusters_[timestamp].csv
-|         (exportierte Gebäudeliste von Frontend)
-|         └───simulation_parameters_[timestamp].xml
-|         (xml-Datei mit allen Simulationsparametern zum Starten des headless modes)
-|         └───connections
-|         |       Export der Anschlussquoten
-|         └───emissions
-|         |      gebäudespezifische und aggregierte Quartiersemissionen
-|         └───snapshot
-|               von GAMA produzierte Grafiken
+|   |  └───output_[timestamp]
+|   |     (simulation-specific output)
+|   |     └───buildings_clusters_[timestamp].csv
+|   |     (exportierte Gebäudeliste von Frontend)
+|   |     └───simulation_parameters_[timestamp].xml
+|   |     (xml-Datei mit allen Simulationsparametern zum Starten des headless modes)
+|   |     └───connections
+|   |     |       Export der Anschlussquoten
+|   |     └───emissions
+|   |     |      gebäudespezifische und aggregierte Quartiersemissionen
+|   |     └───snapshot
+|   |           von GAMA produzierte Grafiken
+|   └───scenarios
+|       └───scenarios are preconditions for the simulation, like energy price development. Each csv file placed here will be read.
 └───q100_abm
 │   │   GAMA workspace folder
 │   └───q100

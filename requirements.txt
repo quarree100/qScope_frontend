@@ -1,11 +1,11 @@
 datetime
 geopandas
-json
+matplotlib
 numpy
 opencv-python
 pandas
 pygame
 python-socketio
-random
+requests
 shapely
 websocket-client

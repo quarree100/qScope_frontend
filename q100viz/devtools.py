@@ -7,6 +7,7 @@ class Devtools:
         self.VERBOSE_MODE = False
         self.test_run = False  # if True: simulation output folder will be deleted after session. can be set via startup flag --test_run
         self.log = ""
+        self.profiler = None # cProfiler to evaluate runtime speed
 
     def print_verbose(self, message):
         if self.VERBOSE_MODE:

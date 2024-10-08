@@ -3,6 +3,7 @@ import os
 import threading
 import datetime
 import shutil
+import cProfile
 
 import pygame
 from pygame.locals import NOFRAME, KEYDOWN, K_0, K_9, K_8, K_7, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_w, K_PLUS, K_MINUS, QUIT
@@ -35,9 +36,11 @@ class Frontend:
         self.canvas = pygame.display.set_mode(canvas_size, NOFRAME)
         pygame.display.set_caption("q100viz")
 
-        self.show_grid = False  # draws a representation of the physical grid of tiles onto the canvas
+        # draws a representation of the physical grid of tiles onto the canvas
+        self.show_grid = False
         self.show_nahwaermenetz = True  # display heat grid as red lines
-        self.display_viewport = True  # displays the area that is being drawn on. used for debugging
+        # displays the area that is being drawn on. used for debugging
+        self.display_viewport = True
 
         # mask viewport with black surface
         self.mask_points = [[0, 0], [85.5, 0], [85.5, 82], [0, 82], [0, -50],
@@ -65,8 +68,11 @@ class Frontend:
         udp_thread.start()
 
 
+        if devtools.test_run:
+            devtools.profiler = cProfile.Profile()
+            devtools.profiler.enable()
 ############################ Begin Game Loop ##########################
-
+        
     def run(self):
 
         if session.previous_mode is not session.active_mode:
@@ -95,10 +101,9 @@ class Frontend:
                 elif event.key == K_b:
                     self.display_viewport = not self.display_viewport
 
-
                 elif event.key == K_w:
-                    print(session.buildings.df[session.buildings.df['group'] >= 0])
-
+                    print(
+                        session.buildings.df[session.buildings.df['group'] >= 0])
 
                 ##################### mode selection ######################
                 # enter questionnaire mode:
@@ -155,13 +160,20 @@ class Frontend:
                 print("-" * 72)
                 print("Closing application.")
                 if devtools.log != "":
-                    print("Full log exported to qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
+                    print("Full log exported to qScope-log_%s.txt" %
+                          str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
                     with open(session.simulation.output_folder + "/qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
                         f.write(devtools.log)
                         f.close()
                 if devtools.test_run:
-                    shutil.rmtree(session.simulation.output_folder)
-                    print("data output folder was deleted, because q100viz was run with --test_run flag")
+                    try:
+                        shutil.rmtree(session.simulation.output_folder)
+                        print(
+                            "data output folder was deleted, because q100viz was run with --test_run flag")
+                    except: 
+                        pass
+                    devtools.profiler.disable()
+                    devtools.profiler.print_stats(sort='cumulative')
 
                 pygame.quit()
                 sys.exit()
@@ -216,13 +228,31 @@ class Frontend:
                 fill_attr='connection_to_heat_grid')
 
         # draw grid outline
-        session.grid_1.draw(self.show_grid) # draws polygons to grid.surface
+        session.grid_1.draw(self.show_grid)  # draws polygons to grid.surface
         session.grid_2.draw(self.show_grid)
 
         # draw mask
-        pygame.draw.polygon(session.viewport, (0, 0, 0),
+        mask_color = (0,0,0) if not session.flag_mockup_mode else (128, 128, 128)
+        pygame.draw.polygon(session.viewport, mask_color,
                             session.viewport.transform(self.mask_points))
 
+        if session.flag_mockup_mode:
+            font = pygame.font.SysFont("Arial", 40)
+            session.viewport.blit(
+                font.render(
+                    "Running demo mode!",
+                    True,
+                    pygame.Color(0, 0, 0)),
+                    (2, 2)
+            )
+            session.viewport.blit(
+                font.render(
+                    "Running demo mode!",
+                    True,
+                    pygame.Color(255, 255, 255)),
+                    (0, 0)
+            )
+            
         # draw mode-specific surface:
         if session.active_mode:
             session.active_mode.draw(session.viewport)

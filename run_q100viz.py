@@ -57,9 +57,11 @@ str_sim_model_file = '\n- using simulation model file {0}.'.format(
     str(config['GAMA_MODEL_FILE'])
 )
 str_verbose_mode = '\n- Verbose Mode: ' + str(devtools.VERBOSE_MODE)
+str_mockup_mode = "\n-RUNNING DEMO MODE! CSPY NOT DEFINED" if session.flag_mockup_mode else ""
 # print startup information:
 print('\n', '#' * 28, " RUNTIME SETUP ", '#' * 28)
 print(
+    str_mockup_mode,
     str_verbose_mode,
     str_num_connections,
     str_date_of_connections,

@@ -3,8 +3,9 @@
 import pandas as pd
 import pygame
 import json
+import os
 
-from q100viz.settings.config import config
+from q100viz.settings.config import config, DATA_ABS_PATH
 import q100viz.api as api
 import q100viz.gis as gis
 import q100viz.grid as grid
@@ -96,19 +97,14 @@ environment = {
     }
 
 # scenario data:
-environment['active_scenario_handle'] = 'A'
-scenario_data = {
-    'A': pd.read_csv(
-        '../data/scenario_A.csv').set_index('name'),
-    'B': pd.read_csv(
-        '../data/scenario_B.csv').set_index('name'),
-    'C': pd.read_csv(
-        '../data/scenario_C.csv').set_index('name'),
-    'D': pd.read_csv(
-        '../data/scenario_D.csv').set_index('name'),
-    'Ref': pd.read_csv(
-        '../data/scenario_Ref.csv').set_index('name')
-}
+scenarios = []
+for root, dirs, files in os.walk(DATA_ABS_PATH+'/scenarios'):
+    for file in files:
+        if file.endswith('.csv'):
+            scenarios.append(os.path.join(root, file))
+
+# TODO: let user select scenario
+scenario_data = pd.read_csv(scenarios[0]).set_index("name")
 
 # ---------------------------- simulation -----------------------------
 min_connection_year = config['SIMULATION_FORCE_START_YEAR']
@@ -132,7 +128,16 @@ basemap.warp()
 
 # ------------------------------ grid ---------------------------------
 ###### Initialize grid, projected onto the viewport #########
-grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))  # TODO: seperate files for the two grids
+grid_settings = json.load(open(os.path.join(DATA_ABS_PATH, "mockup/qscope.json")))
+flag_mockup_mode = False
+try:
+    grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))  # TODO: seperate files for the two grids
+except Exception as e:
+    print(e, "--> could not load cspy settings file, so a simulated mode will be used.")  # TODO: conspicuously show that we are running a simulation!
+    flag_mockup_mode = True
+    
+print("flag_mockup_mode", flag_mockup_mode)
+        
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = grid.Grid(
@@ -164,7 +169,10 @@ slider2 = grid_2.sliders['slider2']
 slider3 = grid_2.sliders['slider3']
 
 # --------------------------- init buildings: -------------------------
-buildings.load_data()
+try:
+    buildings.load_data()
+except:
+    pass
 
 # ----------------------- mode-specific grid setup: -------------------
 buildings_interaction_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])

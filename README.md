@@ -71,6 +71,8 @@ project qScope
 └───cspy
 │   └───modified MIT CityScoPy Token Tag Decoder
 └───data
+|   └───mockup
+|   |   contains dummy data from the cspy table to be used if other Q-Scope components are not initialized.
 |   └───outputs
 |   |  └───output_[timestamp]
 |   |     (simulation-specific output)
@@ -85,7 +87,8 @@ project qScope
 |   |     └───snapshot
 |   |           von GAMA produzierte Grafiken
 |   └───scenarios
-|       └───scenarios are preconditions for the simulation, like energy price development. Each csv file placed here will be read.
+|       └───scenarios are preconditions for the simulation, like energy 
+price development. Each csv file placed here will be read.
 └───q100_abm
 │   │   GAMA workspace folder
 │   └───q100

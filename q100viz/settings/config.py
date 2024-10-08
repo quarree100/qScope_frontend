@@ -1,15 +1,21 @@
+import os
+
+DATA_FOLDER = "./data" # change me
+
+DATA_ABS_PATH = os.path.abspath(DATA_FOLDER)
+
 config = {
     # UDP communication
     'UDP_SERVER_PORT' : 8081,
     'UDP_TABLE_1' : 5001,
     'UDP_TABLE_2' : 5000,
-
+    
     # GIS files
-    'BASEMAP_FILE': "../data/GIS/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg",
-    'GEBAEUDE_BESTAND_FILE': "../data/GIS/Shapefiles/bestandsgebaeude_export.shp",
-    'GEBAEUDE_NEUBAU_FILE': "../data/GIS/Shapefiles/Neubau Gebaeude Kataster.shp",
-    'WAERMESPEICHER_FILE': "../data/GIS/Shapefiles/Waermespeicher.shp",
-    'NAHWAERMENETZ_FILE': "../data/GIS/Shapefiles/Nahwaermenetz.shp",
+    'BASEMAP_FILE': os.path.join(DATA_ABS_PATH, "GIS/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"),
+    'GEBAEUDE_BESTAND_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/bestandsgebaeude_export.shp"),
+    'GEBAEUDE_NEUBAU_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/Neubau Gebaeude Kataster.shp"),
+    'WAERMESPEICHER_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/Waermespeicher.shp"),
+    'NAHWAERMENETZ_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/Nahwaermenetz.shp"),
 
     # graphics setup
     'SAVED_KEYSTONE_FILE': 'keystone.save',
@@ -23,11 +29,11 @@ config = {
     # simulation
     # 'GAMA_HEADLESS_FOLDER' : '/opt/gama-platform/headless/',
     'GAMA_HEADLESS_FOLDER' : '/home/qscope/opt/GAMA_1.9.2/headless/',
-    'GAMA_OUTPUT_FOLDER': '../data/outputs/output',
+    'GAMA_OUTPUT_FOLDER': os.path.join(DATA_ABS_PATH, 'outputs/output'),
     'GAMA_MODEL_FILE' : '../q100_abm_qscope-workshop/q100/models/qscope_ABM.gaml',
     'SIMULATION_FORCE_START_YEAR' : 2020,
     'SIMULATION_FORCE_END_YEAR' : 2030,
-    'REFERENCE_DATA_FOLDER' : '../data/precomputed/simulation_defaults',
+    'REFERENCE_DATA_FOLDER' : os.path.join(DATA_ABS_PATH, 'precomputed/simulation_defaults'),
 
     # grid setup
     'CSPY_SETTINGS_FILE': '../cspy/settings/qscope_L.json',

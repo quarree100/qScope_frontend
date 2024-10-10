@@ -11,11 +11,11 @@ config = {
     'UDP_TABLE_2' : 5000,
     
     # GIS files
-    'BASEMAP_FILE': os.path.join(DATA_ABS_PATH, "GIS/Layer/180111-QUARREE100-RK_modifiziert_smaller.jpg"),
-    'GEBAEUDE_BESTAND_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/bestandsgebaeude_export.shp"),
-    'GEBAEUDE_NEUBAU_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/Neubau Gebaeude Kataster.shp"),
-    'WAERMESPEICHER_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/Waermespeicher.shp"),
-    'NAHWAERMENETZ_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/Nahwaermenetz.shp"),
+    'BASEMAP_FILE': os.path.join(DATA_ABS_PATH, "GIS/180111-QUARREE100-RK_modifiziert_smaller.jpg"),
+    'GEBAEUDE_BESTAND_FILE': os.path.join(DATA_ABS_PATH, "GIS/Ruesdorfer_Kamp.shp"),
+    # 'GEBAEUDE_NEUBAU_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/Neubau Gebaeude Kataster.shp"),
+    # 'WAERMESPEICHER_FILE': os.path.join(DATA_ABS_PATH, "GIS/Shapefiles/Waermespeicher.shp"),
+    'NAHWAERMENETZ_FILE': os.path.join(DATA_ABS_PATH, "GIS/Nahwaermenetz.shp"),
 
     # graphics setup
     'SAVED_KEYSTONE_FILE': 'keystone.save',

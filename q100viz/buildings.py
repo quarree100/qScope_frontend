@@ -3,12 +3,13 @@ import random
 import shapely
 import pygame
 import json
+import os
 
 import q100viz.session as session
 from q100viz.devtools import devtools as devtools
 import q100viz.gis as gis
 import q100viz.api as api
-from q100viz.settings.config import config
+from q100viz.settings.config import config, DATA_ABS_PATH
 
 class Buildings:
     def __init__(self):
@@ -18,7 +19,7 @@ class Buildings:
     ########################### Load data #############################
     def load_data(self, create_clusters=False):
         # Bestand:
-        bestand = gis.read_shapefile(
+        self.df = gis.read_shapefile(
             config['GEBAEUDE_BESTAND_FILE'], columns={
                 'Kataster_C': 'string',  # Code
                 'Kataster_S': 'string',  # Straße
@@ -32,18 +33,20 @@ class Buildings:
                 'Kataster_W' : 'int'
                 }).set_index('Kataster_C')
 
-        bestand.index.names = ['id']
+        self.df.index.names = ['id']
 
-        bestand['address'] = bestand['Kataster_S'] + ' ' + bestand['Kataster_H']
-        bestand = bestand.drop('Kataster_S', axis=1)
-        bestand = bestand.drop('Kataster_H', axis=1)
-        bestand = bestand.rename(columns = {
+        self.df['address'] = self.df['Kataster_S'] + ' ' + self.df['Kataster_H']
+        self.df = self.df.drop('Kataster_S', axis=1)
+        self.df = self.df.drop('Kataster_H', axis=1)
+        self.df = self.df.rename(columns = {
             'Kataster13': 'spec_heat_consumption',
             'Kataster15': 'spec_power_consumption',
             'Kataster_E': 'energy_source',
             'Kataster_A' : 'type',
             'Kataster_6' : 'area',
             'Kataster_W' : 'units'})
+        
+        return self.initialize_data(create_clusters=create_clusters)
 
         # bestand['area'] = bestand['Kataster_6'].fillna(0).to_numpy()
         # bestand = bestand.drop('Kataster_6', 1)
@@ -66,8 +69,8 @@ class Buildings:
 
         # merge:
         # buildings = session.buildings = pandas.concat([bestand, neubau])
-        self.df = bestand
-
+        
+    def initialize_data(self, create_clusters=False):
         # adjust data
         self.df['spec_heat_consumption'] = self.df['spec_heat_consumption'].fillna(0).to_numpy()
         self.df['spec_power_consumption'] = self.df['spec_power_consumption'].fillna(0).to_numpy()
@@ -107,6 +110,21 @@ class Buildings:
         self.find_closest_heat_grid_line(print_full_df=False)
 
         return self.df
+    
+    ########################## mockup data #######################
+    def create_mockup_data(self, create_clusters=False):
+        self.df = gis.read_shapefile(
+            os.path.join(DATA_ABS_PATH, "GIS/Ruesdorfer_Kamp.shp")
+        )
+
+        self.df["address"] = self.df["addr_stree"] + ' ' + self.df["addr_house"]
+
+        # generate random consumption data:
+        self.df['spec_heat_consumption'] = 200 + random.random() * 100
+        self.df['spec_power_consumption'] = 200 + random.random() * 100
+        self.df['energy_source'] = 200 + random.random() * 100
+        
+        return self.initialize_data(create_clusters=create_clusters)
 
     ##################### find closest heat grid line #################
     def find_closest_heat_grid_line(self, print_full_df):

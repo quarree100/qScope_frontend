@@ -135,9 +135,7 @@ try:
 except Exception as e:
     print(e, "--> could not load cspy settings file, so a simulated mode will be used.")  # TODO: conspicuously show that we are running a simulation!
     flag_mockup_mode = True
-    
-print("flag_mockup_mode", flag_mockup_mode)
-        
+            
 nrows = grid_settings['nrows']
 ncols = grid_settings['ncols']
 grid_1 = grid.Grid(
@@ -172,6 +170,7 @@ slider3 = grid_2.sliders['slider3']
 try:
     buildings.load_data()
 except:
+    buildings.create_mockup_data()
     pass
 
 # ----------------------- mode-specific grid setup: -------------------

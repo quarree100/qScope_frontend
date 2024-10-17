@@ -2,18 +2,16 @@
 
 import pandas as pd
 import pygame
-import json
 import os
 
 from q100viz.settings.config import config, DATA_ABS_PATH
 import q100viz.api as api
 import q100viz.gis as gis
-import q100viz.grid as grid
-from q100viz.interaction.calibration_mode import CalibrationMode
 from q100viz.interaction.buildings_interaction import Buildings_Interaction
 from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.individual_data_view import DataViewIndividual_Mode
 from q100viz.interaction.total_data_view import DataViewTotal_Mode
+from q100viz.interaction.interface import Slider
 import q100viz.keystone as keystone
 import q100viz.buildings
 from q100viz.devtools import devtools as devtools
@@ -33,14 +31,10 @@ api = api.API(io)
 # create the main surface, projected to corner points
 # the viewport's coordinates are between 0 and 100 on each axis
 viewport = keystone.Surface(config['CANVAS_SIZE'], pygame.SRCALPHA)
-try:
-    viewport.load(config['SAVED_KEYSTONE_FILE'])
-    devtools.print_verbose('...viewport points loaded from keystone file.')
-except Exception:
-    devtools.print_verbose("Failed to open keystone file")
-    viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
-    viewport.dst_points = [[0, 0], [0, config['CANVAS_SIZE'][1]], [
-        config['CANVAS_SIZE'][0], config['CANVAS_SIZE'][1]], [config['CANVAS_SIZE'][0], 0]]
+devtools.print_verbose("Failed to open keystone file")
+viewport.src_points = [[0, 0], [0, 100], [100, 100], [100, 0]]
+viewport.dst_points = [[0, 0], [0, config['CANVAS_SIZE'][1]], [
+    config['CANVAS_SIZE'][0], config['CANVAS_SIZE'][1]], [config['CANVAS_SIZE'][0], 0]]
 viewport.calculate()
 
 show_polygons = False
@@ -126,45 +120,8 @@ basemap = gis.Basemap(
     _gis)
 basemap.warp()
 
-# ------------------------------ grid ---------------------------------
-###### Initialize grid, projected onto the viewport #########
-grid_settings = json.load(open(os.path.join(DATA_ABS_PATH, "mockup/qscope.json")))
-flag_mockup_mode = False
-try:
-    grid_settings = json.load(open(config['CSPY_SETTINGS_FILE']))  # TODO: seperate files for the two grids
-except Exception as e:
-    print(e, "--> could not load cspy settings file, so a simulated mode will be used.")  # TODO: conspicuously show that we are running a simulation!
-    flag_mockup_mode = True
-            
-nrows = grid_settings['nrows']
-ncols = grid_settings['ncols']
-grid_1 = grid.Grid(
-    config['CANVAS_SIZE'], ncols, nrows, [
-        [config['GRID_1_X1'], config['GRID_1_Y1']],
-        [config['GRID_1_X1'], config['GRID_1_Y2']],
-        [config['GRID_1_X2'], config['GRID_1_Y2']],
-        [config['GRID_1_X2'], config['GRID_1_Y1']]],
-        viewport, config['GRID_1_SETUP_FILE'],
-        {'slider0' : [[0, 115], [0, 100], [50, 100], [50, 115]],
-            'slider1' : [[50, 115], [50, 100], [100, 100], [100, 115]]},
-        {'slider0' : (0, int(ncols/2)),
-        'slider1' : (int(ncols/2), ncols)})
-grid_2 = grid.Grid(
-    config['CANVAS_SIZE'], ncols, nrows, [
-        [config['GRID_2_X1'], config['GRID_2_Y1']],
-        [config['GRID_2_X1'], config['GRID_2_Y2']],
-        [config['GRID_2_X2'], config['GRID_2_Y2']],
-        [config['GRID_2_X2'], config['GRID_2_Y1']]],
-        viewport, config['GRID_2_SETUP_FILE'],
-        {'slider2' : [[0, 115], [0, 100], [50, 100], [50, 115]],
-         'slider3' : [[50, 115], [50, 100], [100, 100], [100, 115]]},
-        {'slider2' : (0, int(ncols/2)),
-        'slider3' : (int(ncols/2), ncols)})
-
-slider0 = grid_1.sliders['slider0']
-slider1 = grid_1.sliders['slider1']
-slider2 = grid_2.sliders['slider2']
-slider3 = grid_2.sliders['slider3']
+sliders = [Slider(config['CANVAS_SIZE'], "slider{0}".format(i), [[0, 0], [0, 100], [100, 100], [100, 0]], [0, 100]) for i in range(num_of_users)]
+popups = []
 
 # --------------------------- init buildings: -------------------------
 try:
@@ -173,21 +130,10 @@ except:
     buildings.create_mockup_data()
     pass
 
-# ----------------------- mode-specific grid setup: -------------------
-buildings_interaction_grid_1 = pd.read_csv(config['GRID_1_SETUP_FILE'])
-buildings_interaction_grid_2 = pd.read_csv(config['GRID_2_SETUP_FILE'])
-input_scenarios_grid_1 = pd.read_csv(config['GRID_1_INPUT_SCENARIOS_FILE'])
-input_scenarios_grid_2 = pd.read_csv(config['GRID_2_INPUT_SCENARIOS_FILE'])
-individual_data_view_grid_1 = pd.read_csv(config['GRID_1_INDIVIDUAL_DATA_VIEW_FILE'])
-individual_data_view_grid_2 = pd.read_csv(config['GRID_2_INDIVIDUAL_DATA_VIEW_FILE'])
-total_data_view_grid_1 = pd.read_csv(config['GRID_1_TOTAL_DATA_VIEW_FILE'])
-total_data_view_grid_2 = pd.read_csv(config['GRID_2_TOTAL_DATA_VIEW_FILE'])
-
 # -------------------------------- modes ------------------------------
 previous_mode = None
 pending_mode = None  # next mode to run after countdown
 
-calibration = CalibrationMode()
 buildings_interaction = Buildings_Interaction()
 simulation = SimulationMode()
 individual_data_view = DataViewIndividual_Mode()
@@ -197,9 +143,7 @@ modes = [buildings_interaction, simulation, individual_data_view, total_data_vie
 
 ################################# FUNCTIONS ###########################
 def string_to_mode(input_string):
-    if input_string == 'calibrate':
-        return calibration
-    elif input_string == 'buildings_interaction':
+    if input_string == 'buildings_interaction':
         return buildings_interaction
     elif input_string == 'simulation':
         return simulation
@@ -211,11 +155,8 @@ def string_to_mode(input_string):
         print(input_string, "is not a defined game mode. starting at buildings_interaction..")
         return buildings_interaction
 
+flag_mockup_mode = False  # TODO: this causes the forntend to display "demo mode" if mockup data is used
 flag_export_canvas = False
 active_mode = string_to_mode(environment['mode'])
-
-def iterate_grids():
-
-    return [(x, y, cell, grid) for grid in [grid_1, grid_2] for y, row in enumerate(grid.grid) for x, cell in enumerate(row)]
 
 frontend = None  # will be set in run_q100viz.py

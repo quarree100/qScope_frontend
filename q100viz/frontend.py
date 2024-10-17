@@ -23,7 +23,7 @@ class Frontend:
         # window position (must be set before pygame.init!)
         if not run_in_main_window:
             os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (
-                0, 2560)  # projection to the left
+                0, 2560)  # projection to the right
 
         # Initialize program
         pygame.init()
@@ -43,21 +43,16 @@ class Frontend:
         self.display_viewport = True
 
         # mask viewport with black surface
-        self.mask_points = [[0, 0], [85.5, 0], [85.5, 82], [0, 82], [0, -50],
-                            [-50, -50], [-50, 200], [200, 200], [200, -50], [0, -50]]
+        self.mask_points = [
+            [0, 0], [85.5, 0],
+            [85.5, 82], [0, 82],
+            [0, -50], [-50, -50],
+            [-50, 200], [200, 200],
+            [200, -50], [0, -50]]
 
-        ############# UDP server for incoming cspy messages ###########
+        ############# UDP server for incoming gama messages ###########
         # UDP receive
-        grid_udp_1 = ('localhost', config['UDP_TABLE_1'])
-        grid_udp_2 = ('localhost', config['UDP_TABLE_2'])
         self.udp_gama = ('localhost', config['UDP_SERVER_PORT'])
-
-        for grid_, grid_udp in [[session.grid_1, grid_udp_1], [session.grid_2, grid_udp_2]]:
-            udp_server = udp.UDPServer(*grid_udp, 4096)
-            udp_thread = threading.Thread(target=udp_server.listen,
-                                          args=(grid_.read_scanner_data,),
-                                          daemon=True)
-            udp_thread.start()
 
         # receive and forward GAMA messages during simulation:
         udp_server = udp.UDPServer(
@@ -92,9 +87,6 @@ class Frontend:
                 # toggle basemap:
                 if event.key == K_m:
                     session.show_basemap = event.key == K_m and not session.show_basemap
-                # toggle grid:
-                elif event.key == K_g:
-                    self.show_grid = not self.show_grid
                 # toggle nahwaermenetz:
                 elif event.key == K_n:
                     self.show_nahwaermenetz = not self.show_nahwaermenetz
@@ -106,13 +98,6 @@ class Frontend:
                         session.buildings.df[session.buildings.df['group'] >= 0])
 
                 ##################### mode selection ######################
-                # enter questionnaire mode:
-                # if event.key == K_1:
-                #     session.active_mode = session.questionnaire
-                # activate Input Scenarios Mode:
-                # elif event.key == K_2:
-                    # session.active_mode = session.input_scenarios
-                # activate Input Households Mode:
                 elif event.key == K_0:
                     session.active_mode = session.buildings_interaction
                 # enter simulation mode:
@@ -124,33 +109,13 @@ class Frontend:
                 elif event.key == K_7:
                     session.active_mode = session.total_data_view
 
-                # toggle calibration:
-                elif event.key == K_c:
-                    if session.active_mode != session.calibration:
-                        session.active_mode = session.calibration
-                        self.show_grid = True
-                    else:
-                        session.active_mode = session.buildings_interaction
-                        self.show_grid = False
-
                 ########## manual slider control for test purposes: #######
-                elif event.key == K_PLUS:
-                    for grid in session.grid_1, session.grid_2:
-                        for key, val in grid.sliders.items():
-                            if grid.sliders[key].value is not None:
-                                grid.sliders[key].value += 0.1
-                            else:
-                                grid.sliders[key].value = 0.1
-                            grid.sliders[key].process_value()
-                elif event.key == K_MINUS:
-                    for grid in session.grid_1, session.grid_2:
-                        for key, val in grid.sliders.items():
-                            if grid.sliders[key].value is not None:
-                                grid.sliders[key].value = round(
-                                    grid.sliders[key].value - 0.1, 3)
-                            else:
-                                grid.sliders[key].value = 0.1
-                            grid.sliders[key].process_value()
+                elif event.key in [K_PLUS, K_MINUS]:
+                    for slider in session.sliders:
+                        if slider.value is not None:
+                            slider.value = (
+                                slider.value + 0.1) if event.key == K_PLUS else (slider.value - 0.1)
+                        slider.process_value()
 
                 # verbose mode:
                 elif event.key == K_v:
@@ -170,7 +135,7 @@ class Frontend:
                         shutil.rmtree(session.simulation.output_folder)
                         print(
                             "data output folder was deleted, because q100viz was run with --test_run flag")
-                    except: 
+                    except:
                         pass
                     devtools.profiler.disable()
                     devtools.profiler.print_stats(sort='cumulative')
@@ -186,10 +151,8 @@ class Frontend:
         self.canvas.fill(0)
         session.viewport.fill(0)
         session._gis.surface.fill(0)
-        for grid in (session.grid_1, session.grid_2):
-            grid.surface.fill(0)
-            for slider in grid.sliders.values():
-                slider.surface.fill(0)
+        for slider in session.sliders:
+            slider.surface.fill(0)
 
         # draw GIS layers:
         if session.show_polygons:
@@ -227,12 +190,9 @@ class Frontend:
                 fill_true=(0, 168, 78),
                 fill_attr='connection_to_heat_grid')
 
-        # draw grid outline
-        session.grid_1.draw(self.show_grid)  # draws polygons to grid.surface
-        session.grid_2.draw(self.show_grid)
-
         # draw mask
-        mask_color = (0,0,0) if not session.flag_mockup_mode else (128, 128, 128)
+        mask_color = (0, 0, 0) if not session.flag_mockup_mode else (
+            128, 128, 128)
         pygame.draw.polygon(session.viewport, mask_color,
                             session.viewport.transform(self.mask_points))
 
@@ -243,24 +203,29 @@ class Frontend:
                     "Running demo mode!",
                     True,
                     pygame.Color(0, 0, 0)),
-                    (2, 2)
+                (2, 2)
             )
             session.viewport.blit(
                 font.render(
                     "Running demo mode!",
                     True,
                     pygame.Color(255, 255, 255)),
-                    (0, 0)
+                (0, 0)
             )
-            
+
+        for popup in session.popups:
+            popup.draw()
+
         # draw mode-specific surface:
         if session.active_mode:
             session.active_mode.draw(session.viewport)
 
         # basemap
         if session.show_basemap:
-            crop_width = 4644
-            crop_height = 800
+            crop_width = self.canvas.get_width(
+            ) * self.mask_points[1][0] / 100  # 4644
+            crop_height = self.canvas.get_height(
+            ) * self.mask_points[2][1] / 100  # 800
             self.canvas.blit(session.basemap.image, (0, 0),
                              (0, 0, crop_width, crop_height))
 
@@ -271,13 +236,8 @@ class Frontend:
         ########################## DATA PROCESSING ########################
 
         # slider
-        for grid in session.grid_1, session.grid_2:
-            for slider in grid.sliders.values():
-                slider.draw_controls(session.viewport)
-
-        # draw grid
-        self.canvas.blit(session.grid_1.surface, (0, 0))
-        self.canvas.blit(session.grid_2.surface, (0, 0))
+        for slider in session.sliders:
+            slider.draw_controls(session.viewport)
 
         if self.display_viewport:
             self.canvas.blit(session.viewport, (0, 0))

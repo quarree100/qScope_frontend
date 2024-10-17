@@ -7,8 +7,6 @@ DATA_ABS_PATH = os.path.abspath(DATA_FOLDER)
 config = {
     # UDP communication
     'UDP_SERVER_PORT' : 8081,
-    'UDP_TABLE_1' : 5001,
-    'UDP_TABLE_2' : 5000,
     
     # GIS files
     'BASEMAP_FILE': os.path.join(DATA_ABS_PATH, "GIS/180111-QUARREE100-RK_modifiziert_smaller.jpg"),
@@ -20,7 +18,7 @@ config = {
     # graphics setup
     'SAVED_KEYSTONE_FILE': 'keystone.save',
     'SAVED_BUILDINGS_FILE': 'export/buildings_export.shp',
-    'CANVAS_SIZE' : (1920, 1080),
+    'CANVAS_SIZE' : (3840, 2160),
 
     # game rules
     'NUM_OF_ROUNDS' : 4,
@@ -44,48 +42,6 @@ config = {
     'GRID_1_INDIVIDUAL_DATA_VIEW_FILE': 'q100viz/settings/individual_data_view_grid_1.csv',
     'GRID_2_INDIVIDUAL_DATA_VIEW_FILE': 'q100viz/settings/individual_data_view_grid_2.csv',
     'GRID_1_TOTAL_DATA_VIEW_FILE': 'q100viz/settings/total_data_view_grid_1.csv',
-    'GRID_2_TOTAL_DATA_VIEW_FILE': 'q100viz/settings/total_data_view_grid_2.csv',
-
-    # physical grid extents, in percent:
-    'GRID_2_X1' : 50,
-    'GRID_2_X2' : 100,
-    'GRID_2_Y1' : 0,
-    'GRID_2_Y2' : 86.27,
-
-    'GRID_1_X1' : 0,
-    'GRID_1_X2' : 50,
-    'GRID_1_Y1' : 0,
-    'GRID_1_Y2' : 86.27,
-
-    # interaction tuning
-    'buildings_selection_mode': 'rotation' # select 'all' intersected buildings or choose by 'rotation'
-
-}
-
-config_slider = {
-    'slider0' :
-        {
-            'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 5.0,
-            'PHYSICAL_DIFF_R' : 32.0,
-        },
-    'slider1' :
-        {
-            'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 6.6,
-            'PHYSICAL_DIFF_R' : 31.6,
-        },
-    'slider2' :
-        {
-            'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 4.7,
-            'PHYSICAL_DIFF_R' : 30.1,
-        },
-    'slider3' :
-        {
-            'PHYSICAL_SLIDER_AREA_LENGTH' : 38.6,
-            'PHYSICAL_DIFF_L' : 7.0,
-            'PHYSICAL_DIFF_R' : 31.5,
-        },
+    'GRID_2_TOTAL_DATA_VIEW_FILE': 'q100viz/settings/total_data_view_grid_2.csv'
 
 }

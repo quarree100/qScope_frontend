@@ -106,6 +106,7 @@ class Buildings:
         self.df['cell'] = ""
         self.df['selected'] = False
         self.df['group'] = -1
+        self.df['polygon'] = self.df['geometry'].apply(lambda x: session._gis.surface.transform(list(x.exterior.coords)))
 
         self.find_closest_heat_grid_line(print_full_df=False)
 
@@ -176,10 +177,9 @@ class Buildings:
                 group_wrapper['buildings'] = user_selected_buildings
                 group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] != False])
                 group_wrapper['slider_handles'] = []
-                for sliders in session.grid_1.sliders, session.grid_2.sliders:
-                    for slider in sliders.values():
-                        if slider.group == i and slider.handle is not None:
-                            group_wrapper['slider_handles'].append(slider.handle)
+                for slider in session.sliders:
+                    if slider.group == i and slider.handle is not None:
+                        group_wrapper['slider_handles'].append(slider.handle)
 
                 message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)

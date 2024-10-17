@@ -1,18 +1,17 @@
 ''' Input Households Mode: Interact with building-specific parameters using the map '''
 
 import json
-import numpy as np
+import shapely
 import pygame
 import datetime
 
 import q100viz.session as session
 from q100viz.devtools import devtools
 from q100viz.settings.config import config
-from q100viz.graphics.graphictools import Image
+from q100viz.interaction.interface import PopupMenu
 class Buildings_Interaction:
     def __init__(self):
         self.name = 'buildings_interaction'
-        self.selection_mode = config['buildings_selection_mode'] # decides how to select intersected buildings. can be 'all' or 'rotation'
         self.previous_connections_selector = ''  # stores the 'global scenario token' that was used to manually set the number of generic connections to heat grid
         self.mode_token_selection_time = datetime.datetime.now()
         self.activation_buffer_time = 2  # seconds before simulation begins
@@ -29,61 +28,66 @@ class Buildings_Interaction:
         session.flag_export_canvas = True  # export "empty" polygon layer once
 
         # sliders:
-        for grid in session.grid_1, session.grid_2:
-            for slider in grid.sliders.values():
-                slider.show_text = True
-                slider.show_controls = True
+        for slider in session.sliders:
+            slider.show_text = True
+            slider.show_controls = True
 
         # setup mode selectors:
-        session.grid_1.update_cell_data(session.buildings_interaction_grid_1)
-        session.grid_2.update_cell_data(session.buildings_interaction_grid_2)
+        # TODO: session.grid_1.update_cell_data(session.buildings_interaction_grid_1)
+        # session.grid_2.update_cell_data(session.buildings_interaction_grid_2)
 
         # send data:
         session.api.send_df_with_session_env(None)
         session.api.send_message(json.dumps({'step' : 0}))
 
     def process_event(self, event):
-        if event.type == pygame.locals.MOUSEBUTTONDOWN:
-            session.grid_1.mouse_pressed(event.button)
-            session.grid_2.mouse_pressed(event.button)
+        # TODO: make global function in interface
 
-            session.flag_export_canvas = True
-            self.process_grid_change()
+        if event.type == pygame.locals.MOUSEBUTTONDOWN:
+
+            pos = pygame.mouse.get_pos()
+
+            # get grid coordinate
+            coord = session._gis.surface.inverse_transform([pos])[0]
+            
+
+            if coord[0] < 0 or coord[1] < 0:
+                return
+
+            # return
+            buildings = session.buildings.df
+            for idx, row in enumerate(buildings.index):
+                if shapely.Point(coord).within(buildings.loc[idx, 'geometry']):
+                    print(pos, "=>", coord, shapely.Point(coord).within(buildings.loc[idx, 'geometry']))
+                    buildings.at[idx, 'selected'] = not buildings.loc[idx, 'selected']
+
+                    centroid = shapely.geometry.Polygon(buildings.loc[idx, 'polygon']).centroid.coords[0]
+                    
+                    session.popups.append(
+                        PopupMenu(
+                            session.viewport, 
+                            centroid,
+                            menu_type="decisions",
+                            displace=(0, 100)
+                        )
+                    )
+
 
     def process_grid_change(self):
+        
+        return
 
         session.buildings.df['selected'] = False  # reset buildings
         session.buildings.df['group'] = -1  # reset group
 
-        # reset sliders:
-        for grid in session.grid_1, session.grid_2:
-            for slider in grid.sliders.values():
-                slider.handle = None
-
         # iterate grid:
-        for x,y,cell,grid in session.iterate_grids():
+        # TODO: change mode:
+        mode = session.string_to_mode(cell.handle[6:])
+        session.pending_mode = None
 
-            if not cell.selected:
-                if cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt time buffer when deselected
-                    mode = session.string_to_mode(cell.handle[6:])
-                    session.pending_mode = None
-                continue
-
-            # high performance impact, use sparingly
-            i = grid.get_intersection(session.buildings.df, x, y)
-
-            # use rotation value to cycle through buildings located in cell
-            n = len(session.buildings.df[i])
-            if n > 0:
-                selection = session.buildings.df[i].iloc[cell.rot % n]
-                session.buildings.df.loc[selection.name,
-                                    'selected'] = True  # select cell
-                session.buildings.df.loc[selection.name,
-                                    'group'] = cell.id  # pass cell ID to building
-
-            # set slider handles via selected cell:
-            if cell.handle is None:
-                continue
+        # TODO: Slider handling
+        
+        if True:
 
             if cell.handle in session.VALID_DECISION_HANDLES:
                 for slider in grid.sliders.values():
@@ -173,9 +177,8 @@ class Buildings_Interaction:
                     pygame.draw.polygon(session._gis.surface, fill_color, points, 2)
 
             # coloring slider area:
-            for slider_dict in session.grid_1.sliders, session.grid_2.sliders:
-                for slider in slider_dict.values():
-                    slider.draw_area()
+            for slider in session.sliders:
+                slider.draw_area()
 
         except Exception as e:
                 print("Cannot draw frontend:", e)
@@ -183,37 +186,33 @@ class Buildings_Interaction:
 
         # ------------------------- TEXT DISPLAY ----------------------
 
-        font = pygame.font.SysFont('Arial', 18)
-        nrows = 22
+        font = pygame.font.SysFont('Arial', 24)
 
-        column = 18
-        y = 1*22
-        canvas.blit(font.render("Anschlüsse", True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+y][1][0])
+        x = config["CANVAS_SIZE"][0] * 0.855
+        y = config["CANVAS_SIZE"][1] * 0.1
+        line_height = 50
+        
+        # global settings:
+        canvas.blit(font.render("Anschlüsse", True, pygame.Color(255,255,255)), (x, y))
 
         # draw num connections:
         i = 1
         for num_string in ["0%", "20%", "40%", "60%", "80%", "100%"]:
-            column = nrows * 1 + 18
-            canvas.blit(font.render(num_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+nrows*i][1][0])
+            canvas.blit(font.render(num_string, True, pygame.Color(255,255,255)), (x, y + line_height * i))
             i += 1
 
-        column = 16
-        row = 11
+        i += 1
         canvas.blit(font.render(
-            "Quartiersdaten", True, pygame.Color(255,255,255)),
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,  # x
-            session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 12)  # y
-        )
+            "Quartiersdaten", True, pygame.Color(255,255,255)), (x,y + i * line_height))
 
-        column = 16
-        row = 13
         font = pygame.font.SysFont('Arial', 18)
+        i += 1
         canvas.blit(font.render(
             "Individualdaten", True, pygame.Color(255,255,255)),
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
-             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+            (x,y + i * line_height)
         )
-
+        
+        return 
         column = 17
         row = 15
         font = pygame.font.SysFont('Arial', 18)

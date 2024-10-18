@@ -8,11 +8,12 @@ import datetime
 import q100viz.session as session
 from q100viz.devtools import devtools
 from q100viz.settings.config import config
-from q100viz.interaction.interface import PopupMenu
+
 class Buildings_Interaction:
     def __init__(self):
         self.name = 'buildings_interaction'
-        self.previous_connections_selector = ''  # stores the 'global scenario token' that was used to manually set the number of generic connections to heat grid
+        # stores the 'global scenario token' that was used to manually set the number of generic connections to heat grid
+        self.previous_connections_selector = ''
         self.mode_token_selection_time = datetime.datetime.now()
         self.activation_buffer_time = 2  # seconds before simulation begins
 
@@ -38,43 +39,13 @@ class Buildings_Interaction:
 
         # send data:
         session.api.send_df_with_session_env(None)
-        session.api.send_message(json.dumps({'step' : 0}))
+        session.api.send_message(json.dumps({'step': 0}))
 
     def process_event(self, event):
-        # TODO: make global function in interface
-
-        if event.type == pygame.locals.MOUSEBUTTONDOWN:
-
-            pos = pygame.mouse.get_pos()
-
-            # get grid coordinate
-            coord = session._gis.surface.inverse_transform([pos])[0]
-            
-
-            if coord[0] < 0 or coord[1] < 0:
-                return
-
-            # return
-            buildings = session.buildings.df
-            for idx, row in enumerate(buildings.index):
-                if shapely.Point(coord).within(buildings.loc[idx, 'geometry']):
-                    print(pos, "=>", coord, shapely.Point(coord).within(buildings.loc[idx, 'geometry']))
-                    buildings.at[idx, 'selected'] = not buildings.loc[idx, 'selected']
-
-                    centroid = shapely.geometry.Polygon(buildings.loc[idx, 'polygon']).centroid.coords[0]
-                    
-                    session.popups.append(
-                        PopupMenu(
-                            session.viewport, 
-                            centroid,
-                            menu_type="decisions",
-                            displace=(0, 100)
-                        )
-                    )
-
+        pass
 
     def process_grid_change(self):
-        
+
         return
 
         session.buildings.df['selected'] = False  # reset buildings
@@ -86,7 +57,7 @@ class Buildings_Interaction:
         session.pending_mode = None
 
         # TODO: Slider handling
-        
+
         if True:
 
             if cell.handle in session.VALID_DECISION_HANDLES:
@@ -138,12 +109,14 @@ class Buildings_Interaction:
                         devtools.log += "\n%s" % e
 
                     # filter already selected buildings from list:
-                    session.scenario_selected_buildings = session.scenario_selected_buildings[session.scenario_selected_buildings['group'] < 0]
+                    session.scenario_selected_buildings = session.scenario_selected_buildings[
+                        session.scenario_selected_buildings['group'] < 0]
                     for group_df in session.buildings.list_from_groups():
                         if group_df is not None:
                             for idx in group_df.index:
                                 if idx in session.scenario_selected_buildings.index:
-                                    session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
+                                    session.scenario_selected_buildings = session.scenario_selected_buildings.drop(
+                                        idx)
 
                     # select and connect sampled buildings:
                     session.scenario_selected_buildings['selected'] = True
@@ -151,17 +124,20 @@ class Buildings_Interaction:
                     print("selecting random {0} buildings:".format(
                         session.environment['scenario_num_connections']))
                     session.buildings.df.update(
-                    session.scenario_selected_buildings)
+                        session.scenario_selected_buildings)
 
                 else:  # value is 0: deselect all
                     session.scenario_selected_buildings['selected'] = False
                     session.scenario_selected_buildings['connection_to_heat_grid'] = False
                     session.buildings.df.update(
-                    session.scenario_selected_buildings)
-                    session.scenario_selected_buildings = session.scenario_selected_buildings[0:0] # empty dataframe
+                        session.scenario_selected_buildings)
+                    # empty dataframe
+                    session.scenario_selected_buildings = session.scenario_selected_buildings[
+                        0:0]
 
         session.api.send_message(json.dumps(session.environment))
-        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
+        session.api.send_message(json.dumps(
+            session.buildings.get_dict_with_api_wrapper()))
 
     def draw(self, canvas):
 
@@ -169,20 +145,24 @@ class Buildings_Interaction:
             # highlight selected buildings (draws colored stroke on top)
             if len(session.buildings.df[session.buildings.df.selected]):
 
-                sel_buildings = session.buildings.df[(session.buildings.df.selected)]
+                sel_buildings = session.buildings.df[(
+                    session.buildings.df.selected)]
                 for building in sel_buildings.to_dict('records'):
-                    fill_color = pygame.Color(session.user_colors[int(building['group'])])
+                    fill_color = pygame.Color(
+                        session.user_colors[int(building['group'])])
 
-                    points = session._gis.surface.transform(building['geometry'].exterior.coords)
-                    pygame.draw.polygon(session._gis.surface, fill_color, points, 2)
+                    points = session._gis.surface.transform(
+                        building['geometry'].exterior.coords)
+                    pygame.draw.polygon(
+                        session._gis.surface, fill_color, points, 2)
 
             # coloring slider area:
             for slider in session.sliders:
                 slider.draw_area()
 
         except Exception as e:
-                print("Cannot draw frontend:", e)
-                devtools.log += "\nCannot draw frontend: %s" % e
+            print("Cannot draw frontend:", e)
+            devtools.log += "\nCannot draw frontend: %s" % e
 
         # ------------------------- TEXT DISPLAY ----------------------
 
@@ -191,49 +171,54 @@ class Buildings_Interaction:
         x = config["CANVAS_SIZE"][0] * 0.855
         y = config["CANVAS_SIZE"][1] * 0.1
         line_height = 50
-        
+
         # global settings:
-        canvas.blit(font.render("Anschlüsse", True, pygame.Color(255,255,255)), (x, y))
+        canvas.blit(font.render("Anschlüsse", True,
+                    pygame.Color(255, 255, 255)), (x, y))
 
         # draw num connections:
         i = 1
         for num_string in ["0%", "20%", "40%", "60%", "80%", "100%"]:
-            canvas.blit(font.render(num_string, True, pygame.Color(255,255,255)), (x, y + line_height * i))
+            canvas.blit(font.render(num_string, True, pygame.Color(
+                255, 255, 255)), (x, y + line_height * i))
             i += 1
 
         i += 1
         canvas.blit(font.render(
-            "Quartiersdaten", True, pygame.Color(255,255,255)), (x,y + i * line_height))
+            "Quartiersdaten", True, pygame.Color(255, 255, 255)), (x, y + i * line_height))
 
         font = pygame.font.SysFont('Arial', 18)
         i += 1
         canvas.blit(font.render(
-            "Individualdaten", True, pygame.Color(255,255,255)),
-            (x,y + i * line_height)
+            "Individualdaten", True, pygame.Color(255, 255, 255)),
+            (x, y + i * line_height)
         )
-        
-        return 
+
+        return
         column = 17
         row = 15
         font = pygame.font.SysFont('Arial', 18)
         canvas.blit(font.render(
-            "Simulation", True, pygame.Color(255,255,255)),
+            "Simulation", True, pygame.Color(255, 255, 255)),
             (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
-            session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
         )
 
         # draw mode buffer:
         column = 20
         if session.pending_mode is not None:
-            sim_string = str(round(session.pending_mode.activation_buffer_time -(datetime.datetime.now() - self.mode_token_selection_time).total_seconds(), 2))
-            canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), (session.grid_2.rects_transformed[column+nrows*row][1][0][0], session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 40))
+            sim_string = str(round(session.pending_mode.activation_buffer_time - (
+                datetime.datetime.now() - self.mode_token_selection_time).total_seconds(), 2))
+            canvas.blit(font.render(sim_string, True, pygame.Color(255, 255, 255)), (
+                session.grid_2.rects_transformed[column+nrows*row][1][0][0], session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 40))
 
     def update(self):
         if session.pending_mode is None:
             return
 
         if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > session.pending_mode.activation_buffer_time and (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() < 10:
-            session.active_mode = session.pending_mode  # marks simulation to be started in main thread
+            # marks simulation to be started in main thread
+            session.active_mode = session.pending_mode
             session.pending_mode = None
             self.mode_token_selection_time = datetime.datetime.now()
 

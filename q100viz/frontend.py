@@ -4,14 +4,16 @@ import threading
 import datetime
 import shutil
 import cProfile
+import shapely
 
 import pygame
-from pygame.locals import NOFRAME, KEYDOWN, K_0, K_9, K_8, K_7, K_b, K_c, K_g, K_m, K_n, K_p, K_v, K_w, K_PLUS, K_MINUS, QUIT
+import pygame.locals
 
 import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.settings.config import config
-from q100viz.interaction.interface import *
+from q100viz.interaction.PopupMenu import PopupMenu
+import q100viz.interaction.interface as interface
 from q100viz.devtools import devtools as devtools
 
 
@@ -23,21 +25,21 @@ class Frontend:
         # window position (must be set before pygame.init!)
         if not run_in_main_window:
             os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (
-                0, 2560)  # projection to the right
+                2000, 2560)  # projection to the right
 
         # Initialize program
         pygame.init()
+        if not devtools.VERBOSE_MODE:
+            pygame.mouse.set_visible(False)
 
         self.clock = pygame.time.Clock()
 
         ######################### pygame canvas #######################
         # window size:
         canvas_size = session.config['CANVAS_SIZE']
-        self.canvas = pygame.display.set_mode(canvas_size, NOFRAME)
+        self.canvas = pygame.display.set_mode(canvas_size, pygame.locals.NOFRAME)
         pygame.display.set_caption("q100viz")
 
-        # draws a representation of the physical grid of tiles onto the canvas
-        self.show_grid = False
         self.show_nahwaermenetz = True  # display heat grid as red lines
         # displays the area that is being drawn on. used for debugging
         self.display_viewport = True
@@ -62,12 +64,12 @@ class Frontend:
                                       daemon=True)
         udp_thread.start()
 
-
         if devtools.test_run:
             devtools.profiler = cProfile.Profile()
             devtools.profiler.enable()
+
 ############################ Begin Game Loop ##########################
-        
+
     def run(self):
 
         if session.previous_mode is not session.active_mode:
@@ -78,50 +80,56 @@ class Frontend:
         for event in pygame.event.get():
             if session.active_mode:
                 session.active_mode.process_event(event)
+                
+            if event.type == pygame.locals.MOUSEMOTION:
+                interface.handle_mouse_motion()
 
-            if event.type == KEYDOWN:
+            elif event.type == pygame.locals.MOUSEBUTTONDOWN:
+                interface.handle_mouse_click(event)
+            
+            elif event.type == pygame.locals.KEYDOWN:
                 ############################# graphics ####################
                 # toggle polygons:
-                if event.key == K_p:
-                    session.show_polygons = event.key == K_p and not session.show_polygons
+                if event.key == pygame.locals.K_p:
+                    session.show_polygons = event.key == pygame.locals.K_p and not session.show_polygons
                 # toggle basemap:
-                if event.key == K_m:
-                    session.show_basemap = event.key == K_m and not session.show_basemap
+                if event.key == pygame.locals.K_m:
+                    session.show_basemap = event.key == pygame.locals.K_m and not session.show_basemap
                 # toggle nahwaermenetz:
-                elif event.key == K_n:
+                elif event.key == pygame.locals.K_n:
                     self.show_nahwaermenetz = not self.show_nahwaermenetz
-                elif event.key == K_b:
+                elif event.key == pygame.locals.K_b:
                     self.display_viewport = not self.display_viewport
 
-                elif event.key == K_w:
+                elif event.key == pygame.locals.K_w:
                     print(
                         session.buildings.df[session.buildings.df['group'] >= 0])
 
                 ##################### mode selection ######################
-                elif event.key == K_0:
+                elif event.key == pygame.locals.K_0:
                     session.active_mode = session.buildings_interaction
                 # enter simulation mode:
-                elif event.key == K_9:
+                elif event.key == pygame.locals.K_9:
                     session.simulation.setup()
                     session.active_mode = session.simulation
-                elif event.key == K_8:
+                elif event.key == pygame.locals.K_8:
                     session.active_mode = session.individual_data_view
-                elif event.key == K_7:
+                elif event.key == pygame.locals.K_7:
                     session.active_mode = session.total_data_view
 
                 ########## manual slider control for test purposes: #######
-                elif event.key in [K_PLUS, K_MINUS]:
+                elif event.key in [pygame.locals.K_PLUS, pygame.locals.K_MINUS]:
                     for slider in session.sliders:
                         if slider.value is not None:
                             slider.value = (
-                                slider.value + 0.1) if event.key == K_PLUS else (slider.value - 0.1)
+                                slider.value + 0.1) if event.key == pygame.locals.K_PLUS else (slider.value - 0.1)
                         slider.process_value()
 
                 # verbose mode:
-                elif event.key == K_v:
+                elif event.key == pygame.locals.K_v:
                     devtools.VERBOSE_MODE = not devtools.VERBOSE_MODE
 
-            elif event.type == QUIT:
+            elif event.type == pygame.locals.QUIT:
                 print("-" * 72)
                 print("Closing application.")
                 if devtools.log != "":
@@ -213,7 +221,7 @@ class Frontend:
                 (0, 0)
             )
 
-        for popup in session.popups:
+        for popup in [p for p in session.buildings.df['popup'] if p]:
             popup.draw()
 
         # draw mode-specific surface:
@@ -243,8 +251,6 @@ class Frontend:
             self.canvas.blit(session.viewport, (0, 0))
 
         ############ render everything beyond/on top of canvas: ###########
-
-        pass
 
         ############################# pygame time #########################
 

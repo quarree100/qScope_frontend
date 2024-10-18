@@ -103,11 +103,11 @@ class Buildings:
         self.df['save_energy_prior'] = self.df['save_energy']
 
         # buildings interaction
-        self.df['cell'] = ""
+        self.df['popup'] = None
         self.df['selected'] = False
         self.df['group'] = -1
         self.df['polygon'] = self.df['geometry'].apply(lambda x: session._gis.surface.transform(list(x.exterior.coords)))
-
+        
         self.find_closest_heat_grid_line(print_full_df=False)
 
         return self.df
@@ -118,7 +118,8 @@ class Buildings:
             os.path.join(DATA_ABS_PATH, "GIS/Ruesdorfer_Kamp.shp")
         )
 
-        self.df["address"] = self.df["addr_stree"] + ' ' + self.df["addr_house"]
+        self.df["address"] = self.df["addr_stree"].fillna("") + ' ' + self.df["addr_house"].fillna("")
+        self.df["address"] = self.df["address"].apply(lambda x: "" if x.strip() == "" else x)
 
         # generate random consumption data:
         self.df['spec_heat_consumption'] = 200 + random.random() * 100

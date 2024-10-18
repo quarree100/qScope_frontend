@@ -3,21 +3,12 @@
 import pygame
 import json
 import numpy as np
+import shapely
 
 import q100viz.keystone as keystone
 import q100viz.session as session
 from q100viz.devtools import devtools as devtools
-from q100viz.graphics.graphictools import Image
-
-images = {
-    'start_simulation': pygame.image.load("images/start_simulation.png"),
-    'start_buildings_interaction': pygame.image.load("images/start_buildings_interaction.png"),
-    'start_individual_data_view': pygame.image.load("images/start_individual_data_view.png"),
-    'start_total_data_view': pygame.image.load("images/start_total_data_view.png"),
-    'refurbished': pygame.image.load("images/refurbished.png"),
-    'connection_to_heat_grid': pygame.image.load("images/connection_to_heat_grid.png"),
-    'save_energy': pygame.image.load("images/save_energy.png"),
-}
+from q100viz.interaction.PopupMenu import PopupMenu
 
 ############################ SLIDER ###################################
 
@@ -46,8 +37,7 @@ class Slider:
         self.coords = coords
         self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
 
-        self.VALID_HANDLES = ['connection_to_heat_grid', 'refurbished',
-                              'save_energy']
+        self.VALID_HANDLES = ['connection_to_heat_grid', 'refurbished', 'save_energy']
 
         self.human_readable_value = {None: ''}
         for key in self.VALID_HANDLES:
@@ -338,90 +328,44 @@ class Slider:
                     "group": self.group}}))
                 self.previous_handle = self.handle
 
+def handle_mouse_click(event):
+    mouse_pos = pygame.mouse.get_pos()
 
-class MousePosition:
-    def __init__(self, canvas_size):
-        self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
+    buildings = session.buildings.df
+    
+    # 1. check popup hits:
+    for popup in [p for p in session.buildings.df['popup'] if p]:
+        if popup.bounding_box.collidepoint(mouse_pos):
+            popup.handle_mouse_button(mouse_pos)
+            return
 
-    def draw(self, surface, x, y):
-        pygame.draw.circle(surface, pygame.color.Color(
-            50, 160, 123), (x, y), 20)
-
-
-class PopupMenu:
-    def __init__(self, surface, origin=(0, 0), rect_dim=(100, 30), displace=(0, 0), menu_type=""):
-
-        self.surface = surface
-
-        self.origin = origin
-        self.rect_width = rect_dim[0]
-        self.rect_height = rect_dim[1]
-        self.rect = pygame.Rect(origin[0], origin[1], rect_dim[0], rect_dim[1])
-        self.displace = displace
-
-        self.menu_type = menu_type
-        self.alpha = 0
-        self.color = pygame.Color(120, 130, 240)  # TODO: use user colors
-
-        if self.menu_type == "decisions":
-
-            img_max_w = 0
-            img_max_h = 0
-            for key in "connection_to_heat_grid", "refurbished", "save_energy":
-                img_max_w = images[key].width if images[key].width > img_max_w else img_max_w
-                img_max_h = images[key].height if images[key].height > img_max_h else img_max_h
-
-            num_of_images = 3
-            self.rect = pygame.Rect(
-                self.origin[0], self.origin[1],
-                num_of_images * img_max_w + num_of_images-1,
-                img_max_h)
-
-        # center rectangle:
-        self.rect = self.rect.move(
-            displace[0] - self.rect.width / 2,
-            displace[1] - self.rect.height / 2)
-
-    def draw(self):
-        if self.alpha < 255:
-            self.alpha = min(self.alpha + 75, 255)
-
-        if (self.displace[0] is not 0 or self.displace[1] is not 0):
-            pygame.draw.line(
-                self.surface,
-                pygame.Color(
-                    self.color.r,
-                    self.color.g,
-                    self.color.b,
-                    self.alpha),
-                self.origin, self.rect.center, 2
-            )
-
-        if self.menu_type == "decisions":
-            self.draw_decisions()
-
-    def draw_decisions(self):
-
-        pygame.draw.rect(
-            surface=self.surface,
-            color=pygame.Color(
-                self.color.r,
-                self.color.g,
-                self.color.b,
-                self.alpha),
-            rect=self.rect.scale_by(1.2)
-        )
-        pygame.draw.rect(
-            surface=self.surface,
-            color=pygame.Color(255, 255, 255, self.alpha),
-            rect=self.rect
-        )
-
-        i = 0
-        for key in "connection_to_heat_grid", "refurbished", "save_energy":
-            self.surface.blit(
-                images[key],
-                (self.rect.left + i * images[key].width,
-                 self.rect.top)
-            )
-            i += 1
+    # 2. check building hits:
+    for idx, row in enumerate(buildings.index):
+        if shapely.Point(mouse_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
+            # print(pos, "=>", coord, shapely.Point(
+                # coord).within(buildings.loc[idx, 'geometry']))
+            
+            # toggle selection:
+            buildings.at[idx, 'selected'] = not buildings.loc[idx, 'selected']
+            
+            # create or remove popup:
+            if buildings.loc[idx, 'selected']:
+                centroid = shapely.geometry.Polygon(
+                    buildings.loc[idx, 'polygon']).centroid.coords[0]
+                buildings.at[idx, 'popup'] = \
+                    PopupMenu(
+                        session.viewport,
+                        centroid,
+                        displace=(0, 200),
+                        building_address=buildings.at[idx, 'address']
+                    )
+                
+            else:
+                buildings.at[idx, 'popup'] = None
+                            
+def handle_mouse_motion():
+    mouse_pos = pygame.mouse.get_pos()
+    for popup in [p for p in session.buildings.df['popup'] if p]:
+        if popup.bounding_box.collidepoint(mouse_pos):
+            popup.handle_mouse_motion(mouse_pos)
+            return                            

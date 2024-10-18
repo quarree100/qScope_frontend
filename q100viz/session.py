@@ -121,7 +121,6 @@ basemap = gis.Basemap(
 basemap.warp()
 
 sliders = [Slider(config['CANVAS_SIZE'], "slider{0}".format(i), [[0, 0], [0, 100], [100, 100], [100, 0]], [0, 100]) for i in range(num_of_users)]
-popups = []
 
 # --------------------------- init buildings: -------------------------
 try:

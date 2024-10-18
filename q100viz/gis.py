@@ -133,7 +133,7 @@ class Basemap:
 
 
 def read_shapefile(file, layer=None, columns=None):
-    df = geopandas.read_file(file, layer=layer).to_crs(crs=crs)
+    df = geopandas.read_file(file, layer=layer, encoding='utf-8').to_crs(crs=crs)
     if columns:
         df = df.astype(columns)
         return df.loc[:, ['geometry', *columns.keys()]]

@@ -43,6 +43,7 @@ show_basemap = False
 #------------------------------ interaction ---------------------------
 num_of_rounds = config['NUM_OF_ROUNDS']  # max num of rounds; will repeat after this
 num_of_users = config['NUM_OF_USERS']  # num of valid users # TODO: combine with num of valid tags!
+group_available = [True for n in range(num_of_users)]  # list of assignable group
 user_colors = [
     (0, 117, 180),   # Quarree-blue  #0075b4
     (253, 193, 19),  # Quarree-yellow  #fdc113
@@ -119,8 +120,6 @@ basemap = gis.Basemap(
     [[1012695, 7207571], [1012695, 7205976], [1014205, 7205976], [1014205, 7207571]],
     _gis)
 basemap.warp()
-
-sliders = [Slider(config['CANVAS_SIZE'], "slider{0}".format(i), [[0, 0], [0, 100], [100, 100], [100, 0]], [0, 100]) for i in range(num_of_users)]
 
 # --------------------------- init buildings: -------------------------
 try:

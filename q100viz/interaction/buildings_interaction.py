@@ -28,15 +28,6 @@ class Buildings_Interaction:
         session.show_basemap = True
         session.flag_export_canvas = True  # export "empty" polygon layer once
 
-        # sliders:
-        for slider in session.sliders:
-            slider.show_text = True
-            slider.show_controls = True
-
-        # setup mode selectors:
-        # TODO: session.grid_1.update_cell_data(session.buildings_interaction_grid_1)
-        # session.grid_2.update_cell_data(session.buildings_interaction_grid_2)
-
         # send data:
         session.api.send_df_with_session_env(None)
         session.api.send_message(json.dumps({'step': 0}))
@@ -155,10 +146,6 @@ class Buildings_Interaction:
                         building['geometry'].exterior.coords)
                     pygame.draw.polygon(
                         session._gis.surface, fill_color, points, 2)
-
-            # coloring slider area:
-            for slider in session.sliders:
-                slider.draw_area()
 
         except Exception as e:
             print("Cannot draw frontend:", e)

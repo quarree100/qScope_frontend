@@ -82,10 +82,10 @@ class Frontend:
                 session.active_mode.process_event(event)
                 
             if event.type == pygame.locals.MOUSEMOTION:
-                interface.handle_mouse_motion()
+                self.handle_mouse_motion()
 
             elif event.type == pygame.locals.MOUSEBUTTONDOWN:
-                interface.handle_mouse_click(event)
+                self.handle_mouse_click(event)
             
             elif event.type == pygame.locals.KEYDOWN:
                 ############################# graphics ####################
@@ -101,10 +101,6 @@ class Frontend:
                 elif event.key == pygame.locals.K_b:
                     self.display_viewport = not self.display_viewport
 
-                elif event.key == pygame.locals.K_w:
-                    print(
-                        session.buildings.df[session.buildings.df['group'] >= 0])
-
                 ##################### mode selection ######################
                 elif event.key == pygame.locals.K_0:
                     session.active_mode = session.buildings_interaction
@@ -116,14 +112,6 @@ class Frontend:
                     session.active_mode = session.individual_data_view
                 elif event.key == pygame.locals.K_7:
                     session.active_mode = session.total_data_view
-
-                ########## manual slider control for test purposes: #######
-                elif event.key in [pygame.locals.K_PLUS, pygame.locals.K_MINUS]:
-                    for slider in session.sliders:
-                        if slider.value is not None:
-                            slider.value = (
-                                slider.value + 0.1) if event.key == pygame.locals.K_PLUS else (slider.value - 0.1)
-                        slider.process_value()
 
                 # verbose mode:
                 elif event.key == pygame.locals.K_v:
@@ -159,8 +147,6 @@ class Frontend:
         self.canvas.fill(0)
         session.viewport.fill(0)
         session._gis.surface.fill(0)
-        for slider in session.sliders:
-            slider.surface.fill(0)
 
         # draw GIS layers:
         if session.show_polygons:
@@ -169,20 +155,12 @@ class Frontend:
             session._gis.draw_buildings_connections(
                 session.buildings.df)  # draw lines to closest heat grid
 
-            # fill and lerp:
-            if devtools.VERBOSE_MODE:
-                session._gis.draw_polygon_layer_float(
-                    self.canvas, session.buildings.df, 0,
-                    (96, 205, 21),
-                    (213, 50, 21),
-                    'spec_heat_consumption')
-            else:
-                session._gis.draw_polygon_layer_bool(
-                    self.canvas, session.buildings.df, 0,
-                    (213, 50, 21),
-                    (96, 205, 21),
-                    'connection_to_heat_grid')
-
+            session._gis.draw_polygon_layer(
+                surface=self.canvas, 
+                df=session.buildings.df, 
+                stroke=0
+                )
+            
             # stroke simple black:
             session._gis.draw_polygon_layer_bool(
                 self.canvas, session.buildings.df, 1,
@@ -240,12 +218,17 @@ class Frontend:
         # render GIS layer
         if session.show_polygons:
             self.canvas.blit(session._gis.surface, (0, 0))
+        for index, row in session.buildings.df[session.buildings.df['connection_to_heat_grid'] != False].iterrows():
+            font = pygame.font.SysFont('Arial', 14)
+            polygon = shapely.geometry.Polygon(row['polygon'])
+            self.canvas.blit(
+                font.render(
+                    str(row['connection_to_heat_grid']), True, pygame.Color(255,255,255)), 
+                polygon.centroid.coords[0]
+                )
+            
 
         ########################## DATA PROCESSING ########################
-
-        # slider
-        for slider in session.sliders:
-            slider.draw_controls(session.viewport)
 
         if self.display_viewport:
             self.canvas.blit(session.viewport, (0, 0))
@@ -257,3 +240,59 @@ class Frontend:
         pygame.display.update()
 
         self.clock.tick(self.FPS)
+
+    def handle_mouse_click(self, event):
+        mouse_pos = pygame.mouse.get_pos()
+
+        buildings = session.buildings.df
+        
+        # 1. check popup hits:
+        for popup in [p for p in buildings['popup'] if p]:
+            if popup.bounding_box.collidepoint(mouse_pos):
+                popup.handle_mouse_button(mouse_pos)
+                return
+
+        # 2. check building hits:
+        for idx, row in enumerate(buildings.index):
+            if shapely.Point(mouse_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
+                
+                # toggle selection:
+                buildings.at[idx, 'selected'] = not buildings.loc[idx, 'selected']
+                
+                if buildings.loc[idx, 'selected']:
+    
+                    if any(session.group_available):
+                        # add to arbitrary group:
+                        group_available = None
+                        for i in range(session.num_of_users):
+                            if session.group_available[i] == True:
+                                session.group_available[i] = False
+                                group_available = i
+                                break
+                        buildings.at[idx, 'group'] = group_available
+    
+                        # create popup menu:
+                        centroid = shapely.geometry.Polygon(
+                            buildings.loc[idx, 'polygon']).centroid.coords[0]
+                        buildings.at[idx, 'popup'] = \
+                            PopupMenu(
+                                session.viewport,
+                                centroid,
+                                displace=(0, 200),
+                                idx=idx,
+                                popup_type="slider"
+                            )
+                                            
+                else:
+                    buildings.at[idx, 'popup'] = None
+                    if buildings.loc[idx, 'group'] >= 0:
+                        session.group_available[buildings.loc[idx, 'group']] = True  # make group available again
+                    buildings.at[idx, 'group'] = -1
+                    
+                                
+    def handle_mouse_motion(self):
+        mouse_pos = pygame.mouse.get_pos()
+        for popup in [p for p in session.buildings.df['popup'] if p]:
+            if popup.bounding_box.collidepoint(mouse_pos):
+                popup.handle_mouse_motion(mouse_pos)
+                return                            

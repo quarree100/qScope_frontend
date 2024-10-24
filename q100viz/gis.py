@@ -62,14 +62,18 @@ class GIS:
 
     # --------------------------- polygons ----------------------------
 
-    def draw_polygon_layer(self, surface, df, stroke, fill):
+    def draw_polygon_layer(self, surface, df, stroke, fill=None):
         '''draw polygon layer, do not lerp'''
         try:
-            for polygon in df.to_dict('records'):
+            for row in df.to_dict('records'):
                 if fill:
                     fill_color = pygame.Color(*fill)
+                else:
+                    fill_color = pygame.Color(180, 180, 180)
+                if row['group'] > -1:
+                    fill_color = pygame.Color(session.user_colors[row['group']])
 
-                points = self.surface.transform(polygon['geometry'].exterior.coords)
+                points = self.surface.transform(row['geometry'].exterior.coords)
                 pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
         except Exception as e:
@@ -87,6 +91,7 @@ class GIS:
                         fill_color = pygame.Color(fill_true) if polygon[fill_attr] else fill_color
 
                 points = self.surface.transform(polygon['geometry'].exterior.coords)
+                fill_color = pygame.Color(session.user_colors[polygon['group']]) if polygon['group'] > 0 else fill_color
                 pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
         except Exception as e:

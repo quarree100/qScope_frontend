@@ -8,41 +8,29 @@ import shapely
 import q100viz.keystone as keystone
 import q100viz.session as session
 from q100viz.devtools import devtools as devtools
-from q100viz.interaction.PopupMenu import PopupMenu
 
 ############################ SLIDER ###################################
 
 
 class Slider:
-    def __init__(self, canvas_size, id, coords, x_cell_range):
+    def __init__(self, id):
         self.value = 0
         self.previous_value = 0
-        self.group = -1
-        self.id = id  # unique STRING identifier for slider
-        self.id_int = int(id[-1])
+        self.idx = id
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
-        self.x_cell_range = x_cell_range  # limits of slider handles
-        # cm
 
         self.color = pygame.Color(125, 125, 125)  # slider area
         self.alpha = 255
         self.handle = None
         self.previous_handle = None
 
-        # this is used for the activation of the next question in questionnaire mode  # TODO: get slider position initially and set toggle accordingly (Slider should not "start at" this position)
-        self.toggle_question = False
-
-        # create rectangle around centerpoint:
-        self.coords = coords
-        self.surface = keystone.Surface(canvas_size, pygame.SRCALPHA)
-
         self.VALID_HANDLES = ['connection_to_heat_grid', 'refurbished', 'save_energy']
 
         self.human_readable_value = {None: ''}
         for key in self.VALID_HANDLES:
             self.human_readable_value[key] = ''
-        self.human_readable_function = {
+        self.human_readable_handle = {
             'connection_to_heat_grid': "Wärmenetzanschluss",
             'refurbished': "Sanierung",
             'save_energy': "Energie sparen",
@@ -79,7 +67,7 @@ class Slider:
                     self.surface, self.color, rect_points, stroke)
 
         # icons:
-        if cell.handle in ['connection_to_heat_grid', 'refurbished', 'save_energy'] and int(self.id[-1]) in session.buildings.df['group'].values:
+        if cell.handle in ['connection_to_heat_grid', 'refurbished', 'save_energy'] and int(self.idx[-1]) in session.buildings.df['group'].values:
             ncols = session.ncols
             # TODO: why does this have to be shifted ~4*cell_width to the left??
             x = self.grid.rects_transformed[cell.x +
@@ -94,7 +82,7 @@ class Slider:
 
         handle_string = None
         # slider control texts:
-        if self.show_text and int(self.id[-1]) in session.buildings.df['group'].values:
+        if self.show_text and int(self.idx[-1]) in session.buildings.df['group'].values:
             font = pygame.font.SysFont('Arial', 10)
             if cell.handle == "connection_to_heat_grid":
                 handle_string = "Anschluss"
@@ -139,8 +127,8 @@ class Slider:
             # display human readable slider name:
             # string is either "function..........val" or "please select"
             if self.handle is not None:
-                slider_text = str(self.human_readable_function[self.handle]) \
-                    + "." * (40 - len(self.human_readable_function[self.handle])) \
+                slider_text = str(self.human_readable_handle[self.handle]) \
+                    + "." * (40 - len(self.human_readable_handle[self.handle])) \
                     + str(self.human_readable_value[self.handle])
             elif len(session.buildings.df[session.buildings.df['group'] == self.id_int].index) > 0:
                 slider_text = session.buildings.df[session.buildings.df['group']
@@ -167,7 +155,7 @@ class Slider:
 
         # draw slider handles if user has selected building:
         # user selected at least one building
-        if not int(self.id[-1]) in session.buildings.df['group'].values:
+        if not int(self.idx[-1]) in session.buildings.df['group'].values:
             return
         # green field:
         c = self.coords
@@ -176,9 +164,9 @@ class Slider:
         pygame.draw.polygon(
             self.surface,
             pygame.Color(
-                session.user_colors[int(self.id[-1])][0],
-                session.user_colors[int(self.id[-1])][1],
-                session.user_colors[int(self.id[-1])][2],
+                session.user_colors[int(self.idx[-1])][0],
+                session.user_colors[int(self.idx[-1])][1],
+                session.user_colors[int(self.idx[-1])][2],
                 self.alpha),
             points_transformed)
 
@@ -210,9 +198,9 @@ class Slider:
             points_transformed = self.surface.transform(points)
             pygame.draw.polygon(
                 self.surface, pygame.Color(
-                    session.user_colors[int(self.id[-1])][0],
-                    session.user_colors[int(self.id[-1])][1],
-                    session.user_colors[int(self.id[-1])][2]),
+                    session.user_colors[int(self.idx[-1])][0],
+                    session.user_colors[int(self.idx[-1])][1],
+                    session.user_colors[int(self.idx[-1])][2]),
                 points_transformed)
 
         ############# year selection #############
@@ -242,9 +230,9 @@ class Slider:
             points_transformed = self.surface.transform(points)
             pygame.draw.polygon(
                 self.surface, pygame.Color(
-                    session.user_colors[int(self.id[-1])][0],
-                    session.user_colors[int(self.id[-1])][1],
-                    session.user_colors[int(self.id[-1])][2]),
+                    session.user_colors[int(self.idx[-1])][0],
+                    session.user_colors[int(self.idx[-1])][1],
+                    session.user_colors[int(self.idx[-1])][2]),
                 points_transformed)
 
             # red field: no connection
@@ -294,25 +282,22 @@ class Slider:
 
         # household-specific:
         if self.handle == 'connection_to_heat_grid':
-            session.buildings.df.loc[((
-                session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'connection_to_heat_grid'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_connection_year, session.simulation.max_year]))
+            session.buildings.df.at[self.idx,"connection_to_heat_grid"] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_connection_year, session.simulation.max_year]))
             self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
                 np.interp(float(self.value), [0.2, 1], [session.min_connection_year, session.simulation.max_year]))
 
         elif self.handle == 'refurbished':
-            session.buildings.df.loc[((
-                session.buildings.df.selected == True) & (session.buildings.df.group == self.group)), 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_refurb_year, session.simulation.max_year]))
+            session.buildings.df.at[self.idx, 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_refurb_year, session.simulation.max_year]))
             self.human_readable_value['refurbished'] = "n.a." if self.value <= 0.2 else int(
                 np.interp(float(self.value), [0.2, 1], [session.min_refurb_year, session.simulation.max_year]))
 
         elif self.handle == 'save_energy':
-            session.buildings.df.loc[(
-                session.buildings.df.selected == True) & (session.buildings.df.group == self.group), 'save_energy'] = self.value > 0.5
+            session.buildings.df.at[self.idx, 'save_energy'] = self.value > 0.5
             self.human_readable_value['save_energy'] = 'ja' if self.value > 0.5 else 'nein'
 
         session.api.send_message(json.dumps(session.environment))
-        session.api.send_message(json.dumps(
-            session.buildings.get_dict_with_api_wrapper()))
+        # session.api.send_message(json.dumps(
+            # session.buildings.get_dict_with_api_wrapper()))
 
         self.previous_value = self.value
 
@@ -323,49 +308,7 @@ class Slider:
             self.group = cell_id
             if self.previous_handle is not self.handle:
                 session.api.send_message(json.dumps({'sliders': {
-                    "id": self.id,
+                    "id": self.idx,
                     "handle": self.handle,
                     "group": self.group}}))
                 self.previous_handle = self.handle
-
-def handle_mouse_click(event):
-    mouse_pos = pygame.mouse.get_pos()
-
-    buildings = session.buildings.df
-    
-    # 1. check popup hits:
-    for popup in [p for p in session.buildings.df['popup'] if p]:
-        if popup.bounding_box.collidepoint(mouse_pos):
-            popup.handle_mouse_button(mouse_pos)
-            return
-
-    # 2. check building hits:
-    for idx, row in enumerate(buildings.index):
-        if shapely.Point(mouse_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
-            # print(pos, "=>", coord, shapely.Point(
-                # coord).within(buildings.loc[idx, 'geometry']))
-            
-            # toggle selection:
-            buildings.at[idx, 'selected'] = not buildings.loc[idx, 'selected']
-            
-            # create or remove popup:
-            if buildings.loc[idx, 'selected']:
-                centroid = shapely.geometry.Polygon(
-                    buildings.loc[idx, 'polygon']).centroid.coords[0]
-                buildings.at[idx, 'popup'] = \
-                    PopupMenu(
-                        session.viewport,
-                        centroid,
-                        displace=(0, 200),
-                        building_address=buildings.at[idx, 'address']
-                    )
-                
-            else:
-                buildings.at[idx, 'popup'] = None
-                            
-def handle_mouse_motion():
-    mouse_pos = pygame.mouse.get_pos()
-    for popup in [p for p in session.buildings.df['popup'] if p]:
-        if popup.bounding_box.collidepoint(mouse_pos):
-            popup.handle_mouse_motion(mouse_pos)
-            return                            

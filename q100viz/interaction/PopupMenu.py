@@ -1,10 +1,11 @@
 import pygame
 from q100viz.graphics.graphictools import Icon
 from q100viz.settings.config import config
+from q100viz.interaction.interface import Slider
 import q100viz.session as session
 
 class PopupMenu:
-    def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), building_address="", draw_border=False):
+    def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False, popup_type="slider"):
 
         self.icons = {
             'start_simulation': Icon("images/start_simulation.png"),
@@ -25,11 +26,11 @@ class PopupMenu:
 
         self.alpha = 0
         self.colors = {
-            "user": pygame.Color(120, 130, 240),  # TODO: use user colors
+            "user": pygame.Color(session.user_colors[session.buildings.df.loc[idx, "group"]]),
             "secondary": pygame.Color(60, 60, 60)
         }
-        self.building_address = building_address
-        self.slider_value = 0
+        self.building_address = session.buildings.df.loc[idx, "address"]
+        self.slider = Slider(idx) if popup_type is "slider" else None
         self.draw_border = draw_border
 
         # center rectangle:
@@ -52,6 +53,12 @@ class PopupMenu:
             self.icons_box.bottom,
             self.bounding_box.width, 
             75)
+        
+        self.info_box = pygame.Rect(
+            self.bounding_box.left,
+            self.slider_box.bottom,
+            self.bounding_box.width, 
+            30)        
         
     def draw(self):
         if self.alpha < 200:
@@ -80,17 +87,22 @@ class PopupMenu:
                 rect=self.bounding_box.scale_by(1.2)
             )
 
-        # ------------bounding box: ------------
+        # ------------draw bounding box: ------------
         pygame.draw.rect(
             surface=self.surface,
-            color=pygame.Color(255, 255, 255),
+            color=pygame.Color(255, 255, 255, 50),
             rect=self.bounding_box
         )
 
-        # ------------address box: ------------
+        # ------------draw address box: ------------
         pygame.draw.rect(
             surface=self.surface,
-            color=pygame.Color(255, 0, 0),
+            color=pygame.Color(
+                self.colors["user"].r,
+                    self.colors["user"].g,
+                    self.colors["user"].b,
+                    self.alpha
+                ),
             rect=self.address_box
         )
 
@@ -145,13 +157,23 @@ class PopupMenu:
             pygame.draw.line(
                 self.surface,
                 pygame.Color(10, 10, 240),
-                (self.bounding_box.left + self.slider_value * self.bounding_box.width, self.slider_box.top),
-                (self.bounding_box.left + self.slider_value * self.bounding_box.width, self.slider_box.bottom), 
+                (self.bounding_box.left + self.slider.value * self.bounding_box.width, self.slider_box.top),
+                (self.bounding_box.left + self.slider.value * self.bounding_box.width, self.slider_box.bottom), 
                 4
             )
+            
+            # info text:
+            font = pygame.font.SysFont('Arial', 20)
+            text = font.render(
+                self.slider.human_readable_handle[self.slider.handle] + ": " + str(self.slider.human_readable_value[self.slider.handle]), 
+                True,
+                pygame.Color(255, 255, 255)
+            )
+            self.surface.blit(text, (self.info_box.left + 0.05 * self.info_box.width, self.info_box.centery))
+
 
     def handle_mouse_button(self, mouse_pos):           
-        # iterate images
+        # icon clicked:
         for key in self.icons.keys():
             icon = self.icons[key]
             if icon.rect.collidepoint(mouse_pos):
@@ -159,9 +181,10 @@ class PopupMenu:
                     for ic in self.icons.values():
                         ic.selected = False
                 icon.selected = not icon.selected
+                self.slider.handle = key
 
     def handle_mouse_motion(self, mouse_pos):
         if any(ic.selected for ic in self.icons.values()):        
             if self.slider_box.collidepoint(mouse_pos):
-                self.slider_value = (mouse_pos[0] - self.slider_box.left) / self.bounding_box.width
-                print(self.slider_value)
+                self.slider.value = (mouse_pos[0] - self.slider_box.left) / self.bounding_box.width
+                self.slider.process_value()

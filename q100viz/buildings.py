@@ -178,9 +178,6 @@ class Buildings:
                 group_wrapper['buildings'] = user_selected_buildings
                 group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] != False])
                 group_wrapper['slider_handles'] = []
-                for slider in session.sliders:
-                    if slider.group == i and slider.handle is not None:
-                        group_wrapper['slider_handles'].append(slider.handle)
 
                 message['group_{0}'.format(str(i))] = group_wrapper
             else:  # create empty elements for empty groups (infoscreen reset)

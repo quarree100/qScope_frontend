@@ -23,6 +23,7 @@ class PopupMenu:
         self.bounding_box = pygame.Rect(
             origin[0], origin[1], rect_dim[0], rect_dim[1])
         self.displace = displace
+        self.dragging = False  # the menu can be moved by click&hold on address_box
 
         self.alpha = 0
         self.colors = {
@@ -58,7 +59,9 @@ class PopupMenu:
             self.bounding_box.left,
             self.slider_box.bottom,
             self.bounding_box.width, 
-            30)        
+            30)
+        
+        self.boxes = [self.bounding_box, self.address_box, self.icons_box, self.slider_box, self.info_box]
         
     def draw(self):
         if self.alpha < 200:
@@ -173,6 +176,14 @@ class PopupMenu:
 
 
     def handle_mouse_button(self, mouse_pos):           
+        # address_box clicked
+        if self.address_box.collidepoint(mouse_pos):
+            self.dragging = True
+            self.drag_offset = [(
+                mouse_pos[0] - box.left,
+                mouse_pos[1] - box.top) for box in self.boxes]
+            return
+        
         # icon clicked:
         for key in self.icons.keys():
             icon = self.icons[key]
@@ -182,8 +193,9 @@ class PopupMenu:
                         ic.selected = False
                 icon.selected = not icon.selected
                 self.slider.handle = key
-
-    def handle_mouse_motion(self, mouse_pos):
+                return
+                
+    def handle_mouse_motion(self, mouse_pos):       
         if any(ic.selected for ic in self.icons.values()):        
             if self.slider_box.collidepoint(mouse_pos):
                 self.slider.value = (mouse_pos[0] - self.slider_box.left) / self.bounding_box.width

@@ -85,7 +85,10 @@ class Frontend:
                 self.handle_mouse_motion()
 
             elif event.type == pygame.locals.MOUSEBUTTONDOWN:
-                self.handle_mouse_click(event)
+                self.handle_mouse_down(event)
+
+            elif event.type == pygame.locals.MOUSEBUTTONUP:
+                self.handle_mouse_up(event)
             
             elif event.type == pygame.locals.KEYDOWN:
                 ############################# graphics ####################
@@ -241,7 +244,7 @@ class Frontend:
 
         self.clock.tick(self.FPS)
 
-    def handle_mouse_click(self, event):
+    def handle_mouse_down(self, event):
         mouse_pos = pygame.mouse.get_pos()
 
         buildings = session.buildings.df
@@ -255,6 +258,15 @@ class Frontend:
         # 2. check building hits:
         for idx, row in enumerate(buildings.index):
             if shapely.Point(mouse_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
+                
+                if not any(session.group_available):
+                    # deselect and return:
+                    buildings.at[idx, 'popup'] = None
+                    buildings.at[idx, 'selected'] = False
+                    if buildings.loc[idx, 'group'] >= 0:
+                        session.group_available[buildings.loc[idx, 'group']] = True  # make group available again
+                    buildings.at[idx, 'group'] = -1
+                    return
                 
                 # toggle selection:
                 buildings.at[idx, 'selected'] = not buildings.loc[idx, 'selected']
@@ -283,7 +295,7 @@ class Frontend:
                                 popup_type="slider"
                             )
                                             
-                else:
+                else:  # deselect
                     buildings.at[idx, 'popup'] = None
                     if buildings.loc[idx, 'group'] >= 0:
                         session.group_available[buildings.loc[idx, 'group']] = True  # make group available again
@@ -293,6 +305,15 @@ class Frontend:
     def handle_mouse_motion(self):
         mouse_pos = pygame.mouse.get_pos()
         for popup in [p for p in session.buildings.df['popup'] if p]:
-            if popup.bounding_box.collidepoint(mouse_pos):
+            if popup.dragging:
+                for b, box in enumerate(popup.boxes):
+                    box.left = mouse_pos[0] - popup.drag_offset[b][0]
+                    box.top = mouse_pos[1] - popup.drag_offset[b][1]      
+            elif popup.bounding_box.collidepoint(mouse_pos):
                 popup.handle_mouse_motion(mouse_pos)
-                return                            
+                return
+        
+    def handle_mouse_up(self, event):
+        for popup in [p for p in session.buildings.df['popup'] if p]:
+            popup.dragging = False
+        print("mouse up!")

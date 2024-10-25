@@ -13,7 +13,7 @@ import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.settings.config import config
 from q100viz.interaction.PopupMenu import PopupMenu
-import q100viz.interaction.interface as interface
+from q100viz.interaction.Slider import Slider
 from q100viz.devtools import devtools as devtools
 
 
@@ -221,12 +221,15 @@ class Frontend:
         # render GIS layer
         if session.show_polygons:
             self.canvas.blit(session._gis.surface, (0, 0))
-        for index, row in session.buildings.df[session.buildings.df['connection_to_heat_grid'] != False].iterrows():
+        for index, row in session.buildings.df[session.buildings.df['group'] != -1].iterrows():
             font = pygame.font.SysFont('Arial', 14)
             polygon = shapely.geometry.Polygon(row['polygon'])
+            info_string = \
+                str(row['connection_to_heat_grid']) \
+                + "\n" + str(row['refurbished']) \
+                + "\n" + str(row['save_energy'])
             self.canvas.blit(
-                font.render(
-                    str(row['connection_to_heat_grid']), True, pygame.Color(255,255,255)), 
+                font.render(info_string, True, pygame.Color(255,255,255)), 
                 polygon.centroid.coords[0]
                 )
             
@@ -291,8 +294,7 @@ class Frontend:
                                 session.viewport,
                                 centroid,
                                 displace=(0, 200),
-                                idx=idx,
-                                popup_type="slider"
+                                idx=idx
                             )
                                             
                 else:  # deselect
@@ -316,4 +318,3 @@ class Frontend:
     def handle_mouse_up(self, event):
         for popup in [p for p in session.buildings.df['popup'] if p]:
             popup.dragging = False
-        print("mouse up!")

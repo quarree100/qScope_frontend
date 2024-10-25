@@ -1,11 +1,11 @@
 import pygame
 from q100viz.graphics.graphictools import Icon
 from q100viz.settings.config import config
-from q100viz.interaction.interface import Slider
+from q100viz.interaction.Slider import Slider
 import q100viz.session as session
 
 class PopupMenu:
-    def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False, popup_type="slider"):
+    def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False):
 
         self.icons = {
             'start_simulation': Icon("images/start_simulation.png"),
@@ -31,8 +31,10 @@ class PopupMenu:
             "secondary": pygame.Color(60, 60, 60)
         }
         self.building_address = session.buildings.df.loc[idx, "address"]
-        self.slider = Slider(idx) if popup_type is "slider" else None
+        self.idx = idx
+        self.slider = Slider(idx)
         self.draw_border = draw_border
+        self.popup_type = None
 
         # center rectangle:
         self.bounding_box = self.bounding_box.move(
@@ -95,7 +97,7 @@ class PopupMenu:
             surface=self.surface,
             color=pygame.Color(255, 255, 255, 50),
             rect=self.bounding_box
-        )
+            )
 
         # ------------draw address box: ------------
         pygame.draw.rect(
@@ -149,21 +151,31 @@ class PopupMenu:
                 self.icons[key].rect.topleft
             )
 
-        # slider if any image selected
+        # ------------ slider if any handle selected ---------
         if any(icon.selected for icon in self.icons.values()):
             pygame.draw.rect(
                 self.surface,
-                pygame.Color(111, 200, 67),
-                self.slider_box
+                pygame.Color(200, 200, 200),
+                self.slider_box,
+                border_radius=int(self.slider_box.height/2) if self.popup_type == "switch" else 0
             )
             
-            pygame.draw.line(
-                self.surface,
-                pygame.Color(10, 10, 240),
-                (self.bounding_box.left + self.slider.value * self.bounding_box.width, self.slider_box.top),
-                (self.bounding_box.left + self.slider.value * self.bounding_box.width, self.slider_box.bottom), 
-                4
-            )
+            if self.popup_type == "slider":
+                # draw vertical line
+                pygame.draw.line(
+                    self.surface,
+                    pygame.Color(10, 10, 240),
+                    (self.bounding_box.left + self.slider.value * self.bounding_box.width, self.slider_box.top),
+                    (self.bounding_box.left + self.slider.value * self.bounding_box.width, self.slider_box.bottom), 
+                    4
+                )
+            elif self.popup_type == "switch":
+                pygame.draw.circle(
+                    surface=self.surface,
+                    color=pygame.Color(250, 250, 250),
+                    center=(self.slider_box.left + self.slider_box.height / 2 if self.slider.value < 0.5 else self.slider_box.right - self.slider_box.height / 2, self.slider_box.centery),
+                    radius=self.slider_box.height / 2
+                )
             
             # info text:
             font = pygame.font.SysFont('Arial', 20)
@@ -193,10 +205,28 @@ class PopupMenu:
                         ic.selected = False
                 icon.selected = not icon.selected
                 self.slider.handle = key
+                if key in ["connection_to_heat_grid", "refurbished"]:
+                    self.popup_type = "slider"
+                    # reset slider_box layout:
+                    self.slider_box.update(
+                        self.bounding_box.left,
+                        self.icons_box.bottom,
+                        self.bounding_box.width, 
+                        75)                    
+                elif key in ["save_energy"]:
+                    self.popup_type = "switch"
+                    # change slider_box layout:
+                    self.slider_box.width = self.bounding_box.height / 2
+                    self.slider_box.centerx = self.bounding_box.centerx
                 return
+            
+        # switch clicked:
+        if self.slider_box.collidepoint(mouse_pos) and self.popup_type == "switch":
+            session.buildings.df.at[self.idx, key] = not session.buildings.df.loc[self.idx, key]
+            self.slider.value = 1 if self.slider.value < 0.5 else 0
                 
     def handle_mouse_motion(self, mouse_pos):       
-        if any(ic.selected for ic in self.icons.values()):        
+        if self.popup_type == "slider" and any(ic.selected for ic in self.icons.values()):        
             if self.slider_box.collidepoint(mouse_pos):
                 self.slider.value = (mouse_pos[0] - self.slider_box.left) / self.bounding_box.width
                 self.slider.process_value()

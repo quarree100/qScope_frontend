@@ -78,8 +78,7 @@ class Frontend:
 
         # process mouse/keyboard events
         for event in pygame.event.get():
-            if session.active_mode:
-                session.active_mode.process_event(event)
+            session.active_mode.process_event(event)
                 
             if event.type == pygame.locals.MOUSEMOTION:
                 self.handle_mouse_motion()
@@ -223,14 +222,16 @@ class Frontend:
             self.canvas.blit(session._gis.surface, (0, 0))
         for index, row in session.buildings.df[session.buildings.df['group'] != -1].iterrows():
             font = pygame.font.SysFont('Arial', 14)
-            polygon = shapely.geometry.Polygon(row['polygon'])
+            polygon = shapely.geometry.Polygon(row['polygon'])               
             info_string = \
-                str(row['connection_to_heat_grid']) \
-                + "\n" + str(row['refurbished']) \
-                + "\n" + str(row['save_energy'])
+                "Q100: " \
+                + str(row['connection_to_heat_grid']) \
+                + "\nSanierung: " + str(row['refurbished']) \
+                + "\nEnergie sparen: " + str(row['save_energy'])
             self.canvas.blit(
                 font.render(info_string, True, pygame.Color(255,255,255)), 
-                polygon.centroid.coords[0]
+                (polygon.centroid.coords[0][0] - 30,
+                 polygon.centroid.coords[0][1] - 30)
                 )
             
 
@@ -248,60 +249,7 @@ class Frontend:
         self.clock.tick(self.FPS)
 
     def handle_mouse_down(self, event):
-        mouse_pos = pygame.mouse.get_pos()
-
-        buildings = session.buildings.df
-        
-        # 1. check popup hits:
-        for popup in [p for p in buildings['popup'] if p]:
-            if popup.bounding_box.collidepoint(mouse_pos):
-                popup.handle_mouse_button(mouse_pos)
-                return
-
-        # 2. check building hits:
-        for idx, row in enumerate(buildings.index):
-            if shapely.Point(mouse_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
-                
-                if not any(session.group_available):
-                    # deselect and return:
-                    buildings.at[idx, 'popup'] = None
-                    buildings.at[idx, 'selected'] = False
-                    if buildings.loc[idx, 'group'] >= 0:
-                        session.group_available[buildings.loc[idx, 'group']] = True  # make group available again
-                    buildings.at[idx, 'group'] = -1
-                    return
-                
-                # toggle selection:
-                buildings.at[idx, 'selected'] = not buildings.loc[idx, 'selected']
-                
-                if buildings.loc[idx, 'selected']:
-    
-                    if any(session.group_available):
-                        # add to arbitrary group:
-                        group_available = None
-                        for i in range(session.num_of_users):
-                            if session.group_available[i] == True:
-                                session.group_available[i] = False
-                                group_available = i
-                                break
-                        buildings.at[idx, 'group'] = group_available
-    
-                        # create popup menu:
-                        centroid = shapely.geometry.Polygon(
-                            buildings.loc[idx, 'polygon']).centroid.coords[0]
-                        buildings.at[idx, 'popup'] = \
-                            PopupMenu(
-                                session.viewport,
-                                centroid,
-                                displace=(0, 200),
-                                idx=idx
-                            )
-                                            
-                else:  # deselect
-                    buildings.at[idx, 'popup'] = None
-                    if buildings.loc[idx, 'group'] >= 0:
-                        session.group_available[buildings.loc[idx, 'group']] = True  # make group available again
-                    buildings.at[idx, 'group'] = -1
+        pass
                     
                                 
     def handle_mouse_motion(self):

@@ -120,11 +120,13 @@ class Buildings:
 
         self.df["address"] = self.df["addr_stree"].fillna("") + ' ' + self.df["addr_house"].fillna("")
         self.df["address"] = self.df["address"].apply(lambda x: "" if x.strip() == "" else x)
+        self.df['type'] = ''
 
+        print(self.df.index)
         # generate random consumption data:
-        self.df['spec_heat_consumption'] = 200 + random.random() * 100
-        self.df['spec_power_consumption'] = 200 + random.random() * 100
-        self.df['energy_source'] = 200 + random.random() * 100
+        self.df['spec_heat_consumption'] = [random.random() * 300 for i in range(len(self.df.index))]
+        self.df['spec_power_consumption'] = [random.random() * 300 for i in range(len(self.df.index))]
+        self.df['energy_source'] = [random.random() * 300 for i in range(len(self.df.index))]
         
         return self.initialize_data(create_clusters=create_clusters)
 

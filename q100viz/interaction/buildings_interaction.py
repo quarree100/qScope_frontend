@@ -10,6 +10,7 @@ from q100viz.devtools import devtools
 from q100viz.settings.config import config
 from q100viz.interaction.PopupMenu import PopupMenu
 
+
 class Buildings_Interaction:
     def __init__(self):
         self.name = 'buildings_interaction'
@@ -36,11 +37,11 @@ class Buildings_Interaction:
     def process_event(self, event):
         if event.type != pygame.locals.MOUSEBUTTONDOWN:
             return
-        
+
         mouse_pos = pygame.mouse.get_pos()
 
         buildings = session.buildings.df
-        
+
         # 1. check popup hits:
         for popup in [p for p in buildings['popup'] if p]:
             if popup.bounding_box.collidepoint(mouse_pos):
@@ -50,21 +51,24 @@ class Buildings_Interaction:
         # 2. check building hits:
         for idx, row in enumerate(buildings.index):
             if shapely.Point(mouse_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
-                
+
                 if not any(session.group_available):
                     # deselect and return:
                     buildings.at[idx, 'popup'] = None
                     buildings.at[idx, 'selected'] = False
                     if buildings.loc[idx, 'group'] >= 0:
-                        session.group_available[buildings.loc[idx, 'group']] = True  # make group available again
+                        # make group available again
+                        session.group_available[buildings.loc[idx,
+                                                              'group']] = True
                     buildings.at[idx, 'group'] = -1
                     return
-                
+
                 # toggle selection:
-                buildings.at[idx, 'selected'] = not buildings.loc[idx, 'selected']
-                
+                buildings.at[idx,
+                             'selected'] = not buildings.loc[idx, 'selected']
+
                 if buildings.loc[idx, 'selected']:
-    
+
                     if any(session.group_available):
                         # add to arbitrary group:
                         group_available = None
@@ -74,28 +78,30 @@ class Buildings_Interaction:
                                 group_available = i
                                 break
                         buildings.at[idx, 'group'] = group_available
-    
+
                         # create popup menu:
                         centroid = shapely.geometry.Polygon(
                             buildings.loc[idx, 'polygon']).centroid.coords[0]
-                        buildings.at[idx, 'popup'] = \
-                            PopupMenu(
-                                session.viewport,
-                                centroid,
-                                displace=(0, 200),
-                                idx=idx
-                            )
-                                            
+                        popup = PopupMenu(
+                            session.viewport,
+                            centroid,
+                            displace=(0, 200),
+                            idx=idx
+                        )
+                        buildings.at[idx, 'popup'] = popup
+                        session.popup_menus[idx] = popup
+
                 else:  # deselect
                     buildings.at[idx, 'popup'] = None
+                    del session.popup_menus[idx]
                     if buildings.loc[idx, 'group'] >= 0:
-                        session.group_available[buildings.loc[idx, 'group']] = True  # make group available again
+                        # make group available again
+                        session.group_available[buildings.loc[idx,'group']] = True
                     buildings.at[idx, 'group'] = -1
-                    
+
         session.api.send_message(json.dumps(session.environment))
         session.api.send_message(json.dumps(
-        session.buildings.get_dict_with_api_wrapper()))
-
+            session.buildings.get_dict_with_api_wrapper()))
 
     def process_grid_change(self):
 
@@ -190,72 +196,42 @@ class Buildings_Interaction:
 
     def draw(self, canvas):
 
-        try:
-            # highlight selected buildings (draws colored stroke on top)
-            if len(session.buildings.df[session.buildings.df.selected]):
+        # highlight selected buildings (draws colored stroke on top)
+        if len(session.buildings.df[session.buildings.df.selected]):
 
-                sel_buildings = session.buildings.df[(
-                    session.buildings.df.selected)]
-                for building in sel_buildings.to_dict('records'):
-                    fill_color = pygame.Color(
-                        session.user_colors[int(building['group'])])
+            sel_buildings = session.buildings.df[(
+                session.buildings.df.selected)]
+            for building in sel_buildings.to_dict('records'):
+                fill_color = pygame.Color(
+                    session.user_colors[int(building['group'])])
 
-                    points = session._gis.surface.transform(
-                        building['geometry'].exterior.coords)
-                    pygame.draw.polygon(
-                        session._gis.surface, fill_color, points, 2)
+                points = session._gis.surface.transform(
+                    building['geometry'].exterior.coords)
+                pygame.draw.polygon(
+                    session._gis.surface, fill_color, points, 2)
 
-        except Exception as e:
-            print("Cannot draw frontend:", e)
-            devtools.log += "\nCannot draw frontend: %s" % e
-
-        # ------------------------- TEXT DISPLAY ----------------------
-
-        font = pygame.font.SysFont('Arial', 24)
-
-        x = config["CANVAS_SIZE"][0] * 0.855
-        y = config["CANVAS_SIZE"][1] * 0.1
-        line_height = 50
-
-        # global settings:
-        canvas.blit(font.render("Anschlüsse", True,
-                    pygame.Color(255, 255, 255)), (x, y))
-
-        # draw num connections:
-        i = 1
-        for num_string in ["0%", "20%", "40%", "60%", "80%", "100%"]:
-            canvas.blit(font.render(num_string, True, pygame.Color(
-                255, 255, 255)), (x, y + line_height * i))
-            i += 1
-
-        i += 1
-        canvas.blit(font.render(
-            "Quartiersdaten", True, pygame.Color(255, 255, 255)), (x, y + i * line_height))
-
-        font = pygame.font.SysFont('Arial', 18)
-        i += 1
-        canvas.blit(font.render(
-            "Individualdaten", True, pygame.Color(255, 255, 255)),
-            (x, y + i * line_height)
-        )
-
-        return
-        column = 17
-        row = 15
-        font = pygame.font.SysFont('Arial', 18)
-        canvas.blit(font.render(
-            "Simulation", True, pygame.Color(255, 255, 255)),
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
-             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
-        )
-
-        # draw mode buffer:
-        column = 20
-        if session.pending_mode is not None:
-            sim_string = str(round(session.pending_mode.activation_buffer_time - (
-                datetime.datetime.now() - self.mode_token_selection_time).total_seconds(), 2))
-            canvas.blit(font.render(sim_string, True, pygame.Color(255, 255, 255)), (
-                session.grid_2.rects_transformed[column+nrows*row][1][0][0], session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 40))
+        # render GIS layer
+        for index, row in session.buildings.df[session.buildings.df['group'] != -1].iterrows():
+            font = pygame.font.SysFont('Arial', 14)
+            polygon = shapely.geometry.Polygon(row['polygon'])
+            for i, key in enumerate(session.VALID_DECISION_HANDLES):
+                if row[key]:
+                    canvas.blit(
+                        session.icons[key].image,
+                        polygon.boundary.coords[i]
+                        # (polygon.centroid.coords[0][0] - 50 + 25 * i,
+                        # polygon.centroid.coords[0][1] - 50 + 25)
+                    )
+            # info_string = \
+            #     "Q100: " \
+            #     + str(row['connection_to_heat_grid']) \
+            #     + "\nSanierung: " + str(row['refurbished']) \
+            #     + "\nEnergie sparen: " + str(row['save_energy'])
+            # canvas.blit(
+            #     font.render(info_string, True, pygame.Color(255,255,255)),
+            #     (polygon.centroid.coords[0][0] - 30,
+            #     polygon.centroid.coords[0][1] - 30)
+            #     )
 
     def update(self):
         if session.pending_mode is None:

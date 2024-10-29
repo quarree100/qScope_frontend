@@ -17,6 +17,7 @@ class Slider:
         self.value = 0
         self.previous_value = 0
         self.idx = id
+        self.bounding_box = pygame.Rect()
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
 
@@ -25,10 +26,8 @@ class Slider:
         self.handle = None
         self.previous_handle = None
 
-        self.VALID_HANDLES = ['connection_to_heat_grid', 'refurbished', 'save_energy']
-
         self.human_readable_value = {None: ''}
-        for key in self.VALID_HANDLES:
+        for key in ['connection_to_heat_grid', 'refurbished', 'save_energy', 'global_connections']:
             self.human_readable_value[key] = ''
         self.human_readable_handle = {
             'connection_to_heat_grid': "Wärmenetzanschluss",
@@ -271,13 +270,13 @@ class Slider:
     def transform(self):
         self.coords_transformed = self.surface.transform(self.coords)
 
-    def process_value(self):
+    def process_value(self, force=False):
         ''' TODO: set up a struct (maybe csv) to import standard values >> this section should be automatized!
         e.g.
         if self.handle == 'name':
             session.environment['name'] = val_from_struct * slider_val
         '''
-        if self.value is self.previous_value or session.active_mode is session.simulation:
+        if not force and self.value is self.previous_value or session.active_mode is session.simulation:
             return
 
         # household-specific:
@@ -294,11 +293,10 @@ class Slider:
         elif self.handle == 'save_energy':
             session.buildings.df.at[self.idx, 'save_energy'] = self.value > 0.5
             self.human_readable_value['save_energy'] = 'ja' if self.value > 0.5 else 'nein'
-
-        session.api.send_message(json.dumps(session.environment))
-        # session.api.send_message(json.dumps(
-            # session.buildings.get_dict_with_api_wrapper()))
-
+            
+        elif self.handle == 'global_connections':
+            session.buildings.connect_buildings_until_idx(int(self.value * len(session.buildings.df)))
+            
         self.previous_value = self.value
 
     def update_handle(self, cell_handle, cell_id):
@@ -312,3 +310,11 @@ class Slider:
                     "handle": self.handle,
                     "group": self.group}}))
                 self.previous_handle = self.handle
+                
+    def update_from_interaction(self, mouse_pos):
+        # horizontal slider: w > h
+        if self.bounding_box.width > self.bounding_box.height:
+            self.value = (mouse_pos[0] - self.bounding_box.left) / self.bounding_box.width
+        # vertical slider: w < h
+        else:
+            self.value = (mouse_pos[1] - self.bounding_box.top) / self.bounding_box.height

@@ -110,7 +110,10 @@ class Buildings:
         
         self.find_closest_heat_grid_line(print_full_df=False)
 
-        return self.df
+        # shuffle df once, so their order is different each time
+        # self.df = self.df.sample(n=len(self.df))
+
+        return self.df.sample(n=len(self.df))
     
     ########################## mockup data #######################
     def create_mockup_data(self, create_clusters=False):
@@ -229,3 +232,16 @@ class Buildings:
         '''sets group to random[0, n] for each building'''
         for idx, row in self.df.iterrows():
             self.df.at[idx, 'group'] = random.randint(0, n)
+    def connect_buildings_until_idx(self, idx):
+        ''' take all buildings from dataframe until given index and set connect_to_heat_grid = True
+        '''
+        # make sure no building is selected with slider.value = 0
+        idx = idx -1
+        self.df.loc[:, 'connection_to_heat_grid'] = False
+        
+        if idx < 0: return
+        
+        self.df.loc[:idx, 'connection_to_heat_grid'] = True
+
+        session.environment['scenario_num_connections'] = idx
+

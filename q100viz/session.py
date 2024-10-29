@@ -12,6 +12,7 @@ from q100viz.interaction.simulation_mode import SimulationMode
 from q100viz.interaction.individual_data_view import DataViewIndividual_Mode
 from q100viz.interaction.total_data_view import DataViewTotal_Mode
 from q100viz.interaction.Slider import Slider
+from q100viz.graphics.graphictools import Icon
 import q100viz.keystone as keystone
 import q100viz.buildings
 from q100viz.devtools import devtools as devtools
@@ -39,6 +40,9 @@ viewport.calculate()
 
 show_polygons = False
 show_basemap = False
+
+icons = {}
+popup_menus = {}
 
 #------------------------------ interaction ---------------------------
 num_of_rounds = config['NUM_OF_ROUNDS']  # max num of rounds; will repeat after this

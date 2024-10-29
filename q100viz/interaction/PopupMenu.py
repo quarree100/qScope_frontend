@@ -51,7 +51,7 @@ class PopupMenu:
             self.bounding_box.width, 
             100)
         
-        self.slider_box = pygame.Rect(
+        self.slider.bounding_box = pygame.Rect(
             self.bounding_box.left,
             self.icons_box.bottom,
             self.bounding_box.width, 
@@ -59,11 +59,11 @@ class PopupMenu:
         
         self.info_box = pygame.Rect(
             self.bounding_box.left,
-            self.slider_box.bottom,
+            self.slider.bounding_box.bottom,
             self.bounding_box.width, 
             30)
         
-        self.boxes = [self.bounding_box, self.address_box, self.icons_box, self.slider_box, self.info_box]
+        self.boxes = [self.bounding_box, self.address_box, self.icons_box, self.slider.bounding_box, self.info_box]
         
     def draw(self):
         if self.alpha < 200:
@@ -116,7 +116,7 @@ class PopupMenu:
         text = font.render(self.building_address, True,
                            pygame.Color(255, 255, 255))
         self.surface.blit(text, text.get_rect(
-            center=(self.address_box.left + 0.5 * self.address_box.width, self.address_box.centery)))
+            center=(self.address_box.centerx, self.address_box.centery)))
 
         num_of_images = 3
         spacing = self.bounding_box.width / num_of_images
@@ -128,7 +128,7 @@ class PopupMenu:
         )
         
         # --------------- icons: ---------------
-        for i, key in enumerate(["connection_to_heat_grid", "refurbished", "save_energy"]):
+        for i, key in enumerate(session.VALID_DECISION_HANDLES):
 
             self.icons[key].rect = pygame.Rect(
                 self.icons_box.left + 0.25 * spacing + i * spacing,
@@ -156,8 +156,8 @@ class PopupMenu:
             pygame.draw.rect(
                 self.surface,
                 pygame.Color(200, 200, 200),
-                self.slider_box,
-                border_radius=int(self.slider_box.height/2) if self.popup_type == "switch" else 0
+                self.slider.bounding_box,
+                border_radius=int(self.slider.bounding_box.height/2) if self.popup_type == "switch" else 0
             )
             
             if self.popup_type == "slider":
@@ -165,16 +165,16 @@ class PopupMenu:
                 pygame.draw.line(
                     self.surface,
                     pygame.Color(10, 10, 240),
-                    (self.bounding_box.left + self.slider.value * self.bounding_box.width, self.slider_box.top),
-                    (self.bounding_box.left + self.slider.value * self.bounding_box.width, self.slider_box.bottom), 
+                    (self.slider.bounding_box.left + self.slider.value * self.slider.bounding_box.width, self.slider.bounding_box.top),
+                    (self.slider.bounding_box.left + self.slider.value * self.slider.bounding_box.width, self.slider.bounding_box.bottom), 
                     4
                 )
             elif self.popup_type == "switch":
                 pygame.draw.circle(
                     surface=self.surface,
                     color=pygame.Color(250, 250, 250),
-                    center=(self.slider_box.left + self.slider_box.height / 2 if self.slider.value < 0.5 else self.slider_box.right - self.slider_box.height / 2, self.slider_box.centery),
-                    radius=self.slider_box.height / 2
+                    center=(self.slider.bounding_box.left + self.slider.bounding_box.height / 2 if self.slider.value < 0.5 else self.slider.bounding_box.right - self.slider.bounding_box.height / 2, self.slider.bounding_box.centery),
+                    radius=self.slider.bounding_box.height / 2
                 )
             
             # info text:
@@ -188,7 +188,7 @@ class PopupMenu:
 
 
     def handle_mouse_button(self, mouse_pos):           
-        # address_box clicked
+        # drag
         if self.address_box.collidepoint(mouse_pos):
             self.dragging = True
             self.drag_offset = [(
@@ -196,7 +196,7 @@ class PopupMenu:
                 mouse_pos[1] - box.top) for box in self.boxes]
             return
         
-        # icon clicked:
+        # open slider:
         for key in self.icons.keys():
             icon = self.icons[key]
             if icon.rect.collidepoint(mouse_pos):
@@ -208,7 +208,7 @@ class PopupMenu:
                 if key in ["connection_to_heat_grid", "refurbished"]:
                     self.popup_type = "slider"
                     # reset slider_box layout:
-                    self.slider_box.update(
+                    self.slider.bounding_box.update(
                         self.bounding_box.left,
                         self.icons_box.bottom,
                         self.bounding_box.width, 
@@ -216,17 +216,21 @@ class PopupMenu:
                 elif key in ["save_energy"]:
                     self.popup_type = "switch"
                     # change slider_box layout:
-                    self.slider_box.width = self.bounding_box.height / 2
-                    self.slider_box.centerx = self.bounding_box.centerx
-                return
+                    self.slider.bounding_box.width = self.bounding_box.height / 2
+                    self.slider.bounding_box.centerx = self.bounding_box.centerx
+                    
+                self.slider.process_value(True)
             
         # switch clicked:
-        if self.slider_box.collidepoint(mouse_pos) and self.popup_type == "switch":
+        if self.slider.bounding_box.collidepoint(mouse_pos) and self.popup_type == "switch":
             session.buildings.df.at[self.idx, key] = not session.buildings.df.loc[self.idx, key]
             self.slider.value = 1 if self.slider.value < 0.5 else 0
+            self.slider.process_value()
+            print(self.slider.value)
+
                 
     def handle_mouse_motion(self, mouse_pos):       
         if self.popup_type == "slider" and any(ic.selected for ic in self.icons.values()):        
-            if self.slider_box.collidepoint(mouse_pos):
-                self.slider.value = (mouse_pos[0] - self.slider_box.left) / self.bounding_box.width
+            if self.slider.bounding_box.collidepoint(mouse_pos):
+                self.slider.update_from_interaction(mouse_pos)
                 self.slider.process_value()

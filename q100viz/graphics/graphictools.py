@@ -27,6 +27,6 @@ class Image():
         
 class Icon():
     def __init__(self, file):
-        self.image = pygame.image.load(file).convert()
+        self.image = pygame.image.load(file).convert_alpha()
         self.selected = False
         self.rect = pygame.Rect()

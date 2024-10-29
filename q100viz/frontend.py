@@ -12,9 +12,10 @@ import pygame.locals
 import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.settings.config import config
-from q100viz.interaction.PopupMenu import PopupMenu
-from q100viz.interaction.Slider import Slider
+from q100viz.interaction.SidePanel import SidePanel
 from q100viz.devtools import devtools as devtools
+from q100viz.graphics.graphictools import Icon
+from infoscreen.server import init_server
 
 
 class Frontend:
@@ -43,6 +44,7 @@ class Frontend:
         self.show_nahwaermenetz = True  # display heat grid as red lines
         # displays the area that is being drawn on. used for debugging
         self.display_viewport = True
+        self.side_panel = SidePanel(config["CANVAS_SIZE"][0] * 0.855)
 
         # mask viewport with black surface
         self.mask_points = [
@@ -63,7 +65,20 @@ class Frontend:
                                       args=(session.api.forward_gama_message,),
                                       daemon=True)
         udp_thread.start()
-
+        
+        session.icons = {
+            'start_simulation': Icon("images/start_simulation.png"),
+            'start_buildings_interaction': Icon("images/start_buildings_interaction.png"),
+            'start_individual_data_view': Icon("images/start_individual_data_view.png"),
+            'start_total_data_view': Icon("images/start_total_data_view.png"),
+            'refurbished': Icon("images/refurbished.png"),
+            'connection_to_heat_grid': Icon("images/connection_to_heat_grid.png"),
+            'save_energy': Icon("images/save_energy.png"),
+        }
+        
+        for key in session.VALID_DECISION_HANDLES:
+            session.icons[key].image = pygame.transform.scale(session.icons[key].image, (25, 25))
+        
         if devtools.test_run:
             devtools.profiler = cProfile.Profile()
             devtools.profiler.enable()
@@ -201,12 +216,17 @@ class Frontend:
                 (0, 0)
             )
 
-        for popup in [p for p in session.buildings.df['popup'] if p]:
+        for popup in session.popup_menus.values():
             popup.draw()
 
         # draw mode-specific surface:
-        if session.active_mode:
+        try:
             session.active_mode.draw(session.viewport)
+        except Exception as e:
+            print(f"{session.active_mode.name} cannot draw frontend:", e)
+            devtools.log += "\nCannot draw frontend: %s" % e
+            
+        self.side_panel.draw(session.viewport)
 
         # basemap
         if session.show_basemap:
@@ -217,23 +237,8 @@ class Frontend:
             self.canvas.blit(session.basemap.image, (0, 0),
                              (0, 0, crop_width, crop_height))
 
-        # render GIS layer
         if session.show_polygons:
-            self.canvas.blit(session._gis.surface, (0, 0))
-        for index, row in session.buildings.df[session.buildings.df['group'] != -1].iterrows():
-            font = pygame.font.SysFont('Arial', 14)
-            polygon = shapely.geometry.Polygon(row['polygon'])               
-            info_string = \
-                "Q100: " \
-                + str(row['connection_to_heat_grid']) \
-                + "\nSanierung: " + str(row['refurbished']) \
-                + "\nEnergie sparen: " + str(row['save_energy'])
-            self.canvas.blit(
-                font.render(info_string, True, pygame.Color(255,255,255)), 
-                (polygon.centroid.coords[0][0] - 30,
-                 polygon.centroid.coords[0][1] - 30)
-                )
-            
+            self.canvas.blit(session._gis.surface, (0, 0))            
 
         ########################## DATA PROCESSING ########################
 
@@ -254,15 +259,26 @@ class Frontend:
                                 
     def handle_mouse_motion(self):
         mouse_pos = pygame.mouse.get_pos()
-        for popup in [p for p in session.buildings.df['popup'] if p]:
+        for popup in session.popup_menus.values():
             if popup.dragging:
+                # move the boxes:
                 for b, box in enumerate(popup.boxes):
                     box.left = mouse_pos[0] - popup.drag_offset[b][0]
-                    box.top = mouse_pos[1] - popup.drag_offset[b][1]      
+                    box.top = mouse_pos[1] - popup.drag_offset[b][1]
+                return
             elif popup.bounding_box.collidepoint(mouse_pos):
                 popup.handle_mouse_motion(mouse_pos)
                 return
+            
+        if self.side_panel.slider.bounding_box.collidepoint(mouse_pos):
+            self.side_panel.slider.update_from_interaction(mouse_pos)
+            self.side_panel.slider.process_value()
         
     def handle_mouse_up(self, event):
-        for popup in [p for p in session.buildings.df['popup'] if p]:
+        for popup in session.popup_menus.values():
             popup.dragging = False
+            
+        session.api.send_message_as_json(session.environment)
+        session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
+            
+            

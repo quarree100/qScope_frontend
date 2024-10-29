@@ -99,9 +99,9 @@ class Buildings_Interaction:
                         session.group_available[buildings.loc[idx,'group']] = True
                     buildings.at[idx, 'group'] = -1
 
-        session.api.send_message(json.dumps(session.environment))
-        session.api.send_message(json.dumps(
-            session.buildings.get_dict_with_api_wrapper()))
+        # session.api.send_message(json.dumps(session.environment))
+        # session.api.send_message(json.dumps(
+        #     session.buildings.get_dict_with_api_wrapper()))
 
     def process_grid_change(self):
 
@@ -112,7 +112,7 @@ class Buildings_Interaction:
 
         # iterate grid:
         # TODO: change mode:
-        mode = session.string_to_mode(cell.handle[6:])
+        mode = session.modes[cell.handle[6:]]
         session.pending_mode = None
 
         # TODO: Slider handling
@@ -126,7 +126,7 @@ class Buildings_Interaction:
 
             # mode selectors:
             elif cell.handle in session.MODE_SELECTOR_HANDLES:
-                mode = session.string_to_mode(cell.handle[6:])
+                mode = session.modes[cell.handle[6:]]
                 if not mode == session.pending_mode:
                     self.mode_token_selection_time = datetime.datetime.now()
                     session.pending_mode = mode
@@ -210,29 +210,6 @@ class Buildings_Interaction:
                 pygame.draw.polygon(
                     session._gis.surface, fill_color, points, 2)
 
-        # render GIS layer
-        for index, row in session.buildings.df[session.buildings.df['group'] != -1].iterrows():
-            font = pygame.font.SysFont('Arial', 14)
-            polygon = shapely.geometry.Polygon(row['polygon'])
-            for i, key in enumerate(session.VALID_DECISION_HANDLES):
-                if row[key]:
-                    canvas.blit(
-                        session.icons[key].image,
-                        polygon.boundary.coords[i]
-                        # (polygon.centroid.coords[0][0] - 50 + 25 * i,
-                        # polygon.centroid.coords[0][1] - 50 + 25)
-                    )
-            # info_string = \
-            #     "Q100: " \
-            #     + str(row['connection_to_heat_grid']) \
-            #     + "\nSanierung: " + str(row['refurbished']) \
-            #     + "\nEnergie sparen: " + str(row['save_energy'])
-            # canvas.blit(
-            #     font.render(info_string, True, pygame.Color(255,255,255)),
-            #     (polygon.centroid.coords[0][0] - 30,
-            #     polygon.centroid.coords[0][1] - 30)
-            #     )
-
     def update(self):
         if session.pending_mode is None:
             return
@@ -243,5 +220,5 @@ class Buildings_Interaction:
             session.pending_mode = None
             self.mode_token_selection_time = datetime.datetime.now()
 
-            if session.active_mode is session.simulation:
-                session.simulation.setup()
+            if session.active_mode is session.modes['simulation']:
+                session.modes['simulation'].setup()

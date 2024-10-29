@@ -102,7 +102,7 @@ class Frontend:
                 self.handle_mouse_down(event)
 
             elif event.type == pygame.locals.MOUSEBUTTONUP:
-                self.handle_mouse_up(event)
+                self.handle_mouse_up(pygame.mouse.get_pos())
             
             elif event.type == pygame.locals.KEYDOWN:
                 ############################# graphics ####################
@@ -123,8 +123,8 @@ class Frontend:
                     session.active_mode = session.buildings_interaction
                 # enter simulation mode:
                 elif event.key == pygame.locals.K_9:
-                    session.simulation.setup()
-                    session.active_mode = session.simulation
+                    session.modes['simulation'].setup()
+                    session.active_mode = session.modes['simulation']
                 elif event.key == pygame.locals.K_8:
                     session.active_mode = session.individual_data_view
                 elif event.key == pygame.locals.K_7:
@@ -140,12 +140,12 @@ class Frontend:
                 if devtools.log != "":
                     print("Full log exported to qScope-log_%s.txt" %
                           str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
-                    with open(session.simulation.output_folder + "/qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
+                    with open(session.modes['simulation'].output_folder + "/qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
                         f.write(devtools.log)
                         f.close()
                 if devtools.test_run:
                     try:
-                        shutil.rmtree(session.simulation.output_folder)
+                        shutil.rmtree(session.modes['simulation'].output_folder)
                         print(
                             "data output folder was deleted, because q100viz was run with --test_run flag")
                     except:
@@ -274,9 +274,16 @@ class Frontend:
             self.side_panel.slider.update_from_interaction(mouse_pos)
             self.side_panel.slider.process_value()
         
-    def handle_mouse_up(self, event):
+    def handle_mouse_up(self, mouse_pos):
         for popup in session.popup_menus.values():
             popup.dragging = False
+           
+        for key in ['start_simulation', 'start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']:
+            rect = session.icons[key].rect
+            if rect.collidepoint(mouse_pos):
+                session.active_mode = session.modes[key[6:]]
+                if session.active_mode is session.modes['simulation']:
+                    session.modes['simulation'].setup()
             
         session.api.send_message_as_json(session.environment)
         session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())

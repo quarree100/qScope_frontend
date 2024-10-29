@@ -136,29 +136,15 @@ except:
 previous_mode = None
 pending_mode = None  # next mode to run after countdown
 
-buildings_interaction = Buildings_Interaction()
-simulation = SimulationMode()
-individual_data_view = DataViewIndividual_Mode()
-total_data_view = DataViewTotal_Mode()
-
-modes = [buildings_interaction, simulation, individual_data_view, total_data_view]
-
-################################# FUNCTIONS ###########################
-def string_to_mode(input_string):
-    if input_string == 'buildings_interaction':
-        return buildings_interaction
-    elif input_string == 'simulation':
-        return simulation
-    elif input_string == 'individual_data_view':
-        return individual_data_view
-    elif input_string == 'total_data_view':
-        return total_data_view
-    else:
-        print(input_string, "is not a defined game mode. starting at buildings_interaction..")
-        return buildings_interaction
+modes = {
+ 'buildings_interaction': Buildings_Interaction(),
+ 'simulation': SimulationMode(),
+ 'individual_data_view': DataViewIndividual_Mode(),
+ 'total_data_view': DataViewTotal_Mode(),
+}
 
 flag_mockup_mode = False  # TODO: this causes the forntend to display "demo mode" if mockup data is used
 flag_export_canvas = False
-active_mode = string_to_mode(environment['mode'])
+active_mode = modes[environment['mode']]
 
 frontend = None  # will be set in run_q100viz.py

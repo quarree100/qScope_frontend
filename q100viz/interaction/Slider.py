@@ -205,7 +205,7 @@ class Slider:
         ############# year selection #############
         elif self.handle in ['connection_to_heat_grid', 'refurbished']:
             min_year = session.min_connection_year if self.handle == 'connection_to_heat_grid' else session.min_refurb_year
-            max_year = session.simulation.max_year if self.handle == 'connection_to_heat_grid' else session.simulation.max_year
+            max_year = session.modes['simulation'].max_year if self.handle == 'connection_to_heat_grid' else session.modes['simulation'].max_year
 
             x0 = self.coords_transformed[0][0]  # in px
             x3 = self.coords_transformed[3][0]  # in px
@@ -276,19 +276,19 @@ class Slider:
         if self.handle == 'name':
             session.environment['name'] = val_from_struct * slider_val
         '''
-        if not force and self.value is self.previous_value or session.active_mode is session.simulation:
+        if not force and self.value is self.previous_value or session.active_mode is session.modes['simulation']:
             return
 
         # household-specific:
         if self.handle == 'connection_to_heat_grid':
-            session.buildings.df.at[self.idx,"connection_to_heat_grid"] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_connection_year, session.simulation.max_year]))
+            session.buildings.df.at[self.idx,"connection_to_heat_grid"] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_connection_year, session.modes['simulation'].max_year]))
             self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value <= 0.2 else int(
-                np.interp(float(self.value), [0.2, 1], [session.min_connection_year, session.simulation.max_year]))
+                np.interp(float(self.value), [0.2, 1], [session.min_connection_year, session.modes['simulation'].max_year]))
 
         elif self.handle == 'refurbished':
-            session.buildings.df.at[self.idx, 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_refurb_year, session.simulation.max_year]))
+            session.buildings.df.at[self.idx, 'refurbished'] = False if self.value <= 0.2 else int(np.interp((self.value), [0.2, 1], [session.min_refurb_year, session.modes['simulation'].max_year]))
             self.human_readable_value['refurbished'] = "n.a." if self.value <= 0.2 else int(
-                np.interp(float(self.value), [0.2, 1], [session.min_refurb_year, session.simulation.max_year]))
+                np.interp(float(self.value), [0.2, 1], [session.min_refurb_year, session.modes['simulation'].max_year]))
 
         elif self.handle == 'save_energy':
             session.buildings.df.at[self.idx, 'save_energy'] = self.value > 0.5

@@ -61,13 +61,13 @@ class DataViewTotal_Mode():
 
                 # mode selectors:
                 if cell.handle in session.MODE_SELECTOR_HANDLES:
-                    mode = session.string_to_mode(cell.handle[6:])
+                    mode = session.modes[cell.handle[6:]]
                     if not mode.waiting_to_start:
                         self.mode_token_selection_time = datetime.datetime.now()
                         mode.waiting_to_start = True
 
             elif cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt buffer when deselected
-                mode = session.string_to_mode(cell.handle[6:])
+                mode = session.modes[cell.handle[6:]]
                 mode.waiting_to_start = False
 
         session.api.send_session_env()
@@ -125,6 +125,6 @@ class DataViewTotal_Mode():
                     for mode_ in session.modes:
                         mode_.waiting_to_start = False
 
-                    if mode is session.simulation:
-                        session.simulation.setup()
+                    if mode is session.modes['simulation']:
+                        session.modes['simulation'].setup()
                     session.active_mode = mode  # marks simulation to be started in main thread

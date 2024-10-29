@@ -67,7 +67,7 @@ class SimulationMode:
 
         # start simulation:
         self.running = True
-        simulation_thread = threading.Thread(target=session.simulation.run, args=[devtools.test_run], daemon=True)
+        simulation_thread = threading.Thread(target=session.modes['simulation'].run, args=[devtools.test_run], daemon=True)
         simulation_thread.start()
 
     ################### SIMULATION SETUP FUNCTION #####################
@@ -297,7 +297,7 @@ class SimulationMode:
         row = 17
         font = pygame.font.SysFont('Arial', 18)
         canvas.blit(font.render(
-            session.simulation.progress, True, pygame.Color(255,255,255)),
+            session.modes['simulation'].progress, True, pygame.Color(255,255,255)),
             (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
         )
@@ -481,10 +481,10 @@ class SimulationMode:
                 # pass path to buildings in infoscreen-compatible format
                 group_df.at[idx, 'emissions_graphs'] = str(
                     os.path.normpath(
-                       session.simulation.current_output_folder[session.simulation.current_output_folder.find('data'):]
+                       session.modes['simulation'].current_output_folder[session.modes['simulation'].current_output_folder.find('data'):]
                     + '/emissions/CO2_emissions_{0}.png').format(idx))
                 group_df.at[idx, 'energy_prices_graphs'] = str(
-                   session.simulation.current_output_folder[session.simulation.current_output_folder.find('data'):]
+                   session.modes['simulation'].current_output_folder[session.modes['simulation'].current_output_folder.find('data'):]
                     + '/energy_prices/energy_prices_{0}.png'.format(idx))
 
                 session.buildings.df.update(group_df)

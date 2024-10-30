@@ -3,7 +3,6 @@
 import pygame
 import json
 import numpy as np
-import shapely
 
 import q100viz.keystone as keystone
 import q100viz.session as session

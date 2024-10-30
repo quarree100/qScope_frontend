@@ -31,7 +31,7 @@ class Buildings_Interaction:
         session.flag_export_canvas = True  # export "empty" polygon layer once
 
         # send data:
-        session.api.send_df_with_session_env(None)
+        session.api.send_dict(session.environment)
         session.api.send_message(json.dumps({'step': 0}))
 
     def process_event(self, event):
@@ -107,94 +107,35 @@ class Buildings_Interaction:
 
         return
 
-        session.buildings.df['selected'] = False  # reset buildings
-        session.buildings.df['group'] = -1  # reset group
-
-        # iterate grid:
-        # TODO: change mode:
-        mode = session.modes[cell.handle[6:]]
-        session.pending_mode = None
-
-        # TODO: Slider handling
-
-        if True:
-
-            if cell.handle in session.VALID_DECISION_HANDLES:
-                for slider in grid.sliders.values():
-                    if cell.x in range(slider.x_cell_range[0], slider.x_cell_range[1]):
-                        slider.update_handle(cell.handle, cell.id)
-
-            # mode selectors:
-            elif cell.handle in session.MODE_SELECTOR_HANDLES:
-                mode = session.modes[cell.handle[6:]]
-                if not mode == session.pending_mode:
-                    self.mode_token_selection_time = datetime.datetime.now()
-                    session.pending_mode = mode
-
-            # connect buildings globally:
-            elif cell.handle in ['connections_0', 'connections_20', 'connections_40', 'connections_60', 'connections_80', 'connections_100'] and cell.handle != self.previous_connections_selector:
-
-                self.previous_connections_selector = cell.handle
-                dec_connections = 0
-                if cell.handle == "connections_20":
-                    dec_connections = 0.2
-                elif cell.handle == "connections_40":
-                    dec_connections = 0.4
-                elif cell.handle == "connections_60":
-                    dec_connections = 0.6
-                elif cell.handle == "connections_80":
-                    dec_connections = 0.8
-                elif cell.handle == "connections_100":
-                    dec_connections = 1
-
-                session.environment['scenario_num_connections'] = int(
-                    dec_connections * len(session.buildings.df.index))
-
-                # connect additional buildings as set in scenario:
-                if session.environment['scenario_num_connections'] > 0:
-                    # reset:
-                    if len(session.scenario_selected_buildings.index) > 0:
-                        session.scenario_selected_buildings['selected'] = False
-                        session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                        session.buildings.df.update(
-                            session.scenario_selected_buildings)
-
-                    # sample data:
-                    try:
-                        session.scenario_selected_buildings = session.buildings.df.sample(
-                            n=session.environment['scenario_num_connections'])
-                    except Exception as e:
-                        print("max number of possible samples reached. " + str(e))
-                        devtools.log += "\n%s" % e
-
-                    # filter already selected buildings from list:
-                    session.scenario_selected_buildings = session.scenario_selected_buildings[
-                        session.scenario_selected_buildings['group'] < 0]
-                    for group_df in session.buildings.list_from_groups():
-                        if group_df is not None:
-                            for idx in group_df.index:
-                                if idx in session.scenario_selected_buildings.index:
-                                    session.scenario_selected_buildings = session.scenario_selected_buildings.drop(
-                                        idx)
-
-                    # select and connect sampled buildings:
-                    session.scenario_selected_buildings['selected'] = True
-                    session.scenario_selected_buildings['connection_to_heat_grid'] = 2020
-                    print("selecting random {0} buildings:".format(
-                        session.environment['scenario_num_connections']))
-                    session.buildings.df.update(
-                        session.scenario_selected_buildings)
-
-                else:  # value is 0: deselect all
-                    session.scenario_selected_buildings['selected'] = False
-                    session.scenario_selected_buildings['connection_to_heat_grid'] = False
-                    session.buildings.df.update(
-                        session.scenario_selected_buildings)
-                    # empty dataframe
-                    session.scenario_selected_buildings = session.scenario_selected_buildings[
-                        0:0]
-
     def draw(self, canvas):
+
+        # draw GIS layers:
+        if session.show_polygons:
+            session._gis.draw_linestring_layer(
+                canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
+            session._gis.draw_buildings_connections(
+                session.buildings.df)  # draw lines to closest heat grid
+
+            session._gis.draw_polygon_layer(
+                surface=canvas, 
+                df=session.buildings.df, 
+                stroke=0
+                )
+            
+            # stroke simple black:
+            session._gis.draw_polygon_layer_bool(
+                canvas, session.buildings.df, 1,
+                (0, 0, 0),
+                (0, 0, 0),
+                'connection_to_heat_grid')
+
+            # stroke according to connection status:
+            session._gis.draw_polygon_layer_bool(
+                surface=canvas, df=session.buildings.df,
+                stroke=1,
+                fill_false=(0, 0, 0),
+                fill_true=(0, 168, 78),
+                fill_attr='connection_to_heat_grid')
 
         # highlight selected buildings (draws colored stroke on top)
         if len(session.buildings.df[session.buildings.df.selected]):
@@ -210,15 +151,8 @@ class Buildings_Interaction:
                 pygame.draw.polygon(
                     session._gis.surface, fill_color, points, 2)
 
+        for popup in session.popup_menus.values():
+            popup.draw()
+
     def update(self):
-        if session.pending_mode is None:
-            return
-
-        if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > session.pending_mode.activation_buffer_time and (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() < 10:
-            # marks simulation to be started in main thread
-            session.active_mode = session.pending_mode
-            session.pending_mode = None
-            self.mode_token_selection_time = datetime.datetime.now()
-
-            if session.active_mode is session.modes['simulation']:
-                session.modes['simulation'].setup()
+        pass

@@ -4,7 +4,6 @@ import threading
 import datetime
 import shutil
 import cProfile
-import shapely
 
 import pygame
 import pygame.locals
@@ -16,6 +15,7 @@ from q100viz.interaction.SidePanel import SidePanel
 from q100viz.devtools import devtools as devtools
 from q100viz.graphics.graphictools import Icon
 from infoscreen.server import init_server
+import infoscreen.api as api
 
 
 class Frontend:
@@ -164,35 +164,7 @@ class Frontend:
         self.canvas.fill(0)
         session.viewport.fill(0)
         session._gis.surface.fill(0)
-
-        # draw GIS layers:
-        if session.show_polygons:
-            session._gis.draw_linestring_layer(
-                self.canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
-            session._gis.draw_buildings_connections(
-                session.buildings.df)  # draw lines to closest heat grid
-
-            session._gis.draw_polygon_layer(
-                surface=self.canvas, 
-                df=session.buildings.df, 
-                stroke=0
-                )
-            
-            # stroke simple black:
-            session._gis.draw_polygon_layer_bool(
-                self.canvas, session.buildings.df, 1,
-                (0, 0, 0),
-                (0, 0, 0),
-                'connection_to_heat_grid')
-
-            # stroke according to connection status:
-            session._gis.draw_polygon_layer_bool(
-                surface=self.canvas, df=session.buildings.df,
-                stroke=1,
-                fill_false=(0, 0, 0),
-                fill_true=(0, 168, 78),
-                fill_attr='connection_to_heat_grid')
-
+        
         # draw mask
         mask_color = (0, 0, 0) if not session.flag_mockup_mode else (
             128, 128, 128)
@@ -216,15 +188,12 @@ class Frontend:
                 (0, 0)
             )
 
-        for popup in session.popup_menus.values():
-            popup.draw()
-
         # draw mode-specific surface:
-        try:
-            session.active_mode.draw(session.viewport)
-        except Exception as e:
-            print(f"{session.active_mode.name} cannot draw frontend:", e)
-            devtools.log += "\nCannot draw frontend: %s" % e
+        # try:
+        session.active_mode.draw(session.viewport)
+        # except Exception as e:
+        #     print(f"{session.active_mode.name} cannot draw frontend:", e)
+        #     devtools.log += "\nCannot draw frontend: %s" % e
             
         self.side_panel.draw(session.viewport)
 
@@ -285,7 +254,7 @@ class Frontend:
                 if session.active_mode is session.modes['simulation']:
                     session.modes['simulation'].setup()
             
-        session.api.send_message_as_json(session.environment)
+        session.api.send_dict(session.environment)
         session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
             
             

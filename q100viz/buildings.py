@@ -8,7 +8,7 @@ import os
 import q100viz.session as session
 from q100viz.devtools import devtools as devtools
 import q100viz.gis as gis
-import q100viz.api as api
+import infoscreen.api as api
 from q100viz.settings.config import config, DATA_ABS_PATH
 
 class Buildings:

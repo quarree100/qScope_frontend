@@ -63,7 +63,7 @@ class SimulationMode:
         session.show_basemap = True
         session.show_polygons = True
 
-        session.api.send_session_env()
+        session.api.send_dict()
 
         # start simulation:
         self.running = True

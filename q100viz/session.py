@@ -5,7 +5,7 @@ import pygame
 import os
 
 from q100viz.settings.config import config, DATA_ABS_PATH
-import q100viz.api as api
+import infoscreen.api as api
 import q100viz.gis as gis
 from q100viz.interaction.buildings_interaction import Buildings_Interaction
 from q100viz.interaction.simulation_mode import SimulationMode

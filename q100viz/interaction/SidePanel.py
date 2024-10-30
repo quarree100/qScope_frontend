@@ -74,19 +74,41 @@ class SidePanel:
 
         canvas.blit(text, text.get_rect(center=(self.bounding_box.centerx, y)))
 
+        # draw mode buttons:
         y += line_height
-        image_width = session.icons['start_simulation'].image.width
+        image_width = session.icons['start_buildings_interaction'].image.width
         x = self.bounding_box.left + 0.25 * image_width
-        for i, key in enumerate(['start_simulation', 'start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']):
+        for i, key in enumerate(['start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']):
 
             session.icons[key].rect = pygame.Rect(
-                x + i * self.bounding_box.width / 4,
+                x + i * self.bounding_box.width / 3,
                 y,
                 session.icons[key].image.width,
                 session.icons[key].image.height
             )
             
+            if session.environment['mode'] == session.modes[key[6:]].name:
+                pygame.draw.rect(
+                    surface=canvas,
+                    color=pygame.Color(255, 120, 55),
+                    rect=session.icons[key].rect
+                )
+            
             canvas.blit(
                 session.icons[key].image,
                 session.icons[key].rect.topleft
             )
+            
+        # simulation button:
+        y += 2 * line_height
+        session.icons['start_simulation'].rect = pygame.Rect(
+            self.bounding_box.centerx - 0.5 * session.icons['start_simulation'].image.width,
+            y,
+            session.icons['start_simulation'].image.width,
+            session.icons['start_simulation'].image.height
+        )
+            
+        canvas.blit(
+            session.icons['start_simulation'].image,
+            session.icons['start_simulation'].rect.topleft,
+        )            

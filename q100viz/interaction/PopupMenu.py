@@ -1,6 +1,5 @@
 import pygame
 from q100viz.graphics.graphictools import Icon
-from q100viz.settings.config import config
 from q100viz.interaction.Slider import Slider
 import q100viz.session as session
 

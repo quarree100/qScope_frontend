@@ -2,7 +2,8 @@
 
 import pygame
 import datetime
-import json
+import shapely
+import numpy
 
 import q100viz.session as session
 
@@ -11,89 +12,89 @@ class DataViewIndividual_Mode():
         self.name = 'individual_data_view'
         self.mode_token_selection_time = datetime.datetime.now()
         self.activation_buffer_time = 2  # seconds before simulation begins
+        self.global_alpha = 0
 
     def activate(self):
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
 
         session.environment['mode'] = self.name
-        for mode in session.modes:
-            mode.waiting_to_start = False
 
         session.show_polygons = True
         session.show_basemap = True
 
-        # setup sliders:
-        session.grid_1.sliders['slider0'].show_text = False
-        session.grid_1.sliders['slider0'].show_controls = False
-        session.grid_1.sliders['slider1'].show_text = False
-        session.grid_1.sliders['slider1'].show_controls = False
-        session.grid_2.sliders['slider2'].show_text = False
-        session.grid_2.sliders['slider2'].show_controls = True
-        session.grid_2.sliders['slider3'].show_text = False
-        session.grid_2.sliders['slider3'].show_controls = True
-
-        # setup mode selectors:
-        session.grid_1.update_cell_data(session.individual_data_view_grid_1)
-        session.grid_2.update_cell_data(session.individual_data_view_grid_2)
-
         session.environment['active_user_focus_data'] = 0
-        session.api.send_session_env()
+        session.api.send_dict(session.environment)
 
-        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
+        session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
+        
+        session.buildings.df['selected'] = False
+        session.buildings.df.loc[session.buildings.df[session.buildings.df['group'] == session.environment['active_user_focus_data']].iloc[0].name, 'selected'] = True
 
 
     def process_event(self, event):
-        if event.type == pygame.locals.MOUSEBUTTONDOWN:
-            session.grid_1.mouse_pressed(event.button)
-            session.grid_2.mouse_pressed(event.button)
-            session.api.send_df_with_session_env(
-                session.buildings.df[session.buildings.df.selected])
+        if event.type != pygame.locals.MOUSEBUTTONDOWN:
+            return
+        
+        buildings = session.buildings.df
+        mouse_pos = pygame.mouse.get_pos()
+        for idx, row in enumerate(buildings.index):
+            if shapely.Point(mouse_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
 
-            self.process_grid_change()
+                if buildings.loc[idx, 'group'] >= 0:
+                    # toggle selection
+                    session.buildings.df['selected'] = False        
+                    buildings.at[idx, 'selected'] = True
+                    session.environment['active_user_focus_data'] = buildings.loc[idx, 'group']
 
     def process_grid_change(self):
-
-        session.buildings.df['selected'] = False
-        for x,y,cell,grid in session.iterate_grids():
-
-            if cell.handle in session.MODE_SELECTOR_HANDLES:  # interrupt buffer when deselected
-                mode = session.modes[cell.handle[6:]]
-                mode.waiting_to_start = False
-
-            if cell.selected:
-
-                # focus user data:
-                if cell.handle in ['active_user_focus_data_0', 'active_user_focus_data_1', 'active_user_focus_data_2', 'active_user_focus_data_3']:
-                    session.environment['active_user_focus_data'] = int(cell.handle[-1])
-
-                # mode selectors:
-                if cell.handle in session.MODE_SELECTOR_HANDLES and cell.handle != 'start_simulation':
-                    mode = session.modes[cell.handle[6:]]
-                    if not mode.waiting_to_start:
-                        self.mode_token_selection_time = datetime.datetime.now()
-                        mode.waiting_to_start = True
-
-        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
-        session.api.send_session_env()
+        pass
 
 
     def draw(self, canvas):
+        
+        self.global_alpha = 30 + \
+            abs(int(numpy.sin(pygame.time.get_ticks() / 1000) * 105))
 
-        try:
-            # highlight selected buildings (draws colored stroke on top)
-            if len(session.buildings.df[session.buildings.df.selected]):
+        # mark selected building to show user focus      
+        focused_bd = session.buildings.df[session.buildings.df['group'] == session.environment['active_user_focus_data']]
+        if len(focused_bd) > 0:
+            scaled_polygon = \
+                shapely.geometry.Polygon(focused_bd['polygon'].iloc[0]).buffer(15)
+            pygame.draw.polygon(
+                canvas, 
+                pygame.Color(255, 255, 255, self.global_alpha),
+                [pnt for pnt in scaled_polygon.exterior.coords])
+            
 
-                sel_buildings = session.buildings.df[(session.buildings.df.selected)]
-                for building in sel_buildings.to_dict('records'):
-                    fill_color = pygame.Color(session.user_colors[int(building['group'])])
+        # draw GIS layers:
+        if session.show_polygons:
+            session._gis.draw_linestring_layer(
+                canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
+            session._gis.draw_buildings_connections(
+                session.buildings.df)  # draw lines to closest heat grid
 
-                    points = session._gis.surface.transform(building['geometry'].exterior.coords)
-                    stroke = 4 if building['group'] == session.environment['active_user_focus_data'] else 2
-                    pygame.draw.polygon(session._gis.surface, fill_color, points, stroke)
+            session._gis.draw_polygon_layer(
+                surface=canvas, 
+                df=session.buildings.df[(session.buildings.df['connection_to_heat_grid']) | (session.buildings.df['group'] >= 0)],
+                stroke=0
+                )
+            
+        # highlight group buildings (draws colored stroke on top)
+        sel_buildings = session.buildings.df[
+            session.buildings.df['group'] >= 0]
+        for building in sel_buildings.to_dict('records'):
+            fill_color = pygame.Color(
+                session.user_colors[int(building['group'])])
 
-        except Exception as e:
-                print("Cannot draw frontend:", e)
-                devtools.log += "\nCannot draw frontend: %s" % e
+            points = session._gis.surface.transform(
+                building['geometry'].exterior.coords)
+          
+            pygame.draw.polygon(
+                session._gis.surface, fill_color, points, 2)
+            
+        
+                        
+        return
 
         nrows = 22
         font = pygame.font.SysFont('Arial', 18)
@@ -124,20 +125,5 @@ class DataViewIndividual_Mode():
              session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
         )
 
-        # draw mode buffer:
-        column = 20
-        for mode, row in zip(session.modes, [18, 16, 14, 12]):
-            if mode.waiting_to_start:
-                sim_string = str(round(mode.activation_buffer_time -(datetime.datetime.now() - self.mode_token_selection_time).total_seconds(), 2))
-                canvas.blit(font.render(sim_string, True, pygame.Color(255,255,255)), session.grid_2.rects_transformed[column+nrows*row][1][0])
-
     def update(self):
-        for mode in session.modes:
-            if mode.waiting_to_start:
-                if (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() > mode.activation_buffer_time and (datetime.datetime.now() - self.mode_token_selection_time).total_seconds() < 10:
-                    for mode_ in session.modes:
-                        mode_.waiting_to_start = False
-
-                    if mode is session.modes['simulation']:
-                        session.modes['simulation'].setup()
-                    session.active_mode = mode  # marks simulation to be started in main sthread
+        pass

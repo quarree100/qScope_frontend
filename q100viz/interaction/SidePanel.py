@@ -86,17 +86,17 @@ class SidePanel:
             )
         
         # ----------------------- draw mode buttons: -----------------------
-        y = self.bounding_box.height * 3/4
-        image_width = session.icons['start_buildings_interaction'].image.width
-        x = self.bounding_box.left + 0.25 * image_width
-        for i, key in enumerate(['start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']):
+        y = self.bounding_box.height * 4/5
+        keys = ['start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']
+        for i, key in enumerate(keys):
 
             session.icons[key].rect = pygame.Rect(
-                x + i * self.bounding_box.width / 3,
+                0,
                 y,
                 session.icons[key].image.width,
                 session.icons[key].image.height
             )
+            session.icons[key].rect.centerx = self.bounding_box.left + self.bounding_box.width / len(keys) / 2 + i * self.bounding_box.width / len(keys)
             
             # highlight selected:
             if session.environment['mode'] == session.modes[key[6:]].name:
@@ -119,7 +119,8 @@ class SidePanel:
             pygame.draw.rect(
                 surface=canvas,
                 color=pygame.Color(255, 120, 55, session.global_alpha),
-                rect=session.icons['start_simulation'].rect
+                rect=session.icons['start_simulation'].rect.scale_by(1.3),
+                border_radius=session.icons['start_simulation'].rect.width
             )
 
         

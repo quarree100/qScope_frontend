@@ -69,7 +69,7 @@ class GIS:
                 if fill:
                     fill_color = pygame.Color(*fill)
                 else:
-                    fill_color = pygame.Color(180, 180, 180)
+                    fill_color = pygame.Color(222, 222, 222)
                 if row['group'] > -1:
                     fill_color = pygame.Color(session.user_colors[row['group']])
 

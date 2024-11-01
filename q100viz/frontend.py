@@ -49,21 +49,30 @@ class Frontend:
         # mask viewport with black surface
         self.mask_points = [
             [0, 0], [85.5, 0],
-            [85.5, 82], [0, 82],
+            [85.5, 100], [0, 100],
             [0, -50], [-50, -50],
             [-50, 200], [200, 200],
             [200, -50], [0, -50]]
 
         ############# UDP server for incoming gama messages ###########
-        # UDP receive
-        self.udp_gama = ('localhost', config['UDP_SERVER_PORT'])
+        http_thread = threading.Thread(
+            target=init_server,
+            args=[config['HTTP_SERVER_PORT'], config['UDP_SERVER_PORT']],
+            daemon=True)
+        # http_thread.start()
+        
+        io = 'http://localhost:' + str(config['UDP_SERVER_PORT'])  # Socket.io
+        session.api = api.API(io)
 
         # receive and forward GAMA messages during simulation:
+        self.udp_gama = ('localhost', config['UDP_SERVER_PORT'])
         udp_server = udp.UDPServer(
             'localhost', config['UDP_SERVER_PORT'], 4096)
-        udp_thread = threading.Thread(target=udp_server.listen,
-                                      args=(session.api.forward_gama_message,),
-                                      daemon=True)
+        udp_thread = threading.Thread(
+            target=udp_server.listen,args=(
+                session.modes['simulation'].forward_gama_message,
+                ),
+            daemon=True)
         udp_thread.start()
         
         session.icons = {
@@ -123,7 +132,11 @@ class Frontend:
                     session.active_mode = session.buildings_interaction
                 # enter simulation mode:
                 elif event.key == pygame.locals.K_9:
-                    session.modes['simulation'].setup()
+                    try:
+                        session.modes['simulation'].setup()
+                    except Exception as e:
+                        print("cannot initialize simulation", e)
+                        session.modes['simulation'].initialization_failed = True
                     session.active_mode = session.modes['simulation']
                 elif event.key == pygame.locals.K_8:
                     session.active_mode = session.individual_data_view
@@ -156,9 +169,6 @@ class Frontend:
                 pygame.quit()
                 sys.exit()
 
-        # update running mode:
-        session.active_mode.update()
-
         ################################## DRAWING ########################
         # clear surfaces
         self.canvas.fill(0)
@@ -189,14 +199,12 @@ class Frontend:
             )
 
         # draw mode-specific surface:
-        # try:
-        session.active_mode.draw(session.viewport)
-        # except Exception as e:
-        #     print(f"{session.active_mode.name} cannot draw frontend:", e)
-        #     devtools.log += "\nCannot draw frontend: %s" % e
+        try:
+            session.active_mode.draw(session.viewport)
+        except Exception as e:
+            print(f"{session.active_mode.name} cannot draw frontend:", e)
+            devtools.log += "\nCannot draw frontend: %s" % e
             
-        self.side_panel.draw(session.viewport)
-
         # basemap
         if session.show_basemap:
             crop_width = self.canvas.get_width(
@@ -217,6 +225,9 @@ class Frontend:
         ############ render everything beyond/on top of canvas: ###########
 
         ############################# pygame time #########################
+
+        session.global_alpha = 30 + \
+            abs(int(numpy.sin(pygame.time.get_ticks() / 1000) * 105))
 
         pygame.display.update()
 
@@ -242,7 +253,7 @@ class Frontend:
         if self.side_panel.slider.bounding_box.collidepoint(mouse_pos):
             self.side_panel.slider.update_from_interaction(mouse_pos)
             self.side_panel.slider.process_value()
-        
+            
     def handle_mouse_up(self, mouse_pos):
         for popup in session.popup_menus.values():
             popup.dragging = False
@@ -252,7 +263,11 @@ class Frontend:
             if rect.collidepoint(mouse_pos):
                 session.active_mode = session.modes[key[6:]]
                 if session.active_mode is session.modes['simulation']:
-                    session.modes['simulation'].setup()
+                    try:
+                        session.modes['simulation'].setup()
+                    except Exception as e:
+                        print("cannot initialize simulation", e)
+                        session.modes['simulation'].initialization_failed = True
             
         session.api.send_dict(session.environment)
         session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())

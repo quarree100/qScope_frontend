@@ -22,7 +22,7 @@ parser.add_argument('--refurbish', '-r',
 parser.add_argument('--save_energy', '-e',
                     help="set all selected buildings to save_energy", action='store_true')
 parser.add_argument('--start_at', help="start at specific game mode [calibrate], [buildings_interaction] (DEFAULT), [simulation], [individual_data_view], [total_data_view]",
-                    type=str, default=session.environment['mode'])
+                    type=str, default='buildings_interaction')
 parser.add_argument(
     '--main_window', help="runs program in main window", action='store_true')
 parser.add_argument('--research_model',
@@ -39,9 +39,13 @@ session.debug_connection_date = args.connect        # force buildings to opt in 
 session.debug_refurb_year = args.refurbish    # force buildings to opt in 'refurbish'
 session.debug_force_save_energy = args.save_energy  # force buildings to opt in for 'save_energy'
 
-session.active_mode = session.string_to_mode(args.start_at)  # force start at this mode
-if session.active_mode == session.simulation:
-    session.active_mode.setup()
+session.active_mode = session.modes[args.start_at]  # force start at this mode
+if session.environment['mode'] == 'simulation':
+    try:
+        session.modes['simulation'].setup()
+    except Exception as e:
+        print("cannot initialize simulation", e)
+        session.modes['simulation'].initialization_failed = True
 
 devtools.VERBOSE_MODE = args.verbose  # define verbose level
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']

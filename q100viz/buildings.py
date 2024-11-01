@@ -1,6 +1,7 @@
 import pandas
 import random
 import shapely
+import numpy as np
 import pygame
 import json
 import os
@@ -236,12 +237,28 @@ class Buildings:
         ''' take all buildings from dataframe until given index and set connect_to_heat_grid = True
         '''
         # make sure no building is selected with slider.value = 0
-        idx = idx -1
+
         self.df.loc[:, 'connection_to_heat_grid'] = False
+        session.environment['scenario_num_connections'] = len(self.df[self.df['connection_to_heat_grid']])
         
-        if idx < 0: return
+        if idx == 0: return
         
         self.df.loc[:idx, 'connection_to_heat_grid'] = True
 
-        session.environment['scenario_num_connections'] = idx
+        session.environment['scenario_num_connections'] = len(self.df[self.df['connection_to_heat_grid']])
 
+
+    def human_readable_value(self, handle, idx):
+        # household-specific:
+        value = self.df.loc[idx, handle]
+        if handle == 'connection_to_heat_grid':
+            return "n.a." if value == False else str(value)
+
+        elif handle == 'refurbished':
+            return "n.a." if value == False else str(value)
+
+        elif handle == 'save_energy':
+            return 'ja' if value > 0.5 else 'nein'
+            
+        elif handle == 'global_connections':
+            return str(session.environment['scenario_num_connections'])

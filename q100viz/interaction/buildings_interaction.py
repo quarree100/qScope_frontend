@@ -55,6 +55,8 @@ class Buildings_Interaction:
                 if not any(session.group_available):
                     # deselect and return:
                     buildings.at[idx, 'popup'] = None
+                    if idx in session.popup_menus.keys():
+                        del session.popup_menus[idx]    
                     buildings.at[idx, 'selected'] = False
                     if buildings.loc[idx, 'group'] >= 0:
                         # make group available again
@@ -153,6 +155,3 @@ class Buildings_Interaction:
 
         for popup in session.popup_menus.values():
             popup.draw()
-
-    def update(self):
-        pass

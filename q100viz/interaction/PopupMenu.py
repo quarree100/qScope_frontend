@@ -17,6 +17,7 @@ class PopupMenu:
         }
 
         self.surface = surface
+        self.visible = True
 
         self.origin = origin
         self.bounding_box = pygame.Rect(
@@ -27,7 +28,7 @@ class PopupMenu:
         self.alpha = 0
         self.colors = {
             "user": pygame.Color(session.user_colors[session.buildings.df.loc[idx, "group"]]),
-            "secondary": pygame.Color(60, 60, 60)
+            "interactive": pygame.Color(222, 222, 222),
         }
         self.building_address = session.buildings.df.loc[idx, "address"]
         self.idx = idx
@@ -94,19 +95,22 @@ class PopupMenu:
         # ------------draw bounding box: ------------
         pygame.draw.rect(
             surface=self.surface,
-            color=pygame.Color(255, 255, 255, 50),
+                color=pygame.Color(
+                    self.colors["user"].r,
+                    self.colors["user"].g,
+                    self.colors["user"].b,
+                    self.alpha / 2),
             rect=self.bounding_box
             )
 
         # ------------draw address box: ------------
         pygame.draw.rect(
             surface=self.surface,
-            color=pygame.Color(
-                self.colors["user"].r,
+                color=pygame.Color(
+                    self.colors["user"].r,
                     self.colors["user"].g,
                     self.colors["user"].b,
-                    self.alpha
-                ),
+                    self.alpha),
             rect=self.address_box
         )
 
@@ -117,16 +121,20 @@ class PopupMenu:
         self.surface.blit(text, text.get_rect(
             center=(self.address_box.centerx, self.address_box.centery)))
 
+        # --------------- icons: ---------------
         num_of_images = 3
         spacing = self.bounding_box.width / num_of_images
 
         pygame.draw.rect(
             surface=self.surface,
-            color=pygame.Color(55, 120, 255, 80),
-            rect=self.icons_box
+                color=pygame.Color(
+                    self.colors["user"].r,
+                    self.colors["user"].g,
+                    self.colors["user"].b,
+                    self.alpha / 2),
+                rect=self.icons_box
         )
         
-        # --------------- icons: ---------------
         for i, key in enumerate(session.VALID_DECISION_HANDLES):
 
             self.icons[key].rect = pygame.Rect(
@@ -136,27 +144,34 @@ class PopupMenu:
                 self.icons[key].image.height
             )
 
-            # border if image selected
-            if self.icons[key].selected:
-                pygame.draw.rect(
-                    surface=self.surface,
-                    color=pygame.Color(255, 120, 55),
-                    rect=self.icons[key].rect.scale_by(1.3)
-                )
+            # highlight if image selected
+            pygame.draw.rect(
+                surface=self.surface,
+                color=self.colors["user"] if self.icons[key].selected else self.colors["interactive"],
+                rect=self.icons[key].rect.scale_by(1.3),
+                border_radius=self.icons[key].rect.width
+            )
 
             # image:
             self.surface.blit(
                 self.icons[key].image,
                 self.icons[key].rect.topleft
             )
+            
+            text = pygame.font.SysFont('Arial', 16).render(
+                session.buildings.human_readable_value(key, self.idx), True, (255, 255, 255)
+            )
+            self.surface.blit(text, text.get_rect(centerx=self.icons[key].rect.scale_by(1.3).centerx, top=self.icons[key].rect.scale_by(1.3).bottom))
 
         # ------------ slider if any handle selected ---------
         if any(icon.selected for icon in self.icons.values()):
+            # slider box
+            color = self.colors["user"] if session.buildings.df.loc[self.idx, 'save_energy'] or self.popup_type == "slider" else pygame.Color(200, 200, 200)
             pygame.draw.rect(
-                self.surface,
-                pygame.Color(200, 200, 200),
-                self.slider.bounding_box,
-                border_radius=int(self.slider.bounding_box.height/2) if self.popup_type == "switch" else 0
+                surface=self.surface,
+                color=color,
+                rect=self.slider.bounding_box,
+                border_radius=int(self.slider.bounding_box.height/2)
             )
             
             if self.popup_type == "slider":

@@ -21,7 +21,7 @@ class SidePanel:
         # ------------draw bounding box: ------------
         pygame.draw.rect(
             surface=canvas,
-            color=pygame.Color(255, 0, 255, 60),
+            color=pygame.Color(0, 0, 0),
             rect=self.bounding_box
         )
 
@@ -39,7 +39,7 @@ class SidePanel:
 
         canvas.blit(text, text.get_rect(center=(self.bounding_box.centerx, y)))
 
-        # Slider:
+        # -------------------------- Slider: --------------------------
         y += line_height
         self.slider.bounding_box = pygame.Rect(
             self.bounding_box.left + self.bounding_box.width / 3,
@@ -50,8 +50,9 @@ class SidePanel:
 
         pygame.draw.rect(
             canvas,
-            pygame.Color(200, 200, 200),
-            self.slider.bounding_box
+            pygame.Color(222, 222, 222),
+            self.slider.bounding_box,
+                border_radius=int(self.slider.bounding_box.height/2)            
         )
 
         # draw horizontal line
@@ -65,17 +66,27 @@ class SidePanel:
             4
         )
 
-        y += self.slider.bounding_box.height + text.get_rect().height
+        # slider annotations
         font.set_bold(False)
-        text = font.render(
-            str(int(self.slider.value * len(session.buildings.df))),
-            True, pygame.Color(255, 255, 255)
-        )
+        text = font.render(str(session.environment['scenario_num_connections']), True, (255, 255, 255))        
+        canvas.blit(
+            text, 
+            text.get_rect(left=self.slider.bounding_box.right, centery=self.slider.bounding_box.top + self.slider.bounding_box.height * self.slider.value)
+            )
 
-        canvas.blit(text, text.get_rect(center=(self.bounding_box.centerx, y)))
-
-        # draw mode buttons:
-        y += line_height
+        text = font.render("0", True, (255, 255, 255))
+        canvas.blit(
+            text, 
+            text.get_rect(right=self.slider.bounding_box.left, centery=self.slider.bounding_box.top)
+            )
+        text = font.render(str(len(session.buildings.df)), True, (255, 255, 255))        
+        canvas.blit(
+            text,
+            text.get_rect(right=self.slider.bounding_box.left, centery=self.slider.bounding_box.bottom)
+            )
+        
+        # ----------------------- draw mode buttons: -----------------------
+        y = self.bounding_box.height * 3/4
         image_width = session.icons['start_buildings_interaction'].image.width
         x = self.bounding_box.left + 0.25 * image_width
         for i, key in enumerate(['start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']):
@@ -87,11 +98,13 @@ class SidePanel:
                 session.icons[key].image.height
             )
             
+            # highlight selected:
             if session.environment['mode'] == session.modes[key[6:]].name:
                 pygame.draw.rect(
                     surface=canvas,
-                    color=pygame.Color(255, 120, 55),
-                    rect=session.icons[key].rect
+                    color=pygame.Color(255, 120, 55, session.global_alpha),
+                    rect=session.icons[key].rect.scale_by(1.3),
+                    border_radius=session.icons[key].rect.width
                 )
             
             canvas.blit(
@@ -101,6 +114,15 @@ class SidePanel:
             
         # simulation button:
         y += 2 * line_height
+
+        if session.environment['mode'] == 'simulation':
+            pygame.draw.rect(
+                surface=canvas,
+                color=pygame.Color(255, 120, 55, session.global_alpha),
+                rect=session.icons['start_simulation'].rect
+            )
+
+        
         session.icons['start_simulation'].rect = pygame.Rect(
             self.bounding_box.centerx - 0.5 * session.icons['start_simulation'].image.width,
             y,

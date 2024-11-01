@@ -17,13 +17,11 @@ class DataViewTotal_Mode():
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
 
         session.environment['mode'] = self.name
-        for mode in session.modes:
-            mode.waiting_to_start = False
 
         session.show_polygons = True
         session.show_basemap = True
 
-        session.api.send_session_env()
+        session.api.send_dict(session.environment)
 
     def process_event(self, event):
         if event.type == pygame.locals.MOUSEBUTTONDOWN:
@@ -84,6 +82,3 @@ class DataViewTotal_Mode():
             (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 8,
              session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
         )
-
-    def update(self):
-        pass                

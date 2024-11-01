@@ -40,6 +40,7 @@ viewport.calculate()
 
 show_polygons = False
 show_basemap = False
+global_alpha = 0
 
 icons = {}
 popup_menus = {}

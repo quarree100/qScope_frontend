@@ -5,8 +5,9 @@ DATA_FOLDER = "./data" # change me
 DATA_ABS_PATH = os.path.abspath(DATA_FOLDER)
 
 config = {
-    # UDP communication
+    # Infoscreen communication
     'UDP_SERVER_PORT' : 8081,
+    'HTTP_SERVER_PORT' : 8082,
     
     # GIS files
     'BASEMAP_FILE': os.path.join(DATA_ABS_PATH, "GIS/180111-QUARREE100-RK_modifiziert_smaller.jpg"),
@@ -29,6 +30,7 @@ config = {
     'GAMA_HEADLESS_FOLDER' : '/home/qscope/opt/GAMA_1.9.2/headless/',
     'GAMA_OUTPUT_FOLDER': os.path.join(DATA_ABS_PATH, 'outputs/output'),
     'GAMA_MODEL_FILE' : '../q100_abm_qscope-workshop/q100/models/qscope_ABM.gaml',
+    'SIMULATION_INITIAL_VARIABLES' : '../data/includes/csv-data_technical/initial_variables.csv',
     'SIMULATION_FORCE_START_YEAR' : 2020,
     'SIMULATION_FORCE_END_YEAR' : 2030,
     'REFERENCE_DATA_FOLDER' : os.path.join(DATA_ABS_PATH, 'precomputed/simulation_defaults'),

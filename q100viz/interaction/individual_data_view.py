@@ -12,7 +12,7 @@ class DataViewIndividual_Mode():
         self.name = 'individual_data_view'
         self.mode_token_selection_time = datetime.datetime.now()
         self.activation_buffer_time = 2  # seconds before simulation begins
-        self.global_alpha = 0
+        self.alpha = 0
 
     def activate(self):
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
@@ -28,7 +28,8 @@ class DataViewIndividual_Mode():
         session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
         
         session.buildings.df['selected'] = False
-        session.buildings.df.loc[session.buildings.df[session.buildings.df['group'] == session.environment['active_user_focus_data']].iloc[0].name, 'selected'] = True
+        if len(session.buildings.df[session.buildings.df['group']  >= 0]) > 0:
+            session.buildings.df.loc[session.buildings.df[session.buildings.df['group'] >= 0].iloc[0].name, 'selected'] = True
 
 
     def process_event(self, event):
@@ -52,7 +53,7 @@ class DataViewIndividual_Mode():
 
     def draw(self, canvas):
         
-        self.global_alpha = 30 + \
+        self.alpha = 30 + \
             abs(int(numpy.sin(pygame.time.get_ticks() / 1000) * 105))
 
         # mark selected building to show user focus      
@@ -62,7 +63,7 @@ class DataViewIndividual_Mode():
                 shapely.geometry.Polygon(focused_bd['polygon'].iloc[0]).buffer(15)
             pygame.draw.polygon(
                 canvas, 
-                pygame.Color(255, 255, 255, self.global_alpha),
+                pygame.Color(255, 255, 255, self.alpha),
                 [pnt for pnt in scaled_polygon.exterior.coords])
             
 
@@ -124,6 +125,3 @@ class DataViewIndividual_Mode():
             (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 8,
              session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
         )
-
-    def update(self):
-        pass

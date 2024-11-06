@@ -7,8 +7,8 @@ import pygame
 class Surface(pygame.Surface):
     def calculate(self, other_mat=None):
         """Calculate the transformation matrixes from source and destination points."""
-        src = numpy.float32(self.src_points)
-        dst = numpy.float32(self.dst_points)
+        src = numpy.float32(self.src_points)  # e.g.geographic coords
+        dst = numpy.float32(self.dst_points)  # canvas points
 
         self.transform_mat = cv2.getPerspectiveTransform(src, dst)
 

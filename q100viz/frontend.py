@@ -217,13 +217,20 @@ class Frontend:
         self.side_panel.draw(session.viewport)
 
         if session.show_polygons:
-            self.canvas.blit(session._gis.surface, (0, 0))  
+            self.canvas.blit(session._gis.surface, (0, 0))
+            
+        # if devtools.VERBOSE_MODE:
+        #     pygame.draw.circle(self.side_panel.surface, (255,255,255), 
+        #                        (pygame.mouse.get_pos()[0] - self.side_panel.x,
+        #                         pygame.mouse.get_pos()[1]),
+        #                        15)
+        #     pygame.draw.circle(session.viewport, (255,255,255), pygame.mouse.get_pos(), 15)
 
-        ########################## DATA PROCESSING ########################
-
+        self.side_panel.draw(session.viewport)
+        
         if self.display_viewport:
             self.canvas.blit(session.viewport, (0, 0))
-
+           
         ############ render everything beyond/on top of canvas: ###########
 
         ############################# pygame time #########################

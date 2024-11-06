@@ -50,7 +50,7 @@ class GIS:
                 if row['connection_to_heat_grid']:
                     pygame.draw.line(
                         self.surface,
-                        color=pygame.Color(0, 168, 78),
+                        color=session.global_colors['connection_to_heat_grid'],
                         start_pos=((centroid.x, centroid.y)),
                         end_pos=((target.x, target.y)),
                         width=4
@@ -69,7 +69,7 @@ class GIS:
                 if fill:
                     fill_color = pygame.Color(*fill)
                 else:
-                    fill_color = pygame.Color(222, 222, 222)
+                    fill_color = (222, 222, 222)
                 if row['group'] > -1:
                     fill_color = pygame.Color(session.user_colors[row['group']])
 
@@ -82,6 +82,7 @@ class GIS:
 
     def draw_polygon_layer_bool(self, surface, df, stroke, fill_false, fill_true=None, fill_attr=None):
         '''draw polygon layer, lerp using bool value'''
+        fill_true = session.global_colors[fill_attr]
         try:
             for polygon in df.to_dict('records'):
                 if fill_false:
@@ -91,7 +92,7 @@ class GIS:
                         fill_color = pygame.Color(fill_true) if polygon[fill_attr] else fill_color
 
                 points = self.surface.transform(polygon['geometry'].exterior.coords)
-                fill_color = pygame.Color(session.user_colors[polygon['group']]) if polygon['group'] > 0 else fill_color
+                fill_color = pygame.Color(session.user_colors[polygon['group']]) if polygon['group'] >= 0 else fill_color
                 pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
         except Exception as e:

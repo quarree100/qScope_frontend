@@ -49,6 +49,8 @@ popup_menus = {}
 num_of_rounds = config['NUM_OF_ROUNDS']  # max num of rounds; will repeat after this
 num_of_users = config['NUM_OF_USERS']  # num of valid users # TODO: combine with num of valid tags!
 group_available = [True for n in range(num_of_users)]  # list of assignable group
+
+# TODO: combine this to one dict and put to graphics/colors
 user_colors = [
     (0, 117, 180),   # Quarree-blue  #0075b4
     (253, 193, 19),  # Quarree-yellow  #fdc113
@@ -72,6 +74,13 @@ quarree_colors_float = [   # corporate design of QUARREE100
     (186/255, 212/255, 50/255),  # Quarree-light-green
     (103/255, 102/255, 104/255)  # Quarree-gray
 ]
+
+global_colors = {
+    "connection_to_heat_grid" : (0, 168, 78),
+    "refurbished" : (168, 78, 0),
+    "save_energy" : (78, 0, 168),
+    "interactive" : (222,222,222)
+}
 
 gama_iteration_images = ['' for n in range(num_of_rounds)]
 emissions_data_paths = ['' for n in range(num_of_rounds)]

@@ -9,8 +9,9 @@ http_port = config['HTTP_SERVER_PORT']
 websocket_port = config['UDP_SERVER_PORT']
 
 app = Flask(__name__, static_folder='static', static_url_path='')
+websocket = Flask('Infoscreen Websocket')
 socketio = SocketIO(
-    app, cors_allowed_origins=f"http://localhost:{websocket_port}"
+    websocket, cors_allowed_origins=f"http://localhost:{http_port}"
     )
 
 
@@ -28,11 +29,11 @@ def handle_message(data):
 def serve_static():
     return send_from_directory('static', 'index.html')
 
-def init_server(http_port):
+def init_server(http_port, websocket_port):
     print(f'HTTP Server started at http://localhost:{http_port}')
     # webbrowser.open(f'http://localhost:{http_port}')
-    socketio.run(app, port=http_port)
-
+    app.run(port=http_port)
+    socketio.run(websocket, port=websocket_port)
 
 if __name__ == '__main__':
-    init_server(http_port)
+    init_server(http_port, websocket_port)

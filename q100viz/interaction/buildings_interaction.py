@@ -118,25 +118,24 @@ class Buildings_Interaction:
             session._gis.draw_buildings_connections(
                 session.buildings.df)  # draw lines to closest heat grid
 
-            session._gis.draw_polygon_layer(
-                surface=canvas, 
-                df=session.buildings.df, 
-                stroke=0
-                )
+            # session._gis.draw_polygon_layer(
+            #     surface=canvas, 
+            #     df=session.buildings.df, 
+            #     stroke=0
+            #     )
             
-            # stroke simple black:
+            # fill interactive:
             session._gis.draw_polygon_layer_bool(
-                canvas, session.buildings.df, 1,
-                (0, 0, 0),
-                (0, 0, 0),
-                'connection_to_heat_grid')
+                surface=canvas, 
+                df=session.buildings.df, stroke=0,
+                fill_false=session.global_colors['interactive'],
+                fill_attr='connection_to_heat_grid')
 
             # stroke according to connection status:
             session._gis.draw_polygon_layer_bool(
                 surface=canvas, df=session.buildings.df,
                 stroke=1,
-                fill_false=(0, 0, 0),
-                fill_true=(0, 168, 78),
+                fill_false=(0,0,0),
                 fill_attr='connection_to_heat_grid')
 
         # highlight selected buildings (draws colored stroke on top)

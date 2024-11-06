@@ -45,7 +45,8 @@ class Buildings:
             'Kataster_E': 'energy_source',
             'Kataster_A' : 'type',
             'Kataster_6' : 'area',
-            'Kataster_W' : 'units'})
+            'Kataster_W' : 'units',
+            'Kataster_C' : 'id'})
         
         return self.initialize_data(create_clusters=create_clusters)
 
@@ -125,6 +126,7 @@ class Buildings:
         self.df["address"] = self.df["addr_stree"].fillna("") + ' ' + self.df["addr_house"].fillna("")
         self.df["address"] = self.df["address"].apply(lambda x: "" if x.strip() == "" else x)
         self.df['type'] = ''
+        self.df['id'] = [random.randint(0, 10) + round(random.random(), 2) for i in range(len(self.df))]
 
         print(self.df.index)
         # generate random consumption data:

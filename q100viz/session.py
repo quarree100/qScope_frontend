@@ -84,7 +84,7 @@ scenario_selected_buildings = pd.DataFrame()
 # list of possible handles
 MODE_SELECTOR_HANDLES = ['start_individual_data_view', 'start_total_data_view', 'start_buildings_interaction', 'start_simulation']
 # columns exported from buildings.df for communication with GAMA and Infoscreen. ATTENTION: When this is changed, make sure to change it in GAMA and infoscreen likewise!
-COMMUNICATION_RELEVANT_KEYS = ['address', 'spec_heat_consumption', 'spec_power_consumption', 'type', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'save_energy', 'save_energy_prior', 'energy_source']
+COMMUNICATION_RELEVANT_KEYS = ['id', 'address', 'spec_heat_consumption', 'spec_power_consumption', 'type', 'cluster_size', 'emissions_graphs', 'energy_prices_graphs', 'connection_to_heat_grid', 'connection_to_heat_grid_prior', 'refurbished', 'refurbished_prior', 'save_energy', 'save_energy_prior', 'energy_source']
 VALID_DECISION_HANDLES = ['connection_to_heat_grid', 'refurbished', 'save_energy']
 
 # environment (used for communication with infoscreen)
@@ -103,7 +103,6 @@ for root, dirs, files in os.walk(DATA_ABS_PATH+'/scenarios'):
         if file.endswith('.csv'):
             scenarios.append(os.path.join(root, file))
 
-print("scenarios:", scenarios)
 devtools.log += "found scenario files:"
 for scenario in scenarios:
     devtools.log += scenario

@@ -118,7 +118,7 @@ def export_individual_emissions(csv_name, columns, x_, title_="", xlabel_="", yl
         plt.savefig(outfile, transparent=False, bbox_inches="tight")
 
 ####################### individual energy expenses ####################
-def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True, prepend_historic_data=False):
+def export_individual_energy_expenses(id, csv_name, columns, x_, title_="", xlabel_="", ylabel_="", labels_=None, data_folders=None, compare_data_folder=None, outfile=None, convert_grams_to_kg=False, convert_grams_to_tons=False, figtext="", label_show_iteration_round=True, figsize=(16,9), overwrite_color=None, show_legend=True, prepend_historic_data=False):
     '''exports energy expenses column of csv-data-file for every iteration round to graph, prepending historic energy prices. Finally, exports png'''
 
     plt.rc('font', size=18)
@@ -158,13 +158,13 @@ def export_individual_energy_expenses(building_idx, csv_name, columns, x_, title
 
                 # historic heat:
                 for energy_source in zip(['gas', 'oil', 'power'], ['Gas', 'Öl', 'Strom']):
-                    if session.buildings.df.loc[building_idx, 'energy_source'] == energy_source[1]:
+                    if session.buildings.df.loc[id, 'energy_source'] == energy_source[1]:
                         historic_prices['building_household_expenses_heat'] = \
-                            historic_prices[energy_source[0]+'_price'] / 100 * session.buildings.df.loc[building_idx, 'area'] * session.buildings.df.loc[building_idx, 'spec_heat_consumption'] / 12 / session.buildings.df.loc[building_idx, 'units']
+                            historic_prices[energy_source[0]+'_price'] / 100 * session.buildings.df.loc[id, 'area'] * session.buildings.df.loc[id, 'spec_heat_consumption'] / 12 / session.buildings.df.loc[id, 'units']
 
                 # historic power:
                 historic_prices['building_household_expenses_power'] = \
-                    historic_prices['power_price'] / 100 * session.buildings.df.loc[building_idx, 'area'] * session.buildings.df.loc[building_idx, 'spec_power_consumption'] / 12 / session.buildings.df.loc[building_idx, 'units']
+                    historic_prices['power_price'] / 100 * session.buildings.df.loc[id, 'area'] * session.buildings.df.loc[id, 'spec_power_consumption'] / 12 / session.buildings.df.loc[id, 'units']
 
 
                 csv_data = pandas.read_csv(output_folder + csv_name)
@@ -351,21 +351,22 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
         if group_df is not None:
             for idx in group_df.index:
                 # load from csv:
-                try:
-                    new_df = pandas.read_csv(current_output_folder + "/emissions/CO2_emissions_{0}.csv".format(idx))
-                    new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
-                    new_df['building_household_emissions'] = new_df['building_household_emissions'].apply(grams_to_kg)
-                    new_df['color'] = [rgb_to_float_tuple(session.user_colors[group_num]) for i in new_df.values]
-                    new_df['group_num'] = [group_num for i in new_df.values]
+                # try:
+                building_id = group_df.loc[idx, 'id']
+                new_df = pandas.read_csv(current_output_folder + "/emissions/CO2_emissions_{0}.csv".format(building_id))
+                new_df['current_date'] = new_df['current_date'].apply(GAMA_time_to_datetime)
+                new_df['building_household_emissions'] = new_df['building_household_emissions'].apply(grams_to_kg)
+                new_df['color'] = [rgb_to_float_tuple(session.user_colors[group_num]) for i in new_df.values]
+                new_df['group_num'] = [group_num for i in new_df.values]
 
-                    if compare_data_folder is not None:
-                        compare_df = pandas.read_csv(compare_data_folder + '/emissions/CO2_emissions_{0}.csv'.format(idx))
-                        new_df['compare'] = compare_df['building_household_emissions'].apply(grams_to_kg)
+                if compare_data_folder is not None:
+                    compare_df = pandas.read_csv(compare_data_folder + '/emissions/CO2_emissions_{0}.csv'.format(building_id))
+                    new_df['compare'] = compare_df['building_household_emissions'].apply(grams_to_kg)
 
-                    data.append(new_df)
+                data.append(new_df)
 
-                except Exception as e:
-                    print("cannot create compared emissions graph", e)
+                # except Exception as e:
+                #     print("cannot create compared emissions graph", e)
 
                 # add labels:
                 decisions.append(
@@ -447,7 +448,7 @@ def export_neighborhood_emissions_connections(connections_file, emissions_file, 
         alpha=0.5
     )
     plt.gca().set_ylabel('Anzahl Wärmenetzanschlüsse', fontsize='x-large')
-    plt.gca().set_yticks(range(0, len(session.buildings.df), 10),fontsize='x-large')
+    plt.gca().set_yticks(range(0, len(session.buildings.df), 10))
 
     #################### right y-axis: ####################
     ax1 = ax0.twinx()
@@ -490,7 +491,8 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
 
         for idx in group_df.index:
             # load from csv:
-            this_csv_df = pandas.read_csv(search_in_folder + "/energy_prices/energy_prices_{0}.csv".format(idx))
+            building_id = group_df.loc[idx, 'id']
+            this_csv_df = pandas.read_csv(search_in_folder + "/energy_prices/energy_prices_{0}.csv".format(building_id))
             this_csv_df['current_date'] = this_csv_df['current_date'].apply(GAMA_time_to_datetime)
             this_csv_df['group_num'] = [group_num for i in this_csv_df.values]
             list_of_csv_dfs.append(this_csv_df)

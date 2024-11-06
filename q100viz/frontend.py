@@ -263,10 +263,12 @@ class Frontend:
         for key in ['start_simulation', 'start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']:
             rect = session.icons[key].rect
             if rect.collidepoint(mouse_pos):
+                if session.active_mode == session.modes[key[6:]]: return
                 session.active_mode = session.modes[key[6:]]
                 if session.active_mode is session.modes['simulation']:
+                    session.modes['simulation'].setup()
                     try:
-                        session.modes['simulation'].setup()
+                        pass
                     except Exception as e:
                         print("cannot initialize simulation", e)
                         session.modes['simulation'].initialization_failed = True

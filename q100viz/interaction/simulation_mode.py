@@ -60,6 +60,7 @@ class SimulationMode:
 
         # start simulation:
         self.running = True
+        self.model_file = None
         simulation_thread = threading.Thread(target=session.modes['simulation'].run, args=[devtools.test_run], daemon=True)
         simulation_thread.start()
 
@@ -162,17 +163,17 @@ class SimulationMode:
         # filter already selected buildings from list:
         try:
             session.scenario_selected_buildings = session.scenario_selected_buildings[session.scenario_selected_buildings['group'] < 0]
-            for group_df in session.buildings.list_from_groups():
-                if group_df is not None:
-                    for idx in group_df.index:
-                        if idx in session.scenario_selected_buildings.index:
-                            session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
+            # for group_df in session.buildings.list_from_groups():
+            #     if group_df is not None:
+            #         for idx in group_df.index:
+            #             if idx in session.scenario_selected_buildings.index:
+            #                 session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
         except Exception as e:
             print("cannot filter scenario list", e)
             devtools.log += "\nCannot filter scenario list: %s" % e
 
         selected_buildings = pandas.concat([session.buildings.df[session.buildings.df.selected], session.scenario_selected_buildings])
-        selected_buildings[['spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'group']].to_csv(clusters_outname)
+        selected_buildings[['id', 'spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'group']].to_csv(clusters_outname, index=False)
 
         # send final_step to infoscreen:
         session.api.send_dataframe_as_json(pandas.DataFrame(data={"final_step": [self.final_step]}))
@@ -196,17 +197,19 @@ class SimulationMode:
 
         # update building images with reference data for discussion:
         if session.environment['current_iteration_round'] == 0:
+            df = session.buildings.df
             for idx in session.buildings.df.index:
-                session.buildings.df.at[idx, 'emissions_graphs'] = "../data/precomputed/simulation_defaults/emissions/CO2_emissions_{0}.png".format(idx)
-                session.buildings.df.at[idx, 'energy_prices_graphs'] = "../data/precomputed/simulation_defaults/energy_prices/energy_prices_{0}.png".format(idx)
+                df.iat[idx, df.columns.get_loc('emissions_graphs')] = "../data/precomputed/simulation_defaults/emissions/CO2_emissions_{0}.png".format(df.iloc[idx, df.columns.get_loc('id')])
+                df.iat[idx, df.columns.get_loc('energy_prices_graphs')] = "../data/precomputed/simulation_defaults/energy_prices/energy_prices_{0}.png".format(df.iloc[idx, df.columns.get_loc('id')])
             session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
 
         self.run_script(self.xml_path)
         session.api.send_message_as_json({'step' : self.final_step-1})  # simulation done
 
         if self.flag_create_graphs:
+            self.export_graphs()
             try:
-                self.export_graphs()
+                pass
             except Exception as e:
                 print("cannot export graphs", e)
                 devtools.log += "\nCannot export graphs: %s" % e
@@ -273,7 +276,7 @@ class SimulationMode:
         canvas.blit(font.render(
             session.modes['simulation'].progress, True, pygame.Color(255,255,255)),
             (session.frontend.side_panel.bounding_box.centerx,
-            session.frontend.side_panel.bounding_box.bottom - 30),
+            session.frontend.side_panel.bounding_box.centery - 30),
         )
 
     ########################### script: prepare #######################
@@ -402,55 +405,58 @@ class SimulationMode:
 
             for idx in group_df.index:
                 # export emissions graph:
+                building_id = group_df.loc[idx, 'id']
+                print("creating emission graphs for", building_id)
                 graphs.export_individual_emissions(
                     csv_name="/emissions/CO2_emissions_{0}.csv".format(
-                        idx),
+                        building_id),
                     data_folders=self.output_folders,
                     columns=['building_household_emissions'],
                     title_="Emissionen",
                     outfile=self.current_output_folder +
-                    "/emissions/CO2_emissions_{0}.png".format(idx),
+                    "/emissions/CO2_emissions_{0}.png".format(building_id),
                     xlabel_="Jahr",
                     ylabel_="$CO_{2}$-Äquivalente (kg/Monat)",  # TODO: t/Jahr
                     x_='current_date',
                     convert_grams_to_kg=True,
                     compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults",
                     figtext=
-                        str(idx) + " "
-                        + str(group_df.loc[idx, 'address']) + " "
-                        + str(group_df.loc[idx, 'type'])
+                        str(building_id) + " "
+                        + str(group_df.iloc[idx, group_df.columns.get_loc('address')]) + " "
+                        + str(group_df.iloc[idx, group_df.columns.get_loc('type')])
                         + "\nø-spez. Wärmeverbrauch: "
-                        + str(group_df.loc[idx, 'spec_heat_consumption'])
+                        + str(group_df.iloc[idx, group_df.columns.get_loc('spec_heat_consumption')])
                         + ", ø-spez. Stromverbrauch: "
-                        + str(group_df.loc[idx, 'spec_heat_consumption'])
+                        + str(group_df.iloc[idx, group_df.columns.get_loc('spec_heat_consumption')])
                         if devtools.VERBOSE_MODE else "",
                     figsize=(16,12),  # inches
                 )
 
                 # export energy prices graph:
+                building_id = group_df.loc[idx,'id']
                 graphs.export_individual_energy_expenses(
-                    building_idx = idx,
+                    id=building_id,
                     csv_name="/energy_prices/energy_prices_{0}.csv".format(
-                        idx),
+                        building_id),
                     data_folders=self.output_folders,
                     columns=['building_household_expenses_heat',
                             'building_household_expenses_power'],
                     labels_=['Wärmekosten', 'Stromkosten'],
                     outfile=self.current_output_folder +
-                    "/energy_prices/energy_prices_{0}.png".format(idx),
+                    "/energy_prices/energy_prices_{0}.png".format(building_id),
                     title_="Energiekosten pro Haushalt",
                     xlabel_="Jahr",
                     ylabel_="€/Monat",
                     x_='current_date',
                     compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults",
                     figtext=
-                        str(idx) + " "
-                        + str(group_df.loc[idx, 'address']) + " "
-                        + str(group_df.loc[idx, 'type'])
+                        str(building_id) + " "
+                        + str(group_df.iloc[idx, group_df.columns.get_loc('address')]) + " "
+                        + str(group_df.iloc[idx, group_df.columns.get_loc('type')])
                         + "\nø-spez. Wärmeverbrauch: "
-                        + str(group_df.loc[idx, 'spec_heat_consumption'])
+                        + str(group_df.iloc[idx, group_df.columns.get_loc('spec_heat_consumption')])
                         + ", ø-spez. Stromverbrauch: "
-                        + str(group_df.loc[idx, 'spec_heat_consumption'])
+                        + str(group_df.iloc[idx, group_df.columns.get_loc('spec_heat_consumption')])
                         if devtools.VERBOSE_MODE else "",
                     figsize=(16,12),  # inches
                     prepend_historic_data=True,
@@ -460,10 +466,10 @@ class SimulationMode:
                 group_df.at[idx, 'emissions_graphs'] = str(
                     os.path.normpath(
                        session.modes['simulation'].current_output_folder[session.modes['simulation'].current_output_folder.find('data'):]
-                    + '/emissions/CO2_emissions_{0}.png').format(idx))
+                    + '/emissions/CO2_emissions_{0}.png').format(building_id))
                 group_df.at[idx, 'energy_prices_graphs'] = str(
                    session.modes['simulation'].current_output_folder[session.modes['simulation'].current_output_folder.find('data'):]
-                    + '/energy_prices/energy_prices_{0}.png'.format(idx))
+                    + '/energy_prices/energy_prices_{0}.png'.format(building_id))
 
                 session.buildings.df.update(group_df)
                 

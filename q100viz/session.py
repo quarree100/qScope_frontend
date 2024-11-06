@@ -103,8 +103,13 @@ for root, dirs, files in os.walk(DATA_ABS_PATH+'/scenarios'):
         if file.endswith('.csv'):
             scenarios.append(os.path.join(root, file))
 
+print("scenarios:", scenarios)
+devtools.log += "found scenario files:"
+for scenario in scenarios:
+    devtools.log += scenario
 # TODO: let user select scenario
-scenario_data = pd.read_csv(scenarios[0]).set_index("name")
+scenario_data = pd.read_csv(scenarios[-1]).set_index("name")
+devtools.log += f"loading scenario {scenario_data}"
 
 # ---------------------------- simulation -----------------------------
 min_connection_year = config['SIMULATION_FORCE_START_YEAR']

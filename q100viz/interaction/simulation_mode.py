@@ -247,7 +247,7 @@ class SimulationMode:
         data_view_neighborhood_df = pandas.DataFrame(data=dataview_wrapper)
         session.api.send_dataframe_as_json(data_view_neighborhood_df)
 
-        session.active_mode = session.individual_data_view  # marks total_data_view_mode to be started in main thread
+        session.active_mode = session.modes['individual_data_view']  # marks total_data_view_mode to be started in main thread
 
     ########################### frontend input ########################
     def process_event(self, event):
@@ -472,4 +472,4 @@ class SimulationMode:
         msg = msg.replace("'", "\"")
         json_object = json.loads(msg)
         self.progress = "{0}%".format(int(0.5 + json_object['step'] / self.final_step * 100))
-        self.send_message(json.dumps(json.loads(msg)))                
+        session.api.send_message(json.dumps(json.loads(msg)))                

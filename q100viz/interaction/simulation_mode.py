@@ -15,9 +15,9 @@ from q100viz.devtools import devtools as devtools
 class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
-        self.activation_buffer_time = 4  # seconds before simulation begins
 
         self.running = False
+        self.initialization_failed = False
         self.progress = "0%"
 
         self.cwd = os.getcwd()  # hold current working directory to return to later
@@ -49,21 +49,14 @@ class SimulationMode:
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
 
         session.environment['mode'] = self.name
-        for mode in session.modes:
-            mode.waiting_to_start = False
 
         self.progress = "0%"
 
-        # disable interface:
-        for grid in session.grid_1, session.grid_2:
-            for slider in grid.sliders.values():
-                slider.show_text = False
-                slider.show_controls = False
         # show GIS layer:
         session.show_basemap = True
         session.show_polygons = True
 
-        session.api.send_dict()
+        session.api.send_dict(session.environment)
 
         # start simulation:
         self.running = True
@@ -80,7 +73,7 @@ class SimulationMode:
         # --------------------- final simulation step -----------------
         # derive final step from defined simulation runtime:
         if config['SIMULATION_FORCE_END_YEAR'] == 0:
-            runtime = pandas.read_csv('../data/includes/csv-data_technical/initial_variables.csv',
+            runtime = pandas.read_csv(config['SIMULATION_INITIAL_VARIABLES'],
                                       index_col='var').loc['model_runtime_string', 'value']
             self.max_year = int(runtime[-4:])  # last four digits of model_runtime_string
             self.final_step = ((self.max_year + 1 - 2020) * 365) + int((self.max_year - 2020)/4) # num of days including leapyears 2020, 2024, 2028, 2032, 2036, 2040, 2044
@@ -158,7 +151,7 @@ class SimulationMode:
             connection_date = random.randint(2020, self.max_year) if session.debug_connection_date > 0 else False
             devtools.mark_random_buildings_for_simulation(session.buildings.df, session.debug_num_of_random_buildings, connection_to_heat_grid=connection_date, refurbished=session.debug_refurb_year, save_energy=session.debug_force_save_energy)
 
-        session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
+        session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
 
         ################# export buildings_clusters to csv ############
         clusters_outname = self.current_output_folder + '/buildings_clusters_{0}.csv'.format(str(self.timestamp))  # TODO: remove timestamp
@@ -206,10 +199,10 @@ class SimulationMode:
             for idx in session.buildings.df.index:
                 session.buildings.df.at[idx, 'emissions_graphs'] = "../data/precomputed/simulation_defaults/emissions/CO2_emissions_{0}.png".format(idx)
                 session.buildings.df.at[idx, 'energy_prices_graphs'] = "../data/precomputed/simulation_defaults/energy_prices/energy_prices_{0}.png".format(idx)
-            session.api.send_message(json.dumps(session.buildings.get_dict_with_api_wrapper()))
+            session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
 
         self.run_script(self.xml_path)
-        session.api.send_message(json.dumps({'step' : self.final_step-1}))  # simulation done
+        session.api.send_message_as_json({'step' : self.final_step-1})  # simulation done
 
         if self.flag_create_graphs:
             try:
@@ -238,7 +231,7 @@ class SimulationMode:
                 for file_name in os.listdir(self.current_output_folder + '/emissions')
         ]
 
-        ## send GAMA image paths to infoscreen (per iteration round!) #
+        # send GAMA image paths to infoscreen (per iteration round!) #
         dataview_wrapper = ['' for i in range(session.num_of_rounds)]
         for i in range(session.num_of_rounds):
             images_and_data = {'iteration_round': i,
@@ -258,48 +251,29 @@ class SimulationMode:
 
     ########################### frontend input ########################
     def process_event(self, event):
-        if event.type == pygame.locals.MOUSEBUTTONDOWN:
-            session.grid_1.mouse_pressed(event.button)
-            session.grid_2.mouse_pressed(event.button)
-            session.flag_export_canvas = True
-
-            self.process_grid_change()
-
-    ############################# grid changes ########################
-    def process_grid_change(self):
         pass
-
-    def update(self):
-        pass
-
+    
     ################################ draw #############################
     def draw(self, canvas):
 
-        try:
-            # highlight selected buildings (draws colored stroke on top)
-            if len(session.buildings.df[session.buildings.df.selected]):
+        # draw GIS layers:
+        if session.show_polygons:
+            session._gis.draw_linestring_layer(
+                canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
+            session._gis.draw_buildings_connections(
+                session.buildings.df)  # draw lines to closest heat grid
 
-                sel_buildings = session.buildings.df[(session.buildings.df.selected)]
-                for building in sel_buildings.to_dict('records'):
-                    fill_color = pygame.Color(session.user_colors[int(building['group'])])
+            session._gis.draw_polygon_layer(
+                surface=canvas, 
+                df=session.buildings.df[(session.buildings.df['connection_to_heat_grid']) | (session.buildings.df['group'] >= 0)],
+                stroke=0
+                )
 
-                    points = session._gis.surface.transform(building['geometry'].exterior.coords)
-                    pygame.draw.polygon(session._gis.surface, fill_color, points, 2)
-
-        except Exception as e:
-                print("Cannot draw frontend:", e)
-                devtools.log += "\nCannot draw frontend: %s" % e
-
-        font = pygame.font.SysFont('Arial', 18)
-        nrows = 22
-
-        column = 20
-        row = 17
         font = pygame.font.SysFont('Arial', 18)
         canvas.blit(font.render(
             session.modes['simulation'].progress, True, pygame.Color(255,255,255)),
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
-            session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
+            (session.frontend.side_panel.bounding_box.centerx,
+            session.frontend.side_panel.bounding_box.bottom - 30),
         )
 
     ########################### script: prepare #######################
@@ -334,9 +308,13 @@ class SimulationMode:
         xml = '\n'.join(xml_temp)
 
         # export xml
-        if os.path.isdir(self.current_output_folder) is False:
-            os.makedirs(self.current_output_folder)
-        os.chdir(self.headless_folder)  # change working directory temporarily
+        try:
+            if os.path.isdir(self.current_output_folder) is False:
+                os.makedirs(self.current_output_folder)
+            os.chdir(self.headless_folder)  # change working directory temporarily
+        except Exception as e:
+            print("Cannot start simulation!", e)
+            session.flag_mockup_mode = True
 
         # print(xml)
         f = open(xml_output_path, 'w')
@@ -488,3 +466,10 @@ class SimulationMode:
                     + '/energy_prices/energy_prices_{0}.png'.format(idx))
 
                 session.buildings.df.update(group_df)
+                
+    def forward_gama_message(self, msg):
+        '''formats gama simulation status message to percentage and forwards it to the infoscreen via send_message()'''
+        msg = msg.replace("'", "\"")
+        json_object = json.loads(msg)
+        self.progress = "{0}%".format(int(0.5 + json_object['step'] / self.final_step * 100))
+        self.send_message(json.dumps(json.loads(msg)))                

@@ -32,9 +32,9 @@ class Buildings:
                 'Kataster_E': 'string',  # Energieträger
                 'Kataster_A': 'string',  # Gebäudetyp
                 'Kataster_W' : 'int'
-                }).set_index('Kataster_C')
+                })
 
-        self.df.index.names = ['id']
+        # self.df.index.names = ['id']
 
         self.df['address'] = self.df['Kataster_S'] + ' ' + self.df['Kataster_H']
         self.df = self.df.drop('Kataster_S', axis=1)

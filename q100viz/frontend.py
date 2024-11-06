@@ -3,6 +3,7 @@ import os
 import threading
 import datetime
 import shutil
+import numpy
 import cProfile
 
 import pygame
@@ -14,7 +15,6 @@ from q100viz.settings.config import config
 from q100viz.interaction.SidePanel import SidePanel
 from q100viz.devtools import devtools as devtools
 from q100viz.graphics.graphictools import Icon
-from infoscreen.server import init_server
 import infoscreen.api as api
 
 
@@ -26,7 +26,7 @@ class Frontend:
         # window position (must be set before pygame.init!)
         if not run_in_main_window:
             os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (
-                2000, 2560)  # projection to the right
+                0, 1200)  # projection to the right
 
         # Initialize program
         pygame.init()
@@ -55,10 +55,10 @@ class Frontend:
             [200, -50], [0, -50]]
 
         ############# UDP server for incoming gama messages ###########
-        http_thread = threading.Thread(
-            target=init_server,
-            args=[config['HTTP_SERVER_PORT'], config['UDP_SERVER_PORT']],
-            daemon=True)
+        # http_thread = threading.Thread(
+        #     target=init_server,
+        #     args=[config['HTTP_SERVER_PORT'], config['UDP_SERVER_PORT']],
+        #     daemon=True)
         # http_thread.start()
         
         io = 'http://localhost:' + str(config['UDP_SERVER_PORT'])  # Socket.io
@@ -214,8 +214,10 @@ class Frontend:
             self.canvas.blit(session.basemap.image, (0, 0),
                              (0, 0, crop_width, crop_height))
 
+        self.side_panel.draw(session.viewport)
+
         if session.show_polygons:
-            self.canvas.blit(session._gis.surface, (0, 0))            
+            self.canvas.blit(session._gis.surface, (0, 0))  
 
         ########################## DATA PROCESSING ########################
 

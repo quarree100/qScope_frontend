@@ -88,8 +88,6 @@ emissions_data_paths = ['' for n in range(num_of_rounds)]
 #-------------------------- global variables: -------------------------
 buildings = q100viz.buildings.Buildings()
 
-scenario_selected_buildings = pd.DataFrame()
-
 # list of possible handles
 MODE_SELECTOR_HANDLES = ['start_individual_data_view', 'start_total_data_view', 'start_buildings_interaction', 'start_simulation']
 # columns exported from buildings.df for communication with GAMA and Infoscreen. ATTENTION: When this is changed, make sure to change it in GAMA and infoscreen likewise!

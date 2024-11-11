@@ -245,7 +245,7 @@ class Buildings:
         
         if idx == 0: return
         
-        self.df.loc[:idx, 'connection_to_heat_grid'] = True
+        self.df.at[:idx, 'connection_to_heat_grid'] = True
 
         session.environment['scenario_num_connections'] = len(self.df[self.df['connection_to_heat_grid']])
 

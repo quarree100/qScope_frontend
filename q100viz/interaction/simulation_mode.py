@@ -44,6 +44,9 @@ class SimulationMode:
         self.export_neighborhood_graphs_only = False
 
         self.xml = None
+        self.model_file = os.path.normpath(
+            os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
+
 
     def activate(self):
         '''do not call! This function is automatically called in main loop. Instead, enable a mode by setting session.active_mode = session.[mode]'''
@@ -60,7 +63,6 @@ class SimulationMode:
 
         # start simulation:
         self.running = True
-        self.model_file = None
         simulation_thread = threading.Thread(target=session.modes['simulation'].run, args=[devtools.test_run], daemon=True)
         simulation_thread.start()
 
@@ -92,10 +94,6 @@ class SimulationMode:
         # increase round counter to globally log q-scope iterations:
         session.environment['current_iteration_round'] = (
             session.environment['current_iteration_round'] + 1) % session.num_of_rounds
-
-        # ------------------------- model file setup ------------------
-        self.model_file = os.path.normpath(
-            os.path.join(self.cwd, config['GAMA_MODEL_FILE']))
 
         # --------------------- set output folder: --------------------
         self.current_output_folder = os.path.normpath(self.output_folder + '/round' + str(session.environment['current_iteration_round']))
@@ -160,19 +158,7 @@ class SimulationMode:
         if not os.path.isdir(self.current_output_folder):
             os.makedirs(self.current_output_folder)
 
-        # filter already selected buildings from list:
-        try:
-            session.scenario_selected_buildings = session.scenario_selected_buildings[session.scenario_selected_buildings['group'] < 0]
-            # for group_df in session.buildings.list_from_groups():
-            #     if group_df is not None:
-            #         for idx in group_df.index:
-            #             if idx in session.scenario_selected_buildings.index:
-            #                 session.scenario_selected_buildings = session.scenario_selected_buildings.drop(idx)
-        except Exception as e:
-            print("cannot filter scenario list", e)
-            devtools.log += "\nCannot filter scenario list: %s" % e
-
-        selected_buildings = pandas.concat([session.buildings.df[session.buildings.df.selected], session.scenario_selected_buildings])
+        selected_buildings = pandas.concat([session.buildings.df[session.buildings.df['connection_to_heat_grid']], session.buildings.df[session.buildings.df['group'] >= 0]])
         selected_buildings[['id', 'spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'group']].to_csv(clusters_outname, index=False)
 
         # send final_step to infoscreen:
@@ -199,8 +185,8 @@ class SimulationMode:
         if session.environment['current_iteration_round'] == 0:
             df = session.buildings.df
             for idx in session.buildings.df.index:
-                df.iat[idx, df.columns.get_loc('emissions_graphs')] = "../data/precomputed/simulation_defaults/emissions/CO2_emissions_{0}.png".format(df.iloc[idx, df.columns.get_loc('id')])
-                df.iat[idx, df.columns.get_loc('energy_prices_graphs')] = "../data/precomputed/simulation_defaults/energy_prices/energy_prices_{0}.png".format(df.iloc[idx, df.columns.get_loc('id')])
+                df.iat[idx, df.columns.get_loc('emissions_graphs')] = f"{config['DATA_ABS_PATH']}/precomputed/simulation_defaults/emissions/CO2_emissions_{df.iloc[idx, df.columns.get_loc('id')]}.png"
+                df.iat[idx, df.columns.get_loc('energy_prices_graphs')] = f"{config['DATA_ABS_PATH']}/precomputed/simulation_defaults/energy_prices/energy_prices_{df.iloc[idx, df.columns.get_loc('id')]}.png"
             session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
 
         self.run_script(self.xml_path)
@@ -274,9 +260,9 @@ class SimulationMode:
 
         font = pygame.font.SysFont('Arial', 18)
         canvas.blit(font.render(
-            session.modes['simulation'].progress, True, pygame.Color(255,255,255)),
+            str(self.progress), True, pygame.Color(255,255,255)),
             (session.frontend.side_panel.bounding_box.centerx,
-            session.frontend.side_panel.bounding_box.centery - 30),
+            session.frontend.side_panel.bounding_box.bottom - 30),
         )
 
     ########################### script: prepare #######################
@@ -370,7 +356,7 @@ class SimulationMode:
         #     ylabel_="$CO_{2}$-Äquivalente (t)",
         #     x_='current_date',
         #     convert_grams_to_tons=True,
-        #     compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults"
+        #     compare_data_folder=f"{config['DATA_ABS_PATH']}/precomputed/simulation_defaults"
         # )
         graphs.export_neighborhood_emissions_connections(
             emissions_file=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.csv",
@@ -391,8 +377,8 @@ class SimulationMode:
             ylabel_="Preis (ct/kWh)",
             x_='current_date',
             label_show_iteration_round=False,
-            prepend_data=self.output_folder + "/../../data_pre-simulation/energy-prices_hh_2011-2022.csv"
-            # compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults"
+            prepend_data=f"{config['DATA_ABS_PATH']}/data_pre-simulation/energy-prices_hh_2011-2022.csv"
+            # compare_data_folder=f"{config['DATA_ABS_PATH']}/precomputed/simulation_defaults"
         )
 
         ########## individual buildings data ########
@@ -419,15 +405,15 @@ class SimulationMode:
                     ylabel_="$CO_{2}$-Äquivalente (kg/Monat)",  # TODO: t/Jahr
                     x_='current_date',
                     convert_grams_to_kg=True,
-                    compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults",
+                    compare_data_folder=f"{config['DATA_ABS_PATH']}/precomputed/simulation_defaults",
                     figtext=
                         str(building_id) + " "
-                        + str(group_df.iloc[idx, group_df.columns.get_loc('address')]) + " "
-                        + str(group_df.iloc[idx, group_df.columns.get_loc('type')])
+                        + str(group_df.loc[idx, 'address']) + " "
+                        + str(group_df.loc[idx, 'type'])
                         + "\nø-spez. Wärmeverbrauch: "
-                        + str(group_df.iloc[idx, group_df.columns.get_loc('spec_heat_consumption')])
+                        + str(group_df.loc[idx, 'spec_heat_consumption'])
                         + ", ø-spez. Stromverbrauch: "
-                        + str(group_df.iloc[idx, group_df.columns.get_loc('spec_heat_consumption')])
+                        + str(group_df.loc[idx, 'spec_heat_consumption'])
                         if devtools.VERBOSE_MODE else "",
                     figsize=(16,12),  # inches
                 )
@@ -448,15 +434,15 @@ class SimulationMode:
                     xlabel_="Jahr",
                     ylabel_="€/Monat",
                     x_='current_date',
-                    compare_data_folder=self.current_output_folder + "/../../../precomputed/simulation_defaults",
+                    compare_data_folder=f"{config['DATA_ABS_PATH']}/precomputed/simulation_defaults",
                     figtext=
                         str(building_id) + " "
-                        + str(group_df.iloc[idx, group_df.columns.get_loc('address')]) + " "
-                        + str(group_df.iloc[idx, group_df.columns.get_loc('type')])
+                        + str(group_df.loc[idx,'address']) + " "
+                        + str(group_df.loc[idx,'type'])
                         + "\nø-spez. Wärmeverbrauch: "
-                        + str(group_df.iloc[idx, group_df.columns.get_loc('spec_heat_consumption')])
+                        + str(group_df.loc[idx,'spec_heat_consumption'])
                         + ", ø-spez. Stromverbrauch: "
-                        + str(group_df.iloc[idx, group_df.columns.get_loc('spec_heat_consumption')])
+                        + str(group_df.loc[idx,'spec_heat_consumption'])
                         if devtools.VERBOSE_MODE else "",
                     figsize=(16,12),  # inches
                     prepend_historic_data=True,

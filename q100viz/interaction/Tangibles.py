@@ -1,0 +1,93 @@
+import numpy
+from pythontuio import TuioListener, Cursor, Object
+import pygame
+import q100viz.session as session
+from q100viz.settings.config import config
+
+
+class Tuio_Listener(TuioListener):
+
+    def add_tuio_cursor(self, cursor: Cursor):
+        print(
+            f"Neuer Cursor hinzugefügt: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}")
+
+    def update_tuio_cursor(self, cursor: Cursor):
+        print(f"Cursor aktualisiert: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}")
+        # print(cursor.get_message())
+
+    def remove_tuio_cursor(self, cursor: Cursor):
+        print(f"Cursor entfernt: ID={cursor.session_id}")
+
+    def add_tuio_object(self, object: Object):
+        print(
+            f"Neues Tangible hinzugefügt: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}")
+        if object.class_id >= 0: session.tangibles[object.class_id] = Tangible(object)
+
+    def update_tuio_object(self, object: Object):
+        # print(f"Object aktualisiert: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}, angle={object.angle}")
+        # print(object.get_message())
+        session.tangibles[object.class_id].update(object)
+        print(session.tangibles.keys())
+
+    def remove_tuio_object(self, object: Object):
+        print(f"Object entfernt: ID={object.class_id}")
+        if session.tangibles[object.class_id]: del session.tangibles[object.class_id]
+
+
+class Tangible:
+    def __init__(self, object):
+        self.surface = pygame.Surface((500, 500), pygame.SRCALPHA).convert_alpha()
+        self.bounding_box = pygame.Rect(0,0, self.surface.get_width(), self.surface.get_height())
+
+        self.update(object)
+
+    def update(self, object):
+
+        self.id = object.class_id
+        self.position = (
+            object.position[0] * config['CANVAS_SIZE'][0],
+            object.position[1] * config['CANVAS_SIZE'][1]
+        )
+
+        self.angle = numpy.rad2deg(object.angle)
+        print(self.id, self.position, self.angle)
+
+    def draw(self, canvas):
+        pass
+    
+    def draw_verbose(self, canvas):
+        self.surface.fill((0,0,0,0))
+
+        cx, cy = self.bounding_box.center
+        
+        pygame.draw.circle(
+            surface=self.surface,
+            color=pygame.Color(255, 255, 255),
+            center=self.surface.get_rect().center,
+            radius=20,
+            width=1
+        )
+
+        pygame.draw.line(
+            self.surface,
+            (255, 255, 255),
+            start_pos=(cx - 20, cy),
+            end_pos=(cx + 20, cy)
+        )
+        pygame.draw.line(
+            self.surface,
+            (255, 255, 255),
+            start_pos=(cx, cy + 20),
+            end_pos=(cx, cy - 20)
+        )
+
+        font = pygame.font.SysFont('Arial', 16)
+        text = font.render(
+            f"ID {self.id}: ({int(self.position[0])}, {int(self.position[1])}) | r: {int(self.angle)}°", True, pygame.Color(255, 255, 255))
+        
+        self.surface.blit(text, (cx, cy))
+
+        rotated = pygame.transform.rotate(self.surface, self.angle)
+        pos = rotated.get_rect(center = self.surface.get_rect(center = self.position).center)
+        canvas.blit(rotated, pos)
+

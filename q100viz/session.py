@@ -44,6 +44,7 @@ global_alpha = 0
 
 icons = {}
 popup_menus = {}
+tangibles = {}
 
 #------------------------------ interaction ---------------------------
 num_of_rounds = config['NUM_OF_ROUNDS']  # max num of rounds; will repeat after this

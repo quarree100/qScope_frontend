@@ -9,10 +9,13 @@ import cProfile
 import pygame
 import pygame.locals
 
+from pythontuio import TuioClient
+
 import q100viz.udp as udp
 import q100viz.session as session
 from q100viz.settings.config import config
 from q100viz.interaction.SidePanel import SidePanel
+from q100viz.interaction.Tangibles import Tuio_Listener, Tangible
 from q100viz.devtools import devtools as devtools
 from q100viz.graphics.graphictools import Icon
 import infoscreen.api as api
@@ -74,6 +77,14 @@ class Frontend:
                 ),
             daemon=True)
         udp_thread.start()
+        
+        tuio_listener = Tuio_Listener()
+        
+        tuio_client = TuioClient(("localhost", 3333))
+        tuio_thread = threading.Thread(target=tuio_client.start, daemon=True)
+        tuio_client.add_listener(tuio_listener)
+        
+        tuio_thread.start()
         
         session.icons = {
             'start_simulation': Icon("images/start_simulation.png"),
@@ -227,6 +238,10 @@ class Frontend:
         #     pygame.draw.circle(session.viewport, (255,255,255), pygame.mouse.get_pos(), 15)
 
         self.side_panel.draw(session.viewport)
+        
+        for tangible in session.tangibles.values():
+            tangible.draw(session.viewport)
+            if devtools.VERBOSE_MODE: tangible.draw_verbose(session.viewport)
         
         if self.display_viewport:
             self.canvas.blit(session.viewport, (0, 0))

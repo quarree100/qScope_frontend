@@ -16,7 +16,7 @@ class Slider:
         self.value = 0
         self.previous_value = 0
         self.idx = id
-        self.bounding_box = pygame.Rect()
+        self.bounding_box = pygame.Rect((0,0), (1,1))
         self.show_text = True  # display slider control text on grid
         self.show_controls = True
 

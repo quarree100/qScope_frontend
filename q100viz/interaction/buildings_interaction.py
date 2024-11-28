@@ -90,12 +90,9 @@ class Buildings_Interaction:
                             displace=(0, 200),
                             idx=idx
                         )
-                        buildings.at[idx, 'popup'] = popup
-                        session.popup_menus[idx] = popup
 
                 else:  # deselect
-                    buildings.at[idx, 'popup'] = None
-                    del session.popup_menus[idx]
+                    buildings.at[idx, 'popup'].destroy()
                     if buildings.loc[idx, 'group'] >= 0:
                         # make group available again
                         session.group_available[buildings.loc[idx,'group']] = True
@@ -117,12 +114,6 @@ class Buildings_Interaction:
                 canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
             session._gis.draw_buildings_connections(
                 session.buildings.df)  # draw lines to closest heat grid
-
-            # session._gis.draw_polygon_layer(
-            #     surface=canvas, 
-            #     df=session.buildings.df, 
-            #     stroke=0
-            #     )
             
             # fill interactive:
             session._gis.draw_polygon_layer_bool(

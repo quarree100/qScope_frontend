@@ -1,9 +1,12 @@
 import numpy
-from pythontuio import TuioListener, Cursor, Object
+import shapely
 import pygame
+
+from pythontuio import TuioListener, Cursor, Object
+
 import q100viz.session as session
 from q100viz.settings.config import config
-
+from q100viz.interaction.PopupMenu import TangibleMenu
 
 class Tuio_Listener(TuioListener):
 
@@ -38,6 +41,7 @@ class Tangible:
     def __init__(self, object):
         self.surface = pygame.Surface((500, 500), pygame.SRCALPHA).convert_alpha()
         self.bounding_box = pygame.Rect(0,0, self.surface.get_width(), self.surface.get_height())
+        self.sel_idx = None  # index of currently selected building
 
         self.update(object)
 
@@ -51,6 +55,12 @@ class Tangible:
 
         self.angle = numpy.rad2deg(object.angle)
         print(self.id, self.position, self.angle)
+        self.process_event()
+        
+        # update rotation of popup:
+        if not self.sel_idx: return
+        session.popup_menus[self.sel_idx].current_rotation = session.popup_menus[self.sel_idx].start_rotation - self.angle
+        print(session.popup_menus[self.sel_idx].current_rotation)
 
     def draw(self, canvas):
         pass
@@ -91,3 +101,34 @@ class Tangible:
         pos = rotated.get_rect(center = self.surface.get_rect(center = self.position).center)
         canvas.blit(rotated, pos)
 
+    def process_event(self):
+        buildings = session.buildings.df
+        if self.sel_idx:
+            # leave:
+            if not shapely.Point(self.position).within(shapely.geometry.Polygon(buildings.loc[self.sel_idx, 'polygon'])):
+                buildings.at[self.sel_idx, 'selected'] = False
+                buildings.at[self.sel_idx, 'group'] = -1
+                session.popup_menus[self.sel_idx].destroy()
+                self.sel_idx = None
+                return
+            else:
+                return
+        
+        # no building selected:
+        for idx, row in enumerate(buildings.index):
+            if shapely.Point(self.position).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
+                self.sel_idx = idx
+
+                buildings.at[idx, 'selected'] = True
+                buildings.at[idx, 'group'] = self.id % 4
+                centroid = shapely.geometry.Polygon(
+                    buildings.loc[idx, 'polygon']).centroid.coords[0]
+                popup = TangibleMenu(
+                    session.viewport,
+                    centroid,
+                    displace=(0, 200),
+                    idx=idx,
+                    start_rotation=self.angle
+                )
+                
+                return

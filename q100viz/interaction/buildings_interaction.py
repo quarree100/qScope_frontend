@@ -8,7 +8,7 @@ import datetime
 import q100viz.session as session
 from q100viz.devtools import devtools
 from q100viz.settings.config import config
-from q100viz.interaction.PopupMenu import PopupMenu
+from q100viz.interaction.PopupMenu import TouchMenu
 
 
 class Buildings_Interaction:
@@ -84,7 +84,7 @@ class Buildings_Interaction:
                         # create popup menu:
                         centroid = shapely.geometry.Polygon(
                             buildings.loc[idx, 'polygon']).centroid.coords[0]
-                        popup = PopupMenu(
+                        popup = TouchMenu(
                             session.viewport,
                             centroid,
                             displace=(0, 200),

@@ -1,9 +1,10 @@
+import numpy as np
 import pygame
 from q100viz.graphics.graphictools import Icon
 from q100viz.interaction.Slider import Slider
 import q100viz.session as session
 
-class PopupMenu:
+class TouchMenu:
     def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False):
         
         session.buildings.df.at[idx, 'popup'] = self
@@ -256,3 +257,29 @@ class PopupMenu:
         del session.popup_menus[self.idx]
 
 
+class TangibleMenu(TouchMenu):
+    
+    def __init__(self, surface, origin, rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False, start_rotation=0):
+        super().__init__(surface, origin, rect_dim, displace, idx, draw_border)
+        self.alpha = 0
+        self.start_rotation = start_rotation
+        self.current_rotation = start_rotation
+
+    def draw(self):
+        if self.alpha < 200:
+            self.alpha = min(self.alpha + 75, 200)
+
+        # draw indication line:
+        for rot in [45, 90, 135]:
+            radius = np.linalg.norm(self.displace)
+            x = self.origin[0] + np.cos(np.deg2rad(rot + self.current_rotation))* radius / 2
+            y = self.origin[1] + np.sin(np.deg2rad(rot + self.current_rotation)) * radius / 2
+            pygame.draw.line(
+                self.surface,
+                pygame.Color(
+                    self.colors["user"].r,
+                    self.colors["user"].g,
+                    self.colors["user"].b,
+                    self.alpha),
+                self.origin, (x, y), 4
+            )

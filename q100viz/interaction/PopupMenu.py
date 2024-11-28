@@ -5,6 +5,9 @@ import q100viz.session as session
 
 class PopupMenu:
     def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False):
+        
+        session.buildings.df.at[idx, 'popup'] = self
+        session.popup_menus[idx] = self
 
         self.icons = {
             'start_simulation': Icon("images/start_simulation.png"),
@@ -19,7 +22,7 @@ class PopupMenu:
         self.surface = surface
         self.visible = True
 
-        self.origin = origin
+        self.origin = origin  # usually center of building
         self.bounding_box = pygame.Rect(
             origin[0], origin[1], rect_dim[0], rect_dim[1])
         self.displace = displace
@@ -210,7 +213,7 @@ class PopupMenu:
                 mouse_pos[1] - box.top) for box in self.boxes]
             return
         
-        # open slider:
+        # decision buttons:
         for key in self.icons.keys():
             icon = self.icons[key]
             if icon.rect.collidepoint(mouse_pos):
@@ -219,9 +222,9 @@ class PopupMenu:
                         ic.selected = False
                 icon.selected = not icon.selected
                 self.slider.handle = key
+                # open slider / change layout:
                 if key in ["connection_to_heat_grid", "refurbished"]:
                     self.popup_type = "slider"
-                    # reset slider_box layout:
                     self.slider.bounding_box.update(
                         self.bounding_box.left,
                         self.icons_box.bottom,
@@ -229,22 +232,27 @@ class PopupMenu:
                         75)                    
                 elif key in ["save_energy"]:
                     self.popup_type = "switch"
-                    # change slider_box layout:
                     self.slider.bounding_box.width = self.bounding_box.height / 2
                     self.slider.bounding_box.centerx = self.bounding_box.centerx
                     
                 self.slider.process_value(True)
+                return
             
         # switch clicked:
         if self.slider.bounding_box.collidepoint(mouse_pos) and self.popup_type == "switch":
             session.buildings.df.at[self.idx, key] = not session.buildings.df.loc[self.idx, key]
             self.slider.value = 1 if self.slider.value < 0.5 else 0
             self.slider.process_value()
-            print(self.slider.value)
-
                 
     def handle_mouse_motion(self, mouse_pos):       
         if self.popup_type == "slider" and any(ic.selected for ic in self.icons.values()):        
             if self.slider.bounding_box.collidepoint(mouse_pos):
                 self.slider.update_from_interaction(mouse_pos)
                 self.slider.process_value()
+
+    def destroy(self):
+        if not session.buildings.df.at[self.idx, 'popup']: return
+        session.buildings.df.at[self.idx, 'popup'] = None
+        del session.popup_menus[self.idx]
+
+

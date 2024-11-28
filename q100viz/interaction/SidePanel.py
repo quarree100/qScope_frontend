@@ -14,7 +14,11 @@ class SidePanel:
         )
 
         self.slider = Slider(None)
-        self.slider.handle = 'global_connections'     
+        self.slider.handle = 'global_connections'
+        # self.surface = pygame.Surface(
+        #     (self.bounding_box.width,
+        #     self.bounding_box.height)
+        #     )
 
     def draw(self, canvas):
 

@@ -146,6 +146,8 @@ class Frontend:
                 # verbose mode:
                 elif event.key == pygame.locals.K_v:
                     devtools.VERBOSE_MODE = not devtools.VERBOSE_MODE
+                    pygame.mouse.set_visible(devtools.VERBOSE_MODE)
+                    
 
             elif event.type == pygame.locals.QUIT:
                 print("-" * 72)

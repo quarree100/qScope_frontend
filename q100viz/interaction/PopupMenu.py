@@ -266,18 +266,22 @@ class TangibleMenu(TouchMenu):
     def __init__(self, surface, origin, rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False, start_rotation=0):
         super().__init__(surface, origin, rect_dim, displace, idx, draw_border)
         self.alpha = 0
+        self.radius = 0
         self.start_rotation = start_rotation
         self.current_rotation = start_rotation
 
     def draw(self):
         if self.alpha < 200:
             self.alpha = min(self.alpha + 75, 200)
+        radius_target = np.linalg.norm(self.displace) * 0.6
+        if self.radius < radius_target:
+            self.radius = min(self.radius + 50, radius_target)
 
         # draw indication line:
-        for rot in [45, 90, 135]:
-            radius = np.linalg.norm(self.displace)
-            x = self.origin[0] + np.cos(np.deg2rad(rot + self.current_rotation))* radius / 2
-            y = self.origin[1] + np.sin(np.deg2rad(rot + self.current_rotation)) * radius / 2
+        rot = 15
+        for key in session.VALID_DECISION_HANDLES:
+            x = self.origin[0] + np.cos(np.deg2rad(rot + self.current_rotation))* self.radius
+            y = self.origin[1] + np.sin(np.deg2rad(rot + self.current_rotation)) * self.radius
             pygame.draw.line(
                 self.surface,
                 pygame.Color(
@@ -287,3 +291,35 @@ class TangibleMenu(TouchMenu):
                     self.alpha),
                 self.origin, (x, y), 4
             )
+            rot += 75
+
+            # icons:
+            self.icons[key].rect = pygame.Rect(
+                x, y,
+                self.icons[key].image.width,
+                self.icons[key].image.height
+            )
+            self.icons[key].rect.center = (x, y)
+            
+            # highlight if image selected
+            pygame.draw.rect(
+                surface=self.surface,
+                color=self.colors["user"] if self.icons[key].selected else self.colors["interactive"],
+                rect=self.icons[key].rect.scale_by(1.3),
+                border_radius=self.icons[key].rect.width
+            )
+
+            self.surface.blit(
+                self.icons[key].image,
+                self.icons[key].rect.topleft
+            )
+            
+            # info text:
+            font = pygame.font.SysFont('Arial', 20)
+            text = font.render(
+                str(self.slider.human_readable_value[key]), 
+                True,
+                pygame.Color(255, 255, 255)
+            )            
+            
+            self.surface.blit(text, text.get_rect(center=(x, y + 20)))

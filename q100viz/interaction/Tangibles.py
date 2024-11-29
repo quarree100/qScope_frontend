@@ -22,15 +22,16 @@ class Tuio_Listener(TuioListener):
         print(f"Cursor entfernt: ID={cursor.session_id}")
 
     def add_tuio_object(self, object: Object):
-        print(
-            f"Neues Tangible hinzugefügt: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}")
+        print(f"Neues Tangible hinzugefügt: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}")
         if object.class_id >= 0: session.tangibles[object.class_id] = Tangible(object)
 
     def update_tuio_object(self, object: Object):
         # print(f"Object aktualisiert: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}, angle={object.angle}")
         # print(object.get_message())
+        if object.class_id < 0: return
+        if not object.class_id in session.tangibles.keys():
+            session.tangibles[object.class_id] = Tangible(object)
         session.tangibles[object.class_id].update(object)
-        print(session.tangibles.keys())
 
     def remove_tuio_object(self, object: Object):
         print(f"Object entfernt: ID={object.class_id}")
@@ -54,7 +55,6 @@ class Tangible:
         )
 
         self.angle = numpy.rad2deg(object.angle)
-        print(self.id, self.position, self.angle)
         self.process_event()
         
         # update rotation of popup:

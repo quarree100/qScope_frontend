@@ -44,9 +44,7 @@ class Buildings_Interaction:
 
         # 1. check popup hits:
         for popup in [p for p in buildings['popup'] if p]:
-            if popup.bounding_box.collidepoint(mouse_pos):
-                popup.handle_mouse_button(mouse_pos)
-                return
+            if popup.handle_mouse_button(mouse_pos): return
 
         # 2. check building hits:
         for idx, row in enumerate(buildings.index):

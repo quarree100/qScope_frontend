@@ -140,6 +140,7 @@ class PopupMenu:
         
         for i, key in enumerate(session.VALID_DECISION_HANDLES):
 
+            # reset icons rectangle:
             self.icons[key].rect = pygame.Rect(
                 self.icons_box.left + 0.25 * spacing + i * spacing,
                 self.icons_box.top + (self.icons_box.height - self.icons[key].image.height) / 2,
@@ -204,14 +205,14 @@ class PopupMenu:
             self.surface.blit(text, (self.info_box.left + 0.05 * self.info_box.width, self.info_box.centery))
 
 
-    def handle_mouse_button(self, mouse_pos):           
+    def handle_mouse_button(self, mouse_pos):
         # drag
         if self.address_box.collidepoint(mouse_pos):
             self.dragging = True
             self.drag_offset = [(
                 mouse_pos[0] - box.left,
                 mouse_pos[1] - box.top) for box in self.boxes]
-            return
+            return True
         
         # decision buttons:
         for key in self.icons.keys():
@@ -236,13 +237,16 @@ class PopupMenu:
                     self.slider.bounding_box.centerx = self.bounding_box.centerx
                     
                 self.slider.process_value(True)
-                return
+                return True
             
         # switch clicked:
         if self.slider.bounding_box.collidepoint(mouse_pos) and self.popup_type == "switch":
             session.buildings.df.at[self.idx, key] = not session.buildings.df.loc[self.idx, key]
             self.slider.value = 1 if self.slider.value < 0.5 else 0
             self.slider.process_value()
+            return True
+        
+        return False
                 
     def handle_mouse_motion(self, mouse_pos):       
         if self.popup_type == "slider" and any(ic.selected for ic in self.icons.values()):        

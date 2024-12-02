@@ -80,7 +80,7 @@ class Frontend:
         
         tuio_listener = Tuio_Listener()
         
-        tuio_client = TuioClient(("localhost", 3333))
+        tuio_client = TuioClient((config['TUIO_ADDRESS'], config['TUIO_PORT']))
         tuio_thread = threading.Thread(target=tuio_client.start, daemon=True)
         tuio_client.add_listener(tuio_listener)
         
@@ -243,7 +243,8 @@ class Frontend:
         
         for tangible in session.tangibles.values():
             tangible.draw(session.viewport)
-            if devtools.VERBOSE_MODE: tangible.draw_verbose(session.viewport)
+            if devtools.VERBOSE_MODE: 
+                tangible.draw_verbose(session.viewport)
         
         if self.display_viewport:
             self.canvas.blit(session.viewport, (0, 0))

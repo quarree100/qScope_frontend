@@ -12,7 +12,7 @@ class Devtools:
     def print_verbose(self, message):
         if self.VERBOSE_MODE:
                 print(message)
-                self.log += "\n" + message
+                self.log += "\n" + str(message)
                 return message
 
     def mark_random_buildings_for_simulation(self, buildings_df, num_buildings=1, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
@@ -46,10 +46,18 @@ class Devtools:
             buildings_df.update(df)
 
     def print_full_df(self, df):
-            with pandas.option_context('display.max_rows', None,
-                                    'display.max_columns', None,
-                                    'display.precision', 3,
-                                    ):
+            with pandas.option_context(
+                'display.max_rows', None,
+                'display.max_columns', None,
+                'display.precision', 3,
+                ):
                     print(df)
+
+    def print_tangible_info(self):
+
+        print([k for k in session.popup_menus.keys()])
+        print([v.idx for v in session.popup_menus.values()])
+        print([k for k in session.tangibles.keys()])
+        print([v.id for v in session.tangibles.values()])
 
 devtools = Devtools()

@@ -5,38 +5,46 @@ import pygame
 from pythontuio import TuioListener, Cursor, Object
 
 import q100viz.session as session
+from q100viz.devtools import devtools
 from q100viz.settings.config import config
 from q100viz.interaction.PopupMenu import TangibleMenu
 
 class Tuio_Listener(TuioListener):
 
     def add_tuio_cursor(self, cursor: Cursor):
-        print(
+        devtools.print_verbose(
             f"Neuer Cursor hinzugefügt: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}")
 
     def update_tuio_cursor(self, cursor: Cursor):
-        print(f"Cursor aktualisiert: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}")
-        # print(cursor.get_message())
+        devtools.print_verbose(f"Cursor aktualisiert: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}")
+        # devtools.print_verbose(cursor.get_message())
 
     def remove_tuio_cursor(self, cursor: Cursor):
-        print(f"Cursor entfernt: ID={cursor.session_id}")
+        devtools.print_verbose(f"Cursor entfernt: ID={cursor.session_id}")
 
     def add_tuio_object(self, object: Object):
-        print(f"Neues Tangible hinzugefügt: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}")
-        if object.class_id >= 0: session.tangibles[object.class_id] = Tangible(object)
+        devtools.print_verbose(
+            f"Neues Tangible hinzugefügt: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}"
+            )
+
+        if object.class_id >= 0: 
+            session.tangibles[object.class_id] = Tangible(object)
 
     def update_tuio_object(self, object: Object):
-        # print(f"Object aktualisiert: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}, angle={object.angle}")
-        # print(object.get_message())
+        # devtools.print_verbose(f"Object aktualisiert: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}, angle={object.angle}")
+        # devtools.print_verbose(object.get_message())
         if object.class_id < 0: return
         if not object.class_id in session.tangibles.keys():
             session.tangibles[object.class_id] = Tangible(object)
         session.tangibles[object.class_id].update(object)
 
     def remove_tuio_object(self, object: Object):
-        print(f"Object entfernt: ID={object.class_id}")
-        if session.tangibles[object.class_id]: del session.tangibles[object.class_id]
+        devtools.print_verbose(
+            f"Object entfernt: ID={object.class_id}"
+            )
+        if not session.tangibles[object.class_id]: return
 
+        session.tangibles[object.class_id].destroy()
 
 class Tangible:
     def __init__(self, object):
@@ -59,8 +67,8 @@ class Tangible:
         
         # update rotation of popup:
         if not self.sel_idx: return
-        session.popup_menus[self.sel_idx].current_rotation = session.popup_menus[self.sel_idx].start_rotation - self.angle
-        print(session.popup_menus[self.sel_idx].current_rotation)
+        session.popup_menus[self.sel_idx].current_rotation = session.popup_menus[self.sel_idx].start_rotation + self.angle
+        devtools.print_verbose(session.popup_menus[self.sel_idx].current_rotation)
 
     def draw(self, canvas):
         pass
@@ -97,7 +105,7 @@ class Tangible:
         
         self.surface.blit(text, (cx, cy))
 
-        rotated = pygame.transform.rotate(self.surface, self.angle)
+        rotated = pygame.transform.rotate(self.surface, -self.angle)
         pos = rotated.get_rect(center = self.surface.get_rect(center = self.position).center)
         canvas.blit(rotated, pos)
 
@@ -114,7 +122,7 @@ class Tangible:
             else:
                 return
         
-        # no building selected:
+        # building selected:
         for idx, row in enumerate(buildings.index):
             if shapely.Point(self.position).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
                 self.sel_idx = idx
@@ -132,3 +140,10 @@ class Tangible:
                 )
                 
                 return
+
+    def destroy(self):
+        if self.sel_idx:
+            session.buildings.df.at[self.sel_idx, 'selected'] = False
+            session.buildings.df.at[self.sel_idx, 'group'] = -1
+            session.buildings.df.loc[self.sel_idx, 'popup'].destroy()
+        del session.tangibles[self.id]

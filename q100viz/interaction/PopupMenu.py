@@ -273,7 +273,7 @@ class TangibleMenu(TouchMenu):
     def draw(self):
         if self.alpha < 200:
             self.alpha = min(self.alpha + 75, 200)
-        radius_target = np.linalg.norm(self.displace) * 0.6
+        radius_target = np.linalg.norm(self.displace) * 0.8
         if self.radius < radius_target:
             self.radius = min(self.radius + 50, radius_target)
 

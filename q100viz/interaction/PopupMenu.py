@@ -268,7 +268,7 @@ class TangibleMenu(TouchMenu):
         self.alpha = 0
         self.radius = 0
         self.start_rotation = start_rotation
-        self.current_rotation = start_rotation
+        self.current_rotation = 0
 
     def draw(self):
         if self.alpha < 200:
@@ -278,10 +278,10 @@ class TangibleMenu(TouchMenu):
             self.radius = min(self.radius + 50, radius_target)
 
         # draw indication line:
-        rot = 15
+        rot = self.current_rotation + 15
         for key in session.VALID_DECISION_HANDLES:
-            x = self.origin[0] + np.cos(np.deg2rad(rot + self.current_rotation))* self.radius
-            y = self.origin[1] + np.sin(np.deg2rad(rot + self.current_rotation)) * self.radius
+            x = self.origin[0] + np.cos(np.deg2rad(rot)) * self.radius
+            y = self.origin[1] + np.sin(np.deg2rad(rot)) * self.radius
             pygame.draw.line(
                 self.surface,
                 pygame.Color(

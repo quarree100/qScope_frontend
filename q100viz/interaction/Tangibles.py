@@ -67,9 +67,7 @@ class Tangible:
         
         # update rotation of popup:
         if not self.sel_idx: return
-        session.popup_menus[self.sel_idx].current_rotation = session.popup_menus[self.sel_idx].start_rotation + self.angle
-        devtools.print_verbose(session.popup_menus[self.sel_idx].current_rotation)
-
+        session.popup_menus[self.sel_idx].process_rotation(self.angle)
     def draw(self, canvas):
         pass
     

@@ -323,3 +323,25 @@ class TangibleMenu(TouchMenu):
             )            
             
             self.surface.blit(text, text.get_rect(center=(x, y + 20)))
+            
+            # draw pie:
+            if (any([ic.selected for ic in self.icons.values()])):
+                self.draw_pie(self.surface, pygame.Color(255, 0, 0.5), self.origin, self.radius * 0.5, self.current_rotation, self.slider.value * 360, 0.1)
+            
+            
+    def process_rotation(self, angle):
+        if not (any([ic.selected for ic in self.icons.values()])):
+            self.current_rotation = -((self.start_rotation - angle) % 360)
+        else:
+            self.slider.value = 1 - ((self.start_rotation - angle) % 360) / 360
+            self.slider.process_value()
+            print(self.slider.value)
+            
+    def draw_pie(self, surface, color, center, radius, start_angle, stop_angle, step):
+        theta=start_angle
+        while theta <= stop_angle:
+            pygame.draw.line(
+                surface, color, center,
+                (center[0] + radius * np.cos(np.deg2rad(theta)), center[1]+ radius * np.sin(np.deg2rad(theta))),
+                2)
+            theta+=step

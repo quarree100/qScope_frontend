@@ -2,27 +2,37 @@ import numpy
 import shapely
 import pygame
 
-from pythontuio import TuioListener, Cursor, Object
+import pythontuio
 
 import q100viz.session as session
 from q100viz.devtools import devtools
 from q100viz.settings.config import config
 from q100viz.interaction.PopupMenu import TangibleMenu
 
-class Tuio_Listener(TuioListener):
+class Tuio_Listener(pythontuio.TuioListener):
 
-    def add_tuio_cursor(self, cursor: Cursor):
+    def add_tuio_cursor(self, cursor: pythontuio.Cursor):
         devtools.print_verbose(
             f"Neuer Cursor hinzugefügt: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}")
+        session.frontend.handle_mouse_down(cursor.position)
+        session.tangibles['cursor'] = Cursor(cursor)
+        session.frontend.handle_mouse_down(session.tangibles['cursor'].position)
 
-    def update_tuio_cursor(self, cursor: Cursor):
-        devtools.print_verbose(f"Cursor aktualisiert: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}")
-        # devtools.print_verbose(cursor.get_message())
+    def update_tuio_cursor(self, cursor: pythontuio.Cursor):
+        devtools.print_verbose(
+            f"Cursor aktualisiert: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}"
+            )
+        session.tangibles['cursor'].update(cursor)
+        session.frontend.handle_mouse_motion(session.tangibles['cursor'].position)
 
-    def remove_tuio_cursor(self, cursor: Cursor):
+    def remove_tuio_cursor(self, cursor: pythontuio.Cursor):
         devtools.print_verbose(f"Cursor entfernt: ID={cursor.session_id}")
+        session.frontend.handle_mouse_up(cursor.position)
+        session.frontend.handle_mouse_up(session.tangibles['cursor'].position)
+        session.tangibles['cursor'].destroy
 
-    def add_tuio_object(self, object: Object):
+
+    def add_tuio_object(self, object: pythontuio.Object):
         devtools.print_verbose(
             f"Neues Tangible hinzugefügt: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}"
             )
@@ -30,17 +40,21 @@ class Tuio_Listener(TuioListener):
         if object.class_id >= 0: 
             session.tangibles[object.class_id] = Tangible(object)
 
-    def update_tuio_object(self, object: Object):
-        # devtools.print_verbose(f"Object aktualisiert: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}, angle={object.angle}")
+    def update_tuio_object(self, object: pythontuio.Object):
+        # devtools.print_verbose(f"pythontuio.Object aktualisiert: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}, angle={object.angle}")
         # devtools.print_verbose(object.get_message())
+        
         if object.class_id < 0: return
+        
+        # create object if tangible was already on surface:
         if not object.class_id in session.tangibles.keys():
             session.tangibles[object.class_id] = Tangible(object)
+        
         session.tangibles[object.class_id].update(object)
 
-    def remove_tuio_object(self, object: Object):
+    def remove_tuio_object(self, object: pythontuio.Object):
         devtools.print_verbose(
-            f"Object entfernt: ID={object.class_id}"
+            f"pythontuio.Object entfernt: ID={object.class_id}"
             )
         if not session.tangibles[object.class_id]: return
 
@@ -108,6 +122,9 @@ class Tangible:
         canvas.blit(rotated, pos)
 
     def process_event(self):
+        ''' 
+        select/deselect building and create popup OR set intensity of popup.slider
+        '''
         buildings = session.buildings.df
         if self.sel_idx:
             # leave:
@@ -145,3 +162,32 @@ class Tangible:
             session.buildings.df.at[self.sel_idx, 'group'] = -1
             session.buildings.df.loc[self.sel_idx, 'popup'].destroy()
         del session.tangibles[self.id]
+        
+        
+class Cursor(Tangible):
+    
+    def __init__(self, object):
+        self.surface = pygame.Surface((500, 500), pygame.SRCALPHA).convert_alpha()
+        self.bounding_box = pygame.Rect(0,0, self.surface.get_width(), self.surface.get_height())
+        self.sel_idx = None  # index of currently selected building
+
+        self.update(object)
+
+    def update(self, cursor):
+
+        self.id = cursor.session_id
+        self.position = (
+            cursor.position[0] * config['CANVAS_SIZE'][0],
+            cursor.position[1] * config['CANVAS_SIZE'][1]
+        )
+
+        self.angle = 0
+        self.process_event()
+        
+        # update rotation of popup:
+        if not self.sel_idx: return
+        session.popup_menus[self.sel_idx].current_rotation = -((session.popup_menus[self.sel_idx].start_rotation - self.angle) % 360)
+        devtools.print_verbose(str(self.angle) + " " + str(session.popup_menus[self.sel_idx].current_rotation))
+        
+    def process_event(self):
+        pass

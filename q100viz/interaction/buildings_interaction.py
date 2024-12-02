@@ -34,21 +34,17 @@ class Buildings_Interaction:
         session.api.send_dict(session.environment)
         session.api.send_message(json.dumps({'step': 0}))
 
-    def process_event(self, event):
-        if event.type != pygame.locals.MOUSEBUTTONDOWN:
-            return
-
-        mouse_pos = pygame.mouse.get_pos()
+    def process_event(self, event_pos):
 
         buildings = session.buildings.df
 
         # 1. check popup hits:
         for popup in [p for p in buildings['popup'] if p]:
-            if popup.handle_mouse_button(mouse_pos): return
+            if popup.handle_mouse_button(event_pos): return
 
         # 2. check building hits:
         for idx, row in enumerate(buildings.index):
-            if shapely.Point(mouse_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
+            if shapely.Point(event_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
 
                 if not any(session.group_available):
                     # deselect and return:

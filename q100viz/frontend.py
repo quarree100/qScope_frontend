@@ -113,13 +113,12 @@ class Frontend:
 
         # process mouse/keyboard events
         for event in pygame.event.get():
-            session.active_mode.process_event(event)
                 
             if event.type == pygame.locals.MOUSEMOTION:
-                self.handle_mouse_motion()
+                self.handle_mouse_motion(pygame.mouse.get_pos())
 
             elif event.type == pygame.locals.MOUSEBUTTONDOWN:
-                self.handle_mouse_down(event)
+                self.handle_mouse_down(pygame.mouse.get_pos())
 
             elif event.type == pygame.locals.MOUSEBUTTONUP:
                 self.handle_mouse_up(pygame.mouse.get_pos())
@@ -260,34 +259,32 @@ class Frontend:
 
         self.clock.tick(self.FPS)
 
-    def handle_mouse_down(self, event):
-        pass
+    def handle_mouse_down(self, pos):
+        session.active_mode.process_event(pos)
                     
-                                
-    def handle_mouse_motion(self):
-        mouse_pos = pygame.mouse.get_pos()
+    def handle_mouse_motion(self, pos):
         for popup in session.popup_menus.values():
             if popup.dragging:
                 # move the boxes:
                 for b, box in enumerate(popup.boxes):
-                    box.left = mouse_pos[0] - popup.drag_offset[b][0]
-                    box.top = mouse_pos[1] - popup.drag_offset[b][1]
+                    box.left = pos[0] - popup.drag_offset[b][0]
+                    box.top = pos[1] - popup.drag_offset[b][1]
                 return
-            elif popup.bounding_box.collidepoint(mouse_pos):
-                popup.handle_mouse_motion(mouse_pos)
+            elif popup.bounding_box.collidepoint(pos):
+                popup.handle_mouse_motion(pos)
                 return
             
-        if self.side_panel.slider.bounding_box.collidepoint(mouse_pos):
-            self.side_panel.slider.update_from_interaction(mouse_pos)
+        if self.side_panel.slider.bounding_box.collidepoint(pos):
+            self.side_panel.slider.update_from_interaction(pos)
             self.side_panel.slider.process_value()
             
-    def handle_mouse_up(self, mouse_pos):
+    def handle_mouse_up(self, pos):
         for popup in session.popup_menus.values():
             popup.dragging = False
            
         for key in ['start_simulation', 'start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']:
             rect = session.icons[key].rect
-            if rect.collidepoint(mouse_pos):
+            if rect.collidepoint(pos):
                 if session.active_mode == session.modes[key[6:]]: return
                 session.active_mode = session.modes[key[6:]]
                 if session.active_mode is session.modes['simulation']:

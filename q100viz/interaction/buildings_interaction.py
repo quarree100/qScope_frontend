@@ -92,14 +92,6 @@ class Buildings_Interaction:
                         session.group_available[buildings.loc[idx,'group']] = True
                     buildings.at[idx, 'group'] = -1
 
-        # session.api.send_message(json.dumps(session.environment))
-        # session.api.send_message(json.dumps(
-        #     session.buildings.get_dict_with_api_wrapper()))
-
-    def process_grid_change(self):
-
-        return
-
     def draw(self, canvas):
 
         # draw GIS layers:

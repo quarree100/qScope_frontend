@@ -88,6 +88,7 @@ class Frontend:
         
         session.icons = {
             'start_simulation': Icon("images/start_simulation.png"),
+            'start_simulation_disabled': Icon("images/start_simulation_disabled.png"),
             'start_buildings_interaction': Icon("images/start_buildings_interaction.png"),
             'start_individual_data_view': Icon("images/start_individual_data_view.png"),
             'start_total_data_view': Icon("images/start_total_data_view.png"),
@@ -237,8 +238,6 @@ class Frontend:
         #                         pygame.mouse.get_pos()[1]),
         #                        15)
         #     pygame.draw.circle(session.viewport, (255,255,255), pygame.mouse.get_pos(), 15)
-
-        self.side_panel.draw(session.viewport)
         
         for tangible in session.tangibles.values():
             tangible.draw(session.viewport)
@@ -286,6 +285,7 @@ class Frontend:
             rect = session.icons[key].rect
             if rect.collidepoint(pos):
                 if session.active_mode == session.modes[key[6:]]: return
+                if key == 'start_simulation' and len(session.buildings.df[session.buildings.df['selected']]) <= 0: return
                 session.active_mode = session.modes[key[6:]]
                 if session.active_mode is session.modes['simulation']:
                     session.modes['simulation'].setup()

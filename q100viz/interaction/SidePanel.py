@@ -127,15 +127,15 @@ class SidePanel:
                 border_radius=session.icons['start_simulation'].rect.width
             )
 
-        
-        session.icons['start_simulation'].rect = pygame.Rect(
-            self.bounding_box.centerx - 0.5 * session.icons['start_simulation'].image.width,
+        key = 'start_simulation' if len(session.buildings.df[session.buildings.df['selected']]) > 0 else 'start_simulation_disabled'
+        session.icons[key].rect = pygame.Rect(
+            self.bounding_box.centerx - 0.5 * session.icons[key].image.width,
             y,
-            session.icons['start_simulation'].image.width,
-            session.icons['start_simulation'].image.height
+            session.icons[key].image.width,
+            session.icons[key].image.height
         )
             
         canvas.blit(
-            session.icons['start_simulation'].image,
-            session.icons['start_simulation'].rect.topleft,
+            session.icons[key].image,
+            session.icons[key].rect.topleft,
         )            

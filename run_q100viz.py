@@ -45,7 +45,6 @@ if session.environment['mode'] == 'simulation':
         session.modes['simulation'].setup()
     except Exception as e:
         print("cannot initialize simulation", e)
-        session.modes['simulation'].initialization_failed = True
 
 devtools.VERBOSE_MODE = args.verbose  # define verbose level
 config['GAMA_MODEL_FILE'] = '../q100_abm/q100/models/qscope_ABM.gaml' if args.research_model else config['GAMA_MODEL_FILE']

@@ -72,12 +72,11 @@ class Frontend:
         udp_server = udp.UDPServer(
             'localhost', config['UDP_SERVER_PORT'], 4096)
         udp_thread = threading.Thread(
-            target=udp_server.listen,args=(
-                session.modes['simulation'].forward_gama_message,
-                ),
+            target=udp_server.listen, args=(api.forward_gama_message,),
             daemon=True)
         udp_thread.start()
         
+        # tuio:
         tuio_listener = Tuio_Listener()
         
         tuio_client = TuioClient((config['TUIO_ADDRESS'], config['TUIO_PORT']))
@@ -150,7 +149,6 @@ class Frontend:
                         session.modes['simulation'].setup()
                     except Exception as e:
                         print("cannot initialize simulation", e)
-                        session.modes['simulation'].initialization_failed = True
                     session.active_mode = session.modes['simulation']
                 elif event.key == pygame.locals.K_8:
                     session.active_mode = session.individual_data_view
@@ -296,9 +294,6 @@ class Frontend:
                         pass
                     except Exception as e:
                         print("cannot initialize simulation", e)
-                        session.modes['simulation'].initialization_failed = True
             
         session.api.send_dict(session.environment)
         session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
-            
-            

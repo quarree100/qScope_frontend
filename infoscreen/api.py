@@ -6,6 +6,7 @@ import socketio
 from q100viz.devtools import devtools
 import datetime
 from q100viz.settings.config import config
+import q100viz.session as session
 
 class API:
     def __init__(self, socket_addr):
@@ -61,7 +62,7 @@ class API:
             else:
                 result[key] = value
         self.send_message(json.dumps(result, ensure_ascii=False))
-        
+                
 def append_csv(file, df, cols):
     """Open data from CSV and join them with a GeoDataFrame based on osm_id."""
     values = pandas.read_csv(
@@ -72,3 +73,11 @@ def export_json(df, outfile=None):
     """Export a dataframe to JSON file. This is necessary to transform GeoDataFrames into a JSON serializable format"""
     return pandas.DataFrame(df).to_json(
         outfile, orient='records', force_ascii=False, default_handler=str)
+
+def forward_gama_message(msg):
+    '''formats gama simulation status message to percentage and forwards it to the infoscreen via send_message()'''
+    print("receive", msg)
+    msg = msg.replace("'", "\"")
+    json_object = json.loads(msg)
+    session.modes['simulation'].progress = "{0}%".format(int(0.5 + json_object['step'] / session.modes['simulation'].final_step * 100))
+    session.api.send_message(json.dumps(json.loads(msg)))   

@@ -17,8 +17,8 @@ class SimulationMode:
         self.name = 'simulation'
 
         self.running = False
-        self.initialization_failed = False
         self.progress = "0%"
+        self.fail_message = ""  # returns message if not successful
 
         self.cwd = os.getcwd()  # hold current working directory to return to later
 
@@ -158,8 +158,12 @@ class SimulationMode:
         if not os.path.isdir(self.current_output_folder):
             os.makedirs(self.current_output_folder)
 
-        selected_buildings = pandas.concat([session.buildings.df[session.buildings.df['connection_to_heat_grid']], session.buildings.df[session.buildings.df['group'] >= 0]])
+        selected_buildings = pandas.concat(
+            [session.buildings.df[session.buildings.df['connection_to_heat_grid']], 
+            session.buildings.df[session.buildings.df['group'] >= 0]])  # ATTENTION: delete duplicate entries?
+        
         selected_buildings[['id', 'spec_heat_consumption', 'spec_power_consumption', 'energy_source', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'group']].to_csv(clusters_outname, index=False)
+        devtools.print_full_df(selected_buildings)
 
         # send final_step to infoscreen:
         session.api.send_dataframe_as_json(pandas.DataFrame(data={"final_step": [self.final_step]}))
@@ -189,52 +193,19 @@ class SimulationMode:
                 df.iat[idx, df.columns.get_loc('energy_prices_graphs')] = f"{config['DATA_ABS_PATH']}/precomputed/simulation_defaults/energy_prices/energy_prices_{df.iloc[idx, df.columns.get_loc('id')]}.png"
             session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
 
-        self.run_script(self.xml_path)
+        self.fail_message = ""
+        if self.run_script(self.xml_path): 
+            self.fail_message = "fehlgeschlagen!"
+            return
         session.api.send_message_as_json({'step' : self.final_step-1})  # simulation done
 
         if self.flag_create_graphs:
-            self.export_graphs()
             try:
-                pass
+                self.export_graphs()
             except Exception as e:
                 print("cannot export graphs", e)
                 devtools.log += "\nCannot export graphs: %s" % e
-
-        # define titles for images and their location
-        self.matplotlib_neighborhood_images = {
-            "emissions_neighborhood_accu": "data/outputs/output_{0}/round{1}/emissions/CO2_emissions_neighborhood.png".format(str(self.timestamp), session.environment['current_iteration_round']),
-            "energy_prices": "data/outputs/output_{0}/round{1}/energy_prices/energy_prices_total.png".format(str(self.timestamp), session.environment['current_iteration_round']),
-            "emissions_groups": "data/outputs/output_{0}/round{1}/emissions/CO2_emissions_groups.png".format(str(self.timestamp), session.environment['current_iteration_round']),
-            "energy_prices_groups": "data/outputs/output_{0}/round{1}/energy_prices/energy_prices_groups.png".format(str(self.timestamp), session.environment['current_iteration_round'])
-        }
-
-        # send matplotlib created images to infoscreen
-        session.environment['neighborhood_images'] = self.matplotlib_neighborhood_images
-
-        ########################### csv export ########################
-
-        # compose csv paths for infoscreen to make graphs
-        session.emissions_data_paths[session.environment['current_iteration_round']] = [
-            str(
-                os.path.normpath(self.current_output_folder[self.current_output_folder.find('data'):] + '/emissions/{1}'.format(session.environment['current_iteration_round'], file_name)))
-                for file_name in os.listdir(self.current_output_folder + '/emissions')
-        ]
-
-        # send GAMA image paths to infoscreen (per iteration round!) #
-        dataview_wrapper = ['' for i in range(session.num_of_rounds)]
-        for i in range(session.num_of_rounds):
-            images_and_data = {'iteration_round': i,
-                               'gama_iteration_images': session.gama_iteration_images[i],
-                               'emissions_data_paths': session.emissions_data_paths[i]
-                               }
-
-            dataview_wrapper[i] = images_and_data
-        dataview_wrapper = {
-            'data_view_neighborhood_data': [dataview_wrapper]
-        }
-
-        data_view_neighborhood_df = pandas.DataFrame(data=dataview_wrapper)
-        session.api.send_dataframe_as_json(data_view_neighborhood_df)
+                self.fail_message = "fehlgeschlagen!"
 
         session.active_mode = session.modes['individual_data_view']  # marks total_data_view_mode to be started in main thread
 
@@ -257,14 +228,7 @@ class SimulationMode:
                 df=session.buildings.df[(session.buildings.df['connection_to_heat_grid']) | (session.buildings.df['group'] >= 0)],
                 stroke=0
                 )
-
-        font = pygame.font.SysFont('Arial', 18)
-        canvas.blit(font.render(
-            str(self.progress), True, pygame.Color(255,255,255)),
-            (session.frontend.side_panel.bounding_box.centerx,
-            session.frontend.side_panel.bounding_box.bottom - 30),
-        )
-
+            
     ########################### script: prepare #######################
     def make_xml(self, parameters, outputs, xml_output_path, finalStep=None, until=None, experiment_name=None):
 
@@ -318,15 +282,17 @@ class SimulationMode:
                 '/simulation_parameters_' + str(self.timestamp) + '.xml'
         else:
             xml_path = xml_path_
-        command = self.script + " " + xml_path + " " + self.current_output_folder
+        command = self.script + " -v " + xml_path + " " + self.current_output_folder
 
         sim_start = datetime.datetime.now()
         print("simulation starting using model file", self.model_file)
-        subprocess.call(command, shell=True)
+        p = subprocess.call(command, shell=True)
         print("simulation finished. duration = ",
               datetime.datetime.now() - sim_start)
 
         os.chdir(self.cwd)  # return to previous cwd
+
+        return p
 
         ####################### export matplotlib graphs #######################
 
@@ -346,18 +312,6 @@ class SimulationMode:
             outfile=self.current_output_folder + "/energy_prices/energy_prices_groups.png")
 
         # neighborhood total emissions:
-        # graphs.export_individual_emissions(
-        #     csv_name="/emissions/CO2_emissions_neighborhood.csv",
-        #     data_folders=self.output_folders,
-        #     columns=['emissions_neighborhood_accu'],
-        #     title_="jährlich kumulierte Gesamtemissionen des Quartiers",
-        #     outfile=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.png",
-        #     xlabel_="Jahr",
-        #     ylabel_="$CO_{2}$-Äquivalente (t)",
-        #     x_='current_date',
-        #     convert_grams_to_tons=True,
-        #     compare_data_folder=f"{config['DATA_ABS_PATH']}/precomputed/simulation_defaults"
-        # )
         graphs.export_neighborhood_emissions_connections(
             emissions_file=self.current_output_folder + "/emissions/CO2_emissions_neighborhood.csv",
             emissions_compare_file=self.reference_data_folder + "/emissions/CO2_emissions_neighborhood.csv",
@@ -459,9 +413,38 @@ class SimulationMode:
 
                 session.buildings.df.update(group_df)
                 
-    def forward_gama_message(self, msg):
-        '''formats gama simulation status message to percentage and forwards it to the infoscreen via send_message()'''
-        msg = msg.replace("'", "\"")
-        json_object = json.loads(msg)
-        self.progress = "{0}%".format(int(0.5 + json_object['step'] / self.final_step * 100))
-        session.api.send_message(json.dumps(json.loads(msg)))                
+        # define titles for images and their location
+        self.matplotlib_neighborhood_images = {
+            "emissions_neighborhood_accu": "data/outputs/output_{0}/round{1}/emissions/CO2_emissions_neighborhood.png".format(str(self.timestamp), session.environment['current_iteration_round']),
+            "energy_prices": "data/outputs/output_{0}/round{1}/energy_prices/energy_prices_total.png".format(str(self.timestamp), session.environment['current_iteration_round']),
+            "emissions_groups": "data/outputs/output_{0}/round{1}/emissions/CO2_emissions_groups.png".format(str(self.timestamp), session.environment['current_iteration_round']),
+            "energy_prices_groups": "data/outputs/output_{0}/round{1}/energy_prices/energy_prices_groups.png".format(str(self.timestamp), session.environment['current_iteration_round'])
+        }
+
+        # send matplotlib created images to infoscreen
+        session.environment['neighborhood_images'] = self.matplotlib_neighborhood_images
+
+        ########################### csv export ########################
+
+        # compose csv paths for infoscreen to make graphs
+        session.emissions_data_paths[session.environment['current_iteration_round']] = [
+            str(
+                os.path.normpath(self.current_output_folder[self.current_output_folder.find('data'):] + '/emissions/{1}'.format(session.environment['current_iteration_round'], file_name)))
+                for file_name in os.listdir(self.current_output_folder + '/emissions')
+        ]
+
+        # send GAMA image paths to infoscreen (per iteration round!) #
+        dataview_wrapper = ['' for i in range(session.num_of_rounds)]
+        for i in range(session.num_of_rounds):
+            images_and_data = {'iteration_round': i,
+                               'gama_iteration_images': session.gama_iteration_images[i],
+                               'emissions_data_paths': session.emissions_data_paths[i]
+                               }
+
+            dataview_wrapper[i] = images_and_data
+        dataview_wrapper = {
+            'data_view_neighborhood_data': [dataview_wrapper]
+        }
+
+        data_view_neighborhood_df = pandas.DataFrame(data=dataview_wrapper)
+        session.api.send_dataframe_as_json(data_view_neighborhood_df)                

@@ -262,7 +262,7 @@ class Frontend:
         session.active_mode.process_event(pos)
                     
     def handle_mouse_motion(self, pos):
-        for popup in session.popup_menus.values():
+        for popup in list(session.popup_menus.values()):
             if popup.dragging:
                 # move the boxes:
                 for b, box in enumerate(popup.boxes):
@@ -278,7 +278,7 @@ class Frontend:
             self.side_panel.slider.process_value()
             
     def handle_mouse_up(self, pos):
-        for popup in session.popup_menus.values():
+        for popup in list(session.popup_menus.values()):
             popup.dragging = False
            
         for key in ['start_simulation', 'start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']:

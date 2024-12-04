@@ -7,9 +7,6 @@ import q100viz.session as session
 class TouchMenu:
     def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False):
         
-        session.buildings.df.at[idx, 'popup'] = self
-        session.popup_menus[idx] = self
-
         self.icons = {
             'start_simulation': Icon("images/start_simulation.png"),
             'start_buildings_interaction': Icon("images/start_buildings_interaction.png"),
@@ -68,6 +65,9 @@ class TouchMenu:
             30)
         
         self.boxes = [self.bounding_box, self.address_box, self.icons_box, self.slider.bounding_box, self.info_box]
+
+        session.buildings.df.at[idx, 'popup'] = self
+        session.popup_menus[idx] = self
         
     def draw(self):
         if self.alpha < 200:

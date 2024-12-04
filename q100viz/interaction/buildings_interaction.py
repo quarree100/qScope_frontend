@@ -50,7 +50,7 @@ class Buildings_Interaction:
                     # deselect and return:
                     buildings.at[idx, 'popup'] = None
                     if idx in session.popup_menus.keys():
-                        del session.popup_menus[idx]    
+                        session.popup_menus[idx].destroy()
                     buildings.at[idx, 'selected'] = False
                     if buildings.loc[idx, 'group'] >= 0:
                         # make group available again
@@ -129,5 +129,5 @@ class Buildings_Interaction:
                 pygame.draw.polygon(
                     session._gis.surface, fill_color, points, 2)
 
-        for popup in session.popup_menus.values():
+        for popup in list(session.popup_menus.values()):
             popup.draw()

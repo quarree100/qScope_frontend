@@ -32,14 +32,11 @@ class DataViewIndividual_Mode():
             session.buildings.df.loc[session.buildings.df[session.buildings.df['group'] >= 0].iloc[0].name, 'selected'] = True
 
 
-    def process_event(self, event):
-        if event.type != pygame.locals.MOUSEBUTTONDOWN:
-            return
+    def process_event(self, pos):
         
         buildings = session.buildings.df
-        mouse_pos = pygame.mouse.get_pos()
         for idx, row in enumerate(buildings.index):
-            if shapely.Point(mouse_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
+            if shapely.Point(pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
 
                 if buildings.loc[idx, 'group'] >= 0:
                     # toggle selection

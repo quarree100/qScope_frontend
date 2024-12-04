@@ -240,7 +240,7 @@ class Frontend:
         #                        15)
         #     pygame.draw.circle(session.viewport, (255,255,255), pygame.mouse.get_pos(), 15)
         
-        for tangible in session.tangibles.values():
+        for tangible in list(session.tangibles.values()):
             tangible.draw(session.viewport)
             if devtools.VERBOSE_MODE: 
                 tangible.draw_verbose(session.viewport)

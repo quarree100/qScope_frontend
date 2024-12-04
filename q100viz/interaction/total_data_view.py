@@ -23,16 +23,10 @@ class DataViewTotal_Mode():
 
         session.api.send_dict(session.environment)
 
-    def process_event(self, event):
-        if event.type == pygame.locals.MOUSEBUTTONDOWN:
-            connected_buildings = pd.DataFrame(data=[
-                {'connected_buildings' : len(session.buildings.df[session.buildings.df['connection_to_heat_grid'] != False])}])
-            session.api.send_dataframe_as_json(connected_buildings)
-
-    def process_grid_change(self):
-
-        pass
-
+    def process_event(self, pos):
+        connected_buildings = pd.DataFrame(data=[
+            {'connected_buildings' : len(session.buildings.df[session.buildings.df['connection_to_heat_grid'] != False])}])
+        session.api.send_dataframe_as_json(connected_buildings)
 
     def draw(self, canvas):
         # draw GIS layers:

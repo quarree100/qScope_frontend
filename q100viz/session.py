@@ -156,6 +156,13 @@ modes = {
  'total_data_view': DataViewTotal_Mode(),
 }
 
+modes_human_readable = {
+ 'buildings_interaction': 'Gebäudeauswahl',
+ 'simulation': 'Simulation starten',
+ 'individual_data_view': 'Gebäudeinformation',
+ 'total_data_view': 'Quartiersdaten',
+}
+
 flag_mockup_mode = False  # TODO: this causes the forntend to display "demo mode" if mockup data is used
 flag_export_canvas = False
 active_mode = modes[environment['mode']]

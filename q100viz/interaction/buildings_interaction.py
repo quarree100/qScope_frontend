@@ -8,7 +8,7 @@ import datetime
 import q100viz.session as session
 from q100viz.devtools import devtools
 from q100viz.settings.config import config
-from q100viz.interaction.PopupMenu import TouchMenu
+from q100viz.interaction.PopupMenu import TouchMenu, TangibleMenu
 
 
 class Buildings_Interaction:
@@ -38,59 +38,43 @@ class Buildings_Interaction:
 
         buildings = session.buildings.df
 
-        # 1. check popup hits:
         for popup in [p for p in buildings['popup'] if p]:
             if popup.handle_mouse_button(event_pos): return
+                    
+    def process_tangible_event(self, tangible_id, pos, rotation):
+        buildings = session.buildings.df
+                
+        
+        if tangible_id in list(buildings['tangible'].values):
+            # leave:
+            bd = buildings[buildings['tangible'] == tangible_id]
+            if not shapely.Point(pos).within(shapely.geometry.Polygon(bd.loc[bd.index[0], 'polygon'])):
+                buildings.at[bd.index[0], 'selected'] = False
+                buildings.at[bd.index[0], 'group'] = -1
+                buildings.at[bd.index[0], 'popup'].destroy()
+                buildings.at[bd.index[0], 'tangible'] = None
+                return
+            else:
+                return
+        
+        # building selected:
+        for idx in buildings.index:
+            if shapely.Point(pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
+                buildings.at[idx, 'tangible'] = tangible_id
 
-        # 2. check building hits:
-        for idx, row in enumerate(buildings.index):
-            if shapely.Point(event_pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
-
-                if not any(session.group_available):
-                    # deselect and return:
-                    buildings.at[idx, 'popup'] = None
-                    if idx in session.popup_menus.keys():
-                        session.popup_menus[idx].destroy()
-                    buildings.at[idx, 'selected'] = False
-                    if buildings.loc[idx, 'group'] >= 0:
-                        # make group available again
-                        session.group_available[buildings.loc[idx,
-                                                              'group']] = True
-                    buildings.at[idx, 'group'] = -1
-                    return
-
-                # toggle selection:
-                buildings.at[idx,
-                             'selected'] = not buildings.loc[idx, 'selected']
-
-                if buildings.loc[idx, 'selected']:
-
-                    if any(session.group_available):
-                        # add to arbitrary group:
-                        group_available = None
-                        for i in range(session.num_of_users):
-                            if session.group_available[i] == True:
-                                session.group_available[i] = False
-                                group_available = i
-                                break
-                        buildings.at[idx, 'group'] = group_available
-
-                        # create popup menu:
-                        centroid = shapely.geometry.Polygon(
-                            buildings.loc[idx, 'polygon']).centroid.coords[0]
-                        popup = TouchMenu(
-                            session.viewport,
-                            centroid,
-                            displace=(0, 200),
-                            idx=idx
-                        )
-
-                else:  # deselect
-                    buildings.at[idx, 'popup'].destroy()
-                    if buildings.loc[idx, 'group'] >= 0:
-                        # make group available again
-                        session.group_available[buildings.loc[idx,'group']] = True
-                    buildings.at[idx, 'group'] = -1
+                buildings.at[idx, 'selected'] = True
+                buildings.at[idx, 'group'] = tangible_id % 4
+                centroid = shapely.geometry.Polygon(
+                    buildings.loc[idx, 'polygon']).centroid.coords[0]
+                popup = TangibleMenu(
+                    session.viewport,
+                    centroid,
+                    displace=(0, 200),
+                    idx=idx,
+                    start_rotation=rotation
+                )
+                
+                return
 
     def draw(self, canvas):
 

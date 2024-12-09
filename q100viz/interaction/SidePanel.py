@@ -1,9 +1,10 @@
 import pygame
+import numpy as np
 import q100viz.session as session
-from q100viz.graphics.colors import colors
+import q100viz.graphics.colors as colors
+import q100viz.graphics.graphictools as graphictools
 from q100viz.settings.config import config
 from q100viz.interaction.Slider import Slider
-
 
 class SidePanel:
     def __init__(self, right):
@@ -93,7 +94,7 @@ class SidePanel:
         # ----------------------- draw mode buttons: -----------------------
         y += (self.slider.bounding_box.height + 2* line_height)
         keys = ['start_buildings_interaction', 'start_simulation','start_individual_data_view', 'start_total_data_view']
-        for i, key in enumerate(keys):
+        for key in keys:
 
             for temp_key in [key, key+'_disabled']:
                 session.icons[temp_key].rect = pygame.Rect(
@@ -107,15 +108,15 @@ class SidePanel:
             y += line_height + session.icons[key].rect.height
 
             # define mode enabled or dsiabled:   
-            temp_key = key        
+            temp_key = key
             if key == 'start_simulation':
                 temp_key = key + '_disabled' if len(session.buildings.df[session.buildings.df['selected']]) <= 0 else key
             elif key in ['start_individual_data_view', 'start_total_data_view']:
-                temp_key = key + '_disabled' if session.environment['current_iteration_round'] == 0 or session.active_mode == session.modes['simulation'] else key                
+                temp_key = key + '_disabled' if session.environment['current_iteration_round'] == 0 or session.modes['simulation'].running else key                
             elif key == 'start_buildings_interaction':
                 temp_key = key + '_disabled' if session.active_mode == session.modes['simulation'] else key
                 
-            # highlight selected:
+            # highlight selected / interactive:
             if not temp_key[-8:] == 'disabled':
                 color = pygame.Color(255, 120, 55) if session.environment['mode'] == session.modes[key[6:]].name else pygame.Color(222, 222, 222, session.global_alpha),
                 pygame.draw.rect(
@@ -130,6 +131,31 @@ class SidePanel:
                 session.icons[temp_key].rect.topleft
             )
             
+        if session.active_mode == session.modes['individual_data_view']:
+            for i in range(session.num_of_users):
+                
+                if not i in list(session.buildings.df['group'].values): return
+                
+                origin = session.icons['start_individual_data_view'].rect.center
+                radius = session.icons['start_individual_data_view'].rect.scale_by(1.3).width / 2
+                
+                graphictools.draw_pie(
+                    canvas, 
+                    colors.user_colors[i], 
+                    origin, 
+                    radius=radius, 
+                    start_angle=i * 360 / session.num_of_users, 
+                    stop_angle=i * 360 / session.num_of_users + 360 / session.num_of_users, 
+                    step=0.1)
+    
+                x = origin[0] + np.cos(np.deg2rad(session.icons['start_individual_data_view'].magnitude * 360)) * radius
+                y = origin[1] + np.sin(np.deg2rad(session.icons['start_individual_data_view'].magnitude * 360)) * radius
+
+                pygame.draw.line(
+                    canvas, pygame.Color("white"),
+                    origin, (x, y), 4
+                )
+                
             # button names:
             font = pygame.font.SysFont('Arial', 18)            
             text = font.render(
@@ -154,9 +180,9 @@ class SidePanel:
                 elif session.environment['current_iteration_round'] > 0:
                     info_string = session.modes['simulation'].fail_message
                 canvas.blit(pygame.font.SysFont('Arial', 14).render(
-                info_string, 
-                True, pygame.Color(255, 255, 255)
-                ), text_rect)
+                    info_string, 
+                    True, pygame.Color(255, 255, 255)
+                ), text_rect)                
                 
         # simulation progress:
         text = pygame.font.SysFont('Arial', 18).render(

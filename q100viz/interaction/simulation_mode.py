@@ -16,7 +16,8 @@ class SimulationMode:
     def __init__(self):
         self.name = 'simulation'
 
-        self.running = False
+        self.ready = False  # True after setup, until simulation starts
+        self.running = False  # True while simulation runs
         self.progress = "0%"
         self.fail_message = ""  # returns message if not successful
 
@@ -62,7 +63,7 @@ class SimulationMode:
         session.api.send_dict(session.environment)
 
         # start simulation:
-        self.running = True
+        self.ready = True
         simulation_thread = threading.Thread(target=session.modes['simulation'].run, args=[devtools.test_run], daemon=True)
         simulation_thread.start()
 
@@ -172,18 +173,19 @@ class SimulationMode:
         self.make_xml(params, outputs, self.xml_path,
                       self.final_step, None, 'agent_decision_making')
 
-        self.running = True
+        self.ready = True
 
     ######################## SIMULATION RUN THREAD ####################
 
     def run(self, test_run=False):
-        while not self.running:
+        while not self.ready:
             time.sleep(1)
             if threading.current_thread().__class__.__name__ == '_MainThread':
                 print("Simulation was not set up yet! call simulation.setup() before running.")
                 return
 
-        self.running = False
+        self.ready = False
+        self.running = True
 
         # update building images with reference data for discussion:
         if session.environment['current_iteration_round'] == 0:
@@ -196,6 +198,7 @@ class SimulationMode:
         self.fail_message = ""
         if self.run_script(self.xml_path): 
             self.fail_message = "fehlgeschlagen!"
+            self.running = False
             return
         session.api.send_message_as_json({'step' : self.final_step-1})  # simulation done
 
@@ -207,12 +210,17 @@ class SimulationMode:
                 devtools.log += "\nCannot export graphs: %s" % e
                 self.fail_message = "fehlgeschlagen!"
 
-        session.active_mode = session.modes['individual_data_view']  # marks total_data_view_mode to be started in main thread
+        self.running = False
+
+        # session.active_mode = session.modes['individual_data_view']  # marks total_data_view_mode to be started in main thread
 
     ########################### frontend input ########################
     def process_event(self, event):
         pass
     
+    def process_tangible_event(self, tangible_id, pos, rotation):
+        pass    
+
     ################################ draw #############################
     def draw(self, canvas):
 

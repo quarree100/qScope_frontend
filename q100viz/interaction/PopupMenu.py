@@ -3,6 +3,7 @@ import pygame
 from q100viz.graphics.graphictools import Icon
 from q100viz.interaction.Slider import Slider
 import q100viz.session as session
+import q100viz.graphics.graphictools as graphictools
 
 class TouchMenu:
     def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False):
@@ -265,7 +266,6 @@ class TangibleMenu(TouchMenu):
     
     def __init__(self, surface, origin, rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False, start_rotation=0):
         super().__init__(surface, origin, rect_dim, displace, idx, draw_border)
-        self.alpha = 0
         self.radius = 0
         self.start_rotation = start_rotation
         self.current_rotation = 0
@@ -302,10 +302,15 @@ class TangibleMenu(TouchMenu):
             self.icons[key].rect.center = (x, y)
             
             # highlight if image selected
+            color_key = "user" if self.icons[key].selected else "interactive"
             pygame.draw.rect(
                 surface=self.surface,
-                color=self.colors["user"] if self.icons[key].selected else self.colors["interactive"],
-                rect=self.icons[key].rect.scale_by(1.3),
+                color=pygame.Color(
+                    self.colors[color_key].r,
+                    self.colors[color_key].g,
+                    self.colors[color_key].b,
+                    session.global_alpha),
+                rect=self.icons[key].rect.scale_by(1.7),
                 border_radius=self.icons[key].rect.width
             )
 
@@ -326,7 +331,7 @@ class TangibleMenu(TouchMenu):
             
             # draw pie:
             if (any([ic.selected for ic in self.icons.values()])):
-                self.draw_pie(self.surface, pygame.Color(255, 0, 0.5), self.origin, self.radius * 0.5, 0, self.slider.value * 360, 0.1)
+                graphictools.draw_pie(self.surface, pygame.Color(255, 0, 0.5), self.origin, self.radius * 0.5, 0, self.slider.value * 360, 0.1)
             
             
     def process_rotation(self, angle):
@@ -335,13 +340,4 @@ class TangibleMenu(TouchMenu):
         else:
             self.slider.value = 1 - (((self.start_rotation - angle) % 360) / 360)
             self.slider.process_value()
-            print(self.slider.value)
             
-    def draw_pie(self, surface, color, center, radius, start_angle, stop_angle, step):
-        theta=start_angle
-        while theta <= stop_angle:
-            pygame.draw.line(
-                surface, color, center,
-                (center[0] + radius * np.cos(np.deg2rad(theta)), center[1]+ radius * np.sin(np.deg2rad(theta))),
-                2)
-            theta+=step

@@ -266,3 +266,15 @@ class Buildings:
             
         elif handle == 'global_connections':
             return str(session.environment['scenario_num_connections'])
+        
+    def consumption_to_energy_class(self, consumption):
+        if consumption <= 25: return 'A+'
+        elif consumption > 25 and consumption <= 50: return 'A+'
+        elif consumption > 50 and consumption <= 75: return 'B'
+        elif consumption > 75 and consumption <= 100: return 'C'
+        elif consumption > 100 and consumption <= 125: return 'D'
+        elif consumption > 125 and consumption <= 150: return 'E'
+        elif consumption > 175 and consumption <= 200: return 'F'
+        elif consumption > 200 and consumption <= 250: return 'G'
+        elif consumption > 250: return 'H'
+

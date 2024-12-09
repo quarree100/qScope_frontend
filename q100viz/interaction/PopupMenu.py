@@ -125,7 +125,7 @@ class TouchMenu:
                            pygame.Color(255, 255, 255))
         self.surface.blit(text, text.get_rect(
             center=(self.address_box.centerx, self.address_box.centery)))
-
+            
         # --------------- icons: ---------------
         num_of_images = 3
         spacing = self.bounding_box.width / num_of_images
@@ -269,6 +269,16 @@ class TangibleMenu(TouchMenu):
         self.radius = 0
         self.start_rotation = start_rotation
         self.current_rotation = 0
+        
+        self.address_box = pygame.Rect(
+            origin, (self.bounding_box.width, 30))        
+        
+    def process_rotation(self, angle):
+        if not (any([ic.selected for ic in self.icons.values()])):
+            self.current_rotation = -((self.start_rotation - angle) % 360)
+        else:
+            self.slider.value = 1 - (((self.start_rotation - angle) % 360) / 360)
+            self.slider.process_value()
 
     def draw(self):
         if self.alpha < 200:
@@ -293,7 +303,7 @@ class TangibleMenu(TouchMenu):
             )
             rot += 75
 
-            # icons:
+            # --------------------- icons: ----------------------------
             self.icons[key].rect = pygame.Rect(
                 x, y,
                 self.icons[key].image.width,
@@ -301,7 +311,7 @@ class TangibleMenu(TouchMenu):
             )
             self.icons[key].rect.center = (x, y)
             
-            # highlight if image selected
+            # highlight if image selected 
             color_key = "user" if self.icons[key].selected else "interactive"
             pygame.draw.rect(
                 surface=self.surface,
@@ -319,7 +329,7 @@ class TangibleMenu(TouchMenu):
                 self.icons[key].rect.topleft
             )
             
-            # info text:
+            # ---------------------- info text: -----------------------
             font = pygame.font.SysFont('Arial', 20)
             text = font.render(
                 str(self.slider.human_readable_value[key]), 
@@ -327,17 +337,48 @@ class TangibleMenu(TouchMenu):
                 pygame.Color(255, 255, 255)
             )            
             
-            self.surface.blit(text, text.get_rect(center=(x, y + 20)))
+            self.surface.blit(text, text.get_rect(center=(x, y + 20)))            
             
-            # draw pie:
-            if (any([ic.selected for ic in self.icons.values()])):
-                graphictools.draw_pie(self.surface, pygame.Color(255, 0, 0.5), self.origin, self.radius * 0.5, 0, self.slider.value * 360, 0.1)
+        # ---------------- address and energy bar: ----------------
+        font = pygame.font.SysFont('Arial', 20)
+        text = font.render(f"{self.building_address}\nEnergieklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.idx, 'spec_heat_consumption'])}", True,
+                           pygame.Color(255, 255, 255))
+        if self.building_address:
             
+            self.address_box.width = text.get_rect().width + 40               
+            self.address_box.height = text.get_rect().height + 20           
+
+            x = self.origin[0] + np.cos(np.deg2rad(self.current_rotation + 90)) * 60
+            y = self.origin[1] + np.sin(np.deg2rad(self.current_rotation + 90)) * 60
+
+            self.address_box.center = (x, y)
             
-    def process_rotation(self, angle):
-        if not (any([ic.selected for ic in self.icons.values()])):
-            self.current_rotation = -((self.start_rotation - angle) % 360)
-        else:
-            self.slider.value = 1 - (((self.start_rotation - angle) % 360) / 360)
-            self.slider.process_value()
+            # draw address box:
+            pygame.draw.rect(
+                surface=self.surface,
+                    color=pygame.Color(
+                        self.colors["user"].r,
+                        self.colors["user"].g,
+                        self.colors["user"].b,
+                        self.alpha),
+                rect=self.address_box
+            )
+            
+            # address name:
+            self.surface.blit(text, text.get_rect(
+                center=self.address_box.center))
+        
+        # ---------------------- info text: -----------------------
+        font = pygame.font.SysFont('Arial', 20)
+        text = font.render(
+            str(self.slider.human_readable_value[key]), 
+            True,
+            pygame.Color(255, 255, 255)
+        )            
+        
+        self.surface.blit(text, text.get_rect(center=(x, y + 20)))
+        
+        # draw pie:
+        if (any([ic.selected for ic in self.icons.values()])):
+            graphictools.draw_pie(self.surface, pygame.Color(255, 0, 0.5), self.origin, self.radius * 0.5, 0, self.slider.value * 360, 0.1)
             

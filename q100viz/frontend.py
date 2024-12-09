@@ -118,12 +118,15 @@ class Frontend:
         for event in pygame.event.get():
                 
             if event.type == pygame.locals.MOUSEMOTION:
+                if not devtools.VERBOSE_MODE: return
                 self.handle_mouse_motion(pygame.mouse.get_pos())
 
             elif event.type == pygame.locals.MOUSEBUTTONDOWN:
+                if not devtools.VERBOSE_MODE: return
                 self.handle_mouse_down(pygame.mouse.get_pos())
 
             elif event.type == pygame.locals.MOUSEBUTTONUP:
+                if not devtools.VERBOSE_MODE: return
                 self.handle_mouse_up(pygame.mouse.get_pos())
             
             elif event.type == pygame.locals.KEYDOWN:
@@ -213,11 +216,11 @@ class Frontend:
             )
 
         # draw mode-specific surface:
-        try:
-            session.active_mode.draw(session.viewport)
-        except Exception as e:
-            print(f"{session.active_mode.name} cannot draw frontend:", e)
-            devtools.log += "\nCannot draw frontend: %s" % e
+        # try:
+        session.active_mode.draw(session.viewport)
+        # except Exception as e:
+        #     print(f"{session.active_mode.name} cannot draw frontend:", e)
+        #     devtools.log += "\nCannot draw frontend: %s" % e
             
         # basemap
         if session.show_basemap:
@@ -274,26 +277,13 @@ class Frontend:
                 popup.handle_mouse_motion(pos)
                 return
             
-        if self.side_panel.slider.bounding_box.collidepoint(pos):
-            self.side_panel.slider.update_from_interaction(pos)
-            self.side_panel.slider.process_value()
+        self.side_panel.handle_mouse_motion(pos)
             
     def handle_mouse_up(self, pos):
         for popup in list(session.popup_menus.values()):
             popup.dragging = False
            
-        for key in ['start_simulation', 'start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']:
-            rect = session.icons[key].rect
-            if rect.collidepoint(pos):
-                if session.active_mode == session.modes[key[6:]]: return
-                if key == 'start_simulation' and len(session.buildings.df[session.buildings.df['selected']]) <= 0: return
-                session.active_mode = session.modes[key[6:]]
-                if session.active_mode is session.modes['simulation']:
-                    session.modes['simulation'].setup()
-                    try:
-                        pass
-                    except Exception as e:
-                        print("cannot initialize simulation", e)
+        self.side_panel.handle_mouse_up(pos)
             
         session.api.send_dict(session.environment)
         session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())

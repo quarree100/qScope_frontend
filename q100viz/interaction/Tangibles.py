@@ -29,27 +29,26 @@ class Tuio_Listener(pythontuio.TuioListener):
         devtools.print_verbose(f"Cursor entfernt: ID={cursor.session_id}")
         session.frontend.handle_mouse_up(cursor.position)
         session.frontend.handle_mouse_up(session.tangibles['cursor'].position)
-        session.tangibles['cursor'].destroy
-
+        session.tangibles['cursor'].destroy()
 
     def add_tuio_object(self, object: pythontuio.Object):
         devtools.print_verbose(
             f"Neues Tangible hinzugefügt: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}"
             )
 
-        if object.class_id >= 0: 
+        if object.class_id >= 0:
             session.tangibles[object.class_id] = Tangible(object)
 
     def update_tuio_object(self, object: pythontuio.Object):
         # devtools.print_verbose(f"pythontuio.Object aktualisiert: ID={object.class_id}, X={object.position[0]}, Y={object.position[1]}, angle={object.angle}")
         # devtools.print_verbose(object.get_message())
-        
+
         if object.class_id < 0: return
-        
+
         # create object if tangible was already on surface:
         if not object.class_id in session.tangibles.keys():
             session.tangibles[object.class_id] = Tangible(object)
-        
+
         session.tangibles[object.class_id].update(object)
 
     def remove_tuio_object(self, object: pythontuio.Object):
@@ -77,19 +76,25 @@ class Tangible:
         )
 
         self.angle = numpy.rad2deg(object.angle)
-        self.process_event()
         
+        session.active_mode.process_tangible_event(self.id, self.position, self.angle)
+        session.frontend.side_panel.handle_mouse_motion(self.position)
+        session.frontend.side_panel.process_rotation(self.position, self.angle)
+
         # update rotation of popup:
-        if not self.sel_idx: return
-        session.popup_menus[self.sel_idx].process_rotation(self.angle)
+        if not self.id in list(session.buildings.df['tangible'].values): return
+        for idx in session.buildings.df.index:
+            if session.buildings.df.loc[idx, 'tangible'] == self.id:
+                session.buildings.df.loc[idx, 'popup'].process_rotation(self.angle)
+                        
     def draw(self, canvas):
         pass
-    
+
     def draw_verbose(self, canvas):
         self.surface.fill((0,0,0,0))
 
         cx, cy = self.bounding_box.center
-        
+
         pygame.draw.circle(
             surface=self.surface,
             color=pygame.Color(255, 255, 255),
@@ -114,58 +119,23 @@ class Tangible:
         font = pygame.font.SysFont('Arial', 16)
         text = font.render(
             f"ID {self.id}: ({int(self.position[0])}, {int(self.position[1])}) | r: {int(self.angle)}°", True, pygame.Color(255, 255, 255))
-        
+
         self.surface.blit(text, (cx, cy))
 
         rotated = pygame.transform.rotate(self.surface, -self.angle)
         pos = rotated.get_rect(center = self.surface.get_rect(center = self.position).center)
-        canvas.blit(rotated, pos)
-
-    def process_event(self):
-        ''' 
-        select/deselect building and create popup OR set intensity of popup.slider
-        '''
-        buildings = session.buildings.df
-        if self.sel_idx:
-            # leave:
-            if not shapely.Point(self.position).within(shapely.geometry.Polygon(buildings.loc[self.sel_idx, 'polygon'])):
-                buildings.at[self.sel_idx, 'selected'] = False
-                buildings.at[self.sel_idx, 'group'] = -1
-                session.popup_menus[self.sel_idx].destroy()
-                self.sel_idx = None
-                return
-            else:
-                return
-        
-        # building selected:
-        for idx, row in enumerate(buildings.index):
-            if shapely.Point(self.position).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
-                self.sel_idx = idx
-
-                buildings.at[idx, 'selected'] = True
-                buildings.at[idx, 'group'] = self.id % 4
-                centroid = shapely.geometry.Polygon(
-                    buildings.loc[idx, 'polygon']).centroid.coords[0]
-                popup = TangibleMenu(
-                    session.viewport,
-                    centroid,
-                    displace=(0, 200),
-                    idx=idx,
-                    start_rotation=self.angle
-                )
-                
-                return
+        canvas.blit(rotated, pos) 
 
     def destroy(self):
         if self.sel_idx:
             session.buildings.df.at[self.sel_idx, 'selected'] = False
             session.buildings.df.at[self.sel_idx, 'group'] = -1
             session.buildings.df.loc[self.sel_idx, 'popup'].destroy()
-        del session.tangibles[self.id]
-        
-        
+        del self
+
+
 class Cursor(Tangible):
-    
+
     def __init__(self, object):
         self.surface = pygame.Surface((500, 500), pygame.SRCALPHA).convert_alpha()
         self.bounding_box = pygame.Rect(0,0, self.surface.get_width(), self.surface.get_height())
@@ -183,11 +153,11 @@ class Cursor(Tangible):
 
         self.angle = 0
         self.process_event()
-        
+
         # update rotation of popup:
         if not self.sel_idx: return
         session.popup_menus[self.sel_idx].current_rotation = -((session.popup_menus[self.sel_idx].start_rotation - self.angle) % 360)
         devtools.print_verbose(str(self.angle) + " " + str(session.popup_menus[self.sel_idx].current_rotation))
-        
+
     def process_event(self):
         pass

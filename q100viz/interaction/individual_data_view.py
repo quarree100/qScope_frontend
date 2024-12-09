@@ -44,9 +44,8 @@ class DataViewIndividual_Mode():
                     buildings.at[idx, 'selected'] = True
                     session.environment['active_user_focus_data'] = buildings.loc[idx, 'group']
 
-    def process_grid_change(self):
+    def process_tangible_event(self, tangible_id, pos, rotation):
         pass
-
 
     def draw(self, canvas):
         
@@ -89,36 +88,3 @@ class DataViewIndividual_Mode():
           
             pygame.draw.polygon(
                 session._gis.surface, fill_color, points, 2)
-            
-        
-                        
-        return
-
-        nrows = 22
-        font = pygame.font.SysFont('Arial', 18)
-
-        column = 17
-        row = 11
-        canvas.blit(font.render(
-            "Quartiersdaten", True, pygame.Color(255,255,255)),
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] - 25,  # x
-            session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)  # y
-        )
-
-        column = 17
-        row = 14
-        font = pygame.font.SysFont('Arial', 14)
-        canvas.blit(font.render(
-            "Gebäudeinformation", True, pygame.Color(255,255,255)),
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 4,
-             session.grid_2.rects_transformed[column+nrows*row][1][0][1])
-        )
-
-        column = 17
-        row = 17
-        font = pygame.font.SysFont('Arial', 18)
-        canvas.blit(font.render(
-            "Interaktion", True, pygame.Color(255,255,255)),
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 8,
-             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
-        )

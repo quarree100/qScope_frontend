@@ -27,6 +27,9 @@ class DataViewTotal_Mode():
         connected_buildings = pd.DataFrame(data=[
             {'connected_buildings' : len(session.buildings.df[session.buildings.df['connection_to_heat_grid'] != False])}])
         session.api.send_dataframe_as_json(connected_buildings)
+        
+    def process_tangible_event(self, tangible_id, pos, rotation):
+        pass        
 
     def draw(self, canvas):
         # draw GIS layers:
@@ -41,38 +44,3 @@ class DataViewTotal_Mode():
                 df=session.buildings.df[(session.buildings.df['connection_to_heat_grid']) | (session.buildings.df['group'] >= 0)],
                 stroke=0
                 )
-            
-        return 
-        # highlight group buildings (draws colored stroke on top)
-        sel_buildings = session.buildings.df[
-            session.buildings.df['group'] >= 0]
-        for building in sel_buildings.to_dict('records'):
-            fill_color = pygame.Color(
-                session.user_colors[int(building['group'])])
-
-            points = session._gis.surface.transform(
-                building['geometry'].exterior.coords)
-          
-            pygame.draw.polygon(
-                session._gis.surface, fill_color, points, 2)
-
-        font = pygame.font.SysFont('Arial', 18)
-        nrows = 22
-
-        column = 16
-        row = 13
-        font = pygame.font.SysFont('Arial', 18)
-        canvas.blit(font.render(
-            "Individualdaten", True, pygame.Color(255,255,255)),
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 5,
-             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
-        )
-
-        column = 17
-        row = 17
-        font = pygame.font.SysFont('Arial', 18)
-        canvas.blit(font.render(
-            "Interaktion", True, pygame.Color(255,255,255)),
-            (session.grid_2.rects_transformed[column+nrows*row][1][0][0] + 8,
-             session.grid_2.rects_transformed[column+nrows*row][1][0][1] + 10)
-        )

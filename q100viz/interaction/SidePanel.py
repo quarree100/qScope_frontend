@@ -169,3 +169,37 @@ class SidePanel:
 
         canvas.blit(text, text_rect)
         
+
+    def handle_mouse_motion(self, pos):        
+        if self.slider.bounding_box.collidepoint(pos):
+            self.slider.update_from_interaction(pos)
+            self.slider.process_value()
+            
+        if session.modes['simulation'].running: return
+        for key in ['start_simulation', 'start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']:
+            rect = session.icons[key].rect
+            if rect.collidepoint(pos):
+                if session.active_mode == session.modes[key[6:]]: return
+                
+                if key == 'start_simulation':
+                    if (len(session.buildings.df[session.buildings.df['selected']]) <= 0 or len(session.buildings.df[session.buildings.df['selected']]) == 0): return
+                elif key in ['start_individual_data_view', 'start_total_data_view']:
+                    if session.environment['current_iteration_round'] == 0: return
+                
+                
+                session.active_mode = session.modes[key[6:]]
+                
+                if session.active_mode is session.modes['simulation']:
+                    session.modes['simulation'].setup()
+                    try:
+                        pass
+                    except Exception as e:
+                        print("cannot initialize simulation", e)
+        
+    def handle_mouse_up(self, pos):
+        pass
+    
+    def process_rotation(self, pos, rotation):
+        if session.icons['start_individual_data_view'].rect.collidepoint(pos):
+            session.icons['start_individual_data_view'].magnitude = rotation / 360
+            session.environment['active_user_focus_data'] = int(rotation / 360 * session.num_of_users)

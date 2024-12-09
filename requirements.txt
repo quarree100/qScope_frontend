@@ -6,9 +6,10 @@ matplotlib
 numpy
 opencv-python
 pandas
-pygame
 pygame-ce
 python-socketio
+python-tuio
+python-osc
 requests
 shapely
 websocket-client

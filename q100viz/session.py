@@ -42,7 +42,7 @@ show_polygons = False
 show_basemap = False
 global_alpha = 0
 
-icons = {}
+icons = {}  # mode icons and decision icons
 popup_menus = {}
 tangibles = {}
 

@@ -31,6 +31,7 @@ class Icon():
         self.image = pygame.image.load(file).convert_alpha()
         self.selected = False
         self.rect = pygame.Rect()
+        self.magnitude = 0  # used by tangible rotation
         
 def draw_pie(surface, color, center, radius, start_angle, stop_angle, step):
     theta=start_angle

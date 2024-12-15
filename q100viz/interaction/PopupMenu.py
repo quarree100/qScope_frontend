@@ -45,7 +45,7 @@ class TouchMenu:
 
         # boxes:
         self.address_box = pygame.Rect(
-            self.bounding_box.left, self.bounding_box.top, self.bounding_box.width, 30)
+            self.bounding_box.left, self.bounding_box.top, self.bounding_box.width, 50)
 
         self.icons_box = pygame.Rect(
             self.bounding_box.left,
@@ -121,8 +121,8 @@ class TouchMenu:
 
         # address name:
         font = pygame.font.SysFont('Arial', 20)
-        text = font.render(self.building_address, True,
-                           pygame.Color(255, 255, 255))
+        text = font.render(f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.idx, 'spec_heat_consumption'])}", True, pygame.Color(255, 255, 255))
+
         self.surface.blit(text, text.get_rect(
             center=(self.address_box.centerx, self.address_box.centery)))
             

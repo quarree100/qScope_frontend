@@ -9,10 +9,6 @@ class TouchMenu:
     def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False):
         
         self.icons = {
-            'start_simulation': Icon("images/start_simulation.png"),
-            'start_buildings_interaction': Icon("images/start_buildings_interaction.png"),
-            'start_individual_data_view': Icon("images/start_individual_data_view.png"),
-            'start_total_data_view': Icon("images/start_total_data_view.png"),
             'refurbished': Icon("images/refurbished.png"),
             'connection_to_heat_grid': Icon("images/connection_to_heat_grid.png"),
             'save_energy': Icon("images/save_energy.png"),
@@ -142,7 +138,7 @@ class TouchMenu:
         
         for i, key in enumerate(session.VALID_DECISION_HANDLES):
 
-            # reset icons rectangle:
+            # reposition icons rectangle:
             self.icons[key].rect = pygame.Rect(
                 self.icons_box.left + 0.25 * spacing + i * spacing,
                 self.icons_box.top + (self.icons_box.height - self.icons[key].image.height) / 2,

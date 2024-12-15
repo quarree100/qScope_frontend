@@ -17,6 +17,22 @@ class SidePanel:
 
         self.slider = Slider(None)
         self.slider.handle = 'global_connections'
+        self.icons = {
+            'start_simulation': graphictools.Icon("images/start_simulation.png"),
+            'start_simulation_disabled': graphictools.Icon("images/start_simulation_disabled.png"),
+            'start_buildings_interaction': graphictools.Icon("images/start_buildings_interaction.png"),
+            'start_buildings_interaction_disabled': graphictools.Icon("images/start_buildings_interaction_disabled.png"),
+            'start_individual_data_view': graphictools.Icon("images/start_individual_data_view.png"),
+            'start_individual_data_view_disabled': graphictools.Icon("images/start_individual_data_view_disabled.png"),
+            'start_total_data_view': graphictools.Icon("images/start_total_data_view.png"),
+            'start_total_data_view_disabled': graphictools.Icon("images/start_total_data_view_disabled.png"),
+            'refurbished': graphictools.Icon("images/refurbished.png"),
+            'connection_to_heat_grid': graphictools.Icon("images/connection_to_heat_grid.png"),
+            'save_energy': graphictools.Icon("images/save_energy.png"),
+        }
+        
+        for key in session.VALID_DECISION_HANDLES:
+            self.icons[key].image = pygame.transform.scale(self.icons[key].image, (25, 25))        
         # self.surface = pygame.Surface(
         #     (self.bounding_box.width,
         #     self.bounding_box.height)
@@ -97,15 +113,15 @@ class SidePanel:
         for key in keys:
 
             for temp_key in [key, key+'_disabled']:
-                session.icons[temp_key].rect = pygame.Rect(
+                self.icons[temp_key].rect = pygame.Rect(
                     0,
                     y,
-                    session.icons[temp_key].image.width,
-                    session.icons[temp_key].image.height
+                    self.icons[temp_key].image.width,
+                    self.icons[temp_key].image.height
                 )
-                session.icons[temp_key].rect.centerx = self.bounding_box.left + self.bounding_box.width / 4
+                self.icons[temp_key].rect.centerx = self.bounding_box.left + self.bounding_box.width / 4
             
-            y += line_height + session.icons[key].rect.height
+            y += line_height + self.icons[key].rect.height
 
             # define mode enabled or dsiabled:   
             temp_key = key
@@ -122,40 +138,15 @@ class SidePanel:
                 pygame.draw.rect(
                     surface=canvas,
                     color=color,
-                    rect=session.icons[key].rect.scale_by(1.3),
-                    border_radius=session.icons[key].rect.width
+                    rect=self.icons[key].rect.scale_by(1.3),
+                    border_radius=self.icons[key].rect.width
                 )
                             
             canvas.blit(
-                session.icons[temp_key].image,
-                session.icons[temp_key].rect.topleft
+                self.icons[temp_key].image,
+                self.icons[temp_key].rect.topleft
             )
             
-        if session.active_mode == session.modes['individual_data_view']:
-            for i in range(session.num_of_users):
-                
-                if not i in list(session.buildings.df['group'].values): return
-                
-                origin = session.icons['start_individual_data_view'].rect.center
-                radius = session.icons['start_individual_data_view'].rect.scale_by(1.3).width / 2
-                
-                graphictools.draw_pie(
-                    canvas, 
-                    colors.user_colors[i], 
-                    origin, 
-                    radius=radius, 
-                    start_angle=i * 360 / session.num_of_users, 
-                    stop_angle=i * 360 / session.num_of_users + 360 / session.num_of_users, 
-                    step=0.1)
-    
-                x = origin[0] + np.cos(np.deg2rad(session.icons['start_individual_data_view'].magnitude * 360)) * radius
-                y = origin[1] + np.sin(np.deg2rad(session.icons['start_individual_data_view'].magnitude * 360)) * radius
-
-                pygame.draw.line(
-                    canvas, pygame.Color("white"),
-                    origin, (x, y), 4
-                )
-                
             # button names:
             font = pygame.font.SysFont('Arial', 18)            
             text = font.render(
@@ -164,13 +155,13 @@ class SidePanel:
                 )
             
             text_rect = text.get_rect()
-            text_rect.centery = session.icons[key].rect.centery
-            text_rect.left = session.icons[key].rect.right + 10
+            text_rect.centery = self.icons[key].rect.centery
+            text_rect.left = self.icons[key].rect.right + 10
             
             canvas.blit(text, text_rect)            
             
-            text_rect.bottom = session.icons[key].rect.bottom
-            text_rect.left = session.icons[key].rect.right + 10
+            text_rect.bottom = self.icons[key].rect.bottom
+            text_rect.left = self.icons[key].rect.right + 10
 
             # simulation button extra information:            
             if key == 'start_simulation':
@@ -203,7 +194,7 @@ class SidePanel:
             
         if session.modes['simulation'].running: return
         for key in ['start_simulation', 'start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']:
-            rect = session.icons[key].rect
+            rect = self.icons[key].rect
             if rect.collidepoint(pos):
                 if session.active_mode == session.modes[key[6:]]: return
                 
@@ -211,7 +202,6 @@ class SidePanel:
                     if (len(session.buildings.df[session.buildings.df['selected']]) <= 0 or len(session.buildings.df[session.buildings.df['selected']]) == 0): return
                 elif key in ['start_individual_data_view', 'start_total_data_view']:
                     if session.environment['current_iteration_round'] == 0: return
-                
                 
                 session.active_mode = session.modes[key[6:]]
                 

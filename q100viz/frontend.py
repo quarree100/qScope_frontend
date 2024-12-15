@@ -84,24 +84,7 @@ class Frontend:
         tuio_client.add_listener(tuio_listener)
         
         tuio_thread.start()
-        
-        session.icons = {
-            'start_simulation': Icon("images/start_simulation.png"),
-            'start_simulation_disabled': Icon("images/start_simulation_disabled.png"),
-            'start_buildings_interaction': Icon("images/start_buildings_interaction.png"),
-            'start_buildings_interaction_disabled': Icon("images/start_buildings_interaction_disabled.png"),
-            'start_individual_data_view': Icon("images/start_individual_data_view.png"),
-            'start_individual_data_view_disabled': Icon("images/start_individual_data_view_disabled.png"),
-            'start_total_data_view': Icon("images/start_total_data_view.png"),
-            'start_total_data_view_disabled': Icon("images/start_total_data_view_disabled.png"),
-            'refurbished': Icon("images/refurbished.png"),
-            'connection_to_heat_grid': Icon("images/connection_to_heat_grid.png"),
-            'save_energy': Icon("images/save_energy.png"),
-        }
-        
-        for key in session.VALID_DECISION_HANDLES:
-            session.icons[key].image = pygame.transform.scale(session.icons[key].image, (25, 25))
-        
+                
         if devtools.test_run:
             devtools.profiler = cProfile.Profile()
             devtools.profiler.enable()

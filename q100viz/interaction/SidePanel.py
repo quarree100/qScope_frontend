@@ -173,8 +173,7 @@ class SidePanel:
                 canvas.blit(pygame.font.SysFont('Arial', 14).render(
                     info_string, 
                     True, pygame.Color(255, 255, 255)
-                ), text_rect)                
-                
+                ), text_rect)      
         # simulation progress:
         text = pygame.font.SysFont('Arial', 18).render(
             f"Runde {session.environment['current_iteration_round']}\nSimulation: {session.modes['simulation'].progress}", 

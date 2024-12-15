@@ -109,7 +109,7 @@ class Buildings:
         self.df['tangible'] = None  # holds id of associated tangible
         self.df['selected'] = False
         self.df['group'] = -1
-        self.df['polygon'] = self.df['geometry'].apply(lambda x: session._gis.surface.transform(list(x.exterior.coords)))
+        self.df['polygon'] = self.df['geometry'].apply(lambda x: session._gis.surface.transform(list(x.exterior.coords)))  # TODO: store shapely object
         
         self.find_closest_heat_grid_line(print_full_df=False)
 

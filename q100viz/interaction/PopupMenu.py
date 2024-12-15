@@ -203,19 +203,19 @@ class TouchMenu:
             self.surface.blit(text, (self.info_box.left + 0.05 * self.info_box.width, self.info_box.centery))
 
 
-    def handle_mouse_button(self, mouse_pos):
+    def handle_mouse_button(self, pos):
         # drag
-        if self.address_box.collidepoint(mouse_pos):
+        if self.address_box.collidepoint(pos):
             self.dragging = True
             self.drag_offset = [(
-                mouse_pos[0] - box.left,
-                mouse_pos[1] - box.top) for box in self.boxes]
+                pos[0] - box.left,
+                pos[1] - box.top) for box in self.boxes]
             return True
-        
+
         # decision buttons:
         for key in self.icons.keys():
             icon = self.icons[key]
-            if icon.rect.collidepoint(mouse_pos):
+            if icon.rect.collidepoint(pos):
                 if any(ic.selected for ic in self.icons.values()):
                     for ic in self.icons.values():
                         ic.selected = False
@@ -235,10 +235,10 @@ class TouchMenu:
                     self.slider.bounding_box.centerx = self.bounding_box.centerx
                     
                 self.slider.process_value(True)
-                return True
+                return True  
             
         # switch clicked:
-        if self.slider.bounding_box.collidepoint(mouse_pos) and self.popup_type == "switch":
+        if self.slider.bounding_box.collidepoint(pos) and self.popup_type == "switch":
             session.buildings.df.at[self.idx, key] = not session.buildings.df.loc[self.idx, key]
             self.slider.value = 1 if self.slider.value < 0.5 else 0
             self.slider.process_value()

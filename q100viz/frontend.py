@@ -94,8 +94,8 @@ class Frontend:
     def run(self):
 
         if session.previous_mode is not session.active_mode:
-            session.active_mode.activate()
             session.previous_mode = session.active_mode
+            session.active_mode.activate()
 
         # process mouse/keyboard events
         for event in pygame.event.get():

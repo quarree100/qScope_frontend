@@ -280,6 +280,9 @@ class TangibleMenu(TouchMenu):
             if self.secondary_tangible is None: return
             self.slider.value = session.tangibles[self.secondary_tangible].angle / 360  # TODO: there is a redundancy here: popup is calling tangible instead of usually the other way round.
             self.slider.process_value()
+            
+    def process_motion(self, pos):
+        self.origin = pos
 
     def draw(self):
         if self.alpha < 200:
@@ -304,6 +307,7 @@ class TangibleMenu(TouchMenu):
             rot += 75
 
             # --------------------- icons: ----------------------------
+            # reposition icons rectangle:
             self.icons[key].rect = pygame.Rect(
                 x, y,
                 self.icons[key].image.width,
@@ -330,29 +334,36 @@ class TangibleMenu(TouchMenu):
             )
             
             # ---------------------- info text: -----------------------
-            font = pygame.font.SysFont('Arial', 20)
-            text = font.render(
-                str(self.slider.human_readable_value[key]), 
-                True,
-                pygame.Color(255, 255, 255)
-            )            
-            
-            self.surface.blit(text, text.get_rect(center=(x, y + 20)))            
-            
+            strings = [
+                str(self.slider.human_readable_value[key]),
+                str(self.slider.human_readable_handle[key]),
+                        ]
+            for displace, string in zip([-20, 40], strings):
+                font = pygame.font.SysFont('Arial', 20)            
+                text = font.render(
+                    string, 
+                    True,
+                    pygame.Color(255, 255, 255)
+                )
+
+                self.surface.blit(text, text.get_rect(
+                    center=(
+                        x, y + displace)))
+                    
         # ---------------- address and energy bar: ----------------
         font = pygame.font.SysFont('Arial', 20)
-        text = font.render(f"{self.building_address}\nEnergieklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.idx, 'spec_heat_consumption'])}", True,
+        text = font.render(f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.idx, 'spec_heat_consumption'])}", True,
                            pygame.Color(255, 255, 255))
-        if self.building_address:
-            
+        
+        if self.building_address:    
             self.address_box.width = text.get_rect().width + 40               
             self.address_box.height = text.get_rect().height + 20           
 
-            x = self.origin[0] + np.cos(np.deg2rad(self.current_rotation + 90)) * 60
-            y = self.origin[1] + np.sin(np.deg2rad(self.current_rotation + 90)) * 60
+            x = self.origin[0] - np.cos(np.deg2rad(self.current_rotation + 90)) * 60
+            y = self.origin[1] - np.sin(np.deg2rad(self.current_rotation + 90)) * 60
 
             self.address_box.center = (x, y)
-            
+
             # draw address box:
             pygame.draw.rect(
                 surface=self.surface,
@@ -364,7 +375,7 @@ class TangibleMenu(TouchMenu):
                 rect=self.address_box
             )
             
-            # address name:
+            # address name and efficiency class:
             self.surface.blit(text, text.get_rect(
                 center=self.address_box.center))
 

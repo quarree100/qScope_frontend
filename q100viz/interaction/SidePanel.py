@@ -5,6 +5,7 @@ import q100viz.graphics.colors as colors
 import q100viz.graphics.graphictools as graphictools
 from q100viz.settings.config import config
 from q100viz.interaction.Slider import Slider
+import q100viz.interaction.PopupUI as ui
 
 class SidePanel:
     def __init__(self, right):
@@ -174,6 +175,10 @@ class SidePanel:
                     info_string, 
                     True, pygame.Color(255, 255, 255)
                 ), text_rect)      
+                          
+        if session.active_mode == session.modes['individual_data_view']:
+            ui.select_user(canvas, self.icons)
+
         # simulation progress:
         text = pygame.font.SysFont('Arial', 18).render(
             f"Runde {session.environment['current_iteration_round']}\nSimulation: {session.modes['simulation'].progress}", 

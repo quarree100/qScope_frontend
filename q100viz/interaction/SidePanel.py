@@ -220,6 +220,6 @@ class SidePanel:
         pass
     
     def process_rotation(self, pos, rotation):
-        if session.icons['start_individual_data_view'].rect.collidepoint(pos):
-            session.icons['start_individual_data_view'].magnitude = rotation / 360
+        if self.icons['start_individual_data_view'].rect.collidepoint(pos):
+            self.icons['start_individual_data_view'].magnitude = rotation / 360
             session.environment['active_user_focus_data'] = int(rotation / 360 * session.num_of_users)

@@ -33,11 +33,11 @@ class Icon():
         self.rect = pygame.Rect()
         self.magnitude = 0  # used by tangible rotation
         
-def draw_pie(surface, color, center, radius, start_angle, stop_angle, step):
+def draw_pie(surface, color, center, radius, start_angle, stop_angle, step, stroke=2):
     theta=start_angle
     while theta <= stop_angle:
         pygame.draw.line(
             surface, color, center,
             (center[0] + radius * np.cos(np.deg2rad(theta)), center[1]+ radius * np.sin(np.deg2rad(theta))),
-            2)
+            stroke)
         theta+=step        

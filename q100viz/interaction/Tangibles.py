@@ -23,7 +23,7 @@ class Tuio_Listener(pythontuio.TuioListener):
             f"Cursor aktualisiert: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}"
             )
         session.tangibles['cursor'].update(cursor)
-        session.frontend.handle_mouse_motion(session.tangibles['cursor'].position)
+        # session.frontend.handle_mouse_motion(session.tangibles['cursor'].position)
 
     def remove_tuio_cursor(self, cursor: pythontuio.Cursor):
         devtools.print_verbose(f"Cursor entfernt: ID={cursor.session_id}")
@@ -86,6 +86,7 @@ class Tangible:
         for idx in session.buildings.df.index:
             if session.buildings.df.loc[idx, 'tangible'] == self.id:
                 session.buildings.df.loc[idx, 'popup'].process_rotation(self.angle)
+                session.buildings.df.loc[idx, 'popup'].process_motion(self.position)
                         
     def draw(self, canvas):
         pass
@@ -153,11 +154,6 @@ class Cursor(Tangible):
 
         self.angle = 0
         self.process_event()
-
-        # update rotation of popup:
-        if not self.sel_idx: return
-        session.popup_menus[self.sel_idx].current_rotation = -((session.popup_menus[self.sel_idx].start_rotation - self.angle) % 360)
-        devtools.print_verbose(str(self.angle) + " " + str(session.popup_menus[self.sel_idx].current_rotation))
 
     def process_event(self):
         pass

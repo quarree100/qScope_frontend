@@ -1,7 +1,8 @@
 import numpy as np
 import pygame
 from q100viz.graphics.graphictools import Icon
-from q100viz.interaction.Slider import Slider
+from q100viz.interaction.Slider import Slider, RoundSlider
+import q100viz.interaction.PopupUI as ui
 import q100viz.session as session
 import q100viz.graphics.graphictools as graphictools
 
@@ -263,25 +264,28 @@ class TangibleMenu(TouchMenu):
     def __init__(self, surface, origin, rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False, start_rotation=0):
         super().__init__(surface, origin, rect_dim, displace, idx, draw_border)
         self.radius = 0
+        self.target_radius = np.linalg.norm(self.displace) * 0.8  # used for animation: decision icons extending from center        
         self.start_rotation = start_rotation
         self.current_rotation = 0
         
+        self.secondary_tangible = None  # id of tangible to sit on decision icons TODO: use tangible object reference instead, without making this crash when tangibles appear out of nowhere
+        
         self.address_box = pygame.Rect(
             origin, (self.bounding_box.width, 30))        
+        self.slider = RoundSlider(idx)
         
     def process_rotation(self, angle):
-        if not (any([ic.selected for ic in self.icons.values()])):
-            self.current_rotation = -((self.start_rotation - angle) % 360)
-        else:
-            self.slider.value = 1 - (((self.start_rotation - angle) % 360) / 360)
+        self.current_rotation = -((self.start_rotation - angle) % 360)
+        if (any([ic.selected for ic in self.icons.values()])):
+            if self.secondary_tangible is None: return
+            self.slider.value = session.tangibles[self.secondary_tangible].angle / 360  # TODO: there is a redundancy here: popup is calling tangible instead of usually the other way round.
             self.slider.process_value()
 
     def draw(self):
         if self.alpha < 200:
             self.alpha = min(self.alpha + 75, 200)
-        radius_target = np.linalg.norm(self.displace) * 0.8
-        if self.radius < radius_target:
-            self.radius = min(self.radius + 50, radius_target)
+        if self.radius < self.target_radius:
+            self.radius = min(self.radius + 50, self.target_radius)
 
         # draw indication line:
         rot = self.current_rotation + 15
@@ -363,18 +367,11 @@ class TangibleMenu(TouchMenu):
             # address name:
             self.surface.blit(text, text.get_rect(
                 center=self.address_box.center))
-        
-        # ---------------------- info text: -----------------------
-        font = pygame.font.SysFont('Arial', 20)
-        text = font.render(
-            str(self.slider.human_readable_value[key]), 
-            True,
-            pygame.Color(255, 255, 255)
-        )            
-        
-        self.surface.blit(text, text.get_rect(center=(x, y + 20)))
-        
-        # draw pie:
-        if (any([ic.selected for ic in self.icons.values()])):
-            graphictools.draw_pie(self.surface, pygame.Color(255, 0, 0.5), self.origin, self.radius * 0.5, 0, self.slider.value * 360, 0.1)
-            
+
+        for key in ["connection_to_heat_grid", "refurbished"]:
+            if self.icons[key].selected:
+                ui.year_selection(self)
+
+        if self.icons["save_energy"].selected:
+            ui.toggle(self)
+            # draw red/green areas and slider.value as line

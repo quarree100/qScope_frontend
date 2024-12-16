@@ -43,16 +43,28 @@ class Buildings_Interaction:
                     
     def process_tangible_event(self, tangible_id, pos, rotation):
         buildings = session.buildings.df
-                
         
+        # check collision with popups:
+        for popup in list(buildings['popup'].values):
+            if popup is None: continue
+            if popup.radius is not popup.target_radius: return  # animation not complete
+            for rect in [i.rect for i in popup.icons.values()]:
+                if rect.collidepoint(pos):  # TODO: rect could be defined more precisely as the circle, that it is.
+                    print(f"ID {tangible_id} inside popup of building {session.buildings.df.loc[popup.idx, 'address']}: {pos} ∈ {rect.center}")
+                    popup.handle_mouse_button(pos)
+                    popup.secondary_tangible = tangible_id
+                    # close popup if exists:
+                    if tangible_id in list(buildings['tangible'].values):
+                        bd = buildings[buildings['tangible'] == tangible_id]
+                        session.buildings.deselect(bd.index[0])
+                    return
+
+        # check collision with buildings:
         if tangible_id in list(buildings['tangible'].values):
-            # leave:
+            # leave building:
             bd = buildings[buildings['tangible'] == tangible_id]
             if not shapely.Point(pos).within(shapely.geometry.Polygon(bd.loc[bd.index[0], 'polygon'])):
-                buildings.at[bd.index[0], 'selected'] = False
-                buildings.at[bd.index[0], 'group'] = -1
-                buildings.at[bd.index[0], 'popup'].destroy()
-                buildings.at[bd.index[0], 'tangible'] = None
+                session.buildings.deselect(bd.index[0])
                 return
             else:
                 return
@@ -64,15 +76,14 @@ class Buildings_Interaction:
 
                 buildings.at[idx, 'selected'] = True
                 buildings.at[idx, 'group'] = tangible_id % 4
-                centroid = shapely.geometry.Polygon(
-                    buildings.loc[idx, 'polygon']).centroid.coords[0]
-                popup = TangibleMenu(
+                TangibleMenu(
                     session.viewport,
-                    centroid,
+                    pos,
                     displace=(0, 200),
                     idx=idx,
                     start_rotation=rotation
                 )
+                buildings.loc[idx, 'popup'].primary_tangible = tangible_id
                 
                 return
 

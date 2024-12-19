@@ -293,8 +293,8 @@ class TangibleMenu(TouchMenu):
         # draw indication line:
         rot = self.current_rotation + 15
         for key in session.VALID_DECISION_HANDLES:
-            x = self.origin[0] + np.cos(np.deg2rad(rot)) * self.radius
-            y = self.origin[1] + np.sin(np.deg2rad(rot)) * self.radius
+            x = self.origin[0] + np.cos(np.deg2rad(rot)) * self.radius * 1.3
+            y = self.origin[1] + np.sin(np.deg2rad(rot)) * self.radius * 1.3
             pygame.draw.line(
                 self.surface,
                 pygame.Color(

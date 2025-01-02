@@ -97,7 +97,6 @@ class RoundSlider(Slider):
         '''
         if not force and self.value is self.previous_value or session.active_mode is session.modes['simulation']:
             return
-        print(self.value)
 
         # household-specific:
         if self.handle == 'connection_to_heat_grid':

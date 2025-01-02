@@ -50,7 +50,7 @@ class Buildings_Interaction:
             if popup.radius is not popup.target_radius: return  # animation not complete
             for rect in [i.rect for i in popup.icons.values()]:
                 if rect.collidepoint(pos):  # TODO: rect could be defined more precisely as the circle, that it is.
-                    print(f"ID {tangible_id} inside popup of building {session.buildings.df.loc[popup.idx, 'address']}: {pos} ∈ {rect.center}")
+                    devtools.print_verbose(f"ID {tangible_id} inside popup of building {session.buildings.df.loc[popup.idx, 'address']}: {pos} ∈ {rect.center}")
                     popup.handle_mouse_button(pos)
                     popup.secondary_tangible = tangible_id
                     # close popup if exists:

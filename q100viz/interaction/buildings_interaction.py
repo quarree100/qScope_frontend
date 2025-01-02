@@ -76,7 +76,8 @@ class Buildings_Interaction:
             bd = buildings[buildings['tangible'] == tangible_id]
             if not shapely.Point(pos).within(shapely.geometry.Polygon(bd.loc[bd.index[0], 'polygon'])):
                 session.buildings.deselect(bd.index[0])
-                session.popup_menus[tangible_id].destroy_me = True
+                if session.popup_menus[tangible_id]:
+                    session.popup_menus[tangible_id].destroy_me = True
                 return
             else:
                 return

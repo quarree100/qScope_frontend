@@ -15,8 +15,8 @@ def year_selection(popup):
             popup.colors["user"].b,
             popup.alpha),
         popup.origin,
-        popup.radius / 4,
-        0, 180, 0.5
+        popup.radius,
+        0, 180, 0.1
     )
     
     num_of_years = session.modes['simulation'].max_year - config['SIMULATION_FORCE_START_YEAR']
@@ -27,7 +27,7 @@ def year_selection(popup):
         popup.surface,
         pygame.Color("white"),
         popup.origin,
-        popup.radius / 4,
+        popup.radius,
         0, 180, (180 / divisions), 1
     )            
     
@@ -39,16 +39,16 @@ def year_selection(popup):
             graphictools.shadow_text(
                     text=str(year), 
                     surface=popup.surface, 
-                    position=(popup.origin[0] + np.cos(np.deg2rad(rot)) * 40,
-                              popup.origin[1] + np.sin(np.deg2rad(rot)) * 40), 
+                    position=(popup.origin[0] + np.cos(np.deg2rad(rot)) * popup.radius,
+                              popup.origin[1] + np.sin(np.deg2rad(rot)) * popup.radius), 
                     align='topleft', 
                     font_type='Arial', font_size=20)
         else:
             graphictools.shadow_text(
                     text=str(year), 
                     surface=popup.surface, 
-                    position=(popup.origin[0] + np.cos(np.deg2rad(rot)) * 40,
-                              popup.origin[1] + np.sin(np.deg2rad(rot)) * 40), 
+                    position=(popup.origin[0] + np.cos(np.deg2rad(rot)) * popup.radius,
+                              popup.origin[1] + np.sin(np.deg2rad(rot)) * popup.radius), 
                     align='topright', 
                     font_type='Arial', font_size=20)
 
@@ -59,10 +59,10 @@ def year_selection(popup):
     pygame.draw.line(
         popup.surface,
         pygame.Color(255,255,255),
-        (popup.origin[0] + np.cos(np.deg2rad(180)) * 20 * 0.7,
-        popup.origin[1] + np.sin(np.deg2rad(180)) * 20 * 0.7),
-        (popup.origin[0] + np.cos(np.deg2rad(180)) * 40,
-        popup.origin[1] + np.sin(np.deg2rad(180)) * 40),
+        (popup.origin[0] + np.cos(np.deg2rad(180)) * 40 * 0.7,
+        popup.origin[1] + np.sin(np.deg2rad(180)) * 40 * 0.7),
+        (popup.origin[0] + np.cos(np.deg2rad(180)) * 80,
+        popup.origin[1] + np.sin(np.deg2rad(180)) * 80),
         1
     )
     
@@ -79,18 +79,10 @@ def toggle(popup):
             popup.colors["user"].b,
             popup.alpha),
     popup.origin,
-    popup.radius / 4,
-    90, 270, 0.5
+    popup.radius,
+    90, 270, 0.1
     )
-    
-    graphictools.draw_pie(
-    popup.surface,
-    pygame.Color("gray"),
-    popup.origin,
-    popup.radius / 4,
-    270, 90, 0.5
-    )
-    
+        
     rotation_line(popup=popup)
     handle_information(popup=popup)
 
@@ -101,9 +93,9 @@ def rotation_line(popup):
         pygame.Color(popup.colors["user"]),
         (popup.origin[0] + np.cos(np.deg2rad(popup.current_rotation)) * 20 * 0.7,
         popup.origin[1] + np.sin(np.deg2rad(popup.current_rotation)) * 20 * 0.7),
-        (popup.origin[0] + np.cos(np.deg2rad(popup.current_rotation)) * popup.radius * 0.4,
-        popup.origin[1] + np.sin(np.deg2rad(popup.current_rotation)) * popup.radius * 0.4),
-        3
+        (popup.origin[0] + np.cos(np.deg2rad(popup.current_rotation)) * popup.radius * 1.25,
+        popup.origin[1] + np.sin(np.deg2rad(popup.current_rotation)) * popup.radius * 1.25),
+        6
     )
     
 def handle_information(popup):
@@ -113,7 +105,7 @@ def handle_information(popup):
         surface=popup.surface, 
         position=(
             popup.origin[0], 
-            popup.origin[1] + popup.radius * 0.5), 
+            popup.origin[1] + popup.radius * 1.2), 
         align='center', 
         font_type='Arial', font_size=20)
         
@@ -132,8 +124,8 @@ def select_user(canvas, icons):
             stop_angle=i * 360 / session.num_of_users + 360 / session.num_of_users, 
             step=0.1)
 
-        x = origin[0] + np.cos(np.deg2rad(icons['start_individual_data_view'].magnitude * 360)) * radius
-        y = origin[1] + np.sin(np.deg2rad(icons['start_individual_data_view'].magnitude * 360)) * radius
+        x = origin[0] + np.cos(np.deg2rad(icons['start_individual_data_view'].magnitude * 360)) * radius * 1.25
+        y = origin[1] + np.sin(np.deg2rad(icons['start_individual_data_view'].magnitude * 360)) * radius * 1.25
 
         pygame.draw.line(
             canvas, pygame.Color("white"),

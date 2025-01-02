@@ -79,5 +79,5 @@ def forward_gama_message(msg):
     print("receive", msg)
     msg = msg.replace("'", "\"")
     json_object = json.loads(msg)
-    session.modes['simulation'].progress = "{0}%".format(int(0.5 + json_object['step'] / session.modes['simulation'].final_step * 100))
+    session.modes['simulation'].progress = f"{int(0.5 + json_object['step'] / session.modes['simulation'].final_step * 100)}%"
     session.api.send_message(json.dumps(json.loads(msg)))   

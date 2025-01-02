@@ -117,8 +117,9 @@ class TouchMenu:
         )
 
         # address name:
+        text = f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'])}" if session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'] else "{self.building_address}"
         graphictools.shadow_text(
-            text=f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'])}", 
+            text=text, 
             surface=self.surface, 
             position=(self.address_box.centerx, self.address_box.centery), 
             align='center', font_type='Arial', font_size=20)
@@ -351,8 +352,8 @@ class TangibleMenu(TouchMenu):
             self.address_box.width = text.get_rect().width + 40               
             self.address_box.height = text.get_rect().height + 20           
 
-            x = self.origin[0] - np.cos(np.deg2rad(self.current_rotation + 90)) * 60
-            y = self.origin[1] - np.sin(np.deg2rad(self.current_rotation + 90)) * 60
+            x = self.origin[0] - np.cos(np.deg2rad(self.current_rotation + 90)) * self.radius
+            y = self.origin[1] - np.sin(np.deg2rad(self.current_rotation + 90)) * self.radius
 
             self.address_box.center = (x, y)
 

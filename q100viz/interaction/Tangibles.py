@@ -100,21 +100,21 @@ class Tangible:
             surface=self.surface,
             color=pygame.Color(255, 255, 255),
             center=self.surface.get_rect().center,
-            radius=20,
+            radius=75,
             width=1
         )
 
         pygame.draw.line(
             self.surface,
             (255, 255, 255),
-            start_pos=(cx - 20, cy),
-            end_pos=(cx + 20, cy)
+            start_pos=(cx - 75, cy),
+            end_pos=(cx + 75, cy)
         )
         pygame.draw.line(
             self.surface,
             (255, 255, 255),
-            start_pos=(cx, cy + 20),
-            end_pos=(cx, cy - 20)
+            start_pos=(cx, cy + 75),
+            end_pos=(cx, cy - 75)
         )
 
         font = pygame.font.SysFont('Arial', 16)

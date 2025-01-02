@@ -58,7 +58,7 @@ class SidePanel:
         font.set_bold(True)
 
         y = config["CANVAS_SIZE"][1] * 0.1
-        line_height = 50
+        line_height = 60
 
         text = font.render(f"Netzanschlüsse: {session.environment['scenario_num_connections']}", True,
                            pygame.Color(255, 255, 255))
@@ -81,7 +81,7 @@ class SidePanel:
                 border_radius=int(self.slider.bounding_box.height/2)            
         )
 
-        # draw horizontal line
+        # draw horizontal slider line
         pygame.draw.line(
             canvas,
             pygame.Color(10, 10, 240),
@@ -182,17 +182,25 @@ class SidePanel:
         if session.active_mode == session.modes['individual_data_view']:
             ui.select_user(canvas, self.icons)
 
-        # simulation progress:
-        text = pygame.font.SysFont('Arial', 22).render(
-            f"Runde {session.environment['current_iteration_round']}\nSimulation: {session.modes['simulation'].progress}", 
+        # round and simulation progress:
+        text = pygame.font.SysFont('Arial', 24).render(
+            f"Runde {session.environment['current_iteration_round']}", 
             True, pygame.Color(255, 255, 255)
             )
-        text_rect = text.get_rect()
-        text_rect.centerx = self.bounding_box.centerx
-        text_rect.bottom = self.bounding_box.bottom
 
-        canvas.blit(text, text_rect)
-        
+        canvas.blit(
+            text, text.get_rect(centerx = self.bounding_box.centerx, bottom = self.bounding_box.bottom - line_height)
+        )
+
+        if session.modes['simulation'].running:
+            text = pygame.font.SysFont('Arial', 24).render(
+                f"Simulation: {session.modes['simulation'].progress}", 
+                True, pygame.Color(255, 255, 255)
+                )
+
+            canvas.blit(
+                text, text.get_rect(centerx = self.bounding_box.centerx, bottom = self.bounding_box.bottom - 2 * line_height)
+            )        
 
     def handle_mouse_motion(self, pos):        
         if self.slider.bounding_box.collidepoint(pos):

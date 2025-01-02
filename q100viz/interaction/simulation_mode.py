@@ -18,7 +18,7 @@ class SimulationMode:
 
         self.ready = False  # True after setup, until simulation starts
         self.running = False  # True while simulation runs
-        self.progress = "0%"
+        self.progress = "..."
         self.fail_message = ""  # returns message if not successful
 
         self.cwd = os.getcwd()  # hold current working directory to return to later
@@ -54,7 +54,7 @@ class SimulationMode:
 
         session.environment['mode'] = self.name
 
-        self.progress = "0%"
+        self.progress = "..."
 
         # show GIS layer:
         session.show_basemap = True

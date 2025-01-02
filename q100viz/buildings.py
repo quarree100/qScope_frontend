@@ -276,6 +276,7 @@ class Buildings:
         elif consumption > 175 and consumption <= 200: return 'F'
         elif consumption > 200 and consumption <= 250: return 'G'
         elif consumption > 250: return 'H'
+        else: return ""
 
     def deselect(self, idx):
         self.df.at[idx, 'selected'] = False

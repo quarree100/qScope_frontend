@@ -32,6 +32,9 @@ class SidePanel:
             'save_energy': graphictools.Icon("images/save_energy.png"),
         }
         
+        for icon in self.icons.values():
+            icon.image = pygame.transform.scale(icon.image, (self.bounding_box.width * 0.28, self.bounding_box.width * 0.28))
+        
         for key in session.VALID_DECISION_HANDLES:
             self.icons[key].image = pygame.transform.scale(self.icons[key].image, (25, 25))        
         # self.surface = pygame.Surface(
@@ -113,14 +116,14 @@ class SidePanel:
         keys = ['start_buildings_interaction', 'start_simulation','start_individual_data_view', 'start_total_data_view']
         for key in keys:
 
+            # place icons:
             for temp_key in [key, key+'_disabled']:
                 self.icons[temp_key].rect = pygame.Rect(
-                    0,
-                    y,
+                    0, y,
                     self.icons[temp_key].image.width,
                     self.icons[temp_key].image.height
                 )
-                self.icons[temp_key].rect.centerx = self.bounding_box.left + self.bounding_box.width / 4
+                self.icons[temp_key].rect.centerx = self.bounding_box.left + self.bounding_box.width * 0.33
             
             y += line_height + self.icons[key].rect.height
 
@@ -149,7 +152,7 @@ class SidePanel:
             )
             
             # button names:
-            font = pygame.font.SysFont('Arial', 18)            
+            font = pygame.font.SysFont('Arial', 24)            
             text = font.render(
                 f"{session.modes_human_readable[key[6:]]}", 
                 True, pygame.Color(255, 255, 255)
@@ -157,12 +160,12 @@ class SidePanel:
             
             text_rect = text.get_rect()
             text_rect.centery = self.icons[key].rect.centery
-            text_rect.left = self.icons[key].rect.right + 10
+            text_rect.left = self.icons[key].rect.right + self.icons[key].image.width * 0.2
             
             canvas.blit(text, text_rect)            
             
             text_rect.bottom = self.icons[key].rect.bottom
-            text_rect.left = self.icons[key].rect.right + 10
+            text_rect.left = self.icons[key].rect.right + self.icons[key].image.width * 0.2
 
             # simulation button extra information:            
             if key == 'start_simulation':
@@ -171,7 +174,7 @@ class SidePanel:
                     info_string = "[Bitte Gebäude auswählen]" 
                 elif session.environment['current_iteration_round'] > 0:
                     info_string = session.modes['simulation'].fail_message
-                canvas.blit(pygame.font.SysFont('Arial', 14).render(
+                canvas.blit(pygame.font.SysFont('Arial', 20).render(
                     info_string, 
                     True, pygame.Color(255, 255, 255)
                 ), text_rect)      
@@ -180,7 +183,7 @@ class SidePanel:
             ui.select_user(canvas, self.icons)
 
         # simulation progress:
-        text = pygame.font.SysFont('Arial', 18).render(
+        text = pygame.font.SysFont('Arial', 22).render(
             f"Runde {session.environment['current_iteration_round']}\nSimulation: {session.modes['simulation'].progress}", 
             True, pygame.Color(255, 255, 255)
             )

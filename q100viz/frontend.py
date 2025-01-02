@@ -125,6 +125,8 @@ class Frontend:
                     self.show_nahwaermenetz = not self.show_nahwaermenetz
                 elif event.key == pygame.locals.K_b:
                     self.display_viewport = not self.display_viewport
+                elif event.key == pygame.locals.K_i:
+                    print(session.buildings.df[session.buildings.df['selected']])
 
                 ##################### mode selection ######################
                 elif event.key == pygame.locals.K_0:
@@ -235,6 +237,9 @@ class Frontend:
 
             if devtools.VERBOSE_MODE: 
                 tangible.draw_verbose(session.viewport)
+                font = pygame.font.SysFont('Arial', 12)
+                devtools.display_tangible_dicts(self.canvas)
+                
         for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.destroy_me: 
                 session.popup_menus[key] = None

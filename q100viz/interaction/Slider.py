@@ -114,3 +114,5 @@ class RoundSlider(Slider):
             session.buildings.connect_buildings_until_idx(int(self.value * len(session.buildings.df)))
             
         self.previous_value = self.value
+
+        session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())

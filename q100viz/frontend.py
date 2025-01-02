@@ -235,9 +235,10 @@ class Frontend:
                     for b, l in enumerate([session.tangibles.keys(), session.popup_menus.keys()]):
                         text = font.render(str([f"{k}" for k in l]), True, c)
                         self.canvas.blit(text, (20 + a, config['CANVAS_SIZE'][1] - 100 + a + b * 10))           
+
         for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.destroy_me: 
-                session.popup_menus[key] = None
+                session.popup_menus[popup.tangible_id] = None
                 popup.destroy()
         
         if self.display_viewport:

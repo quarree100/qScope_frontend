@@ -82,8 +82,11 @@ class Buildings_Interaction:
                 return
 
         # building selected:
-        for idx in buildings.index:
-            if tangible_id in session.popup_menus.keys(): return
+        for idx in buildings[buildings['group'] == -1].index:
+            # return if tangible has a popup already:
+            if tangible_id in session.popup_menus.keys(): 
+                if session.popup_menus[tangible_id] is not None: return
+            # new building selected:
             if shapely.Point(pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
                 buildings.at[idx, 'tangible'] = tangible_id
 

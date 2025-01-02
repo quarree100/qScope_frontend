@@ -255,6 +255,7 @@ class TouchMenu:
                 self.slider.process_value()
 
     def destroy(self):
+        session.popup_menus[self.tangible_id] = None
         del self
 
 

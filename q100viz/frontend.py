@@ -24,7 +24,7 @@ import infoscreen.api as api
 class Frontend:
     ############################## PYGAME SETUP ###########################
     def __init__(self, run_in_main_window=False):
-        self.FPS = session.FPS = 12  # framerate
+        self.FPS = session.FPS = 20  # framerate
 
         # window position (must be set before pygame.init!)
         if not run_in_main_window:
@@ -56,6 +56,13 @@ class Frontend:
             [0, -50], [-50, -50],
             [-50, 200], [200, 200],
             [200, -50], [0, -50]]
+        if devtools.VERBOSE_MODE:
+            self.mask_points = [
+            [0, 0], [85.5, 0],
+            [85.5, 95], [0, 95],
+            [0, -50], [-50, -50],
+            [-50, 200], [200, 200],
+            [200, -50], [0, -50]] 
 
         ############# UDP server for incoming gama messages ###########
         # http_thread = threading.Thread(
@@ -147,17 +154,24 @@ class Frontend:
                 elif event.key == pygame.locals.K_v:
                     devtools.VERBOSE_MODE = not devtools.VERBOSE_MODE
                     pygame.mouse.set_visible(devtools.VERBOSE_MODE)
-                    
+                    self.mask_points = [
+                        [0, 0], [85.5, 0],
+                        [85.5, 100], [0, 100],
+                        [0, -50], [-50, -50],
+                        [-50, 200], [200, 200],
+                        [200, -50], [0, -50]]
+                    if devtools.VERBOSE_MODE:
+                        self.mask_points = [
+                        [0, 0], [85.5, 0],
+                        [85.5, 95], [0, 95],
+                        [0, -50], [-50, -50],
+                        [-50, 200], [200, 200],
+                        [200, -50], [0, -50]]
 
             elif event.type == pygame.locals.QUIT:
                 print("-" * 72)
                 print("Closing application.")
-                if devtools.log != "":
-                    print("Full log exported to qScope-log_%s.txt" %
-                          str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
-                    with open(session.modes['simulation'].output_folder + "/qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
-                        f.write(devtools.log)
-                        f.close()
+
                 if devtools.test_run:
                     try:
                         shutil.rmtree(session.modes['simulation'].output_folder)
@@ -168,6 +182,13 @@ class Frontend:
                     devtools.profiler.disable()
                     devtools.profiler.print_stats(sort='cumulative')
 
+                if devtools.log != "":
+                    with open(session.modes['simulation'].output_folder + "/qScope-log_%s.txt" % str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")), "w") as f:
+                        f.write(devtools.log)
+                        f.close()
+                    print("Full log exported to qScope-log_%s.txt" %
+                    str(datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")))
+                    
                 pygame.quit()
                 sys.exit()
 
@@ -180,8 +201,9 @@ class Frontend:
         # draw mask
         mask_color = (0, 0, 0) if not session.flag_mockup_mode else (
             128, 128, 128)
-        pygame.draw.polygon(session.viewport, mask_color,
-                            session.viewport.transform(self.mask_points))
+        pygame.draw.polygon(
+            session.viewport, mask_color,
+            session.viewport.transform(self.mask_points))
 
         if session.flag_mockup_mode:
             font = pygame.font.SysFont("Arial", 40)
@@ -234,7 +256,7 @@ class Frontend:
                 for a, c in enumerate([pygame.Color(0,0,0), pygame.Color(255, 255, 255)]):
                     for b, l in enumerate([session.tangibles.keys(), session.popup_menus.keys()]):
                         text = font.render(str([f"{k}" for k in l]), True, c)
-                        self.canvas.blit(text, (20 + a, config['CANVAS_SIZE'][1] - 100 + a + b * 10))           
+                        session.viewport.blit(text, (20 + a, config['CANVAS_SIZE'][1] - 100 + a + b * 10))           
 
         for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.destroy_me: 

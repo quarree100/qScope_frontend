@@ -40,4 +40,19 @@ def draw_pie(surface, color, center, radius, start_angle, stop_angle, step, stro
             surface, color, center,
             (center[0] + radius * np.cos(np.deg2rad(theta)), center[1]+ radius * np.sin(np.deg2rad(theta))),
             stroke)
-        theta+=step        
+        theta+=step
+        
+def shadow_text(text, surface, position, align=None, font_type='Arial', font_size=14, primary_color=pygame.Color(0,0,0), shadow_color=pygame.Color(255, 255, 255), displace_x=1, displace_y=1):
+    
+        font = pygame.font.SysFont(font_type, font_size)
+
+        for i, color in enumerate([primary_color, shadow_color]):
+            render_text = font.render(text, True, color)
+            if align == 'center':
+                surface.blit(render_text, render_text.get_rect(center=(position[0] + i * displace_x, position[1] + i * displace_y)))
+            elif align == 'topleft':
+                surface.blit(render_text, render_text.get_rect(topleft=(position[0] + i * displace_x, position[1] + i * displace_y)))
+            elif align == 'topright':
+                surface.blit(render_text, render_text.get_rect(topright=(position[0] + i * displace_x, position[1] + i * displace_y)))                                
+            else:
+                surface.blit(render_text, (position[0] + i * displace_x, position[1] + i * displace_y))

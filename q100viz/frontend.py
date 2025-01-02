@@ -29,7 +29,7 @@ class Frontend:
         # window position (must be set before pygame.init!)
         if not run_in_main_window:
             os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (
-                0, 1200)  # projection to the right
+                0, 1080)  # projection to the right
 
         # Initialize program
         pygame.init()
@@ -220,14 +220,7 @@ class Frontend:
 
         if session.show_polygons:
             self.canvas.blit(session._gis.surface, (0, 0))
-            
-        # if devtools.VERBOSE_MODE:
-        #     pygame.draw.circle(self.side_panel.surface, (255,255,255), 
-        #                        (pygame.mouse.get_pos()[0] - self.side_panel.x,
-        #                         pygame.mouse.get_pos()[1]),
-        #                        15)
-        #     pygame.draw.circle(session.viewport, (255,255,255), pygame.mouse.get_pos(), 15)
-        
+                    
         for tangible in list(session.tangibles.values()):
             if tangible is None: continue
             tangible.draw(session.viewport)
@@ -238,8 +231,10 @@ class Frontend:
             if devtools.VERBOSE_MODE: 
                 tangible.draw_verbose(session.viewport)
                 font = pygame.font.SysFont('Arial', 12)
-                devtools.display_tangible_dicts(self.canvas)
-                
+                for a, c in enumerate([pygame.Color(0,0,0), pygame.Color(255, 255, 255)]):
+                    for b, l in enumerate([session.tangibles.keys(), session.popup_menus.keys()]):
+                        text = font.render(str([f"{k}" for k in l]), True, c)
+                        self.canvas.blit(text, (20 + a, config['CANVAS_SIZE'][1] - 100 + a + b * 10))           
         for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.destroy_me: 
                 session.popup_menus[key] = None

@@ -1,5 +1,6 @@
 ######################## dev tools ##########################
 import pandas
+import pygame
 
 class Devtools:
 
@@ -14,13 +15,6 @@ class Devtools:
                 print(message)
                 self.log += "\n" + str(message)
                 return message
-        
-    def display_tangible_dicts(self, surface):
-        for a, c in enumerate([pygame.Color(0,0,0), pygame.Color(255, 255, 255)]):
-            for b, l in enumerate([session.tangibles.keys(), session.popup_menus.keys()]):
-                text = font.render(str([f"{k}" for k in l]), True, c)
-                surface.blit(text, (20 + a, config['CANVAS_SIZE'][1] - 100 + a + b * 10))                
-                
 
     def mark_random_buildings_for_simulation(self, buildings_df, num_buildings=1, max_buildings_group=4, connection_to_heat_grid=False, refurbished=False, save_energy=False):
             '''pick random n buildings, activate for simulation and update buildings list'''

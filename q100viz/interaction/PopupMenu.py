@@ -117,11 +117,11 @@ class TouchMenu:
         )
 
         # address name:
-        font = pygame.font.SysFont('Arial', 20)
-        text = font.render(f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'])}", True, pygame.Color(255, 255, 255))
-
-        self.surface.blit(text, text.get_rect(
-            center=(self.address_box.centerx, self.address_box.centery)))
+        graphictools.shadow_text(
+            text=f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'])}", 
+            surface=self.surface, 
+            position=(self.address_box.centerx, self.address_box.centery), 
+            align='center', font_type='Arial', font_size=20)
             
         # --------------- icons: ---------------
         num_of_images = 3
@@ -161,10 +161,14 @@ class TouchMenu:
                 self.icons[key].rect.topleft
             )
             
-            text = pygame.font.SysFont('Arial', 16).render(
-                session.buildings.human_readable_value(key, self.building_idx), True, (255, 255, 255)
+            # human-readable decision value:
+            graphictools.shadow_text(
+                text=session.buildings.human_readable_value(key, self.building_idx), 
+                surface=popup.surface, 
+                position=(self.icons[key].rect.scale_by(1.3).centerx, self.icons[key].rect.scale_by(1.3).bottom), 
+                align='center', 
+                font_type='Arial', font_size=16
             )
-            self.surface.blit(text, text.get_rect(centerx=self.icons[key].rect.scale_by(1.3).centerx, top=self.icons[key].rect.scale_by(1.3).bottom))
 
         # ------------ slider if any handle selected ---------
         if any(icon.selected for icon in self.icons.values()):
@@ -195,15 +199,12 @@ class TouchMenu:
                 )
             
             # info text:
-            font = pygame.font.SysFont('Arial', 20)
-            text = font.render(
-                self.slider.human_readable_handle[self.slider.handle] + ": " + str(self.slider.human_readable_value[self.slider.handle]), 
-                True,
-                pygame.Color(255, 255, 255)
-            )
-            self.surface.blit(text, (self.info_box.left + 0.05 * self.info_box.width, self.info_box.centery))
-
-
+            graphictools.shadow_text(
+                text=self.slider.human_readable_handle[self.slider.handle] + ": " + str(self.slider.human_readable_value[self.slider.handle]), 
+                surface=self.surface, 
+                position=(self.info_box.left + 0.05 * self.info_box.width, self.info_box.centery),
+                font_type='Arial', font_size=20)
+            
     def handle_mouse_button(self, pos):
         # drag
         if self.address_box.collidepoint(pos):
@@ -326,25 +327,23 @@ class TangibleMenu(TouchMenu):
                 self.icons[key].rect.topleft
             )
             
-            # ---------------------- info text: -----------------------
+            # ---------------------- icons handles: -----------------------
             strings = [
                 session.buildings.human_readable_value(key, self.building_idx),
                 str(self.slider.human_readable_handle[key])
                 ]
             for displace, string in zip([-20, 40], strings):
-                font = pygame.font.SysFont('Arial', 20)            
-                text = font.render(
-                    string, 
-                    True,
-                    pygame.Color(255, 255, 255)
-                )
-
-                self.surface.blit(text, text.get_rect(
-                    center=(x, y + displace)))
+                graphictools.shadow_text(
+                    text=string, 
+                    surface=self.surface, 
+                    position=(x, y + displace), align='center', 
+                    font_type='Arial', font_size=20)
+                
                     
         # ---------------- address and energy bar: ----------------
         font = pygame.font.SysFont('Arial', 20)
-        text = font.render(f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'])}", True,
+        address_and_efficiency = f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'])}"
+        text = font.render(address_and_efficiency, True,
                            pygame.Color(255, 255, 255))
         
         if self.building_address:
@@ -368,8 +367,12 @@ class TangibleMenu(TouchMenu):
             )
             
             # address name and efficiency class:
-            self.surface.blit(text, text.get_rect(
-                center=self.address_box.center))
+            graphictools.shadow_text(
+                text=address_and_efficiency, 
+                surface=self.surface, 
+                position=self.address_box.center, align='center', 
+                font_type='Arial', font_size=20)
+            
             
 class TangibleDecisionMenu(TangibleMenu):
     def __init__(self, surface, origin, rect_dim=(300, 250), displace=(0, 0), tangible_id=-1, building_idx=-1, draw_border=False, start_rotation=0, parent=None, slider_handle=None):
@@ -399,4 +402,4 @@ class TangibleDecisionMenu(TangibleMenu):
         self.current_rotation = -((self.start_rotation - angle) % 360)
         self.slider.value = self.current_rotation / 360 * -1
         self.slider.process_value()
-        devtools.print_verbose(self.tangible_id, self.slider.idx, round(self.slider.value, 2), self.slider.handle, self.slider.human_readable_handle[self.slider.handle], self.slider.human_readable_value[self.slider.handle])
+        devtools.print_verbose(f"{self.tangible_id}, {self.slider.idx}, {round(self.slider.value, 2)}, {self.slider.handle}, {self.slider.human_readable_handle[self.slider.handle]}, {self.slider.human_readable_value[self.slider.handle]}")

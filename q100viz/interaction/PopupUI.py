@@ -34,23 +34,23 @@ def year_selection(popup):
     # display year string:
     rot = 180
     for year in range(config['SIMULATION_FORCE_START_YEAR'], session.modes['simulation'].max_year + divisions, divisions):
-
-        font = pygame.font.SysFont('Arial', 20)
-        text = font.render(str(year), True, pygame.Color(255, 255, 255))
         
         if year > (config['SIMULATION_FORCE_START_YEAR'] + num_of_years / 2):
-            popup.surface.blit(
-                text, text.get_rect(topleft=
-                (popup.origin[0] + np.cos(np.deg2rad(rot)) * 40,
-                popup.origin[1] + np.sin(np.deg2rad(rot)) * 40)),
-            )                
-
+            graphictools.shadow_text(
+                    text=str(year), 
+                    surface=popup.surface, 
+                    position=(popup.origin[0] + np.cos(np.deg2rad(rot)) * 40,
+                              popup.origin[1] + np.sin(np.deg2rad(rot)) * 40), 
+                    align='topleft', 
+                    font_type='Arial', font_size=20)
         else:
-            popup.surface.blit(
-                text, text.get_rect(topright=
-                (popup.origin[0] + np.cos(np.deg2rad(rot)) * 40,
-                popup.origin[1] + np.sin(np.deg2rad(rot)) * 40)),
-            )
+            graphictools.shadow_text(
+                    text=str(year), 
+                    surface=popup.surface, 
+                    position=(popup.origin[0] + np.cos(np.deg2rad(rot)) * 40,
+                              popup.origin[1] + np.sin(np.deg2rad(rot)) * 40), 
+                    align='topright', 
+                    font_type='Arial', font_size=20)
 
         rot -= (180 / divisions)
         
@@ -107,18 +107,15 @@ def rotation_line(popup):
     )
     
 def handle_information(popup):
-
-    font = pygame.font.SysFont('Arial', 20)            
-    text = font.render(
-        f"{str(popup.slider.human_readable_handle[popup.slider.handle])}: {str(popup.slider.human_readable_value[popup.slider.handle])}", 
-        True,
-        pygame.Color(255, 255, 255)
-    )
-
-    popup.surface.blit(text, text.get_rect(
-        center=(
+    
+    graphictools.shadow_text(
+        text=f"{str(popup.slider.human_readable_handle[popup.slider.handle])}: {str(popup.slider.human_readable_value[popup.slider.handle])}", 
+        surface=popup.surface, 
+        position=(
             popup.origin[0], 
-            popup.origin[1] + popup.radius * 0.5)))
+            popup.origin[1] + popup.radius * 0.5), 
+        align='center', 
+        font_type='Arial', font_size=20)
         
 def select_user(canvas, icons):
     for i in range(session.num_of_users):  # TODO: use only user-selected buildings, so focusing "no building" will not be an option here

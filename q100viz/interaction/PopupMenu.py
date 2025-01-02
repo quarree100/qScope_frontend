@@ -248,7 +248,7 @@ class TouchMenu:
         return False
                 
     def handle_mouse_motion(self, mouse_pos):       
-        if self.popup_type == "slider" and any(ic.selected for ic in self.icons.values()):        
+        if self.popup_type == "slider" and any(ic.selected for ic in self.icons.values()):
             if self.slider.bounding_box.collidepoint(mouse_pos):
                 self.slider.update_from_interaction(mouse_pos)
                 self.slider.process_value()
@@ -259,25 +259,20 @@ class TouchMenu:
 
 class TangibleMenu(TouchMenu):
     
-    def __init__(self, surface, origin, rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False, start_rotation=0):
-        super().__init__(surface, origin, rect_dim, displace, idx, draw_border)
+    def __init__(self, surface, origin, rect_dim=(300, 250), displace=(0, 0), building_idx=-1, draw_border=False, start_rotation=0, tangible_id=-1):
+        super().__init__(surface, origin, rect_dim, displace, building_idx, draw_border)
         self.radius = 0
         self.target_radius = np.linalg.norm(self.displace) * 0.8  # used for animation: decision icons extending from center        
         self.start_rotation = start_rotation
         self.current_rotation = 0
-        
-        self.secondary_tangible = None  # id of tangible to sit on decision icons TODO: use tangible object reference instead, without making this crash when tangibles appear out of nowhere
-        
+                
         self.address_box = pygame.Rect(
             origin, (self.bounding_box.width, 30))        
-        self.slider = RoundSlider(idx)
+        self.slider = RoundSlider(building_idx)
+        self.tangible_id = tangible_id
         
     def process_rotation(self, angle):
         self.current_rotation = -((self.start_rotation - angle) % 360)
-        if (any([ic.selected for ic in self.icons.values()])):
-            if self.secondary_tangible is None: return
-            self.slider.value = session.tangibles[self.secondary_tangible].angle / 360  # TODO: there is a redundancy here: popup is calling tangible instead of usually the other way round.
-            self.slider.process_value()
             
     def process_motion(self, pos):
         self.origin = pos
@@ -333,9 +328,9 @@ class TangibleMenu(TouchMenu):
             
             # ---------------------- info text: -----------------------
             strings = [
-                str(self.slider.human_readable_value[key]),
-                str(self.slider.human_readable_handle[key]),
-                        ]
+                session.buildings.human_readable_value(key, self.building_idx),
+                str(self.slider.human_readable_handle[key])
+                ]
             for displace, string in zip([-20, 40], strings):
                 font = pygame.font.SysFont('Arial', 20)            
                 text = font.render(
@@ -345,15 +340,14 @@ class TangibleMenu(TouchMenu):
                 )
 
                 self.surface.blit(text, text.get_rect(
-                    center=(
-                        x, y + displace)))
+                    center=(x, y + displace)))
                     
         # ---------------- address and energy bar: ----------------
         font = pygame.font.SysFont('Arial', 20)
         text = font.render(f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'])}", True,
                            pygame.Color(255, 255, 255))
         
-        if self.building_address:    
+        if self.building_address:
             self.address_box.width = text.get_rect().width + 40               
             self.address_box.height = text.get_rect().height + 20           
 
@@ -376,11 +370,33 @@ class TangibleMenu(TouchMenu):
             # address name and efficiency class:
             self.surface.blit(text, text.get_rect(
                 center=self.address_box.center))
-
+            
+class TangibleDecisionMenu(TangibleMenu):
+    def __init__(self, surface, origin, rect_dim=(300, 250), displace=(0, 0), tangible_id=-1, building_idx=-1, draw_border=False, start_rotation=0, parent=None, slider_handle=None):
+        super().__init__(surface, origin, rect_dim, displace, building_idx, draw_border)
+        # self.slider = parent.slider
+        self.icons = parent.icons
+        self.parent = parent
+        self.tangible_id = tangible_id
+        self.slider.handle = slider_handle
+        
+    def draw(self):        
+        if self.alpha < 200:
+            self.alpha = min(self.alpha + 75, 200)
+        if self.radius < self.target_radius:
+            self.radius = min(self.radius + 50, self.target_radius)
+        
         for key in ["connection_to_heat_grid", "refurbished"]:
             if self.icons[key].selected:
                 ui.year_selection(self)
 
         if self.icons["save_energy"].selected:
             ui.toggle(self)
-            # draw red/green areas and slider.value as line
+            
+        if not session.popup_menus[self.parent.tangible_id]: self.destroy_me = True  # TODO: besser wäre, wenn direkt session.popup_menus[parent.tangible_id] durchsucht würde, und bei Fehlen: self.destroy_me = True
+            
+    def process_rotation(self, angle):
+        self.current_rotation = -((self.start_rotation - angle) % 360)
+        self.slider.value = self.current_rotation / 360 * -1
+        self.slider.process_value()
+        devtools.print_verbose(self.tangible_id, self.slider.idx, round(self.slider.value, 2), self.slider.handle, self.slider.human_readable_handle[self.slider.handle], self.slider.human_readable_value[self.slider.handle])

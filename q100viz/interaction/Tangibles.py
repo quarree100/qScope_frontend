@@ -83,11 +83,10 @@ class Tangible:
         session.frontend.side_panel.process_rotation(self.position, self.angle)
 
         # update rotation of popup:
-        if not self.id in list(session.buildings.df['tangible'].values): return
-        for idx in session.buildings.df.index:
-            if session.buildings.df.loc[idx, 'tangible'] == self.id:
-                session.buildings.df.loc[idx, 'popup'].process_rotation(self.angle)
-                session.buildings.df.loc[idx, 'popup'].process_motion(self.position)
+        if self.id in list(session.popup_menus.keys()):
+            if session.popup_menus[self.id] is None: return
+            session.popup_menus[self.id].process_rotation(self.angle)
+            session.popup_menus[self.id].process_motion(self.position)
                         
     def draw(self, canvas):
         pass

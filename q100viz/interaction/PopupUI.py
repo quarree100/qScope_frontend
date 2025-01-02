@@ -10,13 +10,13 @@ def year_selection(popup):
     graphictools.draw_pie(
         popup.surface,
         pygame.Color(
-                popup.colors["user"].r,
-                popup.colors["user"].g,
-                popup.colors["user"].b,
-                popup.alpha),
-        session.tangibles[popup.secondary_tangible].position,
-        popup.radius,
-        0, 180, 0.1
+            popup.colors["user"].r,
+            popup.colors["user"].g,
+            popup.colors["user"].b,
+            popup.alpha),
+        popup.origin,
+        popup.radius / 4,
+        0, 180, 0.5
     )
     
     num_of_years = session.modes['simulation'].max_year - config['SIMULATION_FORCE_START_YEAR']
@@ -26,43 +26,43 @@ def year_selection(popup):
     graphictools.draw_pie(
         popup.surface,
         pygame.Color("white"),
-        session.tangibles[popup.secondary_tangible].position,
-        popup.radius,
+        popup.origin,
+        popup.radius / 4,
         0, 180, (180 / divisions), 1
     )            
     
     # display year string:
-    rot = 0
+    rot = 180
     for year in range(config['SIMULATION_FORCE_START_YEAR'], session.modes['simulation'].max_year + divisions, divisions):
 
         font = pygame.font.SysFont('Arial', 20)
         text = font.render(str(year), True, pygame.Color(255, 255, 255))
         
-        if year < (config['SIMULATION_FORCE_START_YEAR'] + num_of_years / 2):
+        if year > (config['SIMULATION_FORCE_START_YEAR'] + num_of_years / 2):
             popup.surface.blit(
                 text, text.get_rect(topleft=
-                (session.tangibles[popup.secondary_tangible].position[0] + np.cos(np.deg2rad(rot)) * popup.radius,
-                session.tangibles[popup.secondary_tangible].position[1] + np.sin(np.deg2rad(rot)) * popup.radius)),
+                (popup.origin[0] + np.cos(np.deg2rad(rot)) * 40,
+                popup.origin[1] + np.sin(np.deg2rad(rot)) * 40)),
             )                
 
         else:
             popup.surface.blit(
                 text, text.get_rect(topright=
-                (session.tangibles[popup.secondary_tangible].position[0] + np.cos(np.deg2rad(rot)) * popup.radius,
-                session.tangibles[popup.secondary_tangible].position[1] + np.sin(np.deg2rad(rot)) * popup.radius)),
+                (popup.origin[0] + np.cos(np.deg2rad(rot)) * 40,
+                popup.origin[1] + np.sin(np.deg2rad(rot)) * 40)),
             )
 
-        rot += (180 / divisions)
+        rot -= (180 / divisions)
         
     # final year:    
                     
     pygame.draw.line(
         popup.surface,
         pygame.Color(255,255,255),
-        (session.tangibles[popup.secondary_tangible].position[0] + np.cos(np.deg2rad(180)) * 40 * 0.7,
-        session.tangibles[popup.secondary_tangible].position[1] + np.sin(np.deg2rad(180)) * 40 * 0.7),
-        (session.tangibles[popup.secondary_tangible].position[0] + np.cos(np.deg2rad(180)) * 80,
-        session.tangibles[popup.secondary_tangible].position[1] + np.sin(np.deg2rad(180)) * 80),
+        (popup.origin[0] + np.cos(np.deg2rad(180)) * 20 * 0.7,
+        popup.origin[1] + np.sin(np.deg2rad(180)) * 20 * 0.7),
+        (popup.origin[0] + np.cos(np.deg2rad(180)) * 40,
+        popup.origin[1] + np.sin(np.deg2rad(180)) * 40),
         1
     )
     
@@ -78,9 +78,17 @@ def toggle(popup):
             popup.colors["user"].g,
             popup.colors["user"].b,
             popup.alpha),
-    session.tangibles[popup.secondary_tangible].position,
-    popup.radius,
-    90, 270, 0.1
+    popup.origin,
+    popup.radius / 4,
+    90, 270, 0.5
+    )
+    
+    graphictools.draw_pie(
+    popup.surface,
+    pygame.Color("gray"),
+    popup.origin,
+    popup.radius / 4,
+    270, 90, 0.5
     )
     
     rotation_line(popup=popup)
@@ -91,11 +99,11 @@ def rotation_line(popup):
     pygame.draw.line(
         popup.surface,
         pygame.Color(popup.colors["user"]),
-        (session.tangibles[popup.secondary_tangible].position[0] + np.cos(np.deg2rad(session.tangibles[popup.secondary_tangible].angle)) * 20 * 0.7,
-        session.tangibles[popup.secondary_tangible].position[1] + np.sin(np.deg2rad(session.tangibles[popup.secondary_tangible].angle)) * 20 * 0.7),
-        (session.tangibles[popup.secondary_tangible].position[0] + np.cos(np.deg2rad(session.tangibles[popup.secondary_tangible].angle)) * popup.radius * 1.25,
-        session.tangibles[popup.secondary_tangible].position[1] + np.sin(np.deg2rad(session.tangibles[popup.secondary_tangible].angle)) * popup.radius * 1.25),
-        6
+        (popup.origin[0] + np.cos(np.deg2rad(popup.current_rotation)) * 20 * 0.7,
+        popup.origin[1] + np.sin(np.deg2rad(popup.current_rotation)) * 20 * 0.7),
+        (popup.origin[0] + np.cos(np.deg2rad(popup.current_rotation)) * popup.radius * 0.4,
+        popup.origin[1] + np.sin(np.deg2rad(popup.current_rotation)) * popup.radius * 0.4),
+        3
     )
     
 def handle_information(popup):
@@ -109,8 +117,8 @@ def handle_information(popup):
 
     popup.surface.blit(text, text.get_rect(
         center=(
-            session.tangibles[popup.secondary_tangible].position[0], 
-            session.tangibles[popup.secondary_tangible].position[1] + popup.radius * 1.2)))
+            popup.origin[0], 
+            popup.origin[1] + popup.radius * 0.5)))
         
 def select_user(canvas, icons):
     for i in range(session.num_of_users):  # TODO: use only user-selected buildings, so focusing "no building" will not be an option here

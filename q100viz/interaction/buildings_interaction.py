@@ -8,7 +8,7 @@ import datetime
 import q100viz.session as session
 from q100viz.devtools import devtools
 from q100viz.settings.config import config
-from q100viz.interaction.PopupMenu import TouchMenu, TangibleMenu
+from q100viz.interaction.PopupMenu import *
 
 
 class Buildings_Interaction:
@@ -47,11 +47,22 @@ class Buildings_Interaction:
         # check collision with decision icons:
         for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.radius is not popup.target_radius: return  # animation not complete
-            for rect in [i.rect for i in popup.icons.values()]:
-                if rect.collidepoint(pos):  # TODO: rect could be defined more precisely as the circle, that it is.
-                    devtools.print_verbose(f"ID {tangible_id} inside popup of building {session.buildings.df.loc[popup.idx, 'address']}: {pos} ∈ {rect.center}")
+            for key in session.VALID_DECISION_HANDLES:
+                if popup.icons[key].selected: continue
+                if popup.icons[key].rect.collidepoint(pos):  # TODO: rect could be defined more precisely as the circle, that it is.
+                    devtools.print_verbose(f"ID {tangible_id} inside popup of building {session.buildings.df.loc[popup.building_idx, 'address']}: {pos} ∈ {popup.icons[key].rect.center}")
                     popup.handle_mouse_button(pos)
-                    popup.secondary_tangible = tangible_id
+                    session.popup_menus[tangible_id] = \
+                    TangibleDecisionMenu(
+                        session.viewport,
+                        pos,
+                        displace=(0, 200),
+                        start_rotation=rotation,
+                        building_idx=popup.building_idx,
+                        tangible_id=tangible_id,
+                        parent = popup,
+                        slider_handle = key
+                    )
                     # close popup if exists:
                     if tangible_id in list(buildings['tangible'].values):
                         bd = buildings[buildings['tangible'] == tangible_id]
@@ -78,14 +89,15 @@ class Buildings_Interaction:
 
                 buildings.at[idx, 'selected'] = True
                 buildings.at[idx, 'group'] = tangible_id % 4
-                TangibleMenu(
+                session.popup_menus[tangible_id] = \
+                    TangibleMenu(
                     session.viewport,
                     pos,
                     displace=(0, 200),
-                    idx=idx,
-                    start_rotation=rotation
+                    building_idx=idx,
+                    start_rotation=rotation,
+                    tangible_id=tangible_id
                 )
-                buildings.loc[idx, 'popup'].primary_tangible = tangible_id
                 
                 return
 

@@ -86,7 +86,7 @@ class Slider:
         # vertical slider: w < h
         else:
             self.value = (mouse_pos[1] - self.bounding_box.top) / self.bounding_box.height
-            
+
 class RoundSlider(Slider):
     ''' 
     Round slider that is rotation-based.
@@ -98,20 +98,17 @@ class RoundSlider(Slider):
         if not force and self.value is self.previous_value or session.active_mode is session.modes['simulation']:
             return
 
-        # household-specific:
         if self.handle == 'connection_to_heat_grid':
-            session.buildings.df.at[self.idx,"connection_to_heat_grid"] = False if self.value > 0.5 else int(np.interp((self.value), [0, 0.5], [session.min_connection_year, session.modes['simulation'].max_year]))
-            self.human_readable_value['connection_to_heat_grid'] = "n.a." if self.value > 0.5 else int(
-                np.interp(float(self.value), [0, 0.5], [session.min_connection_year, session.modes['simulation'].max_year]))
+            session.buildings.df.at[self.idx,"connection_to_heat_grid"] = False if self.value < 0.5 else int(np.interp((self.value), [0.5, 0.99], [session.min_connection_year, session.modes['simulation'].max_year]))
+            self.human_readable_value['connection_to_heat_grid'] = session.buildings.human_readable_value("connection_to_heat_grid", self.idx)
 
         elif self.handle == 'refurbished':
-            session.buildings.df.at[self.idx, 'refurbished'] = False if self.value > 0.5 else int(np.interp((self.value), [0, 0.5], [session.min_refurb_year, session.modes['simulation'].max_year]))
-            self.human_readable_value['refurbished'] = "n.a." if self.value > 0.5 else int(
-                np.interp(float(self.value), [0, 0.5], [session.min_refurb_year, session.modes['simulation'].max_year]))
+            session.buildings.df.at[self.idx, 'refurbished'] = False if self.value < 0.5 else int(np.interp((self.value), [0.5, 0.99], [session.min_refurb_year, session.modes['simulation'].max_year]))
+            self.human_readable_value['refurbished'] = session.buildings.human_readable_value("refurbished", self.idx)
 
         elif self.handle == 'save_energy':
             session.buildings.df.at[self.idx, 'save_energy'] = self.value > 0.25 and self.value <= 0.75
-            self.human_readable_value['save_energy'] = 'ja' if self.value > 0.25 and self.value <= 0.75 else 'nein'
+            self.human_readable_value['save_energy'] = session.buildings.human_readable_value("save_energy", self.idx)
             
         elif self.handle == 'global_connections':
             session.buildings.connect_buildings_until_idx(int(self.value * len(session.buildings.df)))

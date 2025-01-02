@@ -105,7 +105,6 @@ class Buildings:
         self.df['save_energy_prior'] = self.df['save_energy']
 
         # buildings interaction
-        self.df['popup'] = None
         self.df['tangible'] = None  # holds id of associated tangible, correpsonds to popup.primary_tangible TODO: remove this redundancy!
         self.df['selected'] = False
         self.df['group'] = -1
@@ -281,6 +280,4 @@ class Buildings:
     def deselect(self, idx):
         self.df.at[idx, 'selected'] = False
         self.df.at[idx, 'group'] = -1
-        if self.df.at[idx, 'popup'] is not None:
-            self.df.at[idx, 'popup'].destroy()        
         self.df.at[idx, 'tangible'] = None

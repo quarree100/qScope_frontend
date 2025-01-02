@@ -57,7 +57,7 @@ class Tuio_Listener(pythontuio.TuioListener):
             )
         if not session.tangibles[object.class_id]: return
 
-        session.tangibles[object.class_id].destroy()
+        session.tangibles[object.class_id].destroy_me = True
 
 class Tangible:
     def __init__(self, object):
@@ -66,6 +66,7 @@ class Tangible:
         self.sel_idx = None  # index of currently selected building
 
         self.update(object)
+        self.destroy_me = False  # flag to destroy object in next iteration
 
     def update(self, object):
 
@@ -131,7 +132,7 @@ class Tangible:
         if self.sel_idx:
             session.buildings.df.at[self.sel_idx, 'selected'] = False
             session.buildings.df.at[self.sel_idx, 'group'] = -1
-            session.buildings.df.loc[self.sel_idx, 'popup'].destroy()
+        session.tangibles[self.id] = None
         del self
 
 

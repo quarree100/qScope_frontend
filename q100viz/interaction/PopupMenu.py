@@ -4,10 +4,13 @@ from q100viz.graphics.graphictools import Icon
 from q100viz.interaction.Slider import Slider, RoundSlider
 import q100viz.interaction.PopupUI as ui
 import q100viz.session as session
+from q100viz.devtools import devtools
 import q100viz.graphics.graphictools as graphictools
 
 class TouchMenu:
-    def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), idx=-1, draw_border=False):
+    def __init__(self, surface, origin=(0, 0), rect_dim=(300, 250), displace=(0, 0), building_idx=-1, draw_border=False):
+        
+        self.destroy_me = False
         
         self.icons = {
             'refurbished': Icon("images/refurbished.png"),
@@ -26,12 +29,12 @@ class TouchMenu:
 
         self.alpha = 0
         self.colors = {
-            "user": pygame.Color(session.user_colors[session.buildings.df.loc[idx, "group"]]),
+            "user": pygame.Color(session.user_colors[session.buildings.df.loc[building_idx, "group"]]),
             "interactive": pygame.Color(222, 222, 222),
         }
-        self.building_address = session.buildings.df.loc[idx, "address"]
-        self.idx = idx
-        self.slider = Slider(idx)
+        self.building_address = session.buildings.df.loc[building_idx, "address"]
+        self.building_idx = building_idx
+        self.slider = Slider(building_idx)
         self.draw_border = draw_border
         self.popup_type = None
 
@@ -63,9 +66,6 @@ class TouchMenu:
             30)
         
         self.boxes = [self.bounding_box, self.address_box, self.icons_box, self.slider.bounding_box, self.info_box]
-
-        session.buildings.df.at[idx, 'popup'] = self
-        session.popup_menus[idx] = self
         
     def draw(self):
         if self.alpha < 200:
@@ -118,7 +118,7 @@ class TouchMenu:
 
         # address name:
         font = pygame.font.SysFont('Arial', 20)
-        text = font.render(f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.idx, 'spec_heat_consumption'])}", True, pygame.Color(255, 255, 255))
+        text = font.render(f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'])}", True, pygame.Color(255, 255, 255))
 
         self.surface.blit(text, text.get_rect(
             center=(self.address_box.centerx, self.address_box.centery)))
@@ -162,14 +162,14 @@ class TouchMenu:
             )
             
             text = pygame.font.SysFont('Arial', 16).render(
-                session.buildings.human_readable_value(key, self.idx), True, (255, 255, 255)
+                session.buildings.human_readable_value(key, self.building_idx), True, (255, 255, 255)
             )
             self.surface.blit(text, text.get_rect(centerx=self.icons[key].rect.scale_by(1.3).centerx, top=self.icons[key].rect.scale_by(1.3).bottom))
 
         # ------------ slider if any handle selected ---------
         if any(icon.selected for icon in self.icons.values()):
             # slider box
-            color = self.colors["user"] if session.buildings.df.loc[self.idx, 'save_energy'] or self.popup_type == "slider" else pygame.Color(200, 200, 200)
+            color = self.colors["user"] if session.buildings.df.loc[self.building_idx, 'save_energy'] or self.popup_type == "slider" else pygame.Color(200, 200, 200)
             pygame.draw.rect(
                 surface=self.surface,
                 color=color,
@@ -240,7 +240,7 @@ class TouchMenu:
             
         # switch clicked:
         if self.slider.bounding_box.collidepoint(pos) and self.popup_type == "switch":
-            session.buildings.df.at[self.idx, key] = not session.buildings.df.loc[self.idx, key]
+            session.buildings.df.at[self.building_idx, key] = not session.buildings.df.loc[self.building_idx, key]
             self.slider.value = 1 if self.slider.value < 0.5 else 0
             self.slider.process_value()
             return True
@@ -254,9 +254,7 @@ class TouchMenu:
                 self.slider.process_value()
 
     def destroy(self):
-        if not session.buildings.df.at[self.idx, 'popup']: return
-        session.buildings.df.at[self.idx, 'popup'] = None
-        del session.popup_menus[self.idx]
+        del self
 
 
 class TangibleMenu(TouchMenu):
@@ -352,7 +350,7 @@ class TangibleMenu(TouchMenu):
                     
         # ---------------- address and energy bar: ----------------
         font = pygame.font.SysFont('Arial', 20)
-        text = font.render(f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.idx, 'spec_heat_consumption'])}", True,
+        text = font.render(f"{self.building_address}\nEffizienzklasse: {session.buildings.consumption_to_energy_class(session.buildings.df.loc[self.building_idx, 'spec_heat_consumption'])}", True,
                            pygame.Color(255, 255, 255))
         
         if self.building_address:    

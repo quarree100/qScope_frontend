@@ -227,9 +227,18 @@ class Frontend:
         #     pygame.draw.circle(session.viewport, (255,255,255), pygame.mouse.get_pos(), 15)
         
         for tangible in list(session.tangibles.values()):
+            if tangible is None: continue
             tangible.draw(session.viewport)
+            if tangible.destroy_me: 
+                tangible.destroy()
+                session.popup_menus[tangible.id] = None
+
             if devtools.VERBOSE_MODE: 
                 tangible.draw_verbose(session.viewport)
+        for popup in [p for p in list(session.popup_menus.values()) if p]:
+            if popup.destroy_me: 
+                session.popup_menus[key] = None
+                popup.destroy()
         
         if self.display_viewport:
             self.canvas.blit(session.viewport, (0, 0))
@@ -249,7 +258,7 @@ class Frontend:
         session.active_mode.process_event(pos)
                     
     def handle_mouse_motion(self, pos):
-        for popup in list(session.popup_menus.values()):
+        for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.dragging:
                 # move the boxes:
                 for b, box in enumerate(popup.boxes):
@@ -263,7 +272,7 @@ class Frontend:
         self.side_panel.handle_mouse_motion(pos)
             
     def handle_mouse_up(self, pos):
-        for popup in list(session.popup_menus.values()):
+        for popup in [p for p in list(session.popup_menus.values()) if p]:
             popup.dragging = False
            
         self.side_panel.handle_mouse_up(pos)

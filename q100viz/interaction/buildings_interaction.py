@@ -38,15 +38,14 @@ class Buildings_Interaction:
 
         buildings = session.buildings.df
 
-        for popup in [p for p in buildings['popup'] if p]:
+        for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.handle_mouse_button(event_pos): return
                     
     def process_tangible_event(self, tangible_id, pos, rotation):
         buildings = session.buildings.df
         
-        # check collision with popups:
-        for popup in list(buildings['popup'].values):
-            if popup is None: continue
+        # check collision with decision icons:
+        for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.radius is not popup.target_radius: return  # animation not complete
             for rect in [i.rect for i in popup.icons.values()]:
                 if rect.collidepoint(pos):  # TODO: rect could be defined more precisely as the circle, that it is.
@@ -57,6 +56,7 @@ class Buildings_Interaction:
                     if tangible_id in list(buildings['tangible'].values):
                         bd = buildings[buildings['tangible'] == tangible_id]
                         session.buildings.deselect(bd.index[0])
+                        session.popup_menus[tangible_id].destroy_me = True
                     return
 
         # check collision with buildings:
@@ -65,12 +65,14 @@ class Buildings_Interaction:
             bd = buildings[buildings['tangible'] == tangible_id]
             if not shapely.Point(pos).within(shapely.geometry.Polygon(bd.loc[bd.index[0], 'polygon'])):
                 session.buildings.deselect(bd.index[0])
+                session.popup_menus[tangible_id].destroy_me = True
                 return
             else:
                 return
-        
+
         # building selected:
         for idx in buildings.index:
+            if tangible_id in session.popup_menus.keys(): return
             if shapely.Point(pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
                 buildings.at[idx, 'tangible'] = tangible_id
 
@@ -124,5 +126,5 @@ class Buildings_Interaction:
                 pygame.draw.polygon(
                     session._gis.surface, fill_color, points, 2)
 
-        for popup in list(session.popup_menus.values()):
+        for popup in [p for p in list(session.popup_menus.values()) if p]:
             popup.draw()

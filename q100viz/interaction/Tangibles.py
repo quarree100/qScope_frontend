@@ -12,21 +12,24 @@ from q100viz.interaction.PopupMenu import TangibleMenu
 class Tuio_Listener(pythontuio.TuioListener):
 
     def add_tuio_cursor(self, cursor: pythontuio.Cursor):
-        devtools.print_verbose(
-            f"Neuer Cursor hinzugefügt: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}")
+        pass
+        # devtools.print_verbose(
+        #     f"Neuer Cursor hinzugefügt: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}")
         # session.frontend.handle_mouse_down(cursor.position)
         # session.tangibles['cursor'] = Cursor(cursor)
         # session.frontend.handle_mouse_down(session.tangibles['cursor'].position)
 
     def update_tuio_cursor(self, cursor: pythontuio.Cursor):
-        devtools.print_verbose(
-            f"Cursor aktualisiert: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}"
-            )
+        pass
+        # devtools.print_verbose(
+        #     f"Cursor aktualisiert: ID={cursor.session_id}, X={cursor.position[0]}, Y={cursor.position[1]}"
+        #     )
         # session.tangibles['cursor'].update(cursor)
         # session.frontend.handle_mouse_motion(session.tangibles['cursor'].position)
 
     def remove_tuio_cursor(self, cursor: pythontuio.Cursor):
-        devtools.print_verbose(f"Cursor entfernt: ID={cursor.session_id}")
+        pass
+        # devtools.print_verbose(f"Cursor entfernt: ID={cursor.session_id}")
         # session.frontend.handle_mouse_up(cursor.position)
         # session.frontend.handle_mouse_up(session.tangibles['cursor'].position)
         # session.tangibles['cursor'].destroy_me = True

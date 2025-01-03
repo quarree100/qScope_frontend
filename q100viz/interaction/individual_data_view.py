@@ -4,6 +4,7 @@ import pygame
 import datetime
 import shapely
 import numpy
+from q100viz.graphics.colors import *
 
 import q100viz.session as session
 
@@ -56,10 +57,14 @@ class DataViewIndividual_Mode():
         focused_bd = session.buildings.df[session.buildings.df['group'] == session.environment['active_user_focus_data']]
         if len(focused_bd) > 0:
             scaled_polygon = \
-                shapely.geometry.Polygon(focused_bd['polygon'].iloc[0]).buffer(15)
+                shapely.geometry.Polygon(focused_bd['polygon'].iloc[0]).buffer(90)
             pygame.draw.polygon(
                 canvas, 
-                pygame.Color(255, 255, 255, self.alpha),
+                pygame.Color(
+                    user_colors[session.environment['active_user_focus_data']][0],
+                    user_colors[session.environment['active_user_focus_data']][1],
+                    user_colors[session.environment['active_user_focus_data']][2],
+                    self.alpha),
                 [pnt for pnt in scaled_polygon.exterior.coords])
             
 

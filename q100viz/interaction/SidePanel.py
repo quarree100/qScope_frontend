@@ -76,7 +76,7 @@ class SidePanel:
 
         pygame.draw.rect(
             canvas,
-            pygame.Color(222, 222, 222),
+            pygame.Color(222, 222, 222, session.global_alpha),
             self.slider.bounding_box,
                 border_radius=int(self.slider.bounding_box.height/2)            
         )
@@ -84,31 +84,32 @@ class SidePanel:
         # draw horizontal slider line
         pygame.draw.line(
             canvas,
-            pygame.Color(10, 10, 240),
-            (self.slider.bounding_box.left, self.slider.value *
+            pygame.Color(session.quarree_colors_8bit[2]),
+            (self.slider.bounding_box.left -10, self.slider.value *
              self.slider.bounding_box.height + self.slider.bounding_box.top),
-            (self.slider.bounding_box.right, self.slider.value *
+            (self.slider.bounding_box.right + 10, self.slider.value *
              self.slider.bounding_box.height + self.slider.bounding_box.top),
             4
         )
 
         # slider annotations
         font.set_bold(False)
-        text = font.render(str(session.environment['scenario_num_connections']), True, (255, 255, 255))        
-        canvas.blit(
-            text, 
-            text.get_rect(left=self.slider.bounding_box.right, centery=self.slider.bounding_box.top + self.slider.bounding_box.height * self.slider.value)
-            )
+        text = font.render(str(session.environment['scenario_num_connections']), True, (255, 255, 255))
+        if session.environment['scenario_num_connections'] > 0 and session.environment['scenario_num_connections'] < len(session.buildings.df) - 1:
+            canvas.blit(
+                text, 
+                text.get_rect(right=self.slider.bounding_box.left - 10, centery=self.slider.bounding_box.top + self.slider.bounding_box.height * self.slider.value)
+                )
 
         text = font.render("0", True, (255, 255, 255))
         canvas.blit(
             text, 
-            text.get_rect(right=self.slider.bounding_box.left, centery=self.slider.bounding_box.top)
+            text.get_rect(right=self.slider.bounding_box.left - 10, centery=self.slider.bounding_box.top)
             )
         text = font.render(str(len(session.buildings.df)), True, (255, 255, 255))        
         canvas.blit(
             text,
-            text.get_rect(right=self.slider.bounding_box.left, centery=self.slider.bounding_box.bottom)
+            text.get_rect(right=self.slider.bounding_box.left - 10, centery=self.slider.bounding_box.bottom)
             )       
                 
         # ----------------------- draw mode buttons: -----------------------

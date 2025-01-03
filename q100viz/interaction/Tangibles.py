@@ -89,7 +89,20 @@ class Tangible:
             session.popup_menus[self.id].process_motion(self.position)
                         
     def draw(self, canvas):
-        pass
+        # if self.id % 4 in session.buildings.df['group'].unique(): return
+        pygame.draw.circle(
+            surface=self.surface,
+            color=pygame.Color(
+                session.user_colors[self.id % session.num_of_users][0],
+                session.user_colors[self.id % session.num_of_users][1],
+                session.user_colors[self.id % session.num_of_users][2],
+                session.global_alpha),
+            center=self.surface.get_rect().center,
+            radius=115
+        )
+        pos = self.surface.get_rect(center = self.surface.get_rect(center = self.position).center)
+        canvas.blit(self.surface, pos) 
+
 
     def draw_verbose(self, canvas):
         self.surface.fill((0,0,0,0))

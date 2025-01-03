@@ -124,10 +124,10 @@ def select_user(canvas, icons):
             stop_angle=i * 360 / session.num_of_users + 360 / session.num_of_users, 
             step=0.1)
 
-        x = origin[0] + np.cos(np.deg2rad(icons['start_individual_data_view'].magnitude * 360)) * radius * 1.25
-        y = origin[1] + np.sin(np.deg2rad(icons['start_individual_data_view'].magnitude * 360)) * radius * 1.25
+    x = origin[0] + np.cos(np.deg2rad(icons['start_individual_data_view'].magnitude * 360)) * radius * 1.25
+    y = origin[1] + np.sin(np.deg2rad(icons['start_individual_data_view'].magnitude * 360)) * radius * 1.25
 
-        pygame.draw.line(
-            canvas, pygame.Color("white"),
-            origin, (x, y), 4
-        )
+    pygame.draw.line(
+        canvas, pygame.Color("white"),
+        origin, (x, y), 4
+    )

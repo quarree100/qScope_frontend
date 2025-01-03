@@ -249,7 +249,7 @@ class Frontend:
                 pygame.font.SysFont('Arial', 12).render(
                     f"UDP message stack: {len(session.api.message_stack)}", False, pygame.Color(255,255,255), pygame.Color(0, 0, 0)
                 ),
-                (0, config['CANVAS_SIZE'][1] - 10)
+                (0, config['CANVAS_SIZE'][1] - 20)
             )
             
             # selected buildings:
@@ -259,7 +259,7 @@ class Frontend:
                     pygame.font.SysFont('Arial', 12).render(
                         f"{key}: {bd[key]}", False, pygame.Color(255,255,255), pygame.Color(0, 0, 0)
                     ),
-                    (250 + i*300, self.mask_points[2][1] / 100 * config['CANVAS_SIZE'][1] + j*10)
+                    (250 + i*300, self.mask_points[2][1] / 100 * config['CANVAS_SIZE'][1] + j*15)
                     )
 
         

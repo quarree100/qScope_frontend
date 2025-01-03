@@ -68,27 +68,37 @@ class Tangible:
         self.bounding_box = pygame.Rect(0,0, self.surface.get_width(), self.surface.get_height())
         self.sel_idx = None  # index of currently selected building
 
-        self.update(object)
+        self.previous_angle = 0
+        self.previous_position = (0, 0)
         self.destroy_me = False  # flag to destroy object in next iteration
+        self.update(object)
 
     def update(self, object):
 
+        if object.angle == self.previous_angle and object.position == self.previous_position: return
+        self.previous_position = object.position
+        self.previous_angle = object.angle
+
+        # position:
         self.id = object.class_id
         self.position = (
             object.position[0] * config['CANVAS_SIZE'][0],
             object.position[1] * config['CANVAS_SIZE'][1]
         )
+        self.angle = int(numpy.rad2deg(object.angle))
 
-        self.angle = numpy.rad2deg(object.angle)
-        
+        # position and rotation change:        
         session.active_mode.process_tangible_event(self.id, self.position, self.angle)
         session.frontend.side_panel.handle_mouse_motion(self.position)
-        session.frontend.side_panel.process_rotation(self.position, self.angle)
 
+        # rotation change:
+        session.frontend.side_panel.process_rotation(self.position, self.angle)
         # update rotation of popup:
         if self.id in list(session.popup_menus.keys()):
             if session.popup_menus[self.id] is None: return
+
             session.popup_menus[self.id].process_rotation(self.angle)
+
             session.popup_menus[self.id].process_motion(self.position)
                         
     def draw(self, canvas):

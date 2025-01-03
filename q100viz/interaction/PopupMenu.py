@@ -267,6 +267,7 @@ class TangibleMenu(TouchMenu):
         self.radius = 0
         self.target_radius = np.linalg.norm(self.displace) * 0.8  # used for animation: decision icons extending from center        
         self.start_rotation = start_rotation
+        self.previous_angle = start_rotation
         self.current_rotation = 0
                 
         self.address_box = pygame.Rect(
@@ -401,7 +402,9 @@ class TangibleDecisionMenu(TangibleMenu):
         if not session.popup_menus[self.parent.tangible_id]: self.destroy_me = True  # TODO: besser wäre, wenn direkt session.popup_menus[parent.tangible_id] durchsucht würde, und bei Fehlen: self.destroy_me = True
             
     def process_rotation(self, angle):
+        if angle == self.previous_angle: return
         self.current_rotation = -((self.start_rotation - angle) % 360)
-        self.slider.value = self.current_rotation / 360 * -1
+        self.slider.value = round(self.current_rotation / 360 * -1, 2)
         self.slider.process_value()
-        devtools.print_verbose(f"{self.tangible_id}, {self.slider.idx}, {(self.slider.value)}, {self.slider.handle}, {self.slider.human_readable_handle[self.slider.handle]}, {self.slider.human_readable_value[self.slider.handle]}")
+        self.previous_angle = angle
+        # devtools.print_verbose(f"{self.tangible_id}, {self.slider.idx}, {(self.slider.value)}, {self.slider.handle}, {self.slider.human_readable_handle[self.slider.handle]}, {self.slider.human_readable_value[self.slider.handle]}")

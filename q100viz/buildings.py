@@ -279,6 +279,5 @@ class Buildings:
         else: return ""
 
     def deselect(self, idx):
-        self.df.at[idx, 'selected'] = False
         self.df.at[idx, 'group'] = -1
         self.df.at[idx, 'tangible'] = None

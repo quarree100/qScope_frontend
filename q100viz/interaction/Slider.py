@@ -73,7 +73,7 @@ class Slider:
             self.process_value()  # update values
             self.group = cell_id
             if self.previous_handle is not self.handle:
-                session.api.send_message(json.dumps({'sliders': {
+                session.api.push_message(json.dumps({'sliders': {
                     "id": self.idx,
                     "handle": self.handle,
                     "group": self.group}}))

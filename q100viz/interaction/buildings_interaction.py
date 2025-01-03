@@ -32,7 +32,7 @@ class Buildings_Interaction:
 
         # send data:
         session.api.send_dict(session.environment)
-        session.api.send_message(json.dumps({'step': 0}))
+        session.api.push_message(json.dumps({'step': 0}))
 
     def process_event(self, event_pos):
 
@@ -78,8 +78,8 @@ class Buildings_Interaction:
                 session.buildings.deselect(bd.index[0])
                 if session.popup_menus[tangible_id]:
                     session.popup_menus[tangible_id].destroy_me = True
+                session.api.send_dict(session.environment)
                 session.api.send_message_as_json(session.buildings.get_dict_with_api_wrapper())
-
                 return
             else:
                 return

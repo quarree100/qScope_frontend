@@ -59,7 +59,7 @@ class Frontend:
         if devtools.VERBOSE_MODE:
             self.mask_points = [
             [0, 0], [85.5, 0],
-            [85.5, 95], [0, 95],
+            [85.5, 85], [0, 85],
             [0, -50], [-50, -50],
             [-50, 200], [200, 200],
             [200, -50], [0, -50]] 
@@ -133,22 +133,7 @@ class Frontend:
                 elif event.key == pygame.locals.K_b:
                     self.display_viewport = not self.display_viewport
                 elif event.key == pygame.locals.K_i:
-                    print(session.buildings.df[session.buildings.df['selected']])
-
-                ##################### mode selection ######################
-                elif event.key == pygame.locals.K_0:
-                    session.active_mode = session.buildings_interaction
-                # enter simulation mode:
-                elif event.key == pygame.locals.K_9:
-                    try:
-                        session.modes['simulation'].setup()
-                    except Exception as e:
-                        print("cannot initialize simulation", e)
-                    session.active_mode = session.modes['simulation']
-                elif event.key == pygame.locals.K_8:
-                    session.active_mode = session.individual_data_view
-                elif event.key == pygame.locals.K_7:
-                    session.active_mode = session.total_data_view
+                    print(session.buildings.df.loc[session.buildings.df['selected']])
 
                 # verbose mode:
                 elif event.key == pygame.locals.K_v:
@@ -163,7 +148,7 @@ class Frontend:
                     if devtools.VERBOSE_MODE:
                         self.mask_points = [
                         [0, 0], [85.5, 0],
-                        [85.5, 95], [0, 95],
+                        [85.5, 85], [0, 85],
                         [0, -50], [-50, -50],
                         [-50, 200], [200, 200],
                         [200, -50], [0, -50]]
@@ -242,22 +227,43 @@ class Frontend:
 
         if session.show_polygons:
             self.canvas.blit(session._gis.surface, (0, 0))
-                    
-        for tangible in list(session.tangibles.values()):
-            if tangible is None: continue
+        
+        # tangibles destruction:
+        for tangible in [t for t in list(session.tangibles.values()) if t]:
             tangible.draw(session.viewport)
             if tangible.destroy_me: 
                 tangible.destroy()
                 session.popup_menus[tangible.id] = None
 
-            if devtools.VERBOSE_MODE: 
+        # bottom information area:
+        if devtools.VERBOSE_MODE: 
+            for tangible in [t for t in list(session.tangibles.values()) if t]:
                 tangible.draw_verbose(session.viewport)
                 font = pygame.font.SysFont('Arial', 12)
                 for a, c in enumerate([pygame.Color(0,0,0), pygame.Color(255, 255, 255)]):
                     for b, l in enumerate([session.tangibles.keys(), session.popup_menus.keys()]):
-                        text = font.render(str([f"{k}" for k in l]), True, c)
-                        session.viewport.blit(text, (20 + a, config['CANVAS_SIZE'][1] - 100 + a + b * 10))           
+                        text = font.render(str([f"{k}" for k in l]), False, c)
+                        session.viewport.blit(text, (20 + a, self.mask_points[2][1] / 100 * config['CANVAS_SIZE'][1] + a + b * 10))
+            # UDP message stack:
+            session.viewport.blit(
+                pygame.font.SysFont('Arial', 12).render(
+                    f"UDP message stack: {len(session.api.message_stack)}", False, pygame.Color(255,255,255), pygame.Color(0, 0, 0)
+                ),
+                (0, config['CANVAS_SIZE'][1] - 10)
+            )
+            
+            # selected buildings:
+            for i, (idx, bd) in enumerate(session.buildings.df.loc[session.buildings.df['selected']].iterrows()):
+                for j, key in enumerate(session.COMMUNICATION_RELEVANT_KEYS):
+                    session.viewport.blit(
+                    pygame.font.SysFont('Arial', 12).render(
+                        f"{key}: {bd[key]}", False, pygame.Color(255,255,255), pygame.Color(0, 0, 0)
+                    ),
+                    (250 + i*300, self.mask_points[2][1] / 100 * config['CANVAS_SIZE'][1] + j*10)
+                    )
 
+        
+        # popup destruction:
         for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.destroy_me: 
                 session.popup_menus[popup.tangible_id] = None

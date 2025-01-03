@@ -404,4 +404,4 @@ class TangibleDecisionMenu(TangibleMenu):
         self.current_rotation = -((self.start_rotation - angle) % 360)
         self.slider.value = self.current_rotation / 360 * -1
         self.slider.process_value()
-        devtools.print_verbose(f"{self.tangible_id}, {self.slider.idx}, {round(self.slider.value, 2)}, {self.slider.handle}, {self.slider.human_readable_handle[self.slider.handle]}, {self.slider.human_readable_value[self.slider.handle]}")
+        devtools.print_verbose(f"{self.tangible_id}, {self.slider.idx}, {(self.slider.value)}, {self.slider.handle}, {self.slider.human_readable_handle[self.slider.handle]}, {self.slider.human_readable_value[self.slider.handle]}")

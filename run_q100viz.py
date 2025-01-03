@@ -59,6 +59,7 @@ str_sim_until = '\n- simulate until year {0}'.format(
 str_sim_model_file = '\n- using simulation model file {0}.'.format(
     str(config['GAMA_MODEL_FILE'])
 )
+str_test_run = "\n- Test run activated: A profiler will run and when the program is closed properly (Alt+F4), the profiling stats are printed. The current output folder will be deleted." if args.test_run else ""
 str_verbose_mode = '\n- Verbose Mode: ' + str(devtools.VERBOSE_MODE)
 str_mockup_mode = "\n- RUNNING DEMO MODE! CSPY NOT DEFINED" if session.flag_mockup_mode else ""
 
@@ -70,7 +71,8 @@ print(
     str_num_connections,
     str_date_of_connections,
     str_sim_until,
-    str_sim_model_file)
+    str_sim_model_file,
+    str_test_run)
 
 print('\n', '#' * 72, '\n')
 

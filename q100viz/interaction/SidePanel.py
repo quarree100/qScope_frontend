@@ -212,8 +212,9 @@ class SidePanel:
         for key in ['start_simulation', 'start_buildings_interaction', 'start_individual_data_view', 'start_total_data_view']:
             rect = self.icons[key].rect
             if rect.collidepoint(pos):
-                if session.active_mode == session.modes[key[6:]]: return
-                
+                if session.active_mode == session.modes[key[6:]]: return  # no mode change
+
+                # mode change:
                 if key == 'start_simulation':
                     if (len(session.buildings.df[session.buildings.df['selected']]) <= 0 or len(session.buildings.df[session.buildings.df['selected']]) == 0): return
                 elif key in ['start_individual_data_view', 'start_total_data_view']:
@@ -227,7 +228,9 @@ class SidePanel:
                         pass
                     except Exception as e:
                         print("cannot initialize simulation", e)
-        
+
+                session.api.send_dict(session.environment)
+
     def handle_mouse_up(self, pos):
         pass
     
@@ -235,3 +238,5 @@ class SidePanel:
         if self.icons['start_individual_data_view'].rect.collidepoint(pos):
             self.icons['start_individual_data_view'].magnitude = rotation / 360
             session.environment['active_user_focus_data'] = int(rotation / 360 * session.num_of_users)
+            session.api.send_dict(session.environment)
+

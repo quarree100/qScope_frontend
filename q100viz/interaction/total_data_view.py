@@ -25,7 +25,7 @@ class DataViewTotal_Mode():
 
     def process_event(self, pos):
         connected_buildings = pd.DataFrame(data=[
-            {'connected_buildings' : len(session.buildings.df[session.buildings.df['connection_to_heat_grid'] != False])}])
+            {'connected_buildings' : len(session.buildings.df[session.buildings.df['connection_to_heat_grid'] >= 0])}])
         session.api.send_dataframe_as_json(connected_buildings)
         
     def process_tangible_event(self, tangible_id, pos, rotation):
@@ -41,6 +41,6 @@ class DataViewTotal_Mode():
 
             session._gis.draw_polygon_layer(
                 surface=canvas, 
-                df=session.buildings.df[(session.buildings.df['connection_to_heat_grid']) | (session.buildings.df['group'] >= 0)],
+                df=session.buildings.df[(session.buildings.df['connection_to_heat_grid'] >= 0) | (session.buildings.df['group'] >= 0)],
                 stroke=0
                 )

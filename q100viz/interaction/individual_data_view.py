@@ -66,7 +66,6 @@ class DataViewIndividual_Mode():
                     user_colors[session.environment['active_user_focus_data']][2],
                     self.alpha),
                 [pnt for pnt in scaled_polygon.exterior.coords])
-            
 
         # draw GIS layers:
         if session.show_polygons:
@@ -77,7 +76,7 @@ class DataViewIndividual_Mode():
 
             session._gis.draw_polygon_layer(
                 surface=canvas, 
-                df=session.buildings.df[(session.buildings.df['connection_to_heat_grid']) | (session.buildings.df['group'] >= 0)],
+                df=session.buildings.df[(session.buildings.df['connection_to_heat_grid'] >= 0) | (session.buildings.df['group'] >= 0)],
                 stroke=0
                 )
             

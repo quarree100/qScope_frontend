@@ -97,7 +97,7 @@ class Buildings:
 
         # generic data
         for idx, row in self.df.iterrows():
-            self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else False  # note: we decided that all buildings without any energy_source in the source data are set pre-connected.
+            self.df.at[idx, 'connection_to_heat_grid'] = 2020 if self.df.loc[idx, 'energy_source'] is None else -1  # note: we decided that all buildings without any energy_source in the source data are set pre-connected.
         self.df['connection_to_heat_grid_prior'] = self.df['connection_to_heat_grid']
         self.df['refurbished'] = self.df['connection_to_heat_grid']
         self.df['refurbished_prior'] = self.df['refurbished']
@@ -184,7 +184,7 @@ class Buildings:
                 user_selected_buildings = json.loads(
                     api.export_json(group_df[session.COMMUNICATION_RELEVANT_KEYS], None))
                 group_wrapper['buildings'] = user_selected_buildings
-                group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] != False])
+                group_wrapper['connections'] = len(group_df[group_df['connection_to_heat_grid'] >= 0])
                 group_wrapper['slider_handles'] = []
 
                 message['group_{0}'.format(str(i))] = group_wrapper
@@ -239,16 +239,17 @@ class Buildings:
         ''' take all buildings from dataframe until given index and set connect_to_heat_grid = True
         '''
         # refresh data:
-        self.df['connection_to_heat_grid'] = False
-        session.environment['scenario_num_connections'] = len(self.df[self.df['connection_to_heat_grid']])
+        self.df['connection_to_heat_grid'] = -1
+        session.environment['scenario_num_connections'] = len(self.df[self.df['connection_to_heat_grid'] >= 0])
 
         # make sure no building is selected with slider.value = 0
         if idx == 0: return
         
         # select rows up until idx:
-        self.df.loc[self.df.index[:idx], 'connection_to_heat_grid'] = True
+        random_years = np.random.randint(config['SIMULATION_FORCE_START_YEAR'], config['SIMULATION_FORCE_END_YEAR'] + 1, size=idx)
+        self.df.loc[self.df.index[:idx], 'connection_to_heat_grid'] = random_years
 
-        session.environment['scenario_num_connections'] = len(self.df[self.df['connection_to_heat_grid']])
+        session.environment['scenario_num_connections'] = len(self.df[self.df['connection_to_heat_grid'] >= 0])
 
 
     def human_readable_value(self, handle, idx):

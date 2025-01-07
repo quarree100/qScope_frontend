@@ -110,22 +110,18 @@ class Buildings_Interaction:
         if session.show_polygons:
             session._gis.draw_linestring_layer(
                 canvas, session._gis.nahwaermenetz, (217, 9, 9), 3)
-            session._gis.draw_buildings_connections(
-                session.buildings.df)  # draw lines to closest heat grid
             
             # fill interactive:
-            session._gis.draw_polygon_layer_bool(
+            session._gis.draw_polygon_layer(
                 surface=canvas, 
                 df=session.buildings.df, stroke=0,
-                fill_false=session.global_colors['interactive'],
-                fill_attr='connection_to_heat_grid')
-
+            )
+            
             # stroke according to connection status:
-            session._gis.draw_polygon_layer_bool(
-                surface=canvas, df=session.buildings.df,
-                stroke=1,
-                fill_false=(0,0,0),
-                fill_attr='connection_to_heat_grid')
+            session._gis.draw_buildings_connections(
+                df=session.buildings.df,
+            )            
+
 
         # highlight selected buildings (draws colored stroke on top)
         if len(session.buildings.df[session.buildings.df.selected]):
@@ -143,3 +139,17 @@ class Buildings_Interaction:
 
         for popup in [p for p in list(session.popup_menus.values()) if p]:
             popup.draw()
+            
+        for tangible in [t for t in list(session.tangibles.values()) if t]:
+            pygame.draw.circle(
+                surface=tangible.surface,
+                color=pygame.Color(
+                    session.user_colors[tangible.id % session.num_of_users][0],
+                    session.user_colors[tangible.id % session.num_of_users][1],
+                    session.user_colors[tangible.id % session.num_of_users][2],
+                    session.global_alpha),
+                center=tangible.surface.get_rect().center,
+                radius=115
+            )
+            pos = tangible.surface.get_rect(center = tangible.surface.get_rect(center = tangible.position).center)
+            canvas.blit(tangible.surface, pos)

@@ -42,12 +42,11 @@ class GIS:
         try:
             for row in df.to_dict('records'):
 
-                points = self.surface.transform(row['geometry'].exterior.coords)
-                centroid = shapely.geometry.Polygon(points).centroid
+                if row['connection_to_heat_grid'] >= 0:
+                    points = self.surface.transform(row['geometry'].exterior.coords)
+                    centroid = shapely.geometry.Polygon(points).centroid
 
-                target = row['target_point']
-
-                if row['connection_to_heat_grid']:
+                    target = row['target_point']
                     pygame.draw.line(
                         self.surface,
                         color=session.global_colors['connection_to_heat_grid'],
@@ -55,6 +54,20 @@ class GIS:
                         end_pos=((target.x, target.y)),
                         width=4
                         )
+                    
+                if row['group'] == -1:
+                    fill_color = (222, 222, 222)
+                else:
+                    fill_color = pygame.Color(session.user_colors[row['group']])
+
+                points = self.surface.transform(row['geometry'].exterior.coords)
+                pygame.draw.polygon(self.surface, fill_color, points, 0)
+
+                if row['connection_to_heat_grid'] >= 0:
+                    pygame.draw.polygon(self.surface, session.global_colors['connection_to_heat_grid'], points, 2)
+                else:
+                    pygame.draw.polygon(self.surface, pygame.Color(0,0,0), points, 1)
+                    
 
         except Exception as e:
             devtools.log += "\n%s" % e
@@ -62,23 +75,17 @@ class GIS:
 
     # --------------------------- polygons ----------------------------
 
-    def draw_polygon_layer(self, surface, df, stroke, fill=None):
+    def draw_polygon_layer(self, surface, df, stroke):
         '''draw polygon layer, do not lerp'''
-        try:
-            for row in df.to_dict('records'):
-                if fill:
-                    fill_color = pygame.Color(*fill)
-                else:
-                    fill_color = (222, 222, 222)
-                if row['group'] > -1:
-                    fill_color = pygame.Color(session.user_colors[row['group']])
+        for row in df.to_dict('records'):
+            if row['group'] == -1:
+                fill_color = (222, 222, 222)
+            else:
+                fill_color = pygame.Color(session.user_colors[row['group']])    
 
-                points = self.surface.transform(row['geometry'].exterior.coords)
-                pygame.draw.polygon(self.surface, fill_color, points, stroke)
+            points = self.surface.transform(row['geometry'].exterior.coords)
+            pygame.draw.polygon(self.surface, fill_color, points, stroke)
 
-        except Exception as e:
-            devtools.log += "\n%s" % e
-            print("cannot draw polygon layer: ", e)
 
     def draw_polygon_layer_bool(self, surface, df, stroke, fill_false, fill_true=None, fill_attr=None):
         '''draw polygon layer, lerp using bool value'''

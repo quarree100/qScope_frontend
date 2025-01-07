@@ -235,15 +235,16 @@ class Frontend:
                 tangible.destroy()
                 session.popup_menus[tangible.id] = None
 
-        # bottom information area:
+        # -------------- bottom information area: ---------------
         if devtools.VERBOSE_MODE: 
+            font = pygame.font.SysFont('Arial', 12)
             for tangible in [t for t in list(session.tangibles.values()) if t]:
                 tangible.draw_verbose(session.viewport)
-                font = pygame.font.SysFont('Arial', 12)
-                for a, c in enumerate([pygame.Color(0,0,0), pygame.Color(255, 255, 255)]):
-                    for b, l in enumerate([session.tangibles.keys(), session.popup_menus.keys()]):
-                        text = font.render(str([f"{k}" for k in l]), False, c)
-                        session.viewport.blit(text, (20 + a, self.mask_points[2][1] / 100 * config['CANVAS_SIZE'][1] + a + b * 10))
+            text = font.render("tangibles:" + str([f"{el.id}" for el in session.tangibles.values() if el]), False, pygame.Color(255,255,255))
+            session.viewport.blit(text, (20, self.mask_points[2][1] / 100 * config['CANVAS_SIZE'][1]))
+            text = font.render("popups:" + str([f"{key}" for key, val in session.popup_menus.items() if val]), False, pygame.Color(255,255,255))
+            session.viewport.blit(text, (20, self.mask_points[2][1] / 100 * config['CANVAS_SIZE'][1] + 20))
+
             # UDP message stack:
             session.viewport.blit(
                 pygame.font.SysFont('Arial', 12).render(
@@ -254,7 +255,7 @@ class Frontend:
             
             # selected buildings:
             for i, (idx, bd) in enumerate(session.buildings.df.loc[session.buildings.df['selected']].iterrows()):
-                for j, key in enumerate(session.COMMUNICATION_RELEVANT_KEYS):
+                for j, key in enumerate(['id', 'address', 'group', 'tangible', 'spec_heat_consumption', 'spec_power_consumption', 'type', 'connection_to_heat_grid', 'refurbished', 'save_energy', 'energy_source']):
                     session.viewport.blit(
                     pygame.font.SysFont('Arial', 12).render(
                         f"{key}: {bd[key]}", False, pygame.Color(255,255,255), pygame.Color(0, 0, 0)

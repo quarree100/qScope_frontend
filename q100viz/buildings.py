@@ -128,11 +128,10 @@ class Buildings:
         self.df['type'] = ''
         self.df['id'] = [random.randint(0, 10) + round(random.random(), 2) for i in range(len(self.df))]
 
-        print(self.df.index)
         # generate random consumption data:
         self.df['spec_heat_consumption'] = [random.random() * 300 for i in range(len(self.df.index))]
         self.df['spec_power_consumption'] = [random.random() * 300 for i in range(len(self.df.index))]
-        self.df['energy_source'] = [random.random() * 300 for i in range(len(self.df.index))]
+        self.df['energy_source'] = [random.choice(['Gas', 'Öl', 'Strom']) for i in range(len(self.df.index))]
         
         return self.initialize_data(create_clusters=create_clusters)
 

@@ -255,10 +255,10 @@ class Buildings:
         # household-specific:
         value = self.df.loc[idx, handle]
         if handle == 'connection_to_heat_grid':
-            return "n.a." if value == False else str(value)
+            return "n.a." if value == -1 else str(int(value))
 
         elif handle == 'refurbished':
-            return "n.a." if value == False else str(value)
+            return "n.a." if value == -1 else str(int(value))
 
         elif handle == 'save_energy':
             return 'ja' if value > 0.5 else 'nein'

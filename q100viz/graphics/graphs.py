@@ -371,7 +371,7 @@ def export_compared_emissions(buildings_groups_list, current_output_folder, outf
                 # add labels:
                 decisions.append(
                     "(S={0}, A={1}, {2})".format(
-                    int(group_df.loc[idx, 'refurbished']) if group_df.loc[idx, 'refurbished'] != False else 'unsaniert',
+                    int(group_df.loc[idx, 'refurbished']) if group_df.loc[idx, 'refurbished'] != -1 else 'unsaniert',
                     int(group_df.loc[idx, 'connection_to_heat_grid']) if group_df.loc[idx, 'connection_to_heat_grid'] >= 0 else "k.A.",
                     "ES" if group_df.loc[idx, 'save_energy'] else "NV")
                 )
@@ -500,7 +500,7 @@ def export_compared_energy_costs(search_in_folder, outfile=None, compare_data_fo
             # add labels:
             decisions.append(
                 "(S={0}, A={1}, {2})".format(
-                int(group_df.loc[idx, 'refurbished']) if group_df.loc[idx, 'refurbished'] != False else 'unsaniert',
+                int(group_df.loc[idx, 'refurbished']) if group_df.loc[idx, 'refurbished'] != -1 else 'unsaniert',
                 int(group_df.loc[idx, 'connection_to_heat_grid']) if group_df.loc[idx, 'connection_to_heat_grid'] >= 0 else "k.A.",
                 "ES" if group_df.loc[idx, 'save_energy'] else "NV")
             )

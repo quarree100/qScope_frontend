@@ -48,6 +48,7 @@ class Buildings_Interaction:
         for popup in [p for p in list(session.popup_menus.values()) if p]:
             if popup.radius is not popup.target_radius: return  # animation not complete
             for key in session.VALID_DECISION_HANDLES:
+                
                 if popup.icons[key].selected: continue
                 if popup.icons[key].rect.collidepoint(pos):  # TODO: rect could be defined more precisely as the circle, that it is.
                     popup.handle_mouse_button(pos)
@@ -68,7 +69,7 @@ class Buildings_Interaction:
         if tangible_id in list(buildings['tangible'].values):
             bd = buildings[buildings['tangible'] == tangible_id]
             if not shapely.Point(pos).within(shapely.geometry.Polygon(bd.loc[bd.index[0], 'polygon'])):
-                session.buildings.deselect(bd.index[0])
+                session.buildings.df.loc[session.buildings.df['tangible'] == tangible_id, 'tangible'] = None
 
                 if session.popup_menus[tangible_id]:
                     session.popup_menus[tangible_id].destroy_me = True
@@ -76,21 +77,25 @@ class Buildings_Interaction:
                 return  # tangible not on building anymore
             else:
                 return  # tangible still on building
-
-        # building selected:
+        
+        # return if tangible has a popup already:
+        if tangible_id in session.popup_menus.keys():
+            if session.popup_menus[tangible_id] is not None: return
+        # allow only one building per user:
+        for i, row in session.buildings.df[session.buildings.df['group'] == tangible_id % session.num_of_users].iterrows():
+            if row['tangible'] is not None: return
+                
+        # building selection:
         for idx in buildings[buildings['group'] == -1].index:
-            # return if tangible has a popup already:
-            if tangible_id in session.popup_menus.keys(): 
-                if session.popup_menus[tangible_id] is not None: return
-                # allow only one building per user:
-                if tangible_id % 4 in set(buildings['group'].values): return
             # new building selected:
             if shapely.Point(pos).within(shapely.geometry.Polygon(buildings.loc[idx, 'polygon'])):
-                buildings.loc[buildings['tangible'] == tangible_id, 'selected'] = False
-                buildings.at[idx, 'tangible'] = tangible_id
+                # deselect all others:
+                buildings.loc[buildings['group'] == tangible_id % session.num_of_users, 'selected'] = False
+                buildings.loc[buildings['group'] == tangible_id % session.num_of_users, 'group'] = -1
 
+                buildings.at[idx, 'tangible'] = tangible_id
                 buildings.at[idx, 'selected'] = True
-                buildings.at[idx, 'group'] = tangible_id % 4
+                buildings.at[idx, 'group'] = tangible_id % session.num_of_users
                 session.popup_menus[tangible_id] = \
                     TangibleMenu(
                     session.viewport,
@@ -139,8 +144,9 @@ class Buildings_Interaction:
 
         for popup in [p for p in list(session.popup_menus.values()) if p]:
             popup.draw()
-            
+
         for tangible in [t for t in list(session.tangibles.values()) if t]:
+            if tangible.id in session.popup_menus.keys() and session.popup_menus[tangible.id] is not None and tangible.id not in session.buildings.df['tangible'].unique(): continue
             pygame.draw.circle(
                 surface=tangible.surface,
                 color=pygame.Color(
